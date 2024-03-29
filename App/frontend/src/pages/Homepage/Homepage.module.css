@@ -1,0 +1,87 @@
+.container {
+  display: flex;
+  flex: 1;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  width: 40%;
+  gap: 40px;
+}
+
+.header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.appIcon {
+  width: 100px;
+  height: 100px;
+}
+
+.gradientText {
+  background: linear-gradient(90deg, #464FEB 10.42%, #8330E9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.textfieldContainer {
+  width: 100%;
+  background-color: #FAF9F8;
+}
+
+.textfieldSection {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  padding: 12px;
+}
+
+.label {
+  margin-right: 8px;
+}
+
+.features {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.feature {
+  text-align: center;
+}
+
+.featureBox {
+  text-align: center;
+  margin: 0 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+}
+
+.featureTitle {
+  font-weight: bold;
+}
+
+.featureText {
+  font-size: 14px;
+  color: #555555;
+}
+
+.featureIcon {
+  min-width: 48;
+  min-height: 48;
+}

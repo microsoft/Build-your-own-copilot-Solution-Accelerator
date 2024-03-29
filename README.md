@@ -1,33 +1,104 @@
-# Project
+>Legal Notice: This program is intended for use by Microsoft employees only and is strictly for internal purposes. Any unauthorized distribution, sharing, or use of this program outside of Microsoft is strictly prohibited.
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+# Build your own AI Assistant Solution Accelerator
 
-As the maintainer of this project, please make a few updates:
+MENU: [**USER STORY**](#user-story) \| [**ONE-CLICK DEPLOY**](#one-click-deploy) 
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+<h2><img src="Deployment/images/readMe/userStory.png" width="64">
+<br/>
+User story
+</h2>
 
-## Contributing
+**Solution accelerator overview**
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+This solution accelerator is a powerful tool that helps you create your own AI assistants. The accelerator can be used by any customer looking for reusable architecture and code snippets to build AI assistants with their own enterprise data. 
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+It leverages Azure Open AI Service, Azure AI Search and Microsoft Fabric, to identify relevant documents, summarize and categorize vast amounts of unstructured information, and accelerate the overall document review and content generation process. 
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+**Scenario**
 
-## Trademarks
+This example focuses on a researcher who wants to explore leading flu vaccine studies and relevant grants to accelerate submission of a grant proposal. 
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
-trademarks or logos is subject to and must follow 
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+The assistant helps the researchers find relevant articles and grants available for their research topic easily using a conversational assistant. Researcher can generate different sections of a grant application with a simple button click, then they can refine the prompts and regenerate individual sections to add more details as needed. Finally, the generated grant application can be exported as a PDF or a Microsoft Word document for further processing.
+
+The sample data is sourced from a select set of research published on [PubMed](https://pubmed.ncbi.nlm.nih.gov/), select [NIH](https://www.nih.gov/grants-funding) grant announcements and sample grant applications. The documents are intended for use as sample data only.
+
+<br/>
+
+**Key features**
+
+![Key Features](/Deployment/images/readMe/keyfeatures.png)
+
+<br/>
+
+**Below is an image of the solution accelerator.**
+
+![Landing Page](/Deployment/images/readMe/landing_page.png)
+
+
+<h2><img src="Deployment/images/readMe/oneClickDeploy.png" width="64">
+<br/>
+One-click deploy
+</h2>
+
+### Prerequisites
+
+To use this solution accelerator, you will need access to an [Azure subscription](https://azure.microsoft.com/free/) with permission to create resource groups and resources. While not required, a prior understanding of Azure Open AI, Azure AI Search and Microsoft Fabric will be helpful.
+
+For additional training and support, please see:
+
+1. [Azure Open AI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
+2. [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
+3. [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/) 
+4. [Azure AI Studio](https://learn.microsoft.com/en-us/azure/ai-studio/) 
+
+### Solution accelerator architecture
+![image](/Deployment/images/readMe/architecture.png)
+
+
+ > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
+
+
+### **How to install/deploy**
+
+1. Please check the link [Azure Products by Region](
+https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) and choose a region where Azure AI Search, Semantic Ranker, Azure OpenAI Service, and Azure AI Studio are available. 
+
+2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
+
+   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-AI-Assistant-Solution-Accelerator%2Fmain%2FDeployment%2Fbicep%2Fmain.json)
+
+3. You will need to select an Azure Subscription, create/select a Resource group, Region, and a unique Solution Prefix.
+
+   ![image](/Deployment/images/readMe/armDeployment.png)
+
+4. When Deployment is complete, follow steps in [AI Studio Deployment guide](./Deployment/AIStudioDeployment.md) to set up the grant draft proposal endpoint.
+
+5. When AI Studio deployment is complete, launch the application by navigating to your Azure resource group, choosing the app service resource, and clicking on the default domain. You should bookmark this URL to have quick access to your deployed application.
+
+The next steps are optional for additional learning. Not required to deploy the solution and run the Grant Writer Assistant.
+
+6. Optional - Follow steps in [Fabric Deployment guide](./Deployment/FabricDeployment.md) to set up the data processing pipelines in Fabric.
+
+7. Optional - Follow steps in [Promptflow Evaluation guide](./Deployment/PromptFlowEvaluation.md) to set up the evaluation flows.
+
+
+<br/>
+<br/>
+<br/>
+
+---
+
+## Disclaimers
+
+This Software requires the use of third-party components which are governed by separate proprietary or open-source licenses as identified below, and you must comply with the terms of each applicable license in order to use the Software. You acknowledge and agree that this license does not grant you a license or other right to use any such third-party proprietary or open-source components.  
+
+To the extent that the Software includes components or code used in or derived from Microsoft products or services, including without limitation Microsoft Azure Services (collectively, “Microsoft Products and Services”), you must also comply with the Product Terms applicable to such Microsoft Products and Services. You acknowledge and agree that the license governing the Software does not grant you a license or other right to use Microsoft Products and Services. Nothing in the license or this ReadMe file will serve to supersede, amend, terminate or modify any terms in the Product Terms for any Microsoft Products and Services. 
+
+You must also comply with all domestic and international export laws and regulations that apply to the Software, which include restrictions on destinations, end users, and end use. For further information on export restrictions, visit https://aka.ms/exporting. 
+
+You acknowledge that the Software and Microsoft Products and Services (1) are not designed, intended or made available as a medical device(s), and (2) are not designed or intended to be a substitute for professional medical advice, diagnosis, treatment, or judgment and should not be used to replace or as a substitute for professional medical advice, diagnosis, treatment, or judgment. Customer is solely responsible for displaying and/or obtaining appropriate consents, warnings, disclaimers, and acknowledgements to end users of Customer’s implementation of the Online Services. 
+
+You acknowledge the Software is not subject to SOC 1 and SOC 2 compliance audits. No Microsoft technology, nor any of its component technologies, including the Software, is intended or made available as a substitute for the professional advice, opinion, or judgement of a certified financial services professional. Do not use the Software to replace, substitute, or provide professional financial advice or judgment.  
+
+BY ACCESSING OR USING THE SOFTWARE, YOU ACKNOWLEDGE THAT THE SOFTWARE IS NOT DESIGNED OR INTENDED TO SUPPORT ANY USE IN WHICH A SERVICE INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE COULD RESULT IN THE DEATH OR SERIOUS BODILY INJURY OF ANY PERSON OR IN PHYSICAL OR ENVIRONMENTAL DAMAGE (COLLECTIVELY, “HIGH-RISK USE”), AND THAT YOU WILL ENSURE THAT, IN THE EVENT OF ANY INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE, THE SAFETY OF PEOPLE, PROPERTY, AND THE ENVIRONMENT ARE NOT REDUCED BELOW A LEVEL THAT IS REASONABLY, APPROPRIATE, AND LEGAL, WHETHER IN GENERAL OR IN A SPECIFIC INDUSTRY. BY ACCESSING THE SOFTWARE, YOU FURTHER ACKNOWLEDGE THAT YOUR HIGH-RISK USE OF THE SOFTWARE IS AT YOUR OWN RISK.  
