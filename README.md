@@ -82,7 +82,7 @@ The next steps are optional for additional learning. Not required to deploy the 
 
 7. Optional - Follow steps in [Promptflow Evaluation guide](./Deployment/PromptFlowEvaluation.md) to set up the evaluation flows.
 
-<h2><img src="/images/readMe/supportingDocuments.png" width="64">
+<h2><img src="/Deployment/images/readMe/supportingDocuments.png" width="64">
 <br/>
 Supporting documents
 </h2>
