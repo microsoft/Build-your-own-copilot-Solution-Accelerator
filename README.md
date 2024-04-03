@@ -88,11 +88,11 @@ Supporting documents
 </h2>
 
 ### How to upload more documents to the search index
-1. Locate your resource group, and select your storage account. ![image]((/Deployment/images/readMe/suppportingDocuments/image1.png)
-2. From here, click containers on the left menu under Data Storage. ![image]((/Deployment/images/readMe/suppportingDocuments/image2.png)
-3. Select pubmed ![image]((/Deployment/images/readMe/suppportingDocuments/image3.png)
-4. Now select Influenza then pdfs ![image]((/Deployment/images/readMe/suppportingDocuments/image4.png)
-5. From here you can click the upload button and upload your pdfs ![image]((/Deployment/images/readMe/suppportingDocuments/image5.png)
+1. Locate your resource group, and select your storage account. ![image](/Deployment/images/readMe/suppportingDocuments/image1.png)
+2. From here, click containers on the left menu under Data Storage. ![image](/Deployment/images/readMe/suppportingDocuments/image2.png)
+3. Select pubmed ![image](/Deployment/images/readMe/suppportingDocuments/image3.png)
+4. Now select Influenza then pdfs ![image](/Deployment/images/readMe/suppportingDocuments/image4.png)
+5. From here you can click the upload button and upload your pdfs ![image](/Deployment/images/readMe/suppportingDocuments/image5.png)
 
 
 **Troubleshooting**
