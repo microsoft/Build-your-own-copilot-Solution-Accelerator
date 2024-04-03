@@ -2,7 +2,7 @@
 
 # Build your own AI Assistant Solution Accelerator
 
-MENU: [**USER STORY**](#user-story) \| [**ONE-CLICK DEPLOY**](#one-click-deploy) \| [**SUPPORTING DOCUMENTS**](#supporting-documents) \|
+MENU: [**USER STORY**](#user-story) \| [**ONE-CLICK DEPLOY**](#one-click-deploy) \| [**SUPPORTING DOCUMENTS**](#supporting-documents) 
 
 <h2><img src="Deployment/images/readMe/userStory.png" width="64">
 <br/>
