@@ -87,6 +87,9 @@ The next steps are optional for additional learning. Not required to deploy the 
 Supporting documents
 </h2>
 
+**Troubleshooting**
+-   [Troubleshooting documentation](Troubleshooting.md)
+
 <br/>
 <br/>
 <br/>
