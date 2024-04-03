@@ -2,7 +2,7 @@
 
 # Build your own AI Assistant Solution Accelerator
 
-MENU: [**USER STORY**](#user-story) \| [**ONE-CLICK DEPLOY**](#one-click-deploy) 
+MENU: [**USER STORY**](#user-story) \| [**ONE-CLICK DEPLOY**](#one-click-deploy) \|[**Supporting Documents**](#supporting-documents)
 
 <h2><img src="Deployment/images/readMe/userStory.png" width="64">
 <br/>
@@ -82,6 +82,10 @@ The next steps are optional for additional learning. Not required to deploy the 
 
 7. Optional - Follow steps in [Promptflow Evaluation guide](./Deployment/PromptFlowEvaluation.md) to set up the evaluation flows.
 
+<h2><img src="/images/readMe/supportingDocuments.png" width="64">
+<br/>
+Supporting documents
+</h2>
 
 <br/>
 <br/>
