@@ -1,8 +1,10 @@
->Legal Notice: This is a pre-release and preview solution and therefore may not work correctly. Certain features may be missing or disabled. Microsoft may change or update this pre-release and preview solution at any time.
+>Legal Notice: This program is intended for use by Microsoft employees only and is strictly for internal purposes. Any unauthorized distribution, sharing, or use of this program outside of Microsoft is strictly prohibited.
 
 # Build your own AI Assistant Solution Accelerator
 
-MENU: [**USER STORY**](#user-story) \| [**ONE-CLICK DEPLOY**](#one-click-deploy) 
+MENU: [**USER STORY**](#user-story) \| [**ONE-CLICK DEPLOY**](#one-click-deploy)  \| [**SUPPORTING DOCUMENTS**](#supporting-documents) \|
+[**CUSTOMER TRUTH**](#customer-truth)
+
 
 <h2><img src="Deployment/images/readMe/userStory.png" width="64">
 <br/>
@@ -68,7 +70,6 @@ https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-regi
 
    [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-AI-Assistant-Solution-Accelerator%2Fmain%2FDeployment%2Fbicep%2Fmain.json)
 
-   <!-- [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fnchandhi%2Fncbyctestrepo%2Fmain%2FDeployment%2Fbicep%2Fmain.json) -->
 
 3. You will need to select an Azure Subscription, create/select a Resource group, Region, and a unique Solution Prefix.
 
@@ -88,9 +89,34 @@ The next steps are optional for additional learning. Not required to deploy the 
 
 
 <br/>
+<br>
+<h2><img src="./Deployment/images/readMe/supportingDocuments.png" width="64">
 <br/>
+Supporting documents
+</h2>
+
+Supporting documents coming soon.
+
+
+<br>
+<h2><img src="./Deployment/images/readMe/customerTruth.png" width="64">
+</br>
+Customer truth
+</h2>
+Customer stories coming soon.
+
 <br/>
 
+
+<h2>
+</br>
+Responsible AI Transparency FAQ 
+</h2>
+
+Please refer to [Transarency FAQ](./TRANSPARENCY_FAQ.md) for responsible AI transparency details of this solution accelerator.
+
+<br/>
+<br/>
 ---
 
 ## Disclaimers
