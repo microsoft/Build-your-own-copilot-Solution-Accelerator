@@ -229,6 +229,7 @@ export const Card = (props: CardProps) => {
                 documentSections[index].metaPrompt = updatedMetaPrompt
                 appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: documentSections })
               }}
+             
             />
 
             <Stack horizontal style={{ justifyContent: 'space-between' }}>
@@ -246,6 +247,7 @@ export const Card = (props: CardProps) => {
             </Stack>
           </PopoverSurface>
         </Popover>
+          <div className={styles.sectionDisclaimer}>AI-generated content may be incorrect</div>
       </div>
 
       <div className={mergeClasses(styles.flex, styles.cardContent)}>

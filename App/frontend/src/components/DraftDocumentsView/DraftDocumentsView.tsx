@@ -5,7 +5,7 @@ import { useContext, useState, useEffect, useRef } from 'react'
 import { Card, ResearchTopicCard } from './Card'
 import { AppStateContext } from '../../state/AppProvider'
 import { saveAs } from 'file-saver'
-import { Document, HeadingLevel, IParagraphOptions, Packer, Paragraph } from 'docx'
+import { AlignmentType, BorderStyle, Document, HeadingLevel, IParagraphOptions, Packer, Paragraph, Table, TableCell, TableRow, WidthType } from 'docx'
 import { TextRun } from 'docx'; // Import the necessary package
 import jsPDF from 'jspdf'
 import { Button, Dialog, DialogBody, DialogSurface, DialogTitle, makeStyles } from '@fluentui/react-components'
@@ -57,6 +57,15 @@ export const DraftDocumentsView = (): JSX.Element => {
             {
                 properties: {},
                 children: [
+                    new Paragraph({
+                      children: [
+                          new TextRun({
+                              text: 'AI-generated content may be incorrect',
+                              color: '707070', // Grey color for disclaimer
+                          }),
+                      ],
+                      alignment: AlignmentType.RIGHT
+                    }),
                     new Paragraph({ text: 'Draft Document'}),
                     new Paragraph({ text: '' }), // New line after draft document name
                     new Paragraph(`Company: ${company}`),
@@ -102,8 +111,21 @@ const handleCreatePDF = (): void => {
 
   // Set font styles
   doc.setFont('helvetica');
-  doc.setFontSize(12);
+  doc.setFontSize(10);
+  doc.setTextColor('#707070');
 
+  // Add disclaimer
+  const disclaimerText = "AI-generated content may be incorrect";
+  const disclaimerWidth = doc.getStringUnitWidth(disclaimerText) * 12; // Adjust 12 for the font size
+  const disclaimerHeight = 16;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const disclaimerX = pageWidth - 65 // Adjust 28 for margin-right
+  const disclaimerY = 5; // Adjust as needed for top margin
+  doc.text(disclaimerText, disclaimerX, disclaimerY);
+
+  doc.setFontSize(12);
+  doc.setTextColor('Black');
+  
   // Set document title
   doc.text('Draft Document', 10, 10);
   doc.setLineWidth(0.5);

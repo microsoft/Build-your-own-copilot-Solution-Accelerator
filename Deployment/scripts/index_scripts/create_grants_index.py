@@ -1,7 +1,6 @@
 #Get Azure Key Vault Client
 key_vault_name = 'kv_to-be-replaced'
 
-
 #hardcoded values
 index_name = "grantsindex"
 drafts_index_name = 'draftsindex'
@@ -10,7 +9,6 @@ directory = 'demodata/nih_grants'
 csv_file_name = '/metadata/nih_grants.csv'
 
 num_pages = 10
-
 
 from azure.keyvault.secrets import SecretClient  
 from azure.identity import DefaultAzureCredential  

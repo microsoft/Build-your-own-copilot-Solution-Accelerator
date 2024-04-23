@@ -23,7 +23,7 @@
     "resourceGroupName": "[resourceGroup().name]",
     "subscriptionId": "[subscription().subscriptionId]",
     "solutionLocation": "[variables('resourceGroupLocation')]",
-    "baseUrl": "https://raw.githubusercontent.com/nchandhi/ncbyctestrepo/main/"
+    "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-AI-Assistant-Solution-Accelerator/main/"
   },
   "resources": [
     {

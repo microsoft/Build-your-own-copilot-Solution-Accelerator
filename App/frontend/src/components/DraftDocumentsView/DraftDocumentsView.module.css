@@ -29,8 +29,10 @@
 }
 
 .contentContainer {
-  width: 100%;
-  box-shadow: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .fullWidthTextField {
@@ -130,6 +132,7 @@
   .card {
     width: 100%;
     margin-bottom: 2rem;
+    
   }
   
   .flex {
@@ -178,11 +181,12 @@
     width: 100%; 
   }
   .cardParagraph{
-    padding: 5px; 
+    padding: 20px; 
     height: 300px; 
     width: 100%; 
+    flex: 1;
     word-wrap: break-word !important; 
-    overflow: auto;
+    overflow-y: auto;
     white-space: pre-wrap !important; 
     resize: vertical !important;
   }
@@ -408,3 +412,22 @@
 .DialogueBody{
   display: block !important;
 }
+
+
+.sectionDisclaimer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 15px;
+  color: #707070;
+  background-color: white;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.5;
+  box-sizing: border-box;
+  width: calc(100% - 2px);
+  max-width: 100%;
+  white-space: nowrap;
+}
+

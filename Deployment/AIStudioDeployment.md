@@ -2,7 +2,7 @@
 Please follow the steps below to set up the AI Studio Hub, Project, PromptFlow and Deploy as endpoint. Clone or download this repository before you start following the steps below.
 
 ## Step 1: Create AI Studio Project
-1. Launch the AI Studio [AI Studio](https://ai.azure.com/) and select Build from the top menu.
+1. Launch the [AI Studio](https://ai.azure.com/) and select Build from the top menu.
 
     ![Home](/Deployment/images/aiStudio/Home.png)
 
