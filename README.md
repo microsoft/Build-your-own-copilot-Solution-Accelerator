@@ -1,4 +1,4 @@
->Legal Notice: This program is intended for use by Microsoft employees only and is strictly for internal purposes. Any unauthorized distribution, sharing, or use of this program outside of Microsoft is strictly prohibited.
+>Legal Notice: This is a pre-release and preview solution and therefore may not work correctly. Certain features may be missing or disabled. Microsoft may change or update this pre-release and preview solution at any time.
 
 # Build your own AI Assistant Solution Accelerator
 

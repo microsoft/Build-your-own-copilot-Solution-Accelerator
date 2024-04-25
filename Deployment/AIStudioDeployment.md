@@ -7,11 +7,11 @@ Please follow the steps below to set up the AI Studio Hub, Project, PromptFlow a
     ![Home](/Deployment/images/aiStudio/Home.png)
 
 
-2. Click on `New AI Project`.
+2. Click on `Build` from the top menu and then click on `New AI Project`.
 
    ![New AI Project](/Deployment/images/aiStudio/NewProject.png)
 
-3. Enter a Project Name and click on `Create a New Resource`.
+3. Enter a Project Name and click on `Create a new hub`.
     ![Getting Started](/Deployment/images/aiStudio/GettingStarted.png)
 
 4. Enter a new AI Hub Resource Name. And then select Azure Subscription, Resource Group, Location from drop-down menus. You should choose the same resource group you created from ARM deployment in previous step. 
