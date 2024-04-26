@@ -1,15 +1,16 @@
 @description('Specifies the location for resources.')
+param solutionLocation string 
+
 param baseUrl string
-param solutionLocation string
-param subscriptionId string
-param solutionName string
 param keyVaultName string
 param identity string
+param solutionName string
 param resourceGroupName string
+param subscriptionId string
 
 resource create_index 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind:'AzureCLI'
-  name: 'create_ai_hub'
+  name: 'create_aihub'
   location: solutionLocation // Replace with your desired location
   identity: {
     type: 'UserAssigned'
@@ -19,12 +20,10 @@ resource create_index 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   }
   properties: {
     azCliVersion: '2.52.0'
-    primaryScriptUri: '${baseUrl}Deployment/scripts/run_ai_hub_scripts.sh' 
-    arguments: '${baseUrl} ${solutionLocation} ${subscriptionId} ${solutionName} ${keyVaultName} ${resourceGroupName}' // Specify any arguments for the script
+    primaryScriptUri: '${baseUrl}Deployment/scripts/run_create_aihub_scripts.sh' 
+    arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}' // Specify any arguments for the script
     timeout: 'PT1H' // Specify the desired timeout duration
     retentionInterval: 'PT1H' // Specify the desired retention interval
     cleanupPreference:'OnSuccess'
   }
 }
-
-

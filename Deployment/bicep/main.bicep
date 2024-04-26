@@ -129,21 +129,19 @@ module createIndex 'deploy_index_scripts.bicep' = {
 //   dependsOn:[keyvaultModule]
 // }
 
-
-// // module createAIHub 'deploy_ai_hub_scripts.bicep' = {
-// //   name : 'deploy_ai_hub_scripts'
-// //   params:{
-// //     baseUrl:baseUrl
-// //     solutionLocation: solutionLocation
-// //     subscriptionId:subscriptionId
-// //     solutionName: solutionPrefix
-// //     identity:managedIdentityModule.outputs.managedIdentityOutput.id
-// //     keyVaultName:keyvaultModule.outputs.keyvaultOutput.name
-// //     resourceGroupName:resourceGroupName
-// //   }
-// //   dependsOn:[keyvaultModule]
-// // }
-
+module createIndex1 'deploy_aihub_scripts.bicep' = {
+  name : 'deploy_aihub_scripts'
+  params:{
+    solutionLocation: solutionLocation
+    identity:managedIdentityModule.outputs.managedIdentityOutput.id
+    baseUrl:baseUrl
+    keyVaultName:keyvaultModule.outputs.keyvaultOutput.name
+    solutionName: solutionPrefix
+    resourceGroupName:resourceGroupName
+    subscriptionId:subscriptionId
+  }
+  dependsOn:[keyvaultModule]
+}
 
 module appserviceModule 'deploy_app_service.bicep' = {
   name: 'deploy_app_service'

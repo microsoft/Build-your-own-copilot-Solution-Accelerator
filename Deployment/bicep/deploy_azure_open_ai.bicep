@@ -29,7 +29,7 @@ resource accounts_byc_openai_name_gpt_35_turbo 'Microsoft.CognitiveServices/acco
   name: 'gpt-35-turbo-16k'
   sku: {
     name: 'Standard'
-    capacity: 10
+    capacity: 30
   }
   properties: {
     model: {
