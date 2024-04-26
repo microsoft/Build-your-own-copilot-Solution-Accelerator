@@ -127,37 +127,37 @@ print(srch_created_conn.name, srch_created_conn.type, srch_created_conn.target, 
 
 ai_client.connections.get(search_conn_name)
 
+# #create deployment endpoint
+# from azure.ai.resources.entities.single_deployment import SingleDeployment
+# from azure.ai.resources.entities.models import PromptflowModel
+# import time 
 
-from azure.ai.resources.entities.single_deployment import SingleDeployment
-from azure.ai.resources.entities.models import PromptflowModel
-import time 
+# if not deployment_name:
+#     deployment_name = f"{ai_client.project_name}-copilot"
 
-if not deployment_name:
-    deployment_name = f"{ai_client.project_name}-copilot"
+# deployment = SingleDeployment(
+#     name=deployment_name,
+#     model=PromptflowModel(
+#         path="./DraftFlow",
+#     ),
+#     instance_type='Standard_DS2_v2',
+#     instance_count=1
+# )
+# ai_client.single_deployments.begin_create_or_update(deployment)
 
-deployment = SingleDeployment(
-    name=deployment_name,
-    model=PromptflowModel(
-        path="./DraftFlow",
-    ),
-    instance_type='Standard_DS2_v2',
-    instance_count=1
-)
-ai_client.single_deployments.begin_create_or_update(deployment)
+# depl_key = None
+# while True:
+#     try:
+#         depl1_keys = ai_client.single_deployments.get_keys(name=deployment_name,endpoint_name=deployment_name)
+#         if depl1_keys.primary_key != None:
+#             depl_key = depl1_keys.primary_key
+#             depl_endpoint = f'https://{deployment_name}.{solutionLocation}.inference.ml.azure.com/score'
+#             break
+#         else:
+#             print('didnt find the deployment keys, waiting')
+#             time.sleep(120) 
+#     except:
+#         print('didnt find the deployment, waiting')
+#         time.sleep(120)
 
-depl_key = None
-while True:
-    try:
-        depl1_keys = ai_client.single_deployments.get_keys(name=deployment_name,endpoint_name=deployment_name)
-        if depl1_keys.primary_key != None:
-            depl_key = depl1_keys.primary_key
-            depl_endpoint = f'https://{deployment_name}.{solutionLocation}.inference.ml.azure.com/score'
-            break
-        else:
-            print('didnt find the deployment keys, waiting')
-            time.sleep(120) 
-    except:
-        print('didnt find the deployment, waiting')
-        time.sleep(120)
-
-print(depl_key,depl_endpoint)
+# print(depl_key,depl_endpoint)
