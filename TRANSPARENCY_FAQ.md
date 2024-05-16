@@ -1,11 +1,11 @@
 ## Build your own Assistant Solution Accelerator: Responsible AI FAQ
 - ### What is Build your own AI Assistant Solution Accelerator?
 
-  This solution accelerator is an open-source GitHub Repository to help create AI assistants using Azure Open AI Service, Azure AI Search, and Microsoft Fabric. This can be used by anyone looking for reusable architecture and code snippets to build AI assistants with their own enterprise data.    The repository showcases a sample scenario of a researcher who wants to explore relevant articles and grants to accelerate submission of a grant proposal.
+  This solution accelerator is an open-source GitHub Repository to help create AI assistants using Azure OpenAI Service, Azure AI Search, and Microsoft Fabric. This can be used by anyone looking for reusable architecture and code snippets to build AI assistants with their own enterprise data.    The repository showcases a sample scenario of a researcher who wants to explore relevant articles and grants to accelerate submission of a grant proposal.
 
 - ### What can Build your own AI Assistant Solution Accelerator do? 
   The sample solution included focuses on a researcher who wants to explore relevant articles and grants to accelerate submission of a grant proposal. The sample data is sourced from a select set of research and grants published on PubMed and NIH. The documents are intended for use as sample data only. The sample solution takes user input in text format and returns LLM responses in text format up to 800 tokens.
-  It uses prompt flow to search data from AI search vector store, summarize the retrieved documents with Azure Open AI.
+  It uses prompt flow to search data from AI search vector store, summarize the retrieved documents with Azure OpenAI.
   
 - ### What is/are Build your own AI Assistant Solution Accelerator’s intended use(s)?  
 
