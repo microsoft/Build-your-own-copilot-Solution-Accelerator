@@ -1,6 +1,10 @@
 #Get Azure Key Vault Client
 key_vault_name = 'kv_to-be-replaced'
 
+import time
+ 
+time.sleep(60) # to fix the issue of the script 
+
 #hardcoded values
 index_name = "articlesindex"
 drafts_index_name = 'draftsindex'
