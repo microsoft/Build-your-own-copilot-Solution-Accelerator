@@ -1,7 +1,5 @@
-# openai
 azure-identity
-# azure-ai-textanalytics
-# azure-search-documents==11.4.0
 azure-keyvault-secrets
 azure-ai-resources
-azure-ai-ml
+azure-ai-ml==1.15.0
+msal[broker]==1.24.0b1
