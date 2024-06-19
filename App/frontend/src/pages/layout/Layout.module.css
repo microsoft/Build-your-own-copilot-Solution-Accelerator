@@ -1,9 +1,7 @@
 .layout {
     flex: 1 1 100%;
-
     width: 100%;
     height: 100%;
-
     display: flex;
     flex-direction: row;
 
@@ -28,4 +26,27 @@
 .headerIcon {
     height: 24px;
     width: 24px;
+}
+
+/* Styles for 1280p resolution at 200% zoom */
+@media screen and (min-width: 1280px) {
+    .layout {
+        height: unset !important;
+        width: 100% !important;
+    }
+}
+
+@media screen and (-ms-high-contrast: active), (forced-colors: active) {
+    .layout{
+        border: 2px solid WindowText;padding: 10px;
+        background-color: Window;
+        color: WindowText;
+    }
+}
+
+/* Styles for 1280p resolution at 400% zoom */
+@media screen and (max-width: 320px) {
+    .layout {
+        width: 250% !important;
+    }
 }

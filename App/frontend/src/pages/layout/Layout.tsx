@@ -40,8 +40,7 @@ const Layout = (): JSX.Element => {
 
   return (
         <Stack style={{
-          height: '100vh',
-          width: '100vw',
+          width: '100%',
           backgroundColor: '#EDEBE9',
           padding: '1rem'
         }}>
@@ -53,6 +52,7 @@ const Layout = (): JSX.Element => {
                     src={Icon}
                     className={styles.headerIcon}
                     aria-hidden="true"
+                    alt="App Icon"
                 />
                 <Link to="/" className={styles.headerTitleContainer}
                     onClick={() => {
