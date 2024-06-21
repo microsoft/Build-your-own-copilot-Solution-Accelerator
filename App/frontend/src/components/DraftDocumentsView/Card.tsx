@@ -31,6 +31,9 @@ const RegenerateIcon = createSvgIcon({
 export function documentSectionPrompt(title: string, topic: string): any {
   return `Create ${title} section of research grant application for - ${topic}.`
 }
+
+let is_bad_request = false
+
 export const ResearchTopicCard = (): JSX.Element => {
   const appStateContext = useContext(AppStateContext)
   const [open, setOpen] = React.useState(false)
@@ -42,10 +45,11 @@ export const ResearchTopicCard = (): JSX.Element => {
     }
 
     const generatedSection = await documentSectionGenerate(appStateContext?.state.researchTopic, documentSection)
-    if ((generatedSection?.body) != null) {
+    if ((generatedSection?.body) != null && (generatedSection?.status) != 400) {
       const response = await generatedSection.json()
       return response.content
     } else {
+      is_bad_request = true
       console.error('Error generating section')
       return ''
     }
@@ -104,6 +108,7 @@ export const ResearchTopicCard = (): JSX.Element => {
             for (let i = 0; i < newDocumentSections.length; i++) {
               if (newDocumentSections[i] === '') {
                 console.error('Error generating section content')
+                setOpen(false)
                 return
               }
 
@@ -130,6 +135,9 @@ export const ResearchTopicCard = (): JSX.Element => {
           </DialogSurface>
         </Dialog>
       </Stack>
+      <div>
+        {is_bad_request && <p className={styles.error}>Oops! It looks like your message contains some content that we can't process. Please try rephrasing your question and submit it again </p> }
+      </div>
     </FluentCard>
   )
 }
