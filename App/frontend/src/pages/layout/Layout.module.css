@@ -1,7 +1,7 @@
 .layout {
     flex: 1 1 100%;
-    width: 100%;
-    height: 100%;
+    /* width: 100%;
+    height: 100%; */
     display: flex;
     flex-direction: row;
 
@@ -31,8 +31,8 @@
 /* Styles for 1280p resolution at 200% zoom */
 @media screen and (min-width: 1280px) {
     .layout {
-        height: unset !important;
-        width: 100% !important;
+        width: auto !important;
+        height: auto !important;
     }
 }
 
