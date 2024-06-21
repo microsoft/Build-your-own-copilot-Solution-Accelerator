@@ -13,17 +13,17 @@
   justify-content: center;
   
   width: 40%;
-  gap: 40px;
+  gap: 8px;
 }
 
 .header {
-  margin-bottom: 20px;
+  margin-bottom: 2px;
   text-align: center;
 }
 
 .appIcon {
-  width: 100px;
-  height: 100px;
+  width: 77px;
+  height: 77px;
 }
 
 .gradientText {

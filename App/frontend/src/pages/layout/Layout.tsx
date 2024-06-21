@@ -40,7 +40,8 @@ const Layout = (): JSX.Element => {
 
   return (
         <Stack style={{
-          width: '100%',
+          height: '100vh',
+          width: '100vw',
           backgroundColor: '#EDEBE9',
           padding: '1rem'
         }}>
