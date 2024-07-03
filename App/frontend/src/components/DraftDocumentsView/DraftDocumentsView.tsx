@@ -195,7 +195,7 @@ const handleCreatePDF = (): void => {
         </Stack>
 
         <div className={styles.textfieldDiv}>
-          <TextField defaultValue="Contoso" className= "inputText" onChange={(event, data) => { setCompany(data ?? 'Contoso') }} value={company} />
+          <TextField defaultValue="Contoso" className= "inputText" onChange={(event, data) => { setCompany(data ?? 'Contoso') }} value={company} placeholder='Contoso'/>
           <TextField placeholder="Name" defaultValue={name} className= "inputText" onChange={(event, data) => { setName(data ?? '') }} value={name}/>
           <TextField placeholder="FOA ID" className= "inputText" onChange={(event, data) => { setFoaId(data ?? '') }} value={foaId}/>
           <TextField placeholder="FOA Title" className= "inputText" onChange={(event, data) => { setFoaTitle(data ?? '') }} value={foaTitle}/>
