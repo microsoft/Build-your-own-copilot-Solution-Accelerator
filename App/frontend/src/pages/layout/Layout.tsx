@@ -53,6 +53,7 @@ const Layout = (): JSX.Element => {
                     src={Icon}
                     className={styles.headerIcon}
                     aria-hidden="true"
+                    alt='App Icon'
                 />
                 <Link to="/" className={styles.headerTitleContainer}
                     onClick={() => {

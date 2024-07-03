@@ -141,9 +141,8 @@ export const TextFieldCard = ({ className, ...props }: CardProps) => {
           onChange={(event, data) => {
             appStateContext?.dispatch({ type: 'UPDATE_RESEARCH_TOPIC', payload: data as string});
           }}
-
           value={appStateContext?.state.researchTopic}
-
+          placeholder="Research Topic"
           style={{
             flex: 1,
             width: "100%",

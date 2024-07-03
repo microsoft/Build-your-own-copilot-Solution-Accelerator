@@ -127,7 +127,7 @@ export const SidebarView = (): JSX.Element => {
                                         appearance="transparent"
                                         size="large"
                                         icon={sidebarOptionIcon[item as keyof typeof sidebarOptionIcon]('#004C87')}
-
+                                        aria-label='button'
                                         style={{
                                           padding: '0'
                                         }}
@@ -167,6 +167,7 @@ export const SidebarView = (): JSX.Element => {
                                         appearance="transparent"
                                         size="large"
                                         icon={sidebarOptionIcon[item as keyof typeof sidebarOptionIcon]('#0078D4')}
+                                         aria-label='button'
                                         style={{ padding: '0' }}
                                     />
                                     <Text className={styles.noSelect}
