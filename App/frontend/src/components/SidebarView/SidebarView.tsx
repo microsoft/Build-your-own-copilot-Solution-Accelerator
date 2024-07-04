@@ -67,7 +67,7 @@ export const SidebarView = (): JSX.Element => {
                 }
 
                 <Stack className={styles.avatarContainer}>
-                    <Avatar color="colorful" name={name} title='User name'/>
+                    <Avatar color="colorful" name={name} aria-label='User name'/>
                 </Stack>
             </Stack>
             <Stack horizontal
