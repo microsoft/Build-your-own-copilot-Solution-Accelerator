@@ -188,7 +188,7 @@ const handleCreatePDF = (): void => {
           <Button
             ref={exportButtonRef}
             size="medium" onClick={handleExportClick} appearance="outline"
-            style={{ color: '#0078D4' }}
+            style={{ color: '#0072c9' }}
           icon={<img src={exportIcon} alt="Export Icon" className={styles.icon}/>}>
             Export
           </Button>

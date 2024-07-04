@@ -53,6 +53,7 @@ const Layout = (): JSX.Element => {
                     src={Icon}
                     className={styles.headerIcon}
                     aria-hidden="true"
+                    alt="Export Icon"
                 />
                 <Link to="/" className={styles.headerTitleContainer}
                     onClick={() => {
@@ -63,7 +64,7 @@ const Layout = (): JSX.Element => {
                       }
                     }}
                 >
-                    <Text as="h1" className={classes.headerTitle}>Grant Writer</Text>
+                    <h1 className={classes.headerTitle}>Grant Writer</h1>
                 </Link>
             </Stack>
 
