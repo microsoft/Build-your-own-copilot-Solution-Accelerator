@@ -85,7 +85,7 @@ export const FeatureCard = (props: Props) => {
       }}
     >
       {icon}
-      <Text weight="semibold">{title}</Text>
+      <h3 style={{ fontWeight: "600", fontSize: "14px" }}>{title}</h3>
 
       <p className={styles.text}>
         {description}
@@ -120,14 +120,14 @@ export const TextFieldCard = ({ className, ...props }: CardProps) => {
           textAlign: "start",
         }}
       >
-        <Title3 
+       <h2 
           style={{
             fontSize: "1.2rem",
-            marginBottom: "2px",
+            fontWeight: "500"
           }}
         >
           Topic
-        </Title3>
+        </h2>
 
         <Text>
           Enter an initial prompt that will exist across all three modes, Articles, Grants, and Drafts. 
