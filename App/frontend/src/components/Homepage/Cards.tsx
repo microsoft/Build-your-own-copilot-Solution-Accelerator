@@ -85,7 +85,7 @@ export const FeatureCard = (props: Props) => {
       }}
     >
       {icon}
-      <h3 style={{ fontWeight: "600", fontSize: "14px" }}>{title}</h3>
+      <h3 style={{ fontWeight: "600", fontSize: "14px", margin: "0" }}>{title}</h3>
 
       <p className={styles.text}>
         {description}
@@ -123,7 +123,10 @@ export const TextFieldCard = ({ className, ...props }: CardProps) => {
        <h2 
           style={{
             fontSize: "1.2rem",
-            fontWeight: "500"
+            marginBottom: "2px",
+            fontWeight: "500",
+            marginTop:"0",
+            lineHeight:"32px"
           }}
         >
           Topic
