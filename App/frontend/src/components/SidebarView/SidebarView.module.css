@@ -60,3 +60,13 @@
     -moz-user-select: none; /* Firefox 2+ */
     -ms-user-select: none; /* IE 10+ */
 }
+
+/* high constrat */
+@media screen and (-ms-high-contrast: active), (forced-colors: active) {
+    button{
+        border: 2px solid WindowText !important;
+        padding: 10px;
+        background-color: Window;
+        color: WindowText;
+    }
+}
