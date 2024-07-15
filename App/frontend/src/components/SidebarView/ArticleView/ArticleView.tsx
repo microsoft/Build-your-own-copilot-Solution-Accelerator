@@ -38,11 +38,12 @@ export const ArticleView = () => {
           marginTop: "0",
         }}
       >
-       
-        <Text variant="xLarge" style={{ alignSelf: "flex-start", marginTop: "0" }}>
+
+        <h2 style={{ alignSelf: "flex-start", marginTop: "0" ,fontWeight: '500'}}>
           Favorites
-        </Text>
+        </h2>
         <Button
+          title="close"
           style={{ border: "none", alignSelf: "flex-start", marginTop: "0" }}
           icon={<Dismiss24Regular />}
           onClick={() => {

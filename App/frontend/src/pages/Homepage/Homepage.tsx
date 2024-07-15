@@ -29,8 +29,8 @@ const Homepage: React.FC = () => {
             icon={
               <NewsRegular
                 style={{
-                  minWidth: 48,
-                  minHeight: 48
+                  minWidth: window.matchMedia('(max-width:320px)').matches ? "1rem" : 48,
+                  minHeight: window.matchMedia('(max-width:320px)').matches ? "1rem" : 48,
                 }}
               />
             }
@@ -42,8 +42,8 @@ const Homepage: React.FC = () => {
             icon={
               <BookRegular
                 style={{
-                  minWidth: 48,
-                  minHeight: 48
+                  minWidth: window.matchMedia('(max-width:320px)').matches ? "1rem" : 48,
+                  minHeight: window.matchMedia('(max-width:320px)').matches ? "1rem" : 48,
                 }}
               />
             }
@@ -55,8 +55,8 @@ const Homepage: React.FC = () => {
             icon={
               <NotepadRegular
                 style={{
-                  minWidth: 48,
-                  minHeight: 48
+                  minWidth: window.matchMedia('(max-width:320px)').matches ? "1rem" : 48,
+                  minHeight: window.matchMedia('(max-width:320px)').matches ? "1rem" : 48,
                 }}
               />
             }

@@ -334,16 +334,16 @@ const Chat = ({ chatType }: Props) => {
     <div className={styles.container} role="main">
         <Stack horizontal className={styles.chatRoot}>
             <div className={styles.chatContainer}>
-                <Text variant="xLarge"
+                <h2
                     style={{
-                      color: '#797775',
+                      color: '#72716f',
                       marginLeft: '15px',
                       marginTop: '25px',
                       alignSelf: 'start'
                     }}
                 >
                     {title}
-                </Text>
+                </h2>
             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? '40px' : '0px' }} role="log">
                 {messages.map((answer, index) => (
                 <>
