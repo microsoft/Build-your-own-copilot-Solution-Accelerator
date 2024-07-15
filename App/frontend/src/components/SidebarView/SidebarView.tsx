@@ -76,14 +76,7 @@ export const SidebarView = (): JSX.Element => {
                 {
                     isExpanded
                       ? (
-                        <Stack style={{
-                          width: '20rem',
-                          backgroundColor: '#FAFAFA',
-                          flexDirection: 'column',
-                          justifyContent: 'flex-start',
-                          alignItems: 'center',
-                          paddingTop: '3rem'
-                        }}>
+                        <Stack className={styles.articlesFav}>
                             {
                               sidebarLoaded
                                 ? (selectedViewComponent)
