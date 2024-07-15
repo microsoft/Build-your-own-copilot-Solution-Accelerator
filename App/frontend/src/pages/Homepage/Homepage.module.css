@@ -11,19 +11,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  
   width: 40%;
-  gap: 8px;
+  gap: 40px;
 }
 
 .header {
-  margin-bottom: 2px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
 .appIcon {
-  width: 77px;
-  height: 77px;
+  width: 100px;
+  height: 100px;
 }
 
 .gradientText {
@@ -56,7 +55,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 3%;
+  /* margin-bottom: 3%; */
 }
 
 .feature {
