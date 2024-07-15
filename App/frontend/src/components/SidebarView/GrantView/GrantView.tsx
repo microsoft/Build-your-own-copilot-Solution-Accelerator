@@ -24,7 +24,7 @@ export const GrantView = () => {
     const updatedGrantsCitations = grantsCitations.filter(c => c.id !== citationToRemove.id);
     setGrantsCitations(updatedGrantsCitations);
   };
-  
+
   return (
     <Stack styles={{ root: { width: "100%" } }}>
       <Stack
@@ -42,6 +42,7 @@ export const GrantView = () => {
           Favorites
         </Text>
         <Button
+          title="close"
           style={{ border: "none", alignSelf: "flex-start", marginTop: "0" }}
           icon={<Dismiss24Regular />}
           onClick={() => {

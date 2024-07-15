@@ -76,4 +76,11 @@
          background-color: Window;
          color: WindowText;
      }
+
+     button{
+        border: 2px solid WindowText !important;
+        padding: 10px;
+        background-color: Window;
+        color: WindowText;
+    }
  }
