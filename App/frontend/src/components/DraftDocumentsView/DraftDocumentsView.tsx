@@ -188,14 +188,14 @@ const handleCreatePDF = (): void => {
           <Button
             ref={exportButtonRef}
             size="medium" onClick={handleExportClick} appearance="outline"
-            style={{ color: '#0078D4' }}
+            style={{ color: '#0072c9' }}
           icon={<img src={exportIcon} alt="Export Icon" className={styles.icon}/>}>
             Export
           </Button>
         </Stack>
 
         <div className={styles.textfieldDiv}>
-          <TextField defaultValue="Contoso" className= "inputText" onChange={(event, data) => { setCompany(data ?? 'Contoso') }} value={company} />
+          <TextField defaultValue="Contoso" className= "inputText" onChange={(event, data) => { setCompany(data ?? 'Contoso') }} value={company} placeholder='Contoso'/>
           <TextField placeholder="Name" defaultValue={name} className= "inputText" onChange={(event, data) => { setName(data ?? '') }} value={name}/>
           <TextField placeholder="FOA ID" className= "inputText" onChange={(event, data) => { setFoaId(data ?? '') }} value={foaId}/>
           <TextField placeholder="FOA Title" className= "inputText" onChange={(event, data) => { setFoaTitle(data ?? '') }} value={foaTitle}/>
