@@ -132,6 +132,6 @@ Please follow the steps below to configure the Prompt flow endpoint in App servi
 
 ![Web](/Deployment/images/aiStudio/Web.png)
 
-8. Enter the `web app URL` (Provide the app service name in place of XXXX) and Save. Then go back to [Step 4](https://github.com/microsoft/Build-your-own-AI-Assistant-Solution-Accelerator/blob/PSL-Authenticate-Doc/Deployment/AIStudioDeployment.md#step-4-add-authentication-in-azure-app-service-configuration) choose `Pick an existing app registration in this directory` from the Add an Identity Provider page and provide the newly registered App Name.
+8. Enter the `web app URL` (Provide the app service name in place of XXXX) and Save. Then go back to [Step 4](https://github.com/microsoft/Build-your-own-AI-Assistant-Solution-Accelerator/blob/PSL-Authenticate-Doc/Deployment/AIStudioDeployment.md#step-4-add-authentication-in-azure-app-service-configuration) and follow from _Point 4_ choose `Pick an existing app registration in this directory` from the Add an Identity Provider page and provide the newly registered App Name.
 
 ![Add Details](/Deployment/images/aiStudio/WebAppURL.png)
