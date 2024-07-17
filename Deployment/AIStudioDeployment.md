@@ -95,8 +95,26 @@ Please follow the steps below to configure the Prompt flow endpoint in App servi
 
   ![Add Provider](/Deployment/images/aiStudio/AppAuthIdentityProvider.png)
 
-4. Select the first option `Microsoft Entra Id` from the drop-down list.
+4. Select the first option `Microsoft Entra Id` from the drop-down list. If `Create new app registration` is disabled, go to step 6.
+
  ![Add Provider](/Deployment/images/aiStudio/AppAuthIdentityProviderAdd.png)
 
 5. Accept the default values and click on `Add` button to go back to the previous page with the identify provider added.
+   
  ![Add Provider](/Deployment/images/aiStudio/AppAuthIdentityProviderAdded.png)
+
+6. Click on `Home` and select `Microsoft Entra ID`.
+
+![Microsoft Entra ID](/Deployment/images/aiStudio/MicrosoftEntraID.png)
+
+7. Click on `App registrations`.
+
+![App registrations](/Deployment/images/aiStudio/Appregistrations.png)
+
+8. Click on `+ New registration`.
+
+![New Registrations](/Deployment/images/aiStudio/NewRegistration.png)
+
+9. Provide the `Name`, select supported account types as `Accounts in this organizational directory only(Contoso only - Single tenant)`, select platform as `Web`, enter/select the `URL` and register.
+
+![Add Details](/Deployment/images/aiStudio/AddDetails.png)
