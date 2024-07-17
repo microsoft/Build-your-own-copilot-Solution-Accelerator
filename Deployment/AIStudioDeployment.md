@@ -95,7 +95,7 @@ Please follow the steps below to configure the Prompt flow endpoint in App servi
 
   ![Add Provider](/Deployment/images/aiStudio/AppAuthIdentityProvider.png)
 
-4. Select the first option `Microsoft Entra Id` from the drop-down list. **If `Create new app registration` is disabled, go to _step 6_.**
+4. Select the first option `Microsoft Entra Id` from the drop-down list. If `Create new app registration` is disabled, go to [Step 4a](https://github.com/microsoft/Build-your-own-AI-Assistant-Solution-Accelerator/edit/PSL-Authenticate-Doc/Deployment/AIStudioDeployment.md#step-4a-creating-a-new-app-registration)
 
  ![Add Provider](/Deployment/images/aiStudio/AppAuthIdentityProviderAdd.png)
 
@@ -103,34 +103,35 @@ Please follow the steps below to configure the Prompt flow endpoint in App servi
    
  ![Add Provider](/Deployment/images/aiStudio/AppAuthIdentityProviderAdded.png)
 
-6. Click on `Home` and select `Microsoft Entra ID`.
+### Step 4a: Creating a new App Registration
+1. Click on `Home` and select `Microsoft Entra ID`.
 
 ![Microsoft Entra ID](/Deployment/images/aiStudio/MicrosoftEntraID.png)
 
-7. Click on `App registrations`.
+2. Click on `App registrations`.
 
 ![App registrations](/Deployment/images/aiStudio/Appregistrations.png)
 
-8. Click on `+ New registration`.
+3. Click on `+ New registration`.
 
 ![New Registrations](/Deployment/images/aiStudio/NewRegistration.png)
 
-9. Provide the `Name`, select supported account types as `Accounts in this organizational directory only(Contoso only - Single tenant)`, select platform as `Web`, enter/select the `URL` and register.
+4. Provide the `Name`, select supported account types as `Accounts in this organizational directory only(Contoso only - Single tenant)`, select platform as `Web`, enter/select the `URL` and register.
 
 ![Add Details](/Deployment/images/aiStudio/AddDetails.png)
 
-10. After application is created sucessfully, then click on `Add a Redirect URL`.
+5. After application is created sucessfully, then click on `Add a Redirect URL`.
 
 ![Redirect URL](/Deployment/images/aiStudio/AddRedirectURL.png)
 
-11. Click on `+ Add a platform`.
+6. Click on `+ Add a platform`.
 
 ![+ Add platform](/Deployment/images/aiStudio/AddPlatform.png)
 
-12. Click on `Web`.
+7. Click on `Web`.
 
 ![Web](/Deployment/images/aiStudio/Web.png)
 
-13. Enter the `web app URL` (Provide the app service name in place of XXXX) and Save. Then go back to the step 4 and choose `Pick an existing app registration in this directory` and provide the newly registered App.
+8. Enter the `web app URL` (Provide the app service name in place of XXXX) and Save. Then go back to [Step 4](https://github.com/microsoft/Build-your-own-AI-Assistant-Solution-Accelerator/edit/PSL-Authenticate-Doc/Deployment/AIStudioDeployment.md#step-4-add-authentication-in-azure-app-service-configuration) choose `Pick an existing app registration in this directory` from the Add an Identity Provider page and provide the newly registered App Name.
 
 ![Add Details](/Deployment/images/aiStudio/WebAppURL.png)
