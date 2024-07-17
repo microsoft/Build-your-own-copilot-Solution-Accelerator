@@ -118,3 +118,19 @@ Please follow the steps below to configure the Prompt flow endpoint in App servi
 9. Provide the `Name`, select supported account types as `Accounts in this organizational directory only(Contoso only - Single tenant)`, select platform as `Web`, enter/select the `URL` and register.
 
 ![Add Details](/Deployment/images/aiStudio/AddDetails.png)
+
+10. After application is created sucessfully, then click on `Add a Redirect URL`.
+
+![Redirect URL](/Deployment/images/aiStudio/AddRedirectURL.png)
+
+11. Click on `+ Add a platform`.
+
+![+ Add platform](/Deployment/images/aiStudio/AddPlatform.png)
+
+12. Click on `Web`.
+
+![Web](/Deployment/images/aiStudio/Web.png)
+
+13. Enter the `web app URL` (Provide the app service name in place of XXXX) and Save. Then go back to the step 4.
+
+![Add Details](/Deployment/images/aiStudio/WebAppURL.png)
