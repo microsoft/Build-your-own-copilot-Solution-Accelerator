@@ -1,5 +1,5 @@
 # Get Azure Key Vault Client
-key_vault_name = "pslsc-kv-gzwijqcuyu2ry"
+key_vault_name = 'kv_to-be-replaced'
 
 from azure.ai.ml import MLClient
 from azure.ai.ml.entities import (
@@ -28,9 +28,6 @@ def get_secrets_from_kv(kv_name, secret_name):
 
     # Retrieve the secret value
     return secret_client.get_secret(secret_name).value
-
-
-print(get_secrets_from_kv(key_vault_name, "AZURE-SEARCH-ENDPOINT"))
 
 # Azure configuration
 
