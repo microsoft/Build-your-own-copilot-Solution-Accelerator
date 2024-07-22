@@ -11,8 +11,6 @@ from azure.ai.ml.entities import (
 )
 from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
-from azure.mgmt import search as Se
-
 
 def get_secrets_from_kv(kv_name, secret_name):
     # Set the name of the Azure Key Vault
@@ -64,8 +62,9 @@ ai_search_key = get_secrets_from_kv(key_vault_name, "AZURE-SEARCH-KEY")
 # Credentials
 credential = DefaultAzureCredential()
 
-# Create the ML CLient
+# Create an ML client
 ml_client = MLClient(
+    workspace_name=aihub_name,
     resource_group_name=resource_group_name,
     subscription_id=subscription_id,
     credential=credential,
@@ -94,21 +93,9 @@ open_ai_connection = AzureOpenAIConnection(
     open_ai_resource_id=f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Search/searchServices/{ai_search_res_name}",
 )
 
-# Create an ML client
-ml_client = MLClient(
-    workspace_name=aihub_name,
-    resource_group_name=resource_group_name,
-    subscription_id=subscription_id,
-    credential=credential,
-)
-
 ml_client.connections.create_or_update(open_ai_connection)
 
 # Create AI Search resource
-search_client = Se.SearchManagementClient(
-    credential=credential, subscription_id=subscription_id
-)
-
 aisearch_connection = AzureAISearchConnection(
     name=ai_search_res_name,
     endpoint=ai_search_endpoint,
