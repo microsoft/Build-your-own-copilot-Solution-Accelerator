@@ -90,7 +90,7 @@ open_ai_connection = AzureOpenAIConnection(
     api_key=open_ai_key,
     api_version=openai_api_version,
     azure_endpoint=f"https://{open_ai_res_name}.openai.azure.com/",
-    open_ai_resource_id=f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Search/searchServices/{ai_search_res_name}",
+    open_ai_resource_id=f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.CognitiveServices/accounts/{open_ai_res_name}"
 )
 
 ml_client.connections.create_or_update(open_ai_connection)
