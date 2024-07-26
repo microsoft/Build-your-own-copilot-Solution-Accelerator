@@ -179,7 +179,7 @@ const handleCreatePDF = (): void => {
   return (
     <div className={styles.container}>
       <Stack className={styles.draftDocumentHeader}>
-        <Text variant="xLarge" className={styles.draftDocumentTitle}>Draft grant proposal</Text>
+        <h2 className={styles.draftDocumentTitle}>Draft grant proposal</h2>
         <ResearchTopicCard />
       </Stack>
 
@@ -202,7 +202,7 @@ const handleCreatePDF = (): void => {
         </div>
 
         <div>
-          <h4>Title</h4>
+          <h3>Title</h3>
           <div className={styles.titleTextfield}>
             <TextField
               placeholder="Topic"

@@ -84,6 +84,8 @@ export const ArticleView = () => {
                     </Text>
                     
                     <Button
+                      title="remove"
+                      aria-label="remove"
                       icon={<DeleteRegular />}
                       onClick={() => handleToggleFavorite(citation)}
                       style={{
