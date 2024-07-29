@@ -339,7 +339,11 @@ const Chat = ({ chatType }: Props) => {
                       color: '#72716f',
                       marginLeft: '15px',
                       marginTop: '25px',
-                      alignSelf: 'start'
+                      alignSelf: 'start',
+                      fontWeight: '600',
+                      fontFamily: '"Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
+                      /* -webkit-font-smoothing: antialiased; */
+                      fontSize: '20px'
                     }}
                 >
                     {title}
