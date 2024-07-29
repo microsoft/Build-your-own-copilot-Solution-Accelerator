@@ -86,7 +86,7 @@ my_project = Project(
 created_project = ml_client.workspaces.begin_create(workspace=my_project).result()
 
 open_ai_connection = AzureOpenAIConnection(
-    name=open_ai_res_name,
+    name="Azure_OpenAI",
     api_key=open_ai_key,
     api_version=openai_api_version,
     azure_endpoint=f"https://{open_ai_res_name}.openai.azure.com/",
@@ -95,11 +95,15 @@ open_ai_connection = AzureOpenAIConnection(
 
 ml_client.connections.create_or_update(open_ai_connection)
 
+target = f"https://{ai_search_res_name}.search.windows.net/"
+
 # Create AI Search resource
 aisearch_connection = AzureAISearchConnection(
-    name=ai_search_res_name,
-    endpoint=ai_search_endpoint,
+    name="Azure_AISearch",
+    endpoint=target,
     credentials=ApiKeyConfiguration(key=ai_search_key),
 )
+
+aisearch_connection.tags["ResourceId"] = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Search/searchServices/{ai_search_res_name}"
 
 ml_client.connections.create_or_update(aisearch_connection)
