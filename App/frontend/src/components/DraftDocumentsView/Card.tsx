@@ -136,7 +136,7 @@ export const ResearchTopicCard = (): JSX.Element => {
         </Dialog>
       </Stack>
       <div>
-        {is_bad_request && <p className={styles.error}>Oops! It looks like your message contains some content that we can't process. Please try rephrasing your question and submit it again </p> }
+        {is_bad_request && <p className={styles.error}>I am sorry, I don’t have this information in the knowledge repository. Please ask another question. </p> }
       </div>
     </FluentCard>
   )
