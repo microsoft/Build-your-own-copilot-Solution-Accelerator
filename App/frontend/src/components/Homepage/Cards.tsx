@@ -85,7 +85,7 @@ export const FeatureCard = (props: Props) => {
       }}
     >
       {icon}
-      <Text weight="semibold">{title}</Text>
+      <h3 style={{ fontWeight: "600", fontSize: "14px", margin: "0" }}>{title}</h3>
 
       <p className={styles.text}>
         {description}
@@ -120,14 +120,17 @@ export const TextFieldCard = ({ className, ...props }: CardProps) => {
           textAlign: "start",
         }}
       >
-        <Title3 
+       <h2 
           style={{
             fontSize: "1.2rem",
             marginBottom: "2px",
+            fontWeight: "500",
+            marginTop:"0",
+            lineHeight:"32px"
           }}
         >
           Topic
-        </Title3>
+        </h2>
 
         <Text>
           Enter an initial prompt that will exist across all three modes, Articles, Grants, and Drafts. 
@@ -141,9 +144,8 @@ export const TextFieldCard = ({ className, ...props }: CardProps) => {
           onChange={(event, data) => {
             appStateContext?.dispatch({ type: 'UPDATE_RESEARCH_TOPIC', payload: data as string});
           }}
-
           value={appStateContext?.state.researchTopic}
-
+          placeholder="Research Topic"
           style={{
             flex: 1,
             width: "100%",

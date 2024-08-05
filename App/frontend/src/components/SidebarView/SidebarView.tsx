@@ -67,7 +67,7 @@ export const SidebarView = (): JSX.Element => {
                 }
 
                 <Stack className={styles.avatarContainer}>
-                    <Avatar color="colorful" name={name} />
+                    <Avatar color="colorful" name={name} aria-label='User name'/>
                 </Stack>
             </Stack>
             <Stack horizontal
@@ -76,14 +76,7 @@ export const SidebarView = (): JSX.Element => {
                 {
                     isExpanded
                       ? (
-                        <Stack style={{
-                          width: '20rem',
-                          backgroundColor: '#FAFAFA',
-                          flexDirection: 'column',
-                          justifyContent: 'flex-start',
-                          alignItems: 'center',
-                          paddingTop: '3rem'
-                        }}>
+                        <Stack className={styles.articlesFav}>
                             {
                               sidebarLoaded
                                 ? (selectedViewComponent)
@@ -127,7 +120,7 @@ export const SidebarView = (): JSX.Element => {
                                         appearance="transparent"
                                         size="large"
                                         icon={sidebarOptionIcon[item as keyof typeof sidebarOptionIcon]('#004C87')}
-
+                                        aria-label='button'
                                         style={{
                                           padding: '0'
                                         }}
@@ -167,6 +160,7 @@ export const SidebarView = (): JSX.Element => {
                                         appearance="transparent"
                                         size="large"
                                         icon={sidebarOptionIcon[item as keyof typeof sidebarOptionIcon]('#0078D4')}
+                                         aria-label='button'
                                         style={{ padding: '0' }}
                                     />
                                     <Text className={styles.noSelect}

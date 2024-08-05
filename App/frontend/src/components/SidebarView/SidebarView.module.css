@@ -32,7 +32,7 @@
 }
 
 .sidebarNavigationButton:active{
-    color:#797775 !important;
+    color:#72716f  !important;
 } 
 
 .mt1 {
@@ -60,3 +60,27 @@
     -moz-user-select: none; /* Firefox 2+ */
     -ms-user-select: none; /* IE 10+ */
 }
+
+.articlesFav{
+    width: 20rem;
+    background-color: #FAFAFA;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 3rem;
+}
+
+@media screen and (-ms-high-contrast: active), (forced-colors: active) {
+    .articlesFav{
+         border: 2px solid WindowText;padding: 10px;
+         background-color: Window;
+         color: WindowText;
+     }
+
+     button{
+        border: 2px solid WindowText !important;
+        padding: 10px;
+        background-color: Window;
+        color: WindowText;
+    }
+ }
