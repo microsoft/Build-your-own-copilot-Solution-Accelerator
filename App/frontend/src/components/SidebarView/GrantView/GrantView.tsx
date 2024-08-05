@@ -83,6 +83,8 @@ export const GrantView = () => {
                     </Text>
                     {/* "X" button to remove the citation */}
                     <Button
+                      title="remove"
+                      aria-label="remove"
                       icon={<DeleteRegular />}
                       onClick={() => handleToggleFavorite(citation)}
                       style={{
