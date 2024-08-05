@@ -105,6 +105,6 @@ aisearch_connection = AzureAISearchConnection(
 )
 
 aisearch_connection.tags["ResourceId"] = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Search/searchServices/{ai_search_res_name}"
-aisearch_connection.tags["ApiVersion"] = "2023-07-01-preview"
+aisearch_connection.tags["ApiVersion"] = "2024-05-01-preview"
 
 ml_client.connections.create_or_update(aisearch_connection)
