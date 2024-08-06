@@ -32,9 +32,8 @@ export function documentSectionPrompt(title: string, topic: string): any {
   return `Create ${title} section of research grant application for - ${topic}.`
 }
 
-let is_bad_request = false
-
 export const ResearchTopicCard = (): JSX.Element => {
+  const [is_bad_request, set_is_bad_request] = useState(false)
   const appStateContext = useContext(AppStateContext)
   const [open, setOpen] = React.useState(false)
 
@@ -46,10 +45,11 @@ export const ResearchTopicCard = (): JSX.Element => {
 
     const generatedSection = await documentSectionGenerate(appStateContext?.state.researchTopic, documentSection)
     if ((generatedSection?.body) != null && (generatedSection?.status) != 400) {
+      set_is_bad_request(false)
       const response = await generatedSection.json()
       return response.content
     } else {
-      is_bad_request = true
+      set_is_bad_request(true)
       console.error('Error generating section')
       return ''
     }
@@ -107,13 +107,13 @@ export const ResearchTopicCard = (): JSX.Element => {
             const newDocumentSections = await Promise.all(newDocumentSectionContent)
             for (let i = 0; i < newDocumentSections.length; i++) {
               if (newDocumentSections[i] === '') {
+                documentSections[i].content = newDocumentSections[i]
                 console.error('Error generating section content')
                 setOpen(false)
-                return
+              }else{
+                documentSections[i].content = newDocumentSections[i]
+                documentSections[i].metaPrompt = documentSectionPrompt(documentSections[i].title, appStateContext?.state.researchTopic ?? '')
               }
-
-              documentSections[i].content = newDocumentSections[i]
-              documentSections[i].metaPrompt = documentSectionPrompt(documentSections[i].title, appStateContext?.state.researchTopic ?? '');
             }
 
             appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: documentSections })
@@ -136,7 +136,7 @@ export const ResearchTopicCard = (): JSX.Element => {
         </Dialog>
       </Stack>
       <div>
-        {is_bad_request && <p className={styles.error}>I am sorry, I don’t have this information in the knowledge repository. Please ask another question. </p> }
+        {is_bad_request && (<p className={styles.error}>I am sorry, I don’t have this information in the knowledge repository. Please ask another question. </p>)}
       </div>
     </FluentCard>
   )
