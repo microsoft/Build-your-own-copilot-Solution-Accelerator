@@ -1,0 +1,25 @@
+/* html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+} */
+
+.chartContainer{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* background: radial-gradient(108.78% 108.78% at 50.02% 19.78%, #ffffff 57.29%, #eef6fe 100%); */
+    border-radius: 8px;
+    /* overflow-y: auto; */
+    max-height: calc(100vh - 300px);
+    height: 100vh;
+    width: 100%;
+}
+
+.embedWrapper .canvasFlexBox .displayAreaContainer .displayArea .visualContainerHost {
+  outline: 0;
+  background: white !important;
+}
