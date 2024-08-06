@@ -11,15 +11,16 @@
 
 ## Step 2: Deploy Fabric resources and artifacts
 1.   Navigate to ([Azure Portal](https://portal.azure.com/))
-2.   Click on Azure Cloud Shell in the top right of navigation Menu (add image)
+2.   Click on Azure Cloud Shell in the top right of navigation Menu 
+   ![Cloud Shell](images/fabric/cloudshell.png)
 3.   Run the run the following commands:  
       - ```az login``` 
       - ```rm -rf Build-your-own-copilot-Solution-Accelerator```
       - ```git clone https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator```
       - ```cd ./Build-your-own-copilot-Solution-Accelerator/ClientAdvisor/Deployment/scripts/fabric_scripts```
       - ```sh ./run_fabric_items_scripts.sh keyvault_param workspaceid_param solutionprefix_param```  
-         1. keyvault_param - the name of the keyvault that was created in Step 1
-         2. workspaceid_param - the workspaceid created in Step 2
+         1. keyvault_param - the name of the keyvault that was created in the one click deployment step
+         2. workspaceid_param - the workspaceid created in Step 1
          3. solutionprefix_param - prefix used to append to lakehouse upon creation
 4.  Get Fabric Lakehouse connection details:
 5.  Once deployment is complete, navigate to Fabric Workspace
