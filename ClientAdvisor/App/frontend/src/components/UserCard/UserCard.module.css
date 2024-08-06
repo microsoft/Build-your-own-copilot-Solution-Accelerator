@@ -1,0 +1,68 @@
+
+
+.cardContainer {
+  /* background-color: white; */
+  /* padding: 16px; */
+  /* box-shadow: 0 0 8px rgba(0, 0, 0, 0.1); */
+  font-family:var(--Font-family-Base, "Segoe UI");
+}
+
+.clientName {
+  font-weight: bold;
+  margin-bottom: 8px;
+  margin-top: 0;
+  font-size: 16px;
+}
+
+
+.userInfo {
+  background-color: white;
+  border: 1px solid #ffffff;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.14), 0px 0px 2px 0px rgba(0, 0, 0, 0.12);
+}
+
+.morestyles{
+  padding: 10px;
+}
+
+.selected {
+  background-color: #0078D7; 
+  color: white !important;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.14), 0px 0px 2px 0px rgba(0, 0, 0, 0.12);
+}
+
+
+.nextMeeting {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.calendarIcon {
+  margin-right: 5px;
+  font-size: 15px;
+}
+
+
+.selected .calendarIcon {
+  color: white;
+}
+
+
+.showBtn {
+color: #0078d4;
+cursor: pointer;
+font-family: "Segoe UI";
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: 20px;
+margin: 16px auto;
+}
+
+.showBtn:hover {
+  color:#0368ba
+}
+  

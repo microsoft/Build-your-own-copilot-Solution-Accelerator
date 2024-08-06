@@ -1,0 +1,17 @@
+ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail
+10001,8893b9a3-5394-4809-9aa5-68aadfa586c1,Investment Strategy,2024-06-16 15:00:00,2024-06-16 15:30:00,John Smith,Alexander.Harrington@contoso.com
+10001,5cc704b5-d2aa-4c29-9786-380b27989e1e,Financial Review,2024-06-17 14:00:00,2024-06-17 14:30:00,John Smith,Alexander.Harrington@contoso.com
+10001,22e53c03-c59f-4d72-87f1-4053a3f6df65,General Strategy,2024-06-15 16:00:00,2024-06-15 16:30:00,John Smith,Alexander.Harrington@contoso.com
+10002,8b98a363-53b2-44f6-941c-c6f96d354fef,Investment Strategy,2024-06-16 15:00:00,2024-06-16 15:30:00,John Smith,Amelia.Harper@contoso.com
+10002,8467d2f0-5742-4140-bf22-f9f307f5a7e2,Retirement Planning,2024-06-17 13:00:00,2024-06-17 13:30:00,John Smith,Amelia.Harper@contoso.com
+10003,becf5b82-c250-4f34-85f5-d13b1739e748,Financial Planning,2024-06-14 19:00:00,2024-06-14 19:30:00,John Smith,Arun.Sharma@contoso.com
+10003,ffcac074-6fa5-4485-a32d-f0f6d0c84b52,Retirement Planning,2024-06-14 11:00:00,2024-06-14 11:30:00,John Smith,Arun.Sharma@contoso.com
+10003,85c2d20b-b8f1-47bf-9413-888743783ae8,Quarterly Update,2024-06-18 12:00:00,2024-06-18 12:30:00,John Smith,Arun.Sharma@contoso.com
+10004,3d3dac78-d5f2-496b-ac08-c376a9e10d8f,Investment Strategy,2024-06-16 14:00:00,2024-06-16 14:30:00,John Smith,Isabella.Simmons@contoso.com
+10004,731a2065-0f7c-4864-b4cc-a7e86b550bde,Financial Review,2024-06-15 13:00:00,2024-06-15 13:30:00,John Smith,Isabella.Simmons@contoso.com
+10004,dd795676-cd35-4ab7-966b-f0ba4706d7f6,Retirement Planning,2024-06-14 11:00:00,2024-06-14 11:30:00,John Smith,Isabella.Simmons@contoso.com
+10005,69f4670e-f01c-4017-856f-c568b7ff1fca,General Strategy,2024-06-15 19:00:00,2024-06-15 19:30:00,John Smith,Karen.Berg@contoso.com
+10005,1894c4d4-10fa-4985-b1c6-f42d677695c9,Financial Planning,2024-06-15 21:00:00,2024-06-15 21:30:00,John Smith,Karen.Berg@contoso.com
+10005,33a6f5f8-ec63-4d08-8608-d96332d65b6d,Quarterly Update,2024-06-17 14:00:00,2024-06-17 14:30:00,John Smith,Karen.Berg@contoso.com
+10006,23e5e983-8be8-45f4-ad14-e8b2cbe55e47,Financial Review,2024-06-15 12:00:00,2024-06-15 12:30:00,John Smith,Victoria.Kensington@contoso.com
+10006,1f7fa734-f253-4f65-a354-01417928bca0,Quarterly Update,2024-06-18 13:00:00,2024-06-18 13:30:00,John Smith,Victoria.Kensington@contoso.com
