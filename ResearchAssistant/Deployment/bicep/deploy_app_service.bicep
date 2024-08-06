@@ -58,7 +58,7 @@ param AzureSearchIndexIsPrechunked string = 'False'
 param AzureSearchTopK string = '5'
 
 @description('Enable in domain')
-param AzureSearchEnableInDomain string = 'False'
+param AzureSearchEnableInDomain string = 'True'
 
 @description('Content columns')
 param AzureSearchContentColumns string = 'content'
@@ -79,7 +79,7 @@ param AzureOpenAIResource string
 param AzureOpenAIModel string
 
 @description('Azure OpenAI Model Name')
-param AzureOpenAIModelName string = 'gpt-35-turbo'
+param AzureOpenAIModelName string = 'gpt-4o'
 
 @description('Azure Open AI Endpoint')
 param AzureOpenAIEndpoint string = ''
@@ -104,16 +104,16 @@ param AzureOpenAIStopSequence string = '\n'
 param AzureOpenAISystemMessage string = 'You are an AI assistant that helps people find information.'
 
 @description('Azure OpenAI Api Version')
-param AzureOpenAIApiVersion string = '2023-12-01-preview'
+param AzureOpenAIApiVersion string = '2024-05-01-preview'
 
 @description('Whether or not to stream responses from Azure OpenAI')
 param AzureOpenAIStream string = 'True'
 
 @description('Azure Search Query Type')
 @allowed(
-  ['simple', 'semantic', 'vector', 'vectorSimpleHybrid', 'vectorSemanticHybrid']
+  ['simple', 'semantic', 'vector', 'vector_simple_hybrid', 'vector_semantic_hybrid']
 )
-param AzureSearchQueryType string = 'vectorSemanticHybrid'
+param AzureSearchQueryType string = 'vector_semantic_hybrid'
 
 @description('Azure Search Vector Fields')
 param AzureSearchVectorFields string = ''

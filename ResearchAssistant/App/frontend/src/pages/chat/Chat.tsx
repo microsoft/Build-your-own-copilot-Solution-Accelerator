@@ -107,7 +107,7 @@ const Chat = ({ chatType }: Props) => {
       assistantMessage.content = assistantContent
     }
 
-    if (resultMessage.role === TOOL) toolMessage = resultMessage
+    if (resultMessage.role === TOOL) toolMessage = {...resultMessage, content: JSON.stringify(resultMessage.content)};
 
     if (!conversationId) {
       isEmpty(toolMessage) ?
@@ -158,7 +158,7 @@ const Chat = ({ chatType }: Props) => {
     setMessages(conversation.messages)
 
     const request: ConversationRequest = {
-      messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)],
+      messages: [...conversation.messages.filter((answer) => answer.hasOwnProperty('content') && answer.hasOwnProperty('role') && answer.role !== ERROR)],
       index_name: String(appStateContext?.state.sidebarSelection)
     }
 
