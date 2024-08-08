@@ -8,15 +8,15 @@ baseUrl="$4"
 
 zipFileName1="demodata1.zip"
 extractedFolder1="demodata"
-zipUrl1=${baseUrl}"Deployment/data/demodata1.zip"
+zipUrl1=${baseUrl}"ResearchAssistant/Deployment/data/demodata1.zip"
 
 zipFileName2="demodata2.zip"
 extractedFolder2="demodata2"
-zipUrl2=${baseUrl}"Deployment/data/demodata2.zip"
+zipUrl2=${baseUrl}"ResearchAssistant/Deployment/data/demodata2.zip"
 
 zipFileName3="demodata3.zip"
 extractedFolder3="demodata3"
-zipUrl3=${baseUrl}"Deployment/data/demodata3.zip"
+zipUrl3=${baseUrl}"ResearchAssistant/Deployment/data/demodata3.zip"
 
 
 # Download the zip file
