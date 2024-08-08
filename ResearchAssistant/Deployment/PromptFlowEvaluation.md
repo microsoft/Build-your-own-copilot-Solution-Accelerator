@@ -17,34 +17,34 @@ In prompt flow, you can customize or create your own evaluation flow and metrics
 
    
 2.  Locate your AI project under recent projects.
- ![image1](/Deployment/images/evaluation/image1.png)
+ ![image1](/ResearchAssistant/Deployment/images/evaluation/image1.png)
 
         
 3.  Once inside your project, select Evaluation from the left dropdown menu.
- ![image2](/Deployment/images/evaluation/image2.png)
+ ![image2](/ResearchAssistant/Deployment/images/evaluation/image2.png)
 
 
 4. From your Evaluation view, select New evaluation in the middle of the page. 
- ![imag3](/Deployment/images/evaluation/image3.png)
+ ![imag3](/ResearchAssistant/Deployment/images/evaluation/image3.png)
 
 5. From here you can create, name a new evaluation and select your scenario. 
- ![image4](/Deployment/images/evaluation/image4.png)
+ ![image4](/ResearchAssistant/Deployment/images/evaluation/image4.png)
 6. Select the flow you want to evaluate. (To evaluate the DraftFlow select DraftFlow here)
- ![image5](/Deployment/images/evaluation/image5.png)
+ ![image5](/ResearchAssistant/Deployment/images/evaluation/image5.png)
 7. Select metrics you would like to use. Also, be sure to select an active Connection and active Deployment name/Model.
- ![image6](/Deployment/images/evaluation/image6.png)
+ ![image6](/ResearchAssistant/Deployment/images/evaluation/image6.png)
 8. Use an existing dataset or upload a dataset to use in evaluation. (Upload the provided dataset found in \Deployment\data\EvaluationDataset.csv)
- ![image7](/Deployment/images/evaluation/image7.png)
+ ![image7](/ResearchAssistant/Deployment/images/evaluation/image7.png)
 
 9. Lastly, map the inputs from your dataset and click submit.
- ![image8](/Deployment/images/evaluation/image8.png)
+ ![image8](/ResearchAssistant/Deployment/images/evaluation/image8.png)
 
 
 ### Results
 
 Once the flow has been ran successfully, the metrics will be displayed showing a 1-5 score of each respective metric. From here, you can click into the evaluation flow to get a better understanding of the scores.
-  ![image9](/Deployment/images/evaluation/image9.png)
-  ![image10](/Deployment/images/evaluation/image10.png)
+  ![image9](/ResearchAssistant/Deployment/images/evaluation/image9.png)
+  ![image10](/ResearchAssistant/Deployment/images/evaluation/image10.png)
 
 
 

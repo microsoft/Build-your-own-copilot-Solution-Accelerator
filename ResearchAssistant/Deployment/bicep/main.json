@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "2338387994513728428"
+      "templateHash": "12320813554577268826"
     }
   },
   "parameters": {
@@ -600,7 +600,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "5446272928246139512"
+              "templateHash": "12313557719833661787"
             }
           },
           "parameters": {
@@ -641,7 +641,7 @@
               },
               "properties": {
                 "azCliVersion": "2.50.0",
-                "primaryScriptUri": "[format('{0}Deployment/scripts/copy_kb_files.sh', parameters('baseUrl'))]",
+                "primaryScriptUri": "[format('{0}ResearchAssistant/Deployment/scripts/copy_kb_files.sh', parameters('baseUrl'))]",
                 "arguments": "[format('{0} {1} {2} {3}', parameters('storageAccountName'), parameters('containerName'), parameters('storageAccountKey'), parameters('baseUrl'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
@@ -1212,7 +1212,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "9953522498407272740"
+              "templateHash": "9147908724141769749"
             }
           },
           "parameters": {
@@ -1247,7 +1247,7 @@
               },
               "properties": {
                 "azCliVersion": "2.52.0",
-                "primaryScriptUri": "[format('{0}Deployment/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]",
+                "primaryScriptUri": "[format('{0}ResearchAssistant/Deployment/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]",
                 "arguments": "[format('{0} {1}', parameters('baseUrl'), parameters('keyVaultName'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
@@ -1301,7 +1301,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "4790032856124832696"
+              "templateHash": "13153561406831829345"
             }
           },
           "parameters": {
@@ -1345,7 +1345,7 @@
               },
               "properties": {
                 "azCliVersion": "2.52.0",
-                "primaryScriptUri": "[format('{0}Deployment/scripts/run_create_aihub_scripts.sh', parameters('baseUrl'))]",
+                "primaryScriptUri": "[format('{0}ResearchAssistant/Deployment/scripts/run_create_aihub_scripts.sh', parameters('baseUrl'))]",
                 "arguments": "[format('{0} {1} {2} {3} {4} {5}', parameters('baseUrl'), parameters('keyVaultName'), parameters('solutionName'), parameters('resourceGroupName'), parameters('subscriptionId'), parameters('solutionLocation'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
