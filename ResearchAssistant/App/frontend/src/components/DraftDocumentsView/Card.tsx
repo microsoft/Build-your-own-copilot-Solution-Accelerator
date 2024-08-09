@@ -32,7 +32,7 @@ export function documentSectionPrompt(title: string, topic: string): any {
   return `Create ${title} section of research grant application for - ${topic}.`
 }
 
-const SystemMessage = 'I am sorry, I don’t have this information in the knowledge repository. Please ask another question.'
+const SystemErrMessage = 'I am sorry, I don’t have this information in the knowledge repository. Please ask another question.'
 
 export const ResearchTopicCard = (): JSX.Element => {
   const [is_bad_request, set_is_bad_request] = useState(false)
@@ -45,14 +45,19 @@ export const ResearchTopicCard = (): JSX.Element => {
       return ''
     }
 
+    if (documentSection.metaPrompt !== '') {
+      documentSection.metaPrompt = ''
+    }
+
     const generatedSection = await documentSectionGenerate(appStateContext?.state.researchTopic, documentSection)
     if ((generatedSection?.body) != null && (generatedSection?.status) != 400) {
       set_is_bad_request(false)
       const response = await generatedSection.json()
       return response.content
     } else {
-      set_is_bad_request(true)
-      console.error('Error generating section')
+      setTimeout(() => {
+        set_is_bad_request(true)
+      }, 3000)
       return ''
     }
   }
@@ -138,7 +143,7 @@ export const ResearchTopicCard = (): JSX.Element => {
         </Dialog>
       </Stack>
       <div>
-        {is_bad_request && (<p className={styles.error}>{SystemMessage}</p>)}
+        {is_bad_request && (<p className={styles.error}>{SystemErrMessage}</p>)}
       </div>
     </FluentCard>
   )
@@ -172,9 +177,8 @@ export const Card = (props: CardProps) => {
           appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: updatedDocumentSections })
           setLoading(false)
         } else if ((generatedSection?.body) != null && (generatedSection?.status) === 400){
-          updatedDocumentSections[index].content = SystemMessage
+          updatedDocumentSections[index].content = SystemErrMessage
           appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: updatedDocumentSections })
-          console.error('Error generating new content.')
           setLoading(false)          
         }
       } else {
