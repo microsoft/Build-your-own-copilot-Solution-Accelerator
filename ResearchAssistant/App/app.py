@@ -459,7 +459,7 @@ def draft_document_generate():
     section = request_body["sectionTitle"]
     section_context = request_body["sectionContext"]
     if(section_context != ""):
-        query = f'{section_context} ' 
+        query = f'{section_context}'
     else:
         query = f'Create {section} section of research grant application for - {topic}.' 
 
