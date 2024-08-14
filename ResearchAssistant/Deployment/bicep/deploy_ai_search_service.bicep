@@ -13,7 +13,7 @@ resource searchServices_byc_cs_name_resource 'Microsoft.Search/searchServices@20
     ProjectType: 'aoai-your-data-service'
   }
   sku: {
-    name: 'basic'
+    name: 'standard'
   }
   properties: {
     replicaCount: 1

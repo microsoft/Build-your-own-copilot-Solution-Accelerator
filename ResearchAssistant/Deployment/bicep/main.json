@@ -408,7 +408,7 @@
                 "ProjectType": "aoai-your-data-service"
               },
               "sku": {
-                "name": "basic"
+                "name": "standard"
               },
               "properties": {
                 "replicaCount": 1,
@@ -512,7 +512,7 @@
               "name": "[format('{0}/{1}', parameters('accounts_byc_openai_name'), 'gpt-4o')]",
               "sku": {
                 "name": "Standard",
-                "capacity": 30
+                "capacity": 60
               },
               "properties": {
                 "model": {
