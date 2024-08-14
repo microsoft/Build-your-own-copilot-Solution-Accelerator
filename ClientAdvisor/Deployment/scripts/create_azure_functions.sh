@@ -38,6 +38,10 @@ az functionapp create --resource-group $resourceGroupName --name $functionappnam
                 --functions-version 4 --runtime python \
                 --image bycwacontainer.azurecr.io/byc-wa-fn:latest
 
+# Sleep for 120 seconds
+echo "Waiting for 120 seconds to ensure the Function App is properly created..."
+sleep 60
+
 az functionapp config appsettings set --name $functionappname -g $resourceGroupName \
                 --settings AZURE_OPEN_AI_API_KEY=$azureOpenAIApiKey AZURE_OPEN_AI_DEPLOYMENT_MODEL=$azureOpenAIDeploymentModel \
                 AZURE_OPEN_AI_ENDPOINT=$azureOpenAIEndpoint AZURE_OPENAI_EMBEDDING_DEPLOYMENT=$azureOpenAIEmbeddingDeployment \
