@@ -438,6 +438,13 @@ def get_frontend_settings():
 def run_async(func):
     return loop.run_until_complete(func)
 
+# Helper function to extract values safely
+def extract_value(key, text, default='N/A'):
+    try:
+        return text.split(f"'{key}': ")[1].split(',')[0].strip("'")
+    except IndexError:
+        return default
+
 @app.route("/draft_document/generate_section", methods=["POST"])
 def draft_document_generate():
     request_body = request.json
@@ -465,8 +472,23 @@ def draft_document_generate():
         result = response.read()
         return jsonify({"content": json.loads(result)['reply']}), 200
     except urllib.error.HTTPError as error:
-        return("The request failed with status code: " + str(error.code))
+        # Read and parse the error response
+        res = error.read()
+        try:
+            # Parse the error content as JSON
+            error_json = json.loads(res)
+        except json.JSONDecodeError:
+            return "Failed to decode the error content."
 
+        error_message = error_json['error']['message']
+        # Extract specific parts of the error message
+        code_value = extract_value('code', error_json['error']['message'])
+        status_value = extract_value('status', error_json['error']['message'])
 
+        if code_value == 'content_filter' and status_value == '400':
+            return jsonify({"The request failed with status code: ": str(error_message)}), 400
+        else:
+            return ("The request failed with status code: " + str(error.code))
+        
 if __name__ == "__main__":
     app.run()
