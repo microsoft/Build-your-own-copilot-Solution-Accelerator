@@ -57,7 +57,7 @@ export const ResearchTopicCard = (): JSX.Element => {
     } else {
       setTimeout(() => {
         set_is_bad_request(true)
-      }, 3000)
+      }, 2000)
       return ''
     }
   }
