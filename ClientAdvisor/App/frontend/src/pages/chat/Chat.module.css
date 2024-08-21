@@ -343,6 +343,12 @@ a {
   text-decoration: underline;
   cursor: pointer;
 }
+.promptsContainer{
+  width: calc(100% - 100px);
+    max-width: 1028px;
+    justify-content: right;
+    margin: 4px 0px;
+}
 
 @media (max-width: 480px) {
   .chatInput {

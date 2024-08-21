@@ -34,6 +34,7 @@ import { QuestionInput } from '../../components/QuestionInput'
 import { ChatHistoryPanel } from '../../components/ChatHistory/ChatHistoryPanel'
 import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
+import { PromptsSection } from '../../components/PromptsSection/PromptsSection'
 
 const enum messageStatus {
   NotRunning = 'Not Running',
@@ -784,7 +785,9 @@ const Chat = () => {
                 <div ref={chatMessageStreamEnd} />
               </div>
             )}
-
+            <Stack horizontal className={styles.promptsContainer}>
+              <PromptsSection />
+            </Stack>
             <Stack horizontal className={styles.chatInput}>
               {isLoading && (
                 <Stack
