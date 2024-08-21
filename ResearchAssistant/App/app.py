@@ -152,7 +152,7 @@ def prepare_body_headers_with_data(request):
 
     messages = [{"role": "system", "content": AZURE_OPENAI_SYSTEM_MESSAGE}]
     for message in request_messages:
-        if message:
+        if message and message.get("role") != "tool":
             messages.append({"role": message["role"], "content": message["content"]})
 
     body = {

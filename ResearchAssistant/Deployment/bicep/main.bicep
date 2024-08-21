@@ -170,7 +170,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureOpenAIModelName:'gpt-4o'
     AzureOpenAITemperature:'0'
     AzureOpenAITopP:'1'
-    AzureOpenAIMaxTokens:'1000'
+    AzureOpenAIMaxTokens:'800'
     AzureOpenAIStopSequence:''
     AzureOpenAISystemMessage:'''You are a research grant writer assistant chatbot whose primary goal is to help users find information from research articles or grants in a given search index. Provide concise replies that are polite and professional. Answer questions truthfully based on available information. Do not answer questions that are not related to Research Articles or Grants and respond with "I am sorry, I don’t have this information in the knowledge repository. Please ask another question.".
     Do not answer questions about what information you have available.
