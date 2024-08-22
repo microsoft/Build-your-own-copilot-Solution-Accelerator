@@ -1,7 +1,9 @@
 import { PromptButton } from '../PromptButton/PromptButton'
 import styles from './PromptsSection.module.css'
 
-type PromptsSectionProps = {}
+type PromptsSectionProps = {
+  onClickPrompt: (promptObj: PromptType) => void
+}
 export type PromptType = {
   name: string
   question?: string
@@ -14,11 +16,7 @@ const promptsConfg = [
   { name: 'Previous meeting summary', question: 'Previous meeting summary', key: 'p3' }
 ]
 
-export const PromptsSection: React.FC<PromptsSectionProps> = ({}) => {
-  const onClickPrompt = (promptObj: PromptType) => {
-    console.log('prompt triggered', promptObj)
-  }
-
+export const PromptsSection: React.FC<PromptsSectionProps> = ({ onClickPrompt }) => {
   return (
     <div className={styles.promptsSection}>
       {promptsConfg.map(promptObj => (

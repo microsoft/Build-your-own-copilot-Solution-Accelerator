@@ -34,7 +34,7 @@ import { QuestionInput } from '../../components/QuestionInput'
 import { ChatHistoryPanel } from '../../components/ChatHistory/ChatHistoryPanel'
 import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
-import { PromptsSection } from '../../components/PromptsSection/PromptsSection'
+import { PromptsSection, PromptType } from '../../components/PromptsSection/PromptsSection'
 
 const enum messageStatus {
   NotRunning = 'Not Running',
@@ -58,6 +58,7 @@ const Chat = () => {
   const [clearingChat, setClearingChat] = useState<boolean>(false)
   const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true)
   const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
+  const [showPrompts, setShowPrompts] = useState<boolean>(true)
 
   const errorDialogContentProps = {
     type: DialogType.close,
@@ -150,6 +151,7 @@ const Chat = () => {
   }
 
   const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
+    setShowPrompts(false);
     setIsLoading(true)
     setShowLoadingMessage(true)
     const abortController = new AbortController()
@@ -275,6 +277,7 @@ const Chat = () => {
   }
 
   const makeApiRequestWithCosmosDB = async (question: string, conversationId?: string) => {
+    setShowPrompts(false);
     setIsLoading(true)
     setShowLoadingMessage(true)
     const abortController = new AbortController()
@@ -700,6 +703,22 @@ const Chat = () => {
     )
   }
 
+  const onClickPrompt = (promptObj: PromptType) => {
+    setShowPrompts(false);
+    const { question } = promptObj
+    const conversationId = appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined
+    if (question) {
+      appStateContext?.state.isCosmosDBAvailable?.cosmosDB
+        ? makeApiRequestWithCosmosDB(question, conversationId)
+        : makeApiRequestWithoutCosmosDB(question, conversationId)
+    }
+  }
+  useEffect(() => {
+    if (!showPrompts) {
+      setShowPrompts(true)
+    }
+  }, [appStateContext?.state?.clientId])
+// console.log("app context", appStateContext);
   return (
     <div className={styles.container} role="main">
       {showAuthMessage ? (
@@ -785,9 +804,11 @@ const Chat = () => {
                 <div ref={chatMessageStreamEnd} />
               </div>
             )}
-            <Stack horizontal className={styles.promptsContainer}>
-              <PromptsSection />
-            </Stack>
+            {!isLoading && showPrompts && (
+              <Stack horizontal className={styles.promptsContainer}>
+                <PromptsSection onClickPrompt={onClickPrompt} />
+              </Stack>
+            )}
             <Stack horizontal className={styles.chatInput}>
               {isLoading && (
                 <Stack
