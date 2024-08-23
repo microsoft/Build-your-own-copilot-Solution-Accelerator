@@ -301,7 +301,7 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
                                 yield format_as_ndjson({"error": "We're currently experiencing a high number of requests for the service you're trying to access. Please wait a moment and try again."})
                             else:
                                 yield format_as_ndjson({"error": "An error occurred. Please try again. If the problem persists, please contact the site administrator."})
-
+                            continue
                         response["id"] = lineJson["id"]
                         response["model"] = lineJson["model"]
                         response["created"] = lineJson["created"]
