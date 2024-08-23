@@ -3,5 +3,6 @@
   height: 24px;
   font-size: 0.8rem;
   width: max-content;
-  border-radius: 16px;
+  border-radius: 7px;
+  border-color: #0078D7;
 }

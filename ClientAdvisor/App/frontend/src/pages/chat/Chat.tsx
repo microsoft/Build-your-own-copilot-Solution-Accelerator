@@ -718,7 +718,7 @@ const Chat = () => {
       setShowPrompts(true)
     }
   }, [appStateContext?.state?.clientId])
-// console.log("app context", appStateContext);
+  
   return (
     <div className={styles.container} role="main">
       {showAuthMessage ? (
