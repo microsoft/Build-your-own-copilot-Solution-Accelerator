@@ -49,3 +49,15 @@
     font-weight: bold;
     margin-bottom: 8px;
   } */
+  .meetingsHeader {
+    font-weight: 500;
+    color: gray;
+    margin-bottom: 0.5rem;
+  }
+  .meetingsBlock {
+    border-bottom: 1px solid rgb(188, 188, 188);
+  }
+  .noMeetings {
+    display: flex;
+    justify-content: center;
+  }
