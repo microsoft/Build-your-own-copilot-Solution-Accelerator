@@ -3,6 +3,9 @@
   height: 24px;
   font-size: 0.8rem;
   width: max-content;
-  border-radius: 7px;
-  border-color: #0078D7;
+  border-radius: 8px;
+  border: 0.8px solid #036ac4;
+}
+.promptBtn > span > span > span {
+  font-weight: 400;
 }
