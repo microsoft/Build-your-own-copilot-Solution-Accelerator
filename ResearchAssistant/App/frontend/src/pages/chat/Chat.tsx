@@ -190,7 +190,18 @@ const Chat = ({ chatType }: Props) => {
               })
               runningText = ''
             }
-            catch { }
+            catch {
+              if (typeof result.error === 'string') {
+                let errorMessage = result.error
+                let errorChatMsg: ChatMessage = {
+                  id: uuid(),
+                  role: ERROR,
+                  content: errorMessage,
+                  date: new Date().toISOString()
+                }
+                assistantMessage = errorChatMsg
+              }
+            }
           })
         }
         conversation.messages.push(toolMessage, assistantMessage)

@@ -306,8 +306,21 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
                         except json.decoder.JSONDecodeError:
                             continue                  
                         if 'error' in lineJson:
-                            yield format_as_ndjson(lineJson)
-                        
+                            error_code_value = lineJson.get('error', {}).get('code', '')
+                            error_message = format_as_ndjson(lineJson)
+                            inner_error_code_value = extract_value('code', error_message)
+                            inner_error_status_value = extract_value('status', error_message)
+                            if inner_error_code_value == 'content_filter' and inner_error_status_value == '400':
+                                response["choices"][0]["messages"].append({
+                                    "role": "assistant",
+                                    "content": "I am sorry, I don’t have this information in the knowledge repository. Please ask another question."
+                                })
+                                yield format_as_ndjson(response)
+                            elif error_code_value == '429' or inner_error_code_value == '429':
+                                yield format_as_ndjson({"error": "We're currently experiencing a high number of requests for the service you're trying to access. Please wait a moment and try again."})
+                            else:
+                                yield format_as_ndjson({"error": "An error occurred. Please try again. If the problem persists, please contact the site administrator."})
+                            continue
                         response["id"] = lineJson["id"]
                         response["model"] = lineJson["model"]
                         response["created"] = lineJson["created"]
