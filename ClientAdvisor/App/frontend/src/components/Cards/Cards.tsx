@@ -11,6 +11,7 @@ interface CardsProps {
 
 const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [clientName, setClientName] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const appStateContext = useContext(AppStateContext);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -19,16 +20,15 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
     setIsVisible(!isVisible);
   };
 
-  // useEffect(() => {
-  //   if (isVisible) {
-  //     const timer = setTimeout(() => {
-  //       setIsVisible(false);
-  //     }, 3000); // Popup will disappear after 3 seconds
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 2000); // Popup will disappear after 3 seconds
 
-  //     return () => clearTimeout(timer); // Cleanup the timer on component unmount
-  //   }
-  // }, [isVisible]);
-  // if (!isVisible) return null;
+      return () => clearTimeout(timer); // Cleanup the timer on component unmount
+    }
+  }, [isVisible]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -57,6 +57,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
       console.log('User clicked:', user);
       console.log('Selected ClientId>>:', user.ClientName.toString());
       setIsVisible(true);
+      setClientName(user.ClientName.toString());
       onCardClick(user);
    
   } else {
@@ -67,14 +68,14 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
   return (
     <div className={styles.cardContainer}>
     {isVisible && (
-        <div className="popup-container">
-          <div className="popup-content">
-            <span className="checkmark">✔</span>
-            <div className="popup-text">
+        <div className={styles.popupContainer}>
+          <div className={styles.popupContent}>
+            <span className={styles.checkmark}>✔</span>
+            <div className={styles.popupText}>
               <div>Chat saved</div>
-              <div className="popup-subtext">Chat history with "user" saved</div>
+              <div className={styles.popupSubtext}>Chat history with <span className={styles.clientName}>{clientName}</span> saved</div>
             </div>
-            <button className="close-button" onClick={closePopup}>X</button>
+            <button className={styles.closeButton} onClick={closePopup}>X</button>
           </div>
         </div>
     )}
