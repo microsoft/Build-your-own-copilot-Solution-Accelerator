@@ -14,52 +14,27 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
   const [users, setUsers] = useState<User[]>([]);
   const appStateContext = useContext(AppStateContext);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [loadingUsers, setLoadingUsers] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        setLoadingUsers(true)
         const usersData = await getUsers()
-        // const tempUsers = [
-        //   {
-        //     AssetValue: '505,758',
-        //     ClientEmail: 'Karen.Berg@GMAIL.com',
-        //     ClientId: 11005,
-        //     ClientName: 'Karen Berg 1',
-        //     ClientSummary:
-        //       'Reviewed portfolio, addressed market concerns, advised on stability, and planned adjustments. Follow-up: Portfolio review and adjustment in next meeting.',
-        //     LastMeeting: 'Wednesday July 24, 2024',
-        //     LastMeetingEndTime: '02:30 PM',
-        //     LastMeetingStartTime: '02:00 PM',
-        //     NextMeeting: 'Saturday August 24, 2024',
-        //     NextMeetingEndTime: '03:30 PM',
-        //     NextMeetingTime: '03:00 PM'
-        //   },
-        //   {
-        //     AssetValue: '505,758',
-        //     ClientEmail: 'Karen.Berg@GMAIL.com',
-        //     ClientId: 12005,
-        //     ClientName: 'Karen Berg 2',
-        //     ClientSummary:
-        //       'Reviewed portfolio, addressed market concerns, advised on stability, and planned adjustments. Follow-up: Portfolio review and adjustment in next meeting.',
-        //     LastMeeting: 'Wednesday July 24, 2024',
-        //     LastMeetingEndTime: '02:30 PM',
-        //     LastMeetingStartTime: '02:00 PM',
-        //     NextMeeting: 'Saturday August 24, 2024',
-        //     NextMeetingEndTime: '03:30 PM',
-        //     NextMeetingTime: '03:00 PM'
-        //   }
-        // ]
-        setUsers(usersData)
-        // console.log('Fetched users:', usersData)
+        setUsers([])
+        setLoadingUsers(false)
       } catch (error) {
-        console.error('Error fetching users:', error)
+        console.error('Error fetching users:', error);
+        setLoadingUsers(false)
       }
     }
 
     fetchUsers()
   }, [])
-
-  if (users.length === 0) return <div className={styles.noMeetings}>No meetings found!</div>
+  if(loadingUsers){
+    return <div className={styles.loadingUsers}>Loading...</div>
+  }
+  if (users.length === 0) return <div className={styles.noMeetings}>No meetings have been arranged</div>
 
   const handleCardClick = async (user: User) => {
     if (!appStateContext) {
