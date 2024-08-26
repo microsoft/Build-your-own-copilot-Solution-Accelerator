@@ -4,6 +4,7 @@ import styles from './Cards.module.css';
 import { getUsers, selectUser } from '../../api/api';
 import { AppStateContext } from '../../state/AppProvider';
 import { User } from '../../types/User';
+import BellToggle from '../../assets/BellToggle.svg'
 
 interface CardsProps {
   onCardClick: (user: User) => void;
@@ -48,19 +49,15 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
         //     NextMeetingTime: '03:00 PM'
         //   }
         // ]
-        // ...tempUsers
-        usersData.splice(0, 1) // removing first item need to know why
-        // setUsers([...usersData, ...tempUsers]) 
-        setUsers(usersData); 
-        // setUsers([]) 
+        setUsers(usersData)
         // console.log('Fetched users:', usersData)
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching users:', error)
       }
-    };
+    }
 
-    fetchUsers();
-  }, []);
+    fetchUsers()
+  }, [])
 
   if (users.length === 0) return <div className={styles.noMeetings}>No meetings found!</div>
 
@@ -79,59 +76,59 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
   } else {
     console.error('User does not have a ClientId and clientName:', user);
   }
-  };
-
+}
   return (
     <div className={styles.cardContainer}>
       <div className={styles.section}>
-        <div className={styles.meetingsBlock}>
-          <div className={styles.meetingsHeader}>Next meeting</div>
-          <div>
+        <div>
+          <div className={`${styles.meetingsHeader} ${styles.nextMeetingHeader} `}>
+            <img src={BellToggle} className={styles.BellToggle} alt="BellToggle" />
+            Next meeting
+          </div>
+          <div className={styles.nextMeetingContent}>
             {users.slice(0, 1).map(user => (
-              <div key={user.ClientId} className={styles.cardWrapper}>
-                <UserCard
-                  ClientId={user.ClientId}
-                  ClientName={user.ClientName}
-                  NextMeeting={user.NextMeeting}
-                  NextMeetingTime={user.NextMeetingTime}
-                  NextMeetingEndTime={user.NextMeetingEndTime}
-                  AssetValue={user.AssetValue}
-                  LastMeeting={user.LastMeeting}
-                  LastMeetingStartTime={user.LastMeetingStartTime}
-                  LastMeetingEndTime={user.LastMeetingEndTime}
-                  ClientSummary={user.ClientSummary}
-                  onCardClick={() => handleCardClick(user)}
-                  chartUrl={user.chartUrl}
-                  isSelected={selectedClientId === user.ClientId?.toString()}
-                  isNextMeeting={false}
-                />
-              </div>
+              <UserCard
+                key={user.ClientId}
+                ClientId={user.ClientId}
+                ClientName={user.ClientName}
+                NextMeeting={user.NextMeeting}
+                NextMeetingTime={user.NextMeetingTime}
+                NextMeetingEndTime={user.NextMeetingEndTime}
+                AssetValue={user.AssetValue}
+                LastMeeting={user.LastMeeting}
+                LastMeetingStartTime={user.LastMeetingStartTime}
+                LastMeetingEndTime={user.LastMeetingEndTime}
+                ClientSummary={user.ClientSummary}
+                onCardClick={() => handleCardClick(user)}
+                chartUrl={user.chartUrl}
+                isSelected={selectedClientId === user.ClientId?.toString()}
+                isNextMeeting={false}
+              />
             ))}
           </div>
         </div>
         <div>
           <div className={styles.meetingsHeader}>Future meetings</div>
           {users.length === 1 && <div className={styles.noMeetings}>No meetings found!</div>}
-          <div>
+          <div className={styles.futureMeetingsContent}>
             {users.slice(1).map(user => (
-              <div key={user.ClientId} className={styles.cardWrapper}>
-                <UserCard
-                  ClientId={user.ClientId}
-                  ClientName={user.ClientName}
-                  NextMeeting={user.NextMeeting}
-                  NextMeetingTime={user.NextMeetingTime}
-                  NextMeetingEndTime={user.NextMeetingEndTime}
-                  AssetValue={user.AssetValue}
-                  LastMeeting={user.LastMeeting}
-                  LastMeetingStartTime={user.LastMeetingStartTime}
-                  LastMeetingEndTime={user.LastMeetingEndTime}
-                  ClientSummary={user.ClientSummary}
-                  onCardClick={() => handleCardClick(user)}
-                  chartUrl={user.chartUrl}
-                  isSelected={selectedClientId === user.ClientId?.toString()}
-                  isNextMeeting={false}
-                />
-              </div>
+              <UserCard
+                key={user.ClientId}
+                ClientId={user.ClientId}
+                ClientName={user.ClientName}
+                NextMeeting={user.NextMeeting}
+                NextMeetingTime={user.NextMeetingTime}
+                NextMeetingEndTime={user.NextMeetingEndTime}
+                AssetValue={user.AssetValue}
+                LastMeeting={user.LastMeeting}
+                LastMeetingStartTime={user.LastMeetingStartTime}
+                LastMeetingEndTime={user.LastMeetingEndTime}
+                ClientSummary={user.ClientSummary}
+                onCardClick={() => handleCardClick(user)}
+                chartUrl={user.chartUrl}
+                isSelected={selectedClientId === user.ClientId?.toString()}
+                isNextMeeting={false}
+              />
             ))}
           </div>
         </div>

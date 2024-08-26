@@ -118,7 +118,6 @@
 .cardsColumn {
   background-color: #fff;
   /* border-radius: 20px; */
-   padding: 10px;
   overflow-y: auto;
   
 }
@@ -186,15 +185,8 @@
 }
 
 .selectClientHeading {
-  display: flex;
-  align-items: center;
-  gap: 8px; 
-  margin-bottom: 12px;
-}
-
-.BellToggle {
-  width: 28px; 
-  height: 28px;
+  margin-left: 0.8rem;
+  margin-top: 0.8rem;
 }
 
 .meeting {

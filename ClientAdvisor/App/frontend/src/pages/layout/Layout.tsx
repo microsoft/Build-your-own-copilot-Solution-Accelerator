@@ -144,8 +144,7 @@ const Layout = () => {
    
     <div className={styles.ContentContainer}>
       <div className={styles.cardsColumn}>
-        <div className={styles.selectClientHeading}>
-        <img src={BellToggle} className={styles.BellToggle} alt="BellToggle"/>
+        <div className={styles.selectClientHeading}> 
         <h4 className={styles.meeting}>Upcoming meetings</h4>
         </div>
         
