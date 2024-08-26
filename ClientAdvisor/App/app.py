@@ -70,8 +70,7 @@ def create_app():
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
     # print(app.secret_key)
-    # return app
-    app.run()
+    return app
 
 
 @bp.route("/")
