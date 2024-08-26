@@ -136,8 +136,9 @@
 
 .selectedName{
   border-radius:25px;
-  background: var(--bap-icons-gradients-blue-06, linear-gradient(137deg, #EDFCFF 0%, #80E5FC 100%));
+  background: var(--bap-icons-gradients-blue-06, linear-gradient(123deg, #40C4F5 0%, #0095E6 100%));
   padding: 12px;
+  color: white;
 }
 
 
