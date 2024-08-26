@@ -1,11 +1,12 @@
 .layout {
   display: flex;
-  flex-direction: column;
   height: 100%;
 }
 
 .header {
   background-color: #f2f2f2;
+  position: fixed;
+  width: 82%;
 }
 
 .headerContainer {
@@ -102,12 +103,8 @@
 }
 
 .ContentContainer{
-  display: grid;
-  grid-template-columns: 17% 2fr;
-  gap: 12px;
-  padding: 10px;
-  margin-top: 15px;
   overflow: hidden;
+  flex-grow: 1;
 }
 
 .mainPage {
@@ -119,7 +116,10 @@
   background-color: #fff;
   /* border-radius: 20px; */
   overflow-y: auto;
-  
+  flex-grow: 0;
+  max-width: 18vw;
+  flex-basis: 18vw;
+  min-width: 18vw;
 }
 
 
@@ -146,10 +146,10 @@
   /* overflow-y: auto; */
   flex-direction: column;
   background: linear-gradient(180deg, #FFF 59.5%, #EBF3FC 100%);
-  /* box-shadow: 0px 0.833px 3.333px 0px rgba(0, 0, 0, 0.32), 0px 0.158px 0.317px 0px rgba(0, 0, 0, 0.24); */
   border-radius: 8px;
   height: 100%;
-
+  box-shadow: 0px 0.83px 3.33px 0px #00000052;
+  margin: 4rem 1rem 1rem;
 }
 
 .welcomeMessage {

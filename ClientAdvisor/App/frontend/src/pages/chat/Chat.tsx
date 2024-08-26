@@ -45,7 +45,6 @@ const Chat = () => {
   const appStateContext = useContext(AppStateContext)
   const ui = appStateContext?.state.frontendSettings?.ui
   const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled
-  const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [showLoadingMessage, setShowLoadingMessage] = useState<boolean>(false)
   const [activeCitation, setActiveCitation] = useState<Citation>()
@@ -664,7 +663,10 @@ const Chat = () => {
   }, [AUTH_ENABLED])
 
   useLayoutEffect(() => {
-    chatMessageStreamEnd.current?.scrollIntoView({ behavior: 'smooth' })
+    const element = document.getElementById("chatMessagesContainer")!;
+    if(element){
+      element.scroll({ top: element.scrollHeight, behavior: 'smooth' });
+    }
   }, [showLoadingMessage, processMessages])
 
   const onShowCitation = (citation: Citation) => {
@@ -738,7 +740,7 @@ const Chat = () => {
                 <h2 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h2>
               </Stack>
             ) : (
-              <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? '40px' : '0px' }} role="log">
+              <div id="chatMessagesContainer" className={styles.chatMessageStream} style={{ marginBottom: isLoading ? '40px' : '0px' }} role="log">
                 {messages.map((answer, index) => (
                   <>
                     {answer.role === 'user' ? (
@@ -781,7 +783,6 @@ const Chat = () => {
                     </div>
                   </>
                 )}
-                <div ref={chatMessageStreamEnd} />
               </div>
             )}
 
