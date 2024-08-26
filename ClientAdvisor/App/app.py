@@ -70,7 +70,8 @@ def create_app():
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
     # print(app.secret_key)
-    return app
+    # return app
+    app.run()
 
 
 @bp.route("/")
@@ -1549,12 +1550,12 @@ def get_users():
             ClientSummary,
             CAST(LastMeeting AS DATE) AS LastMeetingDate,
             FORMAT(CAST(LastMeeting AS DATE), 'dddd MMMM d, yyyy') AS LastMeetingDateFormatted,
-      FORMAT(LastMeeting, 'hh:mm tt') AS LastMeetingStartTime,
-            FORMAT(LastMeetingEnd, 'hh:mm tt') AS LastMeetingEndTime,
+			FORMAT(LastMeeting, 'HH:mm') AS LastMeetingStartTime,
+            FORMAT(LastMeetingEnd, 'HH:mm') AS LastMeetingEndTime,
             CAST(NextMeeting AS DATE) AS NextMeetingDate,
             FORMAT(CAST(NextMeeting AS DATE), 'dddd MMMM d, yyyy') AS NextMeetingFormatted,
-            FORMAT(NextMeeting, 'hh:mm tt') AS NextMeetingStartTime,
-            FORMAT(NextMeetingEnd, 'hh:mm tt') AS NextMeetingEndTime
+            FORMAT(NextMeeting, 'HH:mm') AS NextMeetingStartTime,
+            FORMAT(NextMeetingEnd, 'HH:mm') AS NextMeetingEndTime
         FROM (
             SELECT ca.ClientId, Client, Email, AssetValue, ClientSummary, LastMeeting, LastMeetingEnd, NextMeeting, NextMeetingEnd
             FROM (
@@ -1566,7 +1567,7 @@ def get_users():
                         SELECT ClientId, sum(Investment) as Investment,
                             ROW_NUMBER() OVER (PARTITION BY ClientId ORDER BY AssetDate DESC) AS RowNum
                         FROM Assets
-                group by ClientId,AssetDate
+        				group by ClientId,AssetDate
                     ) a
                     WHERE a.RowNum = 1
                 ) a ON c.ClientId = a.ClientId
