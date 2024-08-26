@@ -17,6 +17,7 @@ import { User } from '../../types/User';
 
 import welcomeIcon from '../../assets/welcomeIcon.png'
 import styles from './Layout.module.css';
+import SpinnerComponent from '../../components/Spinner/Spinner';
 
 
 
@@ -122,6 +123,7 @@ const Layout = () => {
 
   return (
     <div className={styles.layout}>
+      <SpinnerComponent loading={appStateContext?.state.isLoader != undefined ? appStateContext?.state.isLoader : false} label='Please wait.....!' />
       <header className={styles.header} role={'banner'}>
         <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
           <Stack horizontal verticalAlign="center">
@@ -148,7 +150,6 @@ const Layout = () => {
         <img src={BellToggle} className={styles.BellToggle} alt="BellToggle"/>
         <h4 className={styles.meeting}>Upcoming meetings</h4>
         </div>
-        
         <Cards onCardClick={handleCardClick} />
       </div>
       <div className={styles.contentColumn}>
