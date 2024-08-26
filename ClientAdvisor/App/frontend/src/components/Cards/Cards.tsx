@@ -1,18 +1,34 @@
 import React, { useState, useEffect, useContext } from 'react';
 import UserCard from '../UserCard/UserCard';
-import styles from './Cards.module.css';
+
 import { getUsers, selectUser } from '../../api/api';
 import { AppStateContext } from '../../state/AppProvider';
 import { User } from '../../types/User';
-
+import styles from './Cards.module.css';
 interface CardsProps {
   onCardClick: (user: User) => void;
 }
 
 const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
+  const [isVisible, setIsVisible] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const appStateContext = useContext(AppStateContext);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+
+  const closePopup = () => {
+    setIsVisible(!isVisible);
+  };
+
+  // useEffect(() => {
+  //   if (isVisible) {
+  //     const timer = setTimeout(() => {
+  //       setIsVisible(false);
+  //     }, 3000); // Popup will disappear after 3 seconds
+
+  //     return () => clearTimeout(timer); // Cleanup the timer on component unmount
+  //   }
+  // }, [isVisible]);
+  // if (!isVisible) return null;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -39,7 +55,8 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
       appStateContext.dispatch({ type: 'UPDATE_CLIENT_ID', payload: user.ClientId.toString() });
       setSelectedClientId(user.ClientId.toString());
       console.log('User clicked:', user);
-      console.log('Selected ClientId:', user.ClientId.toString());
+      console.log('Selected ClientId>>:', user.ClientName.toString());
+      setIsVisible(true);
       onCardClick(user);
    
   } else {
@@ -49,6 +66,18 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
 
   return (
     <div className={styles.cardContainer}>
+    {isVisible && (
+        <div className="popup-container">
+          <div className="popup-content">
+            <span className="checkmark">✔</span>
+            <div className="popup-text">
+              <div>Chat saved</div>
+              <div className="popup-subtext">Chat history with "user" saved</div>
+            </div>
+            <button className="close-button" onClick={closePopup}>X</button>
+          </div>
+        </div>
+    )}
       <div className={styles.section}>
         {users.slice(1).map((user) => (
           <div key={user.ClientId} className={styles.cardWrapper}>
@@ -71,6 +100,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
           </div>
         ))}
       </div>
+    
     </div>
   );
 };
