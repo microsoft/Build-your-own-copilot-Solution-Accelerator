@@ -21,7 +21,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
       try {
         setLoadingUsers(true)
         const usersData = await getUsers()
-        setUsers([])
+        setUsers(usersData)
         setLoadingUsers(false)
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -34,7 +34,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
   if(loadingUsers){
     return <div className={styles.loadingUsers}>Loading...</div>
   }
-  if (users.length === 0) return <div className={styles.noMeetings}>No meetings have been arranged</div>
+  if (users.length === 0) return <div className={`${styles.meetingsText} ${styles.noMeetings}`}>No meetings have been arranged</div>
 
   const handleCardClick = async (user: User) => {
     if (!appStateContext) {
@@ -84,7 +84,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
         </div>
         <div>
           <div className={styles.meetingsHeader}>Future meetings</div>
-          {users.length === 1 && <div className={styles.noMeetings}>No meetings found!</div>}
+          {users.length === 1 && <div className={`${styles.meetingsText} ${styles.futureMeetings}`}>No future meetings have been arranged</div>}
           <div className={styles.futureMeetingsContent}>
             {users.slice(1).map(user => (
               <UserCard

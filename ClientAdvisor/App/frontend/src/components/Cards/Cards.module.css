@@ -1,5 +1,5 @@
 .cardContainer {
-  height: 100%;
+  /* height: 100%; */
     display: flex;
     flex-direction: column;
   }
@@ -51,19 +51,26 @@
   } */
   .meetingsHeader {
     font-weight: 500;
-    color: gray;
+    color: #616161;
     margin-bottom: 0.5rem;
     margin-left: 0.8rem;
     margin-right: 0.8rem;
     margin-top: 0.8rem;
     margin-bottom: 0.8rem;
   }
-  .noMeetings {
+  .meetingsText {
     display: flex;
     justify-content: center;
     color: #A8A8A8;
     font-weight: 600;
+    margin: 2.8rem;
+  }
+  .noMeetings {
     margin-top: 45vh;
+  }
+  .futureMeetings {
+    margin: 2.8rem;
+    margin-top: 10vh;
   }
   .nextMeetingHeader {
     display: flex;
