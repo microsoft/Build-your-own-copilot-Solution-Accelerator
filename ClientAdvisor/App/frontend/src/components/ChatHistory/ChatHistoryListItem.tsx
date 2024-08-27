@@ -59,6 +59,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
   const [errorRename, setErrorRename] = useState<string | undefined>(undefined)
   const [textFieldFocused, setTextFieldFocused] = useState(false)
   const textFieldRef = useRef<ITextField | null>(null)
+  const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
 
   const appStateContext = React.useContext(AppStateContext)
   const isSelected = item?.id === appStateContext?.state.currentChat?.id
@@ -94,7 +95,14 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
     }
   }, [appStateContext?.state.currentChat?.id, item?.id])
 
+  useEffect(()=>{
+    let v = appStateContext?.state.isRequestInitiated;
+    if(v!=undefined)
+      setIsButtonDisabled(v && isSelected)
+  },[appStateContext?.state.isRequestInitiated])
+
   const onDelete = async () => {
+    appStateContext?.dispatch({ type: 'TOGGLE_LOADER' });
     const response = await historyDelete(item.id)
     if (!response.ok) {
       setErrorDelete(true)
@@ -104,6 +112,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
     } else {
       appStateContext?.dispatch({ type: 'DELETE_CHAT_ENTRY', payload: item.id })
     }
+    appStateContext?.dispatch({ type: 'TOGGLE_LOADER' });
     toggleDeleteDialog()
   }
 
@@ -252,6 +261,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
               <Stack horizontal horizontalAlign="end">
                 <IconButton
                   className={styles.itemButton}
+                  disabled={isButtonDisabled}
                   iconProps={{ iconName: 'Delete' }}
                   title="Delete"
                   onClick={toggleDeleteDialog}
@@ -259,6 +269,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
                 />
                 <IconButton
                   className={styles.itemButton}
+                  disabled={isButtonDisabled}
                   iconProps={{ iconName: 'Edit' }}
                   title="Edit"
                   onClick={onEdit}
