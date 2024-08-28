@@ -1,25 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
 import UserCard from '../UserCard/UserCard';
-
+import styles from './Cards.module.css';
 import { getUsers, selectUser } from '../../api/api';
 import { AppStateContext } from '../../state/AppProvider';
 import { User } from '../../types/User';
-import styles from './Cards.module.css';
+
 interface CardsProps {
   onCardClick: (user: User) => void;
 }
 
 const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
-  // const [clientName, setClientName] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const appStateContext = useContext(AppStateContext);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
-
-
-
-
-  useEffect(() => {
+useEffect(() => {
     const fetchUsers = async () => {
       try {
         const usersData = await getUsers();
@@ -78,5 +73,4 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
     </div>
   );
 };
-
 export default Cards;
