@@ -14,7 +14,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
   const appStateContext = useContext(AppStateContext);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
-useEffect(() => {
+ useEffect(() => {
     const fetchUsers = async () => {
       try {
         const usersData = await getUsers();
@@ -38,6 +38,8 @@ useEffect(() => {
     if (user.ClientId) {
       appStateContext.dispatch({ type: 'UPDATE_CLIENT_ID', payload: user.ClientId.toString() });
       setSelectedClientId(user.ClientId.toString());
+      console.log('User clicked:', user);
+      console.log('Selected ClientId:', user.ClientId.toString());
       onCardClick(user);
    
   } else {
@@ -69,7 +71,6 @@ useEffect(() => {
           </div>
         ))}
       </div>
-    
     </div>
   );
 };
