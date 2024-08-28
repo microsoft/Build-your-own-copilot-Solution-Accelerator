@@ -34,6 +34,7 @@ import { QuestionInput } from '../../components/QuestionInput'
 import { ChatHistoryPanel } from '../../components/ChatHistory/ChatHistoryPanel'
 import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
+import { PromptsSection, PromptType } from '../../components/PromptsSection/PromptsSection'
 
 const enum messageStatus {
   NotRunning = 'Not Running',
@@ -701,6 +702,16 @@ const Chat = () => {
     )
   }
 
+  const onClickPrompt = (promptObj: PromptType) => {
+    const { question } = promptObj
+    const conversationId = appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined
+    if (question) {
+      appStateContext?.state.isCosmosDBAvailable?.cosmosDB
+        ? makeApiRequestWithCosmosDB(question, conversationId)
+        : makeApiRequestWithoutCosmosDB(question, conversationId)
+    }
+  }
+  
   return (
     <div className={styles.container} role="main">
       {showAuthMessage ? (
@@ -786,7 +797,9 @@ const Chat = () => {
                 <div ref={chatMessageStreamEnd} />
               </div>
             )}
-
+            <Stack horizontal className={styles.promptsContainer}>
+              <PromptsSection onClickPrompt={onClickPrompt} isLoading={isLoading} />
+            </Stack>
             <Stack horizontal className={styles.chatInput}>
               {isLoading && (
                 <Stack
