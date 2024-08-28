@@ -160,6 +160,7 @@ class ChatWithDataPlugin:
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
+        Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
         completion = client.chat.completions.create(
