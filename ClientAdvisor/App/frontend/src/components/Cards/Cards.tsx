@@ -10,25 +10,14 @@ interface CardsProps {
 }
 
 const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [clientName, setClientName] = useState("");
+  // const [clientName, setClientName] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const appStateContext = useContext(AppStateContext);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
-  const closePopup = () => {
-    setIsVisible(!isVisible);
-  };
 
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 2000); // Popup will disappear after 3 seconds
 
-      return () => clearTimeout(timer); // Cleanup the timer on component unmount
-    }
-  }, [isVisible]);
+
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -54,10 +43,6 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
     if (user.ClientId) {
       appStateContext.dispatch({ type: 'UPDATE_CLIENT_ID', payload: user.ClientId.toString() });
       setSelectedClientId(user.ClientId.toString());
-      console.log('User clicked:', user);
-      console.log('Selected ClientId>>:', user.ClientName.toString());
-      setIsVisible(true);
-      setClientName(user.ClientName.toString());
       onCardClick(user);
    
   } else {
@@ -67,18 +52,6 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
 
   return (
     <div className={styles.cardContainer}>
-    {isVisible && (
-        <div className={styles.popupContainer}>
-          <div className={styles.popupContent}>
-            <span className={styles.checkmark}>✔</span>
-            <div className={styles.popupText}>
-              <div>Chat saved</div>
-              <div className={styles.popupSubtext}>Chat history with <span className={styles.clientName}>{clientName}</span> saved</div>
-            </div>
-            <button className={styles.closeButton} onClick={closePopup}>X</button>
-          </div>
-        </div>
-    )}
       <div className={styles.section}>
         {users.slice(1).map((user) => (
           <div key={user.ClientId} className={styles.cardWrapper}>
