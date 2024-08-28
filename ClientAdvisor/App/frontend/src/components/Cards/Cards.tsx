@@ -5,6 +5,7 @@ import { getUsers, selectUser } from '../../api/api';
 import { AppStateContext } from '../../state/AppProvider';
 import { User } from '../../types/User';
 import BellToggle from '../../assets/BellToggle.svg'
+import NoMeetings from '../../assets/NoMeetings.svg'
 
 interface CardsProps {
   onCardClick: (user: User) => void;
@@ -34,7 +35,13 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
   if(loadingUsers){
     return <div className={styles.loadingUsers}>Loading...</div>
   }
-  if (users.length === 0) return <div className={`${styles.meetingsText} ${styles.noMeetings}`}>No meetings have been arranged</div>
+  if (users.length === 0)
+    return (
+      <div className={`${styles.meetingsText} ${styles.noMeetings}`}>
+        <img src={NoMeetings} className={styles.noMeetingsIcon} alt="No Meetings found" />
+        No meetings have been arranged
+      </div>
+    )
 
   const handleCardClick = async (user: User) => {
     if (!appStateContext) {
@@ -84,7 +91,12 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
         </div>
         <div>
           <div className={styles.meetingsHeader}>Future meetings</div>
-          {users.length === 1 && <div className={`${styles.meetingsText} ${styles.futureMeetings}`}>No future meetings have been arranged</div>}
+          {users.length === 1 && (
+            <div className={`${styles.meetingsText} ${styles.futureMeetings}`}>
+              <img src={NoMeetings} className={styles.noMeetingsIcon} alt="No Meetings found" />
+              No future meetings have been arranged
+            </div>
+          )}
           <div className={styles.futureMeetingsContent}>
             {users.slice(1).map(user => (
               <UserCard

@@ -61,17 +61,22 @@
   .meetingsText {
     display: flex;
     justify-content: center;
-    color: #A8A8A8;
-    font-weight: 600;
-    margin: 2.8rem;
+    color: #717171;
+    font-weight: 400;
+    margin: 3.8rem;
     text-align: center;
+    flex-direction: column;
+    align-items: center;
   }
   .noMeetings {
-    margin-top: 45vh;
+    margin-top: 40vh;
+  }
+  .noMeetingsIcon {
+    width: 76px;
   }
   .futureMeetings {
     margin: 2.8rem;
-    margin-top: 10vh;
+    margin-top: 18vh;
   }
   .nextMeetingHeader {
     display: flex;
