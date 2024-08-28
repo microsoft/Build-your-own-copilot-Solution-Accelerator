@@ -100,6 +100,7 @@ class ChatWithDataPlugin:
         Do not include assets values unless asked for.
         Always use ClientId = {clientid} in the query filter.
         Always return client name in the query.
+        Always return time in "HH:mm" format for the client meetings in response.
         Always retrieve and provide information about client meetings scheduled for future dates, including the scheduled time in the query.
         Only return the generated sql query. do not return anything else''' 
         try:
@@ -267,6 +268,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
+    if asked, summarize each call transcripts then always return all call transcript's summary for that client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
     '''
