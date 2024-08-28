@@ -221,9 +221,10 @@ html, body {
   width: 161px;
   height: 32px;
   left: calc(50% - 161px / 2 + 25.8px);
-  bottom: 116px;
+  bottom: 146px;
   border: 1px solid #d1d1d1;
   border-radius: 16px;
+  cursor: pointer;
 }
 
 .stopGeneratingIcon {
@@ -342,6 +343,12 @@ a {
 .viewSourceButton:hover {
   text-decoration: underline;
   cursor: pointer;
+}
+.promptsContainer{
+  width: calc(100% - 100px);
+    max-width: 1028px;
+    justify-content: right;
+    margin: 4px 0px;
 }
 
 @media (max-width: 480px) {
