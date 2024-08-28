@@ -14,7 +14,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
   const appStateContext = useContext(AppStateContext);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
- useEffect(() => {
+  useEffect(() => {
     const fetchUsers = async () => {
       try {
         const usersData = await getUsers();
@@ -74,4 +74,5 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
     </div>
   );
 };
+
 export default Cards;
