@@ -3,6 +3,7 @@ import openai
 from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import asyncio
 import os
+
 from typing import Annotated
 
 from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
@@ -17,6 +18,7 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
+
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
