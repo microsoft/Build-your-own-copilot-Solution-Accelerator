@@ -3,7 +3,6 @@ import openai
 from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import asyncio
 import os
-
 from typing import Annotated
 
 from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
@@ -18,7 +17,6 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
-
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -268,7 +266,6 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
-    if asked, summarize each call transcripts then always return all call transcript's summary for that client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
     '''
