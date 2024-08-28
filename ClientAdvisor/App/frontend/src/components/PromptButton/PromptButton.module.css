@@ -9,3 +9,6 @@
 .promptBtn > span > span > span {
   font-weight: 400;
 }
+.promptBtn:disabled { 
+  border: none;
+}

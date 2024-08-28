@@ -221,7 +221,7 @@ html, body {
   width: 161px;
   height: 32px;
   left: calc(50% - 161px / 2 + 25.8px);
-  bottom: 116px;
+  bottom: 146px;
   border: 1px solid #d1d1d1;
   border-radius: 16px;
   cursor: pointer;

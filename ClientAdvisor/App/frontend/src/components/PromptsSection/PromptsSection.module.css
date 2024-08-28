@@ -3,3 +3,7 @@
   gap: 0.5rem;
   justify-content: flex-end;
 }
+
+.promptsSection button:hover:not(:disabled) {
+  background-color: #E9EEF8;
+}

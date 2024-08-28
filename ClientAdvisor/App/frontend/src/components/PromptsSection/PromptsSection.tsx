@@ -3,6 +3,7 @@ import styles from './PromptsSection.module.css'
 
 type PromptsSectionProps = {
   onClickPrompt: (promptObj: PromptType) => void
+  isLoading: boolean
 }
 export type PromptType = {
   name: string
@@ -16,11 +17,11 @@ const promptsConfg = [
   { name: 'Previous meeting summary', question: 'Previous meeting summary', key: 'p3' }
 ]
 
-export const PromptsSection: React.FC<PromptsSectionProps> = ({ onClickPrompt }) => {
+export const PromptsSection: React.FC<PromptsSectionProps> = ({ onClickPrompt, isLoading }) => {
   return (
     <div className={styles.promptsSection}>
       {promptsConfg.map(promptObj => (
-        <PromptButton key={promptObj.key} name={promptObj.name} onClick={() => onClickPrompt(promptObj)} />
+        <PromptButton key={promptObj.key} disabled={isLoading} name={promptObj.name} onClick={() => onClickPrompt(promptObj)} />
       ))}
     </div>
   )

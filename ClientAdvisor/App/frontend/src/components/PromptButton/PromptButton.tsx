@@ -4,8 +4,9 @@ import styles from './PromptButton.module.css'
 interface PromptButtonProps extends IButtonProps {
   onClick: () => void
   name: string
+  disabled: boolean
 }
 
-export const PromptButton: React.FC<PromptButtonProps> = ({ onClick, name = '' }) => {
-  return <DefaultButton className={styles.promptBtn} text={name} onClick={onClick} />
+export const PromptButton: React.FC<PromptButtonProps> = ({ onClick, name = '', disabled }) => {
+  return <DefaultButton className={styles.promptBtn} disabled={disabled} text={name} onClick={onClick} />
 }

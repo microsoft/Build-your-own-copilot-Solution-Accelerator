@@ -58,7 +58,6 @@ const Chat = () => {
   const [clearingChat, setClearingChat] = useState<boolean>(false)
   const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true)
   const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
-  const [showPrompts, setShowPrompts] = useState<boolean>(true)
 
   const errorDialogContentProps = {
     type: DialogType.close,
@@ -151,7 +150,6 @@ const Chat = () => {
   }
 
   const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
-    setShowPrompts(false);
     setIsLoading(true)
     setShowLoadingMessage(true)
     const abortController = new AbortController()
@@ -277,7 +275,6 @@ const Chat = () => {
   }
 
   const makeApiRequestWithCosmosDB = async (question: string, conversationId?: string) => {
-    setShowPrompts(false);
     setIsLoading(true)
     setShowLoadingMessage(true)
     const abortController = new AbortController()
@@ -704,7 +701,6 @@ const Chat = () => {
   }
 
   const onClickPrompt = (promptObj: PromptType) => {
-    setShowPrompts(false);
     const { question } = promptObj
     const conversationId = appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined
     if (question) {
@@ -713,11 +709,6 @@ const Chat = () => {
         : makeApiRequestWithoutCosmosDB(question, conversationId)
     }
   }
-  useEffect(() => {
-    if (!showPrompts) {
-      setShowPrompts(true)
-    }
-  }, [appStateContext?.state?.clientId])
   
   return (
     <div className={styles.container} role="main">
@@ -804,11 +795,9 @@ const Chat = () => {
                 <div ref={chatMessageStreamEnd} />
               </div>
             )}
-            {!isLoading && showPrompts && (
-              <Stack horizontal className={styles.promptsContainer}>
-                <PromptsSection onClickPrompt={onClickPrompt} />
-              </Stack>
-            )}
+            <Stack horizontal className={styles.promptsContainer}>
+              <PromptsSection onClickPrompt={onClickPrompt} isLoading={isLoading} />
+            </Stack>
             <Stack horizontal className={styles.chatInput}>
               {isLoading && (
                 <Stack
