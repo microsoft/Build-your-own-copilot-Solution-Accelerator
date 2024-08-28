@@ -14,7 +14,10 @@ import { getUserInfo, getpbi } from '../../api'
 import { User } from '../../types/User'
 
 import welcomeIcon from '../../assets/welcomeIcon.png'
-import styles from './Layout.module.css'
+import styles from './Layout.module.css';
+import SpinnerComponent from '../../components/Spinner/Spinner';
+
+
 
 const Layout = () => {
   // const [contentType, setContentType] = useState<string | null>(null);
@@ -118,6 +121,10 @@ const Layout = () => {
 
   return (
     <div className={styles.layout}>
+      <SpinnerComponent
+        loading={appStateContext?.state.isLoader != undefined ? appStateContext?.state.isLoader : false}
+        label="Please wait.....!"
+      />
       <div className={styles.cardsColumn}>
         <div className={styles.selectClientHeading}>
           <h4 className={styles.meeting}>Upcoming meetings</h4>

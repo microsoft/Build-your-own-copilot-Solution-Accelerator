@@ -158,7 +158,7 @@ const Chat = ({ chatType }: Props) => {
     setMessages(conversation.messages)
 
     const request: ConversationRequest = {
-      messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)],
+      messages: [...conversation.messages.filter((answer) => answer.hasOwnProperty('content') && answer.hasOwnProperty('role') && answer.role !== ERROR)],
       index_name: String(appStateContext?.state.sidebarSelection)
     }
 
@@ -190,7 +190,18 @@ const Chat = ({ chatType }: Props) => {
               })
               runningText = ''
             }
-            catch { }
+            catch {
+              if (typeof result.error === 'string') {
+                let errorMessage = result.error
+                let errorChatMsg: ChatMessage = {
+                  id: uuid(),
+                  role: ERROR,
+                  content: errorMessage,
+                  date: new Date().toISOString()
+                }
+                assistantMessage = errorChatMsg
+              }
+            }
           })
         }
         conversation.messages.push(toolMessage, assistantMessage)

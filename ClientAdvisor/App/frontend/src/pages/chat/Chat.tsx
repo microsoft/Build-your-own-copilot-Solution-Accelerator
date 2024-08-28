@@ -152,7 +152,7 @@ const Chat = () => {
     setShowLoadingMessage(true)
     const abortController = new AbortController()
     abortFuncs.current.unshift(abortController)
-
+    appStateContext?.dispatch({ type: 'SET_IS_REQUEST_INITIATED', payload: true })
     const userMessage: ChatMessage = {
       id: uuid(),
       role: 'user',
@@ -267,6 +267,7 @@ const Chat = () => {
       setShowLoadingMessage(false)
       abortFuncs.current = abortFuncs.current.filter(a => a !== abortController)
       setProcessMessages(messageStatus.Done)
+      appStateContext?.dispatch({ type: 'SET_IS_REQUEST_INITIATED', payload: false })
     }
 
     return abortController.abort()
@@ -277,7 +278,7 @@ const Chat = () => {
     setShowLoadingMessage(true)
     const abortController = new AbortController()
     abortFuncs.current.unshift(abortController)
-
+    appStateContext?.dispatch({ type: 'SET_IS_REQUEST_INITIATED', payload: true })
     const userMessage: ChatMessage = {
       id: uuid(),
       role: 'user',
@@ -497,6 +498,7 @@ const Chat = () => {
       setShowLoadingMessage(false)
       abortFuncs.current = abortFuncs.current.filter(a => a !== abortController)
       setProcessMessages(messageStatus.Done)
+      appStateContext?.dispatch({ type: 'SET_IS_REQUEST_INITIATED', payload: false })
     }
     return abortController.abort()
   }

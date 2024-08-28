@@ -49,7 +49,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
   const [hideClearAllDialog, { toggle: toggleClearAllDialog }] = useBoolean(true)
   const [clearing, setClearing] = React.useState(false)
   const [clearingError, setClearingError] = React.useState(false)
-
+  const hasChatHistory = appStateContext?.state.chatHistory && appStateContext.state.chatHistory.length > 0;
   const clearAllDialogContentProps = {
     type: DialogType.close,
     title: !clearingError ? 'Are you sure you want to clear all chat history?' : 'Error deleting all of chat history',
@@ -67,7 +67,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
   }
 
   const menuItems: IContextualMenuItem[] = [
-    { key: 'clearAll', text: 'Clear all chat history', iconProps: { iconName: 'Delete' } }
+    { key: 'clearAll', text: 'Clear all chat history',disabled: !hasChatHistory, iconProps: { iconName: 'Delete' }}
   ]
 
   const handleHistoryClick = () => {
