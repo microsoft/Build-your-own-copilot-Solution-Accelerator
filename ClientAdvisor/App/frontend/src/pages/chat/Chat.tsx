@@ -597,8 +597,6 @@ const Chat = () => {
   }
 
   const newChat = () => {
-     
-    console.log("new chacht onlick")
     setIsVisible(true);
     setProcessMessages(messageStatus.Processing)
     setMessages([])
