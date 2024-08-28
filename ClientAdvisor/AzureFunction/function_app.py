@@ -100,6 +100,7 @@ class ChatWithDataPlugin:
         Do not include assets values unless asked for.
         Always use ClientId = {clientid} in the query filter.
         Always return client name in the query.
+        Always return time in "HH:mm" format for the client meetings in response.
         If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings, including the scheduled time in the query.
         To determine the client's portfolio value, provide the total sum of all investments when asked for the asset value. For the current asset value, sum the investment values for the most recent available dates. When asked about the asset types in the portfolio and the total value of each, list each asset type with the total sum of investments for each category. If asked for the asset types in the portfolio and the present value of each, provide a list of each asset type with its most recent investment value.        
         Only return the generated sql query. do not return anything else''' 
@@ -160,6 +161,7 @@ class ChatWithDataPlugin:
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
+        Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
         completion = client.chat.completions.create(
