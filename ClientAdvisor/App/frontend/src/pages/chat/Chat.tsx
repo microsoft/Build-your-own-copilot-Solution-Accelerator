@@ -11,8 +11,6 @@ import DOMPurify from 'dompurify'
 
 import styles from './Chat.module.css'
 import TeamAvatar from '../../assets/TeamAvatar.svg'
-import TickIcon  from '../../assets/TickIcon.svg'
-import DismissIcon from '../../assets/Dismiss.svg'
 import { XSSAllowTags } from '../../constants/xssAllowTags'
 
 import {
@@ -44,7 +42,7 @@ const enum messageStatus {
   Done = 'Done'
 }
 
-const Chat = () => {
+const Chat = (props: any) => {
   const appStateContext = useContext(AppStateContext)
   const ui = appStateContext?.state.frontendSettings?.ui
   const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled
@@ -59,7 +57,6 @@ const Chat = () => {
   const [clearingChat, setClearingChat] = useState<boolean>(false)
   const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true)
   const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
-  const [isVisible, setIsVisible] = useState(false);
 
   const errorDialogContentProps = {
     type: DialogType.close,
@@ -100,19 +97,6 @@ const Chat = () => {
       setErrorMsg(null)
     }, 500)
   }
-  const closePopup = () => {
-    setIsVisible(!isVisible);
-  };
-
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 4000); // Popup will disappear after 3 seconds
-
-      return () => clearTimeout(timer); // Cleanup the timer on component unmount
-    }
-  }, [isVisible]);
 
   useEffect(() => {
     setIsLoading(appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading)
@@ -600,7 +584,7 @@ const Chat = () => {
   }
 
   const newChat = () => {
-    setIsVisible(true);
+    props.setIsVisible(true);
     setProcessMessages(messageStatus.Processing)
     setMessages([])
     setIsCitationPanelOpen(false)
@@ -733,20 +717,6 @@ const Chat = () => {
   
   return (
     <div className={styles.container} role="main">
-      {isVisible && (
-        <div className={styles.popupContainer}>
-          <div className={styles.popupContent}>
-            <div className={styles.popupText}>
-              <div className={styles.headerText}><span className={styles.checkmark}>
-                <img alt="check mark" src={TickIcon} /></span>Chat saved
-                <img alt="close icon" src={DismissIcon} className={styles.closeButton} onClick={closePopup}/>
-              </div>
-              <div className={styles.popupSubtext}><span className={styles.popupMsg}>Your chat history has been saved successfully!</span></div>
-            </div>
-            
-          </div>
-        </div>
-    )}
       {showAuthMessage ? (
         <Stack className={styles.chatEmptyState}>
           <ShieldLockRegular
