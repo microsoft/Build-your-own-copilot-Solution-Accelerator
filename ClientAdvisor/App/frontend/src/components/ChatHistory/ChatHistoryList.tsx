@@ -22,20 +22,6 @@ const formatDate = (date: Date, includeWeekday = false) => {
   return date.toLocaleDateString(undefined, options);
 };
 
-interface Item {
-  _attachments: string;
-  _etag: string;
-  _rid: string;
-  _self: string;
-  _ts: number;
-  createdAt: string;
-  id: string;
-  title: string;
-  type: string;
-  updatedAt: string;
-  userId: string;
-}
-
 
 function isLastSevenDaysRange(dateToCheck: any) {
   // Get the current date
