@@ -279,6 +279,7 @@
   transition: all 0.3s ease;
   gap: 10px;
   margin-right:10px;
+  height: calc(100vh - 60px);
 }
 
 .mainContent {
@@ -316,17 +317,17 @@
     grid-template-columns: 1fr; /* Return to single column layout */
   }
 
-  .contentBody::before {
+  /* .contentBody::before {
     content: '';
     display: block;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.3); /* Optional overlay background */
+    background-color: rgba(0, 0, 0, 0.3); 
     position: absolute;
     top: 0;
     left: 0;
     z-index: 90;
-  }
+  } */
 }
 
 /*--------- New Right Layout Changes -------------*/
