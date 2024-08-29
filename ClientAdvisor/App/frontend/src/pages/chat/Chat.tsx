@@ -938,7 +938,7 @@ const Chat = () => {
             </Stack.Item>
           )}
           {appStateContext?.state.isChatHistoryOpen &&
-            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
+            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel isLoading={isLoading} />}
         </Stack>
       )}
     </div>

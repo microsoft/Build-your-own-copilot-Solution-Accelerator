@@ -26,7 +26,9 @@ import ChatHistoryList from './ChatHistoryList'
 
 import styles from './ChatHistoryPanel.module.css'
 
-interface ChatHistoryPanelProps {}
+interface ChatHistoryPanelProps {
+  isLoading: boolean
+}
 
 export enum ChatHistoryPanelTabs {
   History = 'History'
@@ -44,6 +46,7 @@ const commandBarStyle: ICommandBarStyles = {
 const commandBarButtonStyle: Partial<IStackStyles> = { root: { height: '50px' } }
 
 export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
+  const { isLoading} = _props
   const appStateContext = useContext(AppStateContext)
   const [showContextualMenu, setShowContextualMenu] = React.useState(false)
   const [hideClearAllDialog, { toggle: toggleClearAllDialog }] = useBoolean(true)
@@ -67,7 +70,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
   }
 
   const menuItems: IContextualMenuItem[] = [
-    { key: 'clearAll', text: 'Clear all chat history',disabled: !hasChatHistory, iconProps: { iconName: 'Delete' }}
+    { key: 'clearAll', text: 'Clear all chat history',disabled: (!hasChatHistory || isLoading), iconProps: { iconName: 'Delete' }}
   ]
 
   const handleHistoryClick = () => {
