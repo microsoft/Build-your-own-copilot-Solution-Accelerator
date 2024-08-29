@@ -169,7 +169,8 @@ class ChatWithDataPlugin:
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
-        If asked, consistently provide the action items from the last or previous client meeting for past dates.
+        If asked, consistently provide the action items from the last or previous client meeting only for past dates.
+        If asked, consistently provide the summary of the last meeting with the client only for past dates.
         Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
