@@ -198,10 +198,10 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
       >
       {edit ? (
         <>
-          <Stack.Item style={{ width: '100%' }}>
+          <Stack.Item style={{ width: '100%'  }}>
             <form aria-label="edit title form" onSubmit={e => handleSaveEdit(e)} style={{ padding: '5px 0px' }}>
-              <Stack horizontal verticalAlign={'start'}>
-                <Stack.Item>
+              <Stack horizontal verticalAlign={'start'} style={{ width: '100%' ,justifyContent:'space-between'  }}>
+                <Stack.Item style={{flex:1}}>
                   <TextField
                     componentRef={textFieldRef}
                     autoFocus={textFieldFocused}
@@ -218,21 +218,23 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
                     <Stack aria-label="action button group" horizontal verticalAlign={'center'}>
                       <IconButton
                         role="button"
+                        className={styles.itemButton}
                         disabled={errorRename !== undefined}
                         onKeyDown={e => (e.key === ' ' || e.key === 'Enter' ? handleSaveEdit(e) : null)}
                         onClick={e => handleSaveEdit(e)}
                         aria-label="confirm new title"
                         iconProps={{ iconName: 'CheckMark' }}
-                        styles={{ root: { color: 'green', marginLeft: '5px' } }}
+                        styles={{ root: { color: 'green' } }}
                       />
                       <IconButton
                         role="button"
+                        className={styles.itemButton}
                         disabled={errorRename !== undefined}
                         onKeyDown={e => (e.key === ' ' || e.key === 'Enter' ? cancelEditTitle() : null)}
                         onClick={() => cancelEditTitle()}
                         aria-label="cancel edit title"
                         iconProps={{ iconName: 'Cancel' }}
-                        styles={{ root: { color: 'red', marginLeft: '5px' } }}
+                        styles={{ root: { color: 'red' } }}
                       />
                     </Stack>
                   </Stack.Item>
@@ -251,7 +253,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
         </>
       ) : (
         <>
-          <Stack horizontal verticalAlign={'center'} style={{ width: '100%' }}>
+          <Stack horizontal verticalAlign={'center'} style={{ width: '100%',justifyContent:'space-between' }}>
             <div className={styles.chatTitle}>{truncatedTitle}</div>
             {/* {(isSelected || isHovered) && ( */}
               <Stack horizontal horizontalAlign="end">
