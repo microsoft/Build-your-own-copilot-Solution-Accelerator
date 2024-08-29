@@ -95,11 +95,11 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
     }
   }, [appStateContext?.state.currentChat?.id, item?.id])
 
-  useEffect(()=>{
+  useEffect(() => {
     let v = appStateContext?.state.isRequestInitiated;
-    if(v!=undefined)
+    if (v != undefined)
       setIsButtonDisabled(v && isSelected)
-  },[appStateContext?.state.isRequestInitiated])
+  }, [appStateContext?.state.isRequestInitiated])
 
   const onDelete = async () => {
     appStateContext?.dispatch({ type: 'TOGGLE_LOADER' });
@@ -195,13 +195,13 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
       // horizontal
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      >
+    >
       {edit ? (
         <>
-          <Stack.Item style={{ width: '100%'  }}>
+          <Stack.Item style={{ width: '100%' }}>
             <form aria-label="edit title form" onSubmit={e => handleSaveEdit(e)} style={{ padding: '5px 0px' }}>
-              <Stack horizontal verticalAlign={'start'} style={{ width: '100%' ,justifyContent:'space-between'  }}>
-                <Stack.Item style={{flex:1}}>
+              <Stack horizontal verticalAlign={'start'} style={{ width: '100%', justifyContent: 'space-between' }}>
+                <Stack.Item style={{ flex: 1 }}>
                   <TextField
                     componentRef={textFieldRef}
                     autoFocus={textFieldFocused}
@@ -253,28 +253,26 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
         </>
       ) : (
         <>
-          <Stack horizontal verticalAlign={'center'} style={{ width: '100%',justifyContent:'space-between' }}>
+          <Stack horizontal verticalAlign={'center'} style={{ width: '100%', justifyContent: 'space-between' }}>
             <div className={styles.chatTitle}>{truncatedTitle}</div>
-            {/* {(isSelected || isHovered) && ( */}
-              <Stack horizontal horizontalAlign="end">
-                <IconButton
-                  className={styles.itemButton}
-                  disabled={isButtonDisabled}
-                  iconProps={{ iconName: 'Delete' }}
-                  title="Delete"
-                  onClick={toggleDeleteDialog}
-                  onKeyDown={e => (e.key === ' ' ? toggleDeleteDialog() : null)}
-                />
-                <IconButton
-                  className={styles.itemButton}
-                  disabled={isButtonDisabled}
-                  iconProps={{ iconName: 'Edit' }}
-                  title="Edit"
-                  onClick={onEdit}
-                  onKeyDown={e => (e.key === ' ' ? onEdit() : null)}
-                />
-              </Stack>
-            {/* )} */}
+            <Stack horizontal horizontalAlign="end">
+              <IconButton
+                className={styles.itemButton}
+                disabled={isButtonDisabled}
+                iconProps={{ iconName: 'Delete' }}
+                title="Delete"
+                onClick={toggleDeleteDialog}
+                onKeyDown={e => (e.key === ' ' ? toggleDeleteDialog() : null)}
+              />
+              <IconButton
+                className={styles.itemButton}
+                disabled={isButtonDisabled}
+                iconProps={{ iconName: 'Edit' }}
+                title="Edit"
+                onClick={onEdit}
+                onKeyDown={e => (e.key === ' ' ? onEdit() : null)}
+              />
+            </Stack>
           </Stack>
         </>
       )}
@@ -359,7 +357,6 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
     }
   }, [observerTarget])
 
-  console.log("groupedChatHistory",groupedChatHistory)
   return (
     <div className={styles.listContainer} data-is-scrollable>
       {groupedChatHistory.map(
@@ -381,23 +378,10 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
                 className={styles.chatList}
               />
               <div ref={observerTarget} />
-              {/* <Separator
-                styles={{
-                  root: {
-                    width: '100%',
-                    position: 'relative',
-                    '::before': {
-                      backgroundColor: '#d6d6d6'
-                    }
-                  }
-                }}
-              /> */}
             </Stack>
           )
       )}
-      
-      
-    
+
 
       {showSpinner && (
         <div className={styles.spinnerContainer}>

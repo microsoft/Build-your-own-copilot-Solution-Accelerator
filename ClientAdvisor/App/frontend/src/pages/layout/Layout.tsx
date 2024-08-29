@@ -154,7 +154,7 @@ const Layout = () => {
             </Stack>
           </header>
         </div>
-        <div className={ `${styles.contentBody} ${appStateContext?.state.isChatHistoryOpen ? styles.withHistory : ''}`}>
+        <div className={`${styles.contentBody} ${appStateContext?.state.isChatHistoryOpen ? styles.withHistory : ''}`}>
           <div className={styles.mainContent}>
             <div className={styles.contentColumn}>
               {!selectedUser && showWelcomeCard ? (

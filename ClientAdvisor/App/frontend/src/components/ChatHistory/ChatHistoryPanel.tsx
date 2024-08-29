@@ -26,7 +26,7 @@ import ChatHistoryList from './ChatHistoryList'
 
 import styles from './ChatHistoryPanel.module.css'
 
-interface ChatHistoryPanelProps {}
+interface ChatHistoryPanelProps { }
 
 export enum ChatHistoryPanelTabs {
   History = 'History'
@@ -67,7 +67,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
   }
 
   const menuItems: IContextualMenuItem[] = [
-    { key: 'clearAll', text: 'Clear all chat history',disabled: !hasChatHistory, iconProps: { iconName: 'Delete' }}
+    { key: 'clearAll', text: 'Clear all chat history', disabled: !hasChatHistory, iconProps: { iconName: 'Delete' } }
   ]
 
   const handleHistoryClick = () => {
@@ -100,7 +100,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
     }, 2000)
   }
 
-  React.useEffect(() => {}, [appStateContext?.state.chatHistory, clearingError])
+  React.useEffect(() => { }, [appStateContext?.state.chatHistory, clearingError])
 
   return (
     <section className={styles.container} data-is-scrollable aria-label={'chat history panel'}>
@@ -113,7 +113,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
               fontWeight: '600',
               fontSize: '16px',
               marginRight: 'auto',
-              color:'#242424'
+              color: '#242424'
             }}>
             Chat history
           </Text>
@@ -155,20 +155,20 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
           {appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail &&
             appStateContext?.state.isCosmosDBAvailable && (
               <>
-                  <Stack horizontalAlign="center" verticalAlign="center" style={{ width: '100%', marginTop: 10 }}>
-                    <StackItem>
-                      <Text style={{ alignSelf: 'center', fontWeight: '400', fontSize: 16 }}>
-                        {appStateContext?.state.isCosmosDBAvailable?.status && (
-                          <span>{appStateContext?.state.isCosmosDBAvailable?.status}</span>
-                        )}
-                        {!appStateContext?.state.isCosmosDBAvailable?.status && <span>Error loading chat history</span>}
-                      </Text>
-                    </StackItem>
-                    <StackItem>
-                      <Text style={{ alignSelf: 'center', fontWeight: '400', fontSize: 14 }}>
-                        <span>Chat history can't be saved at this time</span>
-                      </Text>
-                    </StackItem>
+                <Stack horizontalAlign="center" verticalAlign="center" style={{ width: '100%', marginTop: 10 }}>
+                  <StackItem>
+                    <Text style={{ alignSelf: 'center', fontWeight: '400', fontSize: 16 }}>
+                      {appStateContext?.state.isCosmosDBAvailable?.status && (
+                        <span>{appStateContext?.state.isCosmosDBAvailable?.status}</span>
+                      )}
+                      {!appStateContext?.state.isCosmosDBAvailable?.status && <span>Error loading chat history</span>}
+                    </Text>
+                  </StackItem>
+                  <StackItem>
+                    <Text style={{ alignSelf: 'center', fontWeight: '400', fontSize: 14 }}>
+                      <span>Chat history can't be saved at this time</span>
+                    </Text>
+                  </StackItem>
                 </Stack>
               </>
             )}
@@ -199,7 +199,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
       </Stack>
       <Dialog
         hidden={hideClearAllDialog}
-        onDismiss={clearing ? () => {} : onHideClearAllDialog}
+        onDismiss={clearing ? () => { } : onHideClearAllDialog}
         dialogContentProps={clearAllDialogContentProps}
         modalProps={modalProps}>
         <DialogFooter>

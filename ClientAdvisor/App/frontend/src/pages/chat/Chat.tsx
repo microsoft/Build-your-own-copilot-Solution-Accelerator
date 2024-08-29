@@ -667,7 +667,7 @@ const Chat = () => {
 
   useLayoutEffect(() => {
     const element = document.getElementById("chatMessagesContainer")!;
-    if(element){
+    if (element) {
       element.scroll({ top: element.scrollHeight, behavior: 'smooth' });
     }
   }, [showLoadingMessage, processMessages])
@@ -713,7 +713,7 @@ const Chat = () => {
         : makeApiRequestWithoutCosmosDB(question, conversationId)
     }
   }
-  
+
   return (
     <div className={styles.container} role="main">
       {showAuthMessage ? (
@@ -937,7 +937,7 @@ const Chat = () => {
               </div>
             </Stack.Item>
           )}
-         
+
         </Stack>
       )}
     </div>
