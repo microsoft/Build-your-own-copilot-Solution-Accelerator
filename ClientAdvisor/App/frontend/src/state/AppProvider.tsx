@@ -27,6 +27,8 @@ export interface AppState {
   frontendSettings: FrontendSettings | null
   feedbackState: { [answerId: string]: Feedback.Neutral | Feedback.Positive | Feedback.Negative }
   clientId: string;
+  isRequestInitiated : boolean,
+  isLoader: boolean
 }
 
 export type Action =
@@ -47,7 +49,9 @@ export type Action =
       payload: { answerId: string; feedback: Feedback.Positive | Feedback.Negative | Feedback.Neutral }
     }
   | { type: 'GET_FEEDBACK_STATE'; payload: string }
-  | { type: 'UPDATE_CLIENT_ID'; payload: string };
+  | { type: 'UPDATE_CLIENT_ID'; payload: string }
+  | { type: 'SET_IS_REQUEST_INITIATED'; payload: boolean }
+  | { type: 'TOGGLE_LOADER' };
 
 const initialState: AppState = {
   isChatHistoryOpen: false,
@@ -62,6 +66,8 @@ const initialState: AppState = {
   frontendSettings: null,
   feedbackState: {},
   clientId: '',
+  isRequestInitiated: false,
+  isLoader:false
 }
 
 export const AppStateContext = createContext<
