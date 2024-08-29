@@ -102,6 +102,7 @@ class ChatWithDataPlugin:
         Always return client name in the query.
         Always return time in "HH:mm" format for the client meetings in response.
         If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings, including the scheduled time in the query.
+        If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date in the query.
         To determine the client's portfolio value, provide the total sum of all investments when asked for the asset value. For the current asset value, sum the investment values for the most recent available dates. When asked about the asset types in the portfolio and the total value of each, list each asset type with the total sum of investments for each category. If asked for the asset types in the portfolio and the present value of each, provide a list of each asset type with its most recent investment value.        
         Only return the generated sql query. do not return anything else''' 
         try:
@@ -265,7 +266,8 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
 
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
-    Always provide information about client meetings only for future dates, including the scheduled time.
+    If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings, including the scheduled time.
+    If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date.
     Always recognize and respond to the selected client by their full name or common variations (e.g., "Karen" and "Karen Berg" should be treated as the same client if Karen Berg is selected). 
     Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
