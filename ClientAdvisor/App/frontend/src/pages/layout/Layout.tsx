@@ -16,7 +16,7 @@ import { User } from '../../types/User'
 import welcomeIcon from '../../assets/welcomeIcon.png'
 import styles from './Layout.module.css';
 import SpinnerComponent from '../../components/Spinner/Spinner';
-
+import { ChatHistoryPanel } from '../../components/ChatHistory/ChatHistoryPanel'
 
 
 const Layout = () => {
@@ -81,7 +81,7 @@ const Layout = () => {
     }
   }, [copyClicked])
 
-  useEffect(() => {}, [appStateContext?.state.isCosmosDBAvailable.status])
+  useEffect(() => { }, [appStateContext?.state.isCosmosDBAvailable.status])
 
   useEffect(() => {
     const handleResize = () => {
@@ -132,66 +132,153 @@ const Layout = () => {
 
         <Cards onCardClick={handleCardClick} />
       </div>
-      <div className={styles.ContentContainer}>
-        <header className={styles.header} role={'banner'}>
-          <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
-            <Stack horizontal verticalAlign="center">
-              <img src={ui?.logo ? ui.logo : TeamAvatar} className={styles.headerIcon} aria-hidden="true" alt="" />
-              <Link to="/" className={styles.headerTitleContainer}>
-                <h1 className={styles.headerTitle}>{ui?.title}</h1>
-              </Link>
+
+      {/* <div className={styles.ContentContainer}>
+        <div className={styles.contentHeader}>
+          <header className={styles.header} role={'banner'}>
+            <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
+              <Stack horizontal verticalAlign="center">
+                <img src={ui?.logo ? ui.logo : TeamAvatar} className={styles.headerIcon} aria-hidden="true" alt="" />
+                <Link to="/" className={styles.headerTitleContainer}>
+                  <h1 className={styles.headerTitle}>{ui?.title}</h1>
+                </Link>
+              </Stack>
+              <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
+                {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+                  <HistoryButton
+                    onClick={handleHistoryClick}
+                    text={appStateContext?.state?.isChatHistoryOpen ? hideHistoryLabel : showHistoryLabel}
+                  />
+                )}
+                {ui?.show_share_button && <ShareButton onClick={handleShareClick} text={shareLabel} />}
+              </Stack>
             </Stack>
-            <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
-              {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
-                <HistoryButton
-                  onClick={handleHistoryClick}
-                  text={appStateContext?.state?.isChatHistoryOpen ? hideHistoryLabel : showHistoryLabel}
-                />
-              )}
-              {ui?.show_share_button && <ShareButton onClick={handleShareClick} text={shareLabel} />}
-            </Stack>
-          </Stack>
-        </header>
-        <div className={styles.contentColumn}>
-          {!selectedUser && showWelcomeCard ? (
-            <div>
-              <div className={styles.mainPage}>
-                <div className={styles.welcomeCard}>
-                  <div className={styles.welcomeCardContent}>
-                    <div className={styles.welcomeCardIcon}>
-                      <img src={welcomeIcon} alt="Icon" className={styles.icon} />
+          </header>
+        </div>
+        <div className={styles.contentBody}>
+          <div className={styles.contentColumn}>
+            {!selectedUser && showWelcomeCard ? (
+              <div>
+                <div className={styles.mainPage}>
+                  <div className={styles.welcomeCard}>
+                    <div className={styles.welcomeCardContent}>
+                      <div className={styles.welcomeCardIcon}>
+                        <img src={welcomeIcon} alt="Icon" className={styles.icon} />
+                      </div>
+                      <h3 className={styles.welcomeTitle}>Select a client</h3>
+                      <p className={styles.welcomeText}>
+                        You can ask questions about their portfolio details and previous conversations or view their
+                        profile.
+                      </p>
                     </div>
-                    <h3 className={styles.welcomeTitle}>Select a client</h3>
-                    <p className={styles.welcomeText}>
-                      You can ask questions about their portfolio details and previous conversations or view their
-                      profile.
-                    </p>
+                  </div>
+                  <div className={styles.welcomeMessage}>
+                    <img src={Illustration} alt="Illustration" className={styles.illustration} />
+                    <h1>Welcome Back, {name}</h1>
                   </div>
                 </div>
-                <div className={styles.welcomeMessage}>
-                  <img src={Illustration} alt="Illustration" className={styles.illustration} />
-                  <h1>Welcome Back, {name}</h1>
-                </div>
               </div>
-            </div>
-          ) : (
-            <div className={styles.pivotContainer}>
-              {selectedUser && (
-                <div className={styles.selectedClient}>
-                  Client selected:{' '}
-                  <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span>
+            ) : (
+              <div className={styles.pivotContainer}>
+                {selectedUser && (
+                  <div className={styles.selectedClient}>
+                    Client selected:{' '}
+                    <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span>
+                  </div>
+                )}
+                <Pivot defaultSelectedKey="chat">
+                  <PivotItem headerText="Chat" itemKey="chat">
+                    <Chat />
+                  </PivotItem>
+                  <PivotItem headerText="Client 360 Profile" itemKey="profile">
+                    <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
+                  </PivotItem>
+                </Pivot>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className={styles.historyPanel}>
+          {appStateContext?.state.isChatHistoryOpen &&
+            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
+
+        </div>
+      </div> */}
+
+      <div className={styles.contentArea}>
+        <div className={styles.contentHeader}>
+          <header className={styles.header} role={'banner'}>
+            <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
+              <Stack horizontal verticalAlign="center">
+                <img src={ui?.logo ? ui.logo : TeamAvatar} className={styles.headerIcon} aria-hidden="true" alt="" />
+                <Link to="/" className={styles.headerTitleContainer}>
+                  <h1 className={styles.headerTitle}>{ui?.title}</h1>
+                </Link>
+              </Stack>
+              <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
+                {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+                  <HistoryButton
+                    onClick={handleHistoryClick}
+                    text={appStateContext?.state?.isChatHistoryOpen ? hideHistoryLabel : showHistoryLabel}
+                  />
+                )}
+                {ui?.show_share_button && <ShareButton onClick={handleShareClick} text={shareLabel} />}
+              </Stack>
+            </Stack>
+          </header>
+        </div>
+        <div className={ `${styles.contentBody} ${appStateContext?.state.isChatHistoryOpen ? styles.withHistory : ''}`}>
+          <div className={styles.mainContent}>
+            <div className={styles.contentColumn}>
+              {!selectedUser && showWelcomeCard ? (
+                <div>
+                  <div className={styles.mainPage}>
+                    <div className={styles.welcomeCard}>
+                      <div className={styles.welcomeCardContent}>
+                        <div className={styles.welcomeCardIcon}>
+                          <img src={welcomeIcon} alt="Icon" className={styles.icon} />
+                        </div>
+                        <h3 className={styles.welcomeTitle}>Select a client</h3>
+                        <p className={styles.welcomeText}>
+                          You can ask questions about their portfolio details and previous conversations or view their
+                          profile.
+                        </p>
+                      </div>
+                    </div>
+                    <div className={styles.welcomeMessage}>
+                      <img src={Illustration} alt="Illustration" className={styles.illustration} />
+                      <h1>Welcome Back, {name}</h1>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.pivotContainer}>
+                  {selectedUser && (
+                    <div className={styles.selectedClient}>
+                      Client selected:{' '}
+                      <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span>
+                    </div>
+                  )}
+                  <Pivot defaultSelectedKey="chat">
+                    <PivotItem headerText="Chat" itemKey="chat">
+                      <Chat />
+                    </PivotItem>
+                    <PivotItem headerText="Client 360 Profile" itemKey="profile">
+                      <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
+                    </PivotItem>
+                  </Pivot>
                 </div>
               )}
-              <Pivot defaultSelectedKey="chat">
-                <PivotItem headerText="Chat" itemKey="chat">
-                  <Chat />
-                </PivotItem>
-                <PivotItem headerText="Client 360 Profile" itemKey="profile">
-                  <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
-                </PivotItem>
-              </Pivot>
             </div>
-          )}
+
+          </div>
+          {appStateContext?.state.isChatHistoryOpen &&
+            <div className={styles.historyPanel}>
+              {appStateContext?.state.isChatHistoryOpen &&
+                appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
+
+            </div>
+          }
         </div>
       </div>
 

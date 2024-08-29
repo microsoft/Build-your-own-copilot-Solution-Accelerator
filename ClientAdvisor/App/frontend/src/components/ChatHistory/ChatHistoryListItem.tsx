@@ -22,7 +22,7 @@ import { historyDelete, historyList, historyRename } from '../../api'
 import { Conversation } from '../../api/models'
 import { AppStateContext } from '../../state/AppProvider'
 
-import { GroupedChatHistory } from './ChatHistoryList'
+import { GroupedChatHistory,GroupedChatHistory2 } from './ChatHistoryList'
 
 import styles from './ChatHistoryPanel.module.css'
 
@@ -32,7 +32,8 @@ interface ChatHistoryListItemCellProps {
 }
 
 interface ChatHistoryListItemGroupsProps {
-  groupedChatHistory: GroupedChatHistory[]
+  groupedChatHistory: GroupedChatHistory[],
+  groupedChatHistory2: GroupedChatHistory2[]
 }
 
 const formatMonth = (month: string) => {
@@ -257,7 +258,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
         <>
           <Stack horizontal verticalAlign={'center'} style={{ width: '100%' }}>
             <div className={styles.chatTitle}>{truncatedTitle}</div>
-            {(isSelected || isHovered) && (
+            {/* {(isSelected || isHovered) && ( */}
               <Stack horizontal horizontalAlign="end">
                 <IconButton
                   className={styles.itemButton}
@@ -276,7 +277,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
                   onKeyDown={e => (e.key === ' ' ? onEdit() : null)}
                 />
               </Stack>
-            )}
+            {/* )} */}
           </Stack>
         </>
       )}
@@ -302,7 +303,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
   )
 }
 
-export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps> = ({ groupedChatHistory }) => {
+export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps> = ({ groupedChatHistory,groupedChatHistory2 }) => {
   const appStateContext = useContext(AppStateContext)
   const observerTarget = useRef(null)
   const [, setSelectedItem] = React.useState<Conversation | null>(null)
@@ -361,19 +362,20 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
     }
   }, [observerTarget])
 
+  console.log("groupedChatHistory2",groupedChatHistory2)
   return (
     <div className={styles.listContainer} data-is-scrollable>
-      {groupedChatHistory.map(
+      {groupedChatHistory2.map(
         group =>
           group.entries.length > 0 && (
             <Stack
               horizontalAlign="start"
               verticalAlign="center"
-              key={group.month}
+              key={group.title}
               className={styles.chatGroup}
-              aria-label={`chat history group: ${group.month}`}>
-              <Stack aria-label={group.month} className={styles.chatMonth}>
-                {formatMonth(group.month)}
+              aria-label={`chat history group: ${group.title}`}>
+              <Stack aria-label={group.title} className={styles.chatMonth}>
+                {group.title}
               </Stack>
               <List
                 aria-label={`chat history list`}
@@ -382,7 +384,7 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
                 className={styles.chatList}
               />
               <div ref={observerTarget} />
-              <Separator
+              {/* <Separator
                 styles={{
                   root: {
                     width: '100%',
@@ -392,10 +394,14 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
                     }
                   }
                 }}
-              />
+              /> */}
             </Stack>
           )
       )}
+      
+      
+    
+
       {showSpinner && (
         <div className={styles.spinnerContainer}>
           <Spinner size={SpinnerSize.small} aria-label="loading more chat history" className={styles.spinner} />

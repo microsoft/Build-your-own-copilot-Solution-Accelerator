@@ -31,7 +31,7 @@ import {
 } from '../../api'
 import { Answer } from '../../components/Answer'
 import { QuestionInput } from '../../components/QuestionInput'
-import { ChatHistoryPanel } from '../../components/ChatHistory/ChatHistoryPanel'
+
 import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
 import { PromptsSection, PromptType } from '../../components/PromptsSection/PromptsSection'
@@ -937,8 +937,7 @@ const Chat = () => {
               </div>
             </Stack.Item>
           )}
-          {appStateContext?.state.isChatHistoryOpen &&
-            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
+         
         </Stack>
       )}
     </div>

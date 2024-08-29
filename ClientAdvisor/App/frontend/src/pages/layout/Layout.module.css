@@ -1,12 +1,14 @@
 .layout {
   display: flex;
   height: 100%;
+  gap: 20px;
 }
 
 .header {
-  background-color: #f2f2f2;
+  /* background-color: #f2f2f2;
   position: fixed;
-  width: 82%;
+  width: 82%; */
+  width: 100%;
 }
 
 .headerContainer {
@@ -36,14 +38,14 @@
   height: 32px;
   width: auto;
   /* margin-left: 36px; */
-  padding-left: 20px;
+  /* padding-left: 20px; */
 }
 
 .shareButtonContainer {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .shareButton {
@@ -143,14 +145,14 @@
 
 .contentColumn {
   /* width: 75%; */
-  padding: 20px;
+  /* padding: 20px; */
   /* overflow-y: auto; */
   flex-direction: column;
-  background: linear-gradient(180deg, #FFF 59.5%, #EBF3FC 100%);
-  border-radius: 8px;
+  /* background: linear-gradient(180deg, #FFF 59.5%, #EBF3FC 100%);
+  border-radius: 8px; */
   height: 100%;
-  box-shadow: 0px 0.83px 3.33px 0px #00000052;
-  margin: 4rem 1rem 1rem;
+  /* box-shadow: 0px 0.83px 3.33px 0px #00000052; */
+  /* margin: 4rem 1rem 1rem; */
 }
 
 .welcomeMessage {
@@ -200,7 +202,7 @@
 
 .historyPanel {
   background: #f1f1f1;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 16px;
   height: 100%;
@@ -255,3 +257,76 @@
   cursor: pointer;
   font-size: 16px;
 }
+
+
+/*--------- New Right Layout Changes -------------*/
+
+.contentArea {
+  width: 100%;
+  height: 100%;
+}
+
+.contentHeader {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.contentBody {
+  display: grid;
+  grid-template-columns: 1fr;
+  flex-grow: 1;
+  position: relative;
+  transition: all 0.3s ease;
+  gap: 10px;
+  margin-right:10px;
+}
+
+.mainContent {
+  padding: 20px;
+  border: 1px solid lightgray;
+    border-radius: 8px;
+    background: white;
+}
+
+.historyPanel {
+  background-color: #f9f9f9;
+  border-left: 1px solid #ddd;
+  padding: 16px;
+}
+
+/* Media Query for splitting the content-body into two parts */
+.withHistory {
+  grid-template-columns: 2fr 28%;
+}
+
+/* Media Query for lower resolutions or zoomed-in views */
+@media screen and (max-width: 1024px) {
+  .historyPanel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    overflow-y: auto;
+  }
+
+  .contentBody {
+    grid-template-columns: 1fr; /* Return to single column layout */
+  }
+
+  .contentBody::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3); /* Optional overlay background */
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 90;
+  }
+}
+
+/*--------- New Right Layout Changes -------------*/

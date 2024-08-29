@@ -38,6 +38,7 @@ export type Conversation = {
   title: string
   messages: ChatMessage[]
   date: string
+  updatedAt : string
 }
 
 export enum ChatCompletionType {

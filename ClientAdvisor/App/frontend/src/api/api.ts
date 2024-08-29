@@ -91,6 +91,7 @@ export const historyList = async (offset = 0): Promise<Conversation[] | null> =>
             title: conv.title,
             date: conv.createdAt,
             messages: convMessages,
+            updatedAt : conv.updatedAt
           }
           return conversation
         })

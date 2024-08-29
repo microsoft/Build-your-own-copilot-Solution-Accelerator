@@ -1,6 +1,6 @@
 .container {
   max-height: calc(100vh - 100px);
-  width: 300px;
+  /* width: 300px; */
 }
 
 .listContainer {
@@ -9,21 +9,24 @@
 }
 
 .itemCell {
-  max-width: 270px;
+  /* max-width: 270px; */
   min-height: 32px;
   cursor: pointer;
-  padding-left: 15px;
+  /* padding-left: 15px;
   padding-right: 5px;
   padding-top: 5px;
-  padding-bottom: 5px;
+  padding-bottom: 5px; */
+  padding: 10px;
   box-sizing: border-box;
   border-radius: 5px;
   display: flex;
+  background: #F3F3F3;
+    margin-bottom: 10px;
 }
 
-.itemCell:hover {
+/* .itemCell:hover {
   background: #e6e6e6;
-}
+} */
 
 .itemButton {
   display: flex;
@@ -31,19 +34,20 @@
   align-items: center;
   width: 28px;
   height: 28px;
-  border: 1px solid #d1d1d1;
+  /* border: 1px solid #d1d1d1; */
   border-radius: 5px;
-  background-color: white;
-  margin: auto 2.5px;
+  /* background-color: white; */
+  /* margin: auto 2.5px; */
   cursor: pointer;
 }
 
-.itemButton:hover {
+/* .itemButton:hover {
   background-color: #e6e6e6;
-}
+} */
 
 .chatGroup {
-  margin: auto 5px;
+  /* margin: auto 5px; */
+  margin-top: 20px;
   width: 100%;
 }
 
@@ -61,12 +65,12 @@
 .chatMonth {
   font-size: 14px;
   font-weight: 600;
-  margin-bottom: 5px;
-  padding-left: 15px;
+  margin-bottom: 10px;
+  /* padding-left: 15px; */
 }
 
 .chatTitle {
-  width: 80%;
+  width: 78%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
