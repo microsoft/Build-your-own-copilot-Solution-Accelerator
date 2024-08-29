@@ -74,6 +74,9 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  font-size: 14px;
+  font-weight: 600;
+  color: #424242;
 }
 
 @media (max-width: 480px) {

@@ -296,7 +296,7 @@
 
 /* Media Query for splitting the content-body into two parts */
 .withHistory {
-  grid-template-columns: 2fr 28%;
+  grid-template-columns: 2fr 22%;
 }
 
 /* Media Query for lower resolutions or zoomed-in views */

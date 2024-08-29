@@ -149,30 +149,13 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
         </Stack>
       </Stack>
       <Stack
-        aria-label="chat history panel content"
-        styles={{
-          root: {
-            display: 'flex',
-            flexGrow: 1,
-            flexDirection: 'column',
-            paddingTop: '2.5px',
-            maxWidth: '100%'
-          }
-        }}
-        style={{
-          display: 'flex',
-          flexGrow: 1,
-          flexDirection: 'column',
-          flexWrap: 'wrap',
-          padding: '1px'
-        }}>
+        aria-label="chat history panel content">
         <Stack className={styles.chatHistoryListContainer}>
           {appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Success &&
             appStateContext?.state.isCosmosDBAvailable.cosmosDB && <ChatHistoryList />}
           {appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail &&
             appStateContext?.state.isCosmosDBAvailable && (
               <>
-                <Stack>
                   <Stack horizontalAlign="center" verticalAlign="center" style={{ width: '100%', marginTop: 10 }}>
                     <StackItem>
                       <Text style={{ alignSelf: 'center', fontWeight: '400', fontSize: 16 }}>
@@ -187,7 +170,6 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
                         <span>Chat history can't be saved at this time</span>
                       </Text>
                     </StackItem>
-                  </Stack>
                 </Stack>
               </>
             )}
