@@ -721,8 +721,8 @@ const Chat = () => {
         <div className={styles.popupContainer}>
           <div className={styles.popupContent}>
             <div className={styles.popupText}>
-              <div><span className={styles.checkmark}><img src={TickIcon} /></span>Chat saved
-              <button className={styles.closeButton} onClick={closePopup}>X</button></div>
+              <div><span className={styles.checkmark}><img alt="check mark" src={TickIcon} /></span>Chat saved
+              <button aria-label="btnClose" className={styles.closeButton} onClick={closePopup}>X</button></div>
               <div className={styles.popupSubtext}><span className={styles.popupMsg}>Your chat history has been saved successfully!</span></div>
             </div>
             
