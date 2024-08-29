@@ -110,11 +110,10 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
             role="heading"
             aria-level={2}
             style={{
-              alignSelf: 'center',
               fontWeight: '600',
-              fontSize: '18px',
+              fontSize: '16px',
               marginRight: 'auto',
-              // paddingLeft: '20px'
+              color:'#242424'
             }}>
             Chat history
           </Text>
