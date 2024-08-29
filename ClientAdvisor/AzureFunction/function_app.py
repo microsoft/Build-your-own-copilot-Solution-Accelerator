@@ -100,6 +100,7 @@ class ChatWithDataPlugin:
         Do not include assets values unless asked for.
         Always use ClientId = {clientid} in the query filter.
         Always return client name in the query.
+        Always return time in "HH:mm" format if asking for date.
         Always return time in "HH:mm" format for the client meetings in response.
         If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings, including the scheduled time in the query.
         If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date in the query.
@@ -162,6 +163,7 @@ class ChatWithDataPlugin:
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
+        Always return time in "HH:mm" format if asking for date.
         Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
@@ -221,7 +223,6 @@ class ChatWithDataPlugin:
 
         answer = completion.choices[0].message.content
         return answer
-
 # Get data from Azure Open AI
 async def stream_processor(response):
     async for message in response:
