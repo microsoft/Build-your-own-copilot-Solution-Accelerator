@@ -388,9 +388,6 @@ a {
   top: 6rem;
 }
 
-.clientName{
-  color: #4CAF50;
-}
 
 .popupContent {
   display: flex;
@@ -408,10 +405,13 @@ a {
   margin-left: 10px;
 }
 
-
+.headerText{
+  font-weight: 600;
+  color: #242424;
+}
 .popupSubtext {
   font-size: smaller;
-  color: #666;
+  color: #242424;
   padding-left: 1.4rem;
   width: 75%;
 

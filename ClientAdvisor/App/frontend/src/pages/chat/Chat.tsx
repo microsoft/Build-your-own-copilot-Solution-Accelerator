@@ -12,6 +12,7 @@ import DOMPurify from 'dompurify'
 import styles from './Chat.module.css'
 import TeamAvatar from '../../assets/TeamAvatar.svg'
 import TickIcon  from '../../assets/TickIcon.svg'
+import DismissIcon from '../../assets/Dismiss.svg'
 import { XSSAllowTags } from '../../constants/xssAllowTags'
 
 import {
@@ -107,7 +108,7 @@ const Chat = () => {
     if (isVisible) {
       const timer = setTimeout(() => {
         setIsVisible(false);
-      }, 2000); // Popup will disappear after 3 seconds
+      }, 4000); // Popup will disappear after 3 seconds
 
       return () => clearTimeout(timer); // Cleanup the timer on component unmount
     }
@@ -721,8 +722,10 @@ const Chat = () => {
         <div className={styles.popupContainer}>
           <div className={styles.popupContent}>
             <div className={styles.popupText}>
-              <div><span className={styles.checkmark}><img alt="check mark" src={TickIcon} /></span>Chat saved
-              <button aria-label="btnClose" className={styles.closeButton} onClick={closePopup}>X</button></div>
+              <div className={styles.headerText}><span className={styles.checkmark}>
+                <img alt="check mark" src={TickIcon} /></span>Chat saved
+                <img alt="close icon" src={DismissIcon} className={styles.closeButton} onClick={closePopup}/>
+              </div>
               <div className={styles.popupSubtext}><span className={styles.popupMsg}>Your chat history has been saved successfully!</span></div>
             </div>
             
