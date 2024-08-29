@@ -23,6 +23,9 @@
   background: #F3F3F3;
     margin-bottom: 10px;
 }
+.selectedItemCell {
+  border: 1.5px solid #0481E0
+}
 
 /* .itemCell:hover {
   background: #e6e6e6;

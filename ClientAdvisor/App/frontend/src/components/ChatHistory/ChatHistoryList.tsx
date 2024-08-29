@@ -695,7 +695,7 @@ const ChatHistoryList: React.FC<ChatHistoryListProps> = () => {
 
 
    
-const chatHistory : Conversation[]  = [
+const chatHistory3 : Conversation[]  = [
   {
     id: '3bee2161-b130-4845-a2c6-7061f68bb5d3',
     title: 'Summarize Discussion Trends',

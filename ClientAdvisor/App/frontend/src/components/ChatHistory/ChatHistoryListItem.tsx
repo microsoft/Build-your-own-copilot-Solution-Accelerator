@@ -189,18 +189,14 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
       key={item.id}
       tabIndex={0}
       aria-label="chat history item"
-      className={styles.itemCell}
+      className={`${styles.itemCell} ${isSelected ? styles.selectedItemCell : ""}`}
       onClick={() => handleSelectItem()}
       onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? handleSelectItem() : null)}
       verticalAlign="center"
       // horizontal
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      styles={{
-        root: {
-          backgroundColor: isSelected ? '#e6e6e6' : 'transparent'
-        }
-      }}>
+      >
       {edit ? (
         <>
           <Stack.Item style={{ width: '100%' }}>
