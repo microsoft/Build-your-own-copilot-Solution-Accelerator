@@ -22,7 +22,7 @@ import { historyDelete, historyList, historyRename } from '../../api'
 import { Conversation } from '../../api/models'
 import { AppStateContext } from '../../state/AppProvider'
 
-import { GroupedChatHistory,GroupedChatHistory2 } from './ChatHistoryList'
+import { GroupedChatHistory } from './ChatHistoryList'
 
 import styles from './ChatHistoryPanel.module.css'
 
@@ -33,7 +33,6 @@ interface ChatHistoryListItemCellProps {
 
 interface ChatHistoryListItemGroupsProps {
   groupedChatHistory: GroupedChatHistory[],
-  groupedChatHistory2: GroupedChatHistory2[]
 }
 
 const formatMonth = (month: string) => {
@@ -303,7 +302,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
   )
 }
 
-export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps> = ({ groupedChatHistory,groupedChatHistory2 }) => {
+export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps> = ({ groupedChatHistory }) => {
   const appStateContext = useContext(AppStateContext)
   const observerTarget = useRef(null)
   const [, setSelectedItem] = React.useState<Conversation | null>(null)
@@ -362,10 +361,10 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
     }
   }, [observerTarget])
 
-  console.log("groupedChatHistory2",groupedChatHistory2)
+  console.log("groupedChatHistory",groupedChatHistory)
   return (
     <div className={styles.listContainer} data-is-scrollable>
-      {groupedChatHistory2.map(
+      {groupedChatHistory.map(
         group =>
           group.entries.length > 0 && (
             <Stack
