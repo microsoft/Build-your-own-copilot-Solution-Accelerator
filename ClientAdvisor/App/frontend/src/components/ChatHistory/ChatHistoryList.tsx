@@ -45,7 +45,7 @@ const segregateItems = (items: Conversation[]) => {
 
   // Sort items by updatedAt in descending order
   items.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    (a, b) => new Date(b.updatedAt ? b.updatedAt : new Date()).getTime() - new Date(a.updatedAt ? a.updatedAt : new Date()).getTime()
   );
 
   const groupedItems: {
@@ -63,7 +63,7 @@ const segregateItems = (items: Conversation[]) => {
   };
 
   items.forEach(item => {
-    const itemDate = new Date(item.updatedAt);
+    const itemDate = new Date(item.updatedAt ? item.updatedAt : new Date());
     const itemDateOnly = itemDate.toDateString();
     if (itemDateOnly === today.toDateString()) {
       groupedItems.Today.push(item);

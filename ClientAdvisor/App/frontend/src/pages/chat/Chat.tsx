@@ -42,7 +42,7 @@ const enum messageStatus {
   Done = 'Done'
 }
 
-const Chat = () => {
+const Chat = (props: any) => {
   const appStateContext = useContext(AppStateContext)
   const ui = appStateContext?.state.frontendSettings?.ui
   const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled
@@ -167,7 +167,8 @@ const Chat = () => {
         id: conversationId ?? uuid(),
         title: question,
         messages: [userMessage],
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
+        updatedAt : new Date().toISOString(),
       }
     } else {
       conversation = appStateContext?.state?.currentChat
@@ -415,7 +416,8 @@ const Chat = () => {
             id: result.history_metadata.conversation_id,
             title: result.history_metadata.title,
             messages: [userMessage],
-            date: result.history_metadata.date
+            date: result.history_metadata.date,
+            updatedAt : result.history_metadata.date,
           }
           isEmpty(toolMessage)
             ? resultConversation.messages.push(assistantMessage)
@@ -479,7 +481,8 @@ const Chat = () => {
             id: result.history_metadata.conversation_id,
             title: result.history_metadata.title,
             messages: [userMessage],
-            date: result.history_metadata.date
+            date: result.history_metadata.date,
+            updatedAt: result.history_metadata.date,
           }
           resultConversation.messages.push(errorChatMsg)
         }
@@ -584,6 +587,7 @@ const Chat = () => {
   }
 
   const newChat = () => {
+    props.setIsVisible(true);
     setProcessMessages(messageStatus.Processing)
     setMessages([])
     setIsCitationPanelOpen(false)
@@ -937,7 +941,6 @@ const Chat = () => {
               </div>
             </Stack.Item>
           )}
-
         </Stack>
       )}
     </div>

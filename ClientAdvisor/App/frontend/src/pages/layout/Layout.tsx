@@ -12,7 +12,8 @@ import Chat from '../chat/Chat' // Import the Chat component
 import { AppStateContext } from '../../state/AppProvider'
 import { getUserInfo, getpbi } from '../../api'
 import { User } from '../../types/User'
-
+import TickIcon  from '../../assets/TickIcon.svg'
+import DismissIcon from '../../assets/Dismiss.svg'
 import welcomeIcon from '../../assets/welcomeIcon.png'
 import styles from './Layout.module.css';
 import SpinnerComponent from '../../components/Spinner/Spinner';
@@ -37,7 +38,7 @@ const Layout = () => {
   const [name, setName] = useState<string>('')
 
   const [pbiurl, setPbiUrl] = useState<string>('')
-
+  const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
     const fetchpbi = async () => {
       try {
@@ -50,6 +51,21 @@ const Layout = () => {
 
     fetchpbi()
   }, [])
+
+
+  const closePopup = () => {
+    setIsVisible(!isVisible);
+  };
+
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 4000); // Popup will disappear after 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup the timer on component unmount
+    }
+  }, [isVisible]);
 
   const handleCardClick = (user: User) => {
     setSelectedUser(user)
@@ -121,6 +137,20 @@ const Layout = () => {
 
   return (
     <div className={styles.layout}>
+       {isVisible && (
+        <div className={styles.popupContainer}>
+          <div className={styles.popupContent}>
+            <div className={styles.popupText}>
+              <div className={styles.headerText}><span className={styles.checkmark}>
+                <img alt="check mark" src={TickIcon} /></span>Chat saved
+                <img alt="close icon" src={DismissIcon} className={styles.closeButton} onClick={closePopup}/>
+              </div>
+              <div className={styles.popupSubtext}><span className={styles.popupMsg}>Your chat history has been saved successfully!</span></div>
+            </div>
+            
+          </div>
+        </div>
+    )}
       <SpinnerComponent
         loading={appStateContext?.state.isLoader != undefined ? appStateContext?.state.isLoader : false}
         label="Please wait.....!"
@@ -188,7 +218,7 @@ const Layout = () => {
                   )}
                   <Pivot defaultSelectedKey="chat">
                     <PivotItem headerText="Chat" itemKey="chat">
-                      <Chat />
+                      <Chat setIsVisible={setIsVisible} />
                     </PivotItem>
                     <PivotItem headerText="Client 360 Profile" itemKey="profile">
                       <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
@@ -202,7 +232,7 @@ const Layout = () => {
           {appStateContext?.state.isChatHistoryOpen &&
             <div className={styles.historyPanel}>
               {appStateContext?.state.isChatHistoryOpen &&
-                appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
+                appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel isLoading={appStateContext?.state.isRequestInitiated} />}
 
             </div>
           }
