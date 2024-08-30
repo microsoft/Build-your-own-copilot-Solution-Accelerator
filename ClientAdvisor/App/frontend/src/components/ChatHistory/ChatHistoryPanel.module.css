@@ -4,7 +4,15 @@
 
 .listContainer {
   overflow: hidden auto;
-  max-height: calc(90vh - 66px);
+  max-height: calc(90vh - 70px);
+}
+
+/* Media Query for lower resolutions or zoomed-in views */
+@media screen and (max-width: 1024px) {
+  .listContainer {
+    overflow: hidden auto;
+    max-height: calc(90vh - 100px);
+  }
 }
 
 .itemCell {
