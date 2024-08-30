@@ -970,6 +970,7 @@ async def stream_chat_request(request_body, request_headers):
         if client_id is None:
             return jsonify({"error": "No client ID provided"}), 400
         query = request_body.get("messages")[-1].get("content")
+        query = query.strip()
 
         async def generate():
             deltaText = ''
