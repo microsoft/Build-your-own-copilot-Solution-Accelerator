@@ -100,8 +100,8 @@ class ChatWithDataPlugin:
         Do not include assets values unless asked for.
         Always use ClientId = {clientid} in the query filter.
         Always return client name in the query.
-        Always return time in "HH:mm" format for the client meetings in response.
-        If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings, including the scheduled time in the query.
+        If a question involves date and time, always use FORMAT(YourDateTimeColumn, 'yyyy-MM-dd HH:mm:ss') in the query.
+        If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings including the scheduled time and don't filter with "LIMIT 1"  in the query.
         If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date in the query.
         If asked, provide a summary of the most recent meeting with the client from past dates in the query.
         If asked, provide information on the client's investment risk tolerance level in the query.
@@ -231,7 +231,7 @@ class ChatWithDataPlugin:
 
         answer = completion.choices[0].message.content
         return answer
-
+    
 # Get data from Azure Open AI
 async def stream_processor(response):
     async for message in response:
@@ -276,7 +276,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
 
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
-    If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings, including the scheduled time.
+    If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings including the scheduled time.
     If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date.
     If asked, provide a summary of the most recent meeting with the client from past dates.
     If asked, provide information on the client's investment risk tolerance level.
@@ -289,6 +289,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
     Always recognize and respond to the selected client by their full name or common variations (e.g., "Karen" and "Karen Berg" should be treated as the same client if Karen Berg is selected). 
     Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
+    If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
