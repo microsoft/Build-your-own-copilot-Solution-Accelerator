@@ -4,7 +4,7 @@
 
 .listContainer {
   overflow: hidden auto;
-  max-height: calc(90vh - 105px);
+  max-height: calc(90vh - 66px);
 }
 
 .itemCell {
