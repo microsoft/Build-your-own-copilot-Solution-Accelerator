@@ -171,6 +171,7 @@ class ChatWithDataPlugin:
         You have access to the client’s meeting call transcripts. 
         If asked, consistently provide the action items from the last or previous client meeting only for past dates.
         If asked, consistently provide the summary of the last meeting with the client only for past dates.
+        If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
         Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
@@ -285,6 +286,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     If asked, provide information about any recent changes in the client's investment allocations.
     If asked about the client's portfolio performance over the last quarter, calculate the total investment by summing the investment amounts where AssetDate is greater than or equal to the date from one quarter ago using DATEADD(QUARTER, -1, GETDATE()).
     If asked about upcoming important dates or deadlines for the client, always ensure that StartTime is greater than the current date. Do not convert the formats of StartTime and EndTime and consistently provide the upcoming dates along with the scheduled times.
+    If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
     Always recognize and respond to the selected client by their full name or common variations (e.g., "Karen" and "Karen Berg" should be treated as the same client if Karen Berg is selected). 
     Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
