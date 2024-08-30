@@ -162,6 +162,7 @@ class ChatWithDataPlugin:
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
+        If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
         Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
@@ -270,6 +271,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date.
     Always recognize and respond to the selected client by their full name or common variations (e.g., "Karen" and "Karen Berg" should be treated as the same client if Karen Berg is selected). 
     Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
+    If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
