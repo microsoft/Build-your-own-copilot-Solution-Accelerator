@@ -221,6 +221,7 @@ class ChatWithDataPlugin:
 
         answer = completion.choices[0].message.content
         return answer
+    
 # Get data from Azure Open AI
 async def stream_processor(response):
     async for message in response:
