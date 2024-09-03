@@ -1562,9 +1562,14 @@ def get_users():
                 SELECT c.ClientId, c.Client, c.Email, a.AssetValue, cs.ClientSummary
                 FROM Clients c
                  JOIN (
-                SELECT ClientId, SUM(Investment) AS AssetValue
-   				FROM Assets
-    			GROUP BY ClientId
+                SELECT a.ClientId, a.Investment AS AssetValue
+                    FROM (
+                        SELECT ClientId, sum(Investment) as Investment,
+                            ROW_NUMBER() OVER (PARTITION BY ClientId ORDER BY AssetDate DESC) AS RowNum
+                        FROM Assets
+         group by ClientId,AssetDate
+                    ) a
+                    WHERE a.RowNum = 1
                 ) a ON c.ClientId = a.ClientId
                 JOIN ClientSummaries cs ON c.ClientId = cs.ClientId
             ) ca
