@@ -110,7 +110,8 @@ class ChatWithDataPlugin:
         If asked, provide information about any recent changes in the client's investment allocations in the query.
         If asked about the client's portfolio performance over the last quarter, calculate the total investment by summing the investment amounts where AssetDate is greater than or equal to the date from one quarter ago using DATEADD(QUARTER, -1, GETDATE()) in the query.
         If asked about upcoming important dates or deadlines for the client, always ensure that StartTime is greater than the current date. Do not convert the formats of StartTime and EndTime and consistently provide the upcoming dates along with the scheduled times in the query.
-        To determine the client's portfolio value, provide the total sum of all investments when asked for the asset value. For the current asset value, sum the investment values for the most recent available dates. When asked about the asset types in the portfolio and the total value of each, list each asset type with the total sum of investments for each category. If asked for the asset types in the portfolio and the present value of each, provide a list of each asset type with its most recent investment value.        
+        To determine the asset value, sum the investment values for the most recent available date.  If asked for the asset types in the portfolio and the present of each, provide a list of each asset type with its most recent investment value.
+        If the user inquires about asset on a specific date ,sum the investment values for the specific date avoid summing values from all dates prior to the requested date.If asked for the asset types in the portfolio and the value of each for specific date , provide a list of each asset type with specific date investment value avoid summing values from all dates prior to the requested date.
         Only return the generated sql query. do not return anything else''' 
         try:
 
