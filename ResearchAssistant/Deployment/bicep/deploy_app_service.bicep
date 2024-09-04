@@ -162,7 +162,7 @@ param AIStudioDraftFlowDeploymentName string = ''
 param AIStudioUse string = 'False'
 
 
-var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
+var WebAppImageName = 'DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest'
 
 resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: HostingPlanName
