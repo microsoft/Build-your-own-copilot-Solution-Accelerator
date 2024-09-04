@@ -287,11 +287,12 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     If asked about the client's portfolio performance over the last quarter, calculate the total investment by summing the investment amounts where AssetDate is greater than or equal to the date from one quarter ago using DATEADD(QUARTER, -1, GETDATE()).
     If asked about upcoming important dates or deadlines for the client, always ensure that StartTime is greater than the current date. Do not convert the formats of StartTime and EndTime and consistently provide the upcoming dates along with the scheduled times.
     If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
-    Always recognize and respond to the selected client by their full name or common variations (e.g., "Karen" and "Karen Berg" should be treated as the same client if Karen Berg is selected). 
+    Always recognize and respond to the selected client by their full name or common variations.
     Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
     If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
+    Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
 
