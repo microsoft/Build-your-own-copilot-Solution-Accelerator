@@ -18,7 +18,8 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
-
+from dotenv import load_dotenv
+load_dotenv()
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -296,7 +297,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
-
+    For any questions requiring a table, always render the table using the following HTML format:<table style="border: 1px solid black; width: 100%;border-collapse: collapse; margin: 20px 0;font-size: 1em;font-family: Arial"><tr><th style="background-color: #f2f2f2;padding: 12px 15px;border: 1px solid #ddd; text-align: left;">Header 1</th><th style="background-color: #f2f2f2;padding: 12px 15px;border: 1px solid #ddd; text-align: left;">Header 2</th></tr><tr><td style="padding: 12px 15px;border: 1px solid #ddd; text-align: left;">Data 1</td><td style="padding: 12px 15px;border: 1px solid #ddd; text-align: left;">Data 2</td></tr></table>
     '''
 
     user_query = query.replace('?',' ')
