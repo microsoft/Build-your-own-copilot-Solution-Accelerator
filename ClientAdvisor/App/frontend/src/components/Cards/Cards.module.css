@@ -101,3 +101,11 @@
     justify-content: center;
     margin: 1rem;
   }
+
+  @media screen and (-ms-high-contrast: active), (forced-colors: active) {
+    .nextMeetingHeader{
+        border: 2px solid WindowText;
+        background-color: Window;
+        color: WindowText;
+    }
+  }

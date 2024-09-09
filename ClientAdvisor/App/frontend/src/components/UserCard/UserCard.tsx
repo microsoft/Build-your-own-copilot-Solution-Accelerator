@@ -47,7 +47,7 @@ const UserCard: React.FC<UserCardProps> = ({
 
   return (
     <div className={styles.cardContainer}>
-    <div className={`${styles.userInfo} ${isSelected ? styles.selected : ''}`} onClick={onCardClick}>
+    <div tabIndex={0} className={`${styles.userInfo} ${isSelected ? styles.selected : ''}`} onClick={onCardClick}  >
       <div className={styles.clientName}>{ClientName}</div>
       <div className={styles.nextMeeting}><span><Icon iconName='Calendar' className={styles.calendarIcon} /></span>{NextMeeting}</div>
       <div className={styles.nextMeeting}><span><Icon iconName='Clock' className={styles.calendarIcon} /></span>{NextMeetingTime} - {NextMeetingEndTime}</div>
@@ -68,7 +68,7 @@ const UserCard: React.FC<UserCardProps> = ({
     
   
   
-  <div className={styles.showBtn} onClick={handleShowMoreClick}>
+  <div tabIndex={0} className={styles.showBtn} onClick={handleShowMoreClick} >
   {showMore ? 'Less details' : 'More details'}
 </div>
 </div>
