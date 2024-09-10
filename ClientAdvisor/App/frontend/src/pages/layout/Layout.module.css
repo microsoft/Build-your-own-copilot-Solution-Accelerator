@@ -309,3 +309,11 @@
   position: absolute;
   right: 0.8rem;
 }
+
+@media screen and (-ms-high-contrast: active), (forced-colors: active) {
+  .contentColumn, .welcomeMessage, .shareButtonContainer, .meeting{
+      border: 2px solid WindowText;
+      background-color: Window;
+      color: WindowText;
+  }
+}
