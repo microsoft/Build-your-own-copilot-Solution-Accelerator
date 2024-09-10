@@ -276,6 +276,10 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     settings.max_tokens = 800
     settings.temperature = 0
 
+    # Read the HTML file
+    with open("table.html", "r") as file:
+        html_content = file.read() 
+
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
     If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings including the scheduled time.
@@ -297,9 +301,10 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
-    For any questions requiring a table, always render the table using the following HTML format:<table style="border: 1px solid #C8C6C4; width: 100%;border-collapse: collapse; margin: 20px 0;font-size: 1em;font-family: Segoe UI"><tr><th style="background-color: #F3F2F1;padding: 12px 15px;border: 1px solid #ddd; text-align: left;">Header 1</th><th style="background-color: #F3F2F1;padding: 12px 15px;border: 1px solid #ddd; text-align: left;">Header 2</th></tr><tr><td style="padding: 12px 15px;border: 1px solid #ddd; text-align: left; color:#797775;">Data 1</td><td style="padding: 12px 15px;border: 1px solid #ddd; text-align: left;color:#797775;">Data 2</td></tr></table>
+    For any questions requiring a table, always render the table using the following HTML format:
     '''
-
+    system_message += html_content
+   
     user_query = query.replace('?',' ')
 
     user_query_prompt = f'''{user_query}. Always send clientId as {user_query.split(':::')[-1]} '''
