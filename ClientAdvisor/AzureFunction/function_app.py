@@ -5,7 +5,7 @@ import asyncio
 import os
 
 from typing import Annotated
-
+from dotenv import load_dotenv
 from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatCompletion
 from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.open_ai_prompt_execution_settings import (
@@ -18,7 +18,7 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
-
+load_dotenv()
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -172,7 +172,7 @@ class ChatWithDataPlugin:
         You have access to the client’s meeting call transcripts. 
         If asked, consistently provide the action items from the last or previous client meeting only for past dates.
         If asked, consistently provide the summary of the last meeting with the client only for past dates.
-        If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
+        If asked to summarize each transcript, consistently provide a summary with Date and time for all available transcripts and ensure all call transcript's summary should returned with date and time. (i.e "First Call summary Date Time", "Second Call Summary Date Time" and so on.)
         Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
@@ -287,10 +287,9 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     If asked, provide information about any recent changes in the client's investment allocations.
     If asked about the client's portfolio performance over the last quarter, calculate the total investment by summing the investment amounts where AssetDate is greater than or equal to the date from one quarter ago using DATEADD(QUARTER, -1, GETDATE()).
     If asked about upcoming important dates or deadlines for the client, always ensure that StartTime is greater than the current date. Do not convert the formats of StartTime and EndTime and consistently provide the upcoming dates along with the scheduled times.
-    If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
+    If asked to summarize each transcript, provide a summary with Date and time for all available transcripts and ensure all call transcript's summary should returned with date and time. (i.e "First Call summary: Date Time", "Second Call Summary: Date Time" and so on.)
     Always recognize and respond to the selected client by their full name or common variations.
     Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
-    If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
