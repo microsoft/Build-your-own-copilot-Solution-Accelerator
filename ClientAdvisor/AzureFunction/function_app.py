@@ -170,7 +170,7 @@ class ChatWithDataPlugin:
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
-        If asked, consistently provide the action items from the last or previous client meeting only for past dates.
+        When asked about action items from previous meetings with the client, **ALWAYS provide information only for the most recent dates**.
         If asked, consistently provide the summary of the last meeting with the client only for past dates.
         If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
         Always return time in "HH:mm" format for the client in response.
@@ -257,7 +257,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
         service_id=service_id,
         endpoint=endpoint,
         api_key=api_key,
-        api_version=api_version,
+        api_version="2024-02-01",
         deployment_name=deployment
     )
 
