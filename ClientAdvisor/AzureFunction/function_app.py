@@ -295,9 +295,8 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     Only use the client name returned from database in the response.
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
-    Do not include or reference any client IDs, sensitive data, or personal identifiers in the responses.
+    Do not include or specify any client IDs in the responses.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
-
     '''
 
     user_query = query.replace('?',' ')
