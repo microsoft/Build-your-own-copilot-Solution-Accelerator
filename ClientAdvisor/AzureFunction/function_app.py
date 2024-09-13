@@ -40,7 +40,7 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version="2023-09-01-preview"
+            api_version=api_version
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
         try:
@@ -75,7 +75,7 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version="2023-09-01-preview"
+            api_version=api_version
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
 
@@ -164,15 +164,15 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint= endpoint, #f"{endpoint}/openai/deployments/{deployment}/extensions", 
             api_key=apikey, 
-            api_version="2024-02-01"
+            api_version=api_version
         )
 
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
-        If asked, consistently provide the action items from the last or previous client meeting only for past dates.
+        When asked about action items from previous meetings with the client, **ALWAYS provide information only for the most recent dates**.
         If asked, consistently provide the summary of the last meeting with the client only for past dates.
-        If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
+        If asked to summarize each transcript, consistently provide a summary with Date and time for all available transcripts and ensure all call transcript's summary should returned with date and time. (i.e "First Call summary Date Time", "Second Call Summary Date Time" and so on.)
         Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 

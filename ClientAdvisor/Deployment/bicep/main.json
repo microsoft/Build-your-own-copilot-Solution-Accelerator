@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "13936106300349938200"
+      "templateHash": "13616077515444443649"
     }
   },
   "parameters": {
@@ -1015,7 +1015,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai'), '2022-09-01').outputs.openAIOutput.value.openAPIKey]"
           },
           "azureOpenAIApiVersion": {
-            "value": "2023-09-01-preview"
+            "value": "2024-02-15-preview"
           },
           "azureOpenAIEndpoint": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai'), '2022-09-01').outputs.openAIOutput.value.openAPIEndpoint]"
@@ -1233,7 +1233,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai'), '2022-09-01').outputs.openAIOutput.value.openAPIKey]"
           },
           "azureOpenAIApiVersion": {
-            "value": "2023-07-01-preview"
+            "value": "2024-02-15-preview"
           },
           "azureOpenAIEndpoint": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai'), '2022-09-01').outputs.openAIOutput.value.openAPIEndpoint]"
