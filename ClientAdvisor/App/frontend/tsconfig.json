@@ -15,6 +15,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "typeRoots": ["node_modules/@types"],
     "types": ["vite/client", "jest", "mocha", "node"],
     "noUnusedLocals": false
   },
