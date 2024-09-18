@@ -970,7 +970,6 @@ async def stream_chat_request(request_body, request_headers):
         if client_id is None:
             return jsonify({"error": "No client ID provided"}), 400
         query = request_body.get("messages")[-1].get("content")
-        query = query.strip()
 
         async def generate():
             deltaText = ''
@@ -1550,24 +1549,24 @@ def get_users():
             ClientSummary,
             CAST(LastMeeting AS DATE) AS LastMeetingDate,
             FORMAT(CAST(LastMeeting AS DATE), 'dddd MMMM d, yyyy') AS LastMeetingDateFormatted,
-      FORMAT(LastMeeting, 'HH:mm ') AS LastMeetingStartTime,
-            FORMAT(LastMeetingEnd, 'HH:mm') AS LastMeetingEndTime,
+      FORMAT(LastMeeting, 'hh:mm tt') AS LastMeetingStartTime,
+            FORMAT(LastMeetingEnd, 'hh:mm tt') AS LastMeetingEndTime,
             CAST(NextMeeting AS DATE) AS NextMeetingDate,
             FORMAT(CAST(NextMeeting AS DATE), 'dddd MMMM d, yyyy') AS NextMeetingFormatted,
-            FORMAT(NextMeeting, 'HH:mm') AS NextMeetingStartTime,
-            FORMAT(NextMeetingEnd, 'HH:mm') AS NextMeetingEndTime
+            FORMAT(NextMeeting, 'hh:mm tt') AS NextMeetingStartTime,
+            FORMAT(NextMeetingEnd, 'hh:mm tt') AS NextMeetingEndTime
         FROM (
             SELECT ca.ClientId, Client, Email, AssetValue, ClientSummary, LastMeeting, LastMeetingEnd, NextMeeting, NextMeetingEnd
             FROM (
                 SELECT c.ClientId, c.Client, c.Email, a.AssetValue, cs.ClientSummary
                 FROM Clients c
-                 JOIN (
-                SELECT a.ClientId, a.Investment AS AssetValue
+                JOIN (
+                    SELECT a.ClientId, a.Investment AS AssetValue
                     FROM (
                         SELECT ClientId, sum(Investment) as Investment,
                             ROW_NUMBER() OVER (PARTITION BY ClientId ORDER BY AssetDate DESC) AS RowNum
                         FROM Assets
-         group by ClientId,AssetDate
+                group by ClientId,AssetDate
                     ) a
                     WHERE a.RowNum = 1
                 ) a ON c.ClientId = a.ClientId
