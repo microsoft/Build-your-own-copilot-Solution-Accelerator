@@ -2,12 +2,12 @@ name: Tests
 
 on:
   push:
-    branches: [PSL-Workflow-8079]
+    branches: PSL-US-7770-UnitTest
     # Trigger on changes in these specific paths
     paths:
       - 'ClientAdvisor/**'
   pull_request:
-    branches: [PSL-Workflow-8079]
+    branches: PSL-US-7770-UnitTest
     types:
       - opened
       - ready_for_review
