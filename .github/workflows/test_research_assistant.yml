@@ -2,12 +2,12 @@ name: Tests
 
 on:
   push:
-    branches: PSL-US-7770-UnitTest
+    branches: main
     # Trigger on changes in these specific paths
     paths:
       - 'ResearchAssistant/**'
   pull_request:
-    branches: PSL-US-7770-UnitTest
+    branches: main
     types:
       - opened
       - ready_for_review
