@@ -18,6 +18,7 @@ var resourceGroupName = resourceGroup().name
 
 var solutionLocation = resourceGroupLocation
 var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/'
+var functionAppversion = 'latest'
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
@@ -120,6 +121,7 @@ module azureFunctions 'deploy_azure_function_script.bicep' = {
     sqlDbPwd:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
     identity:managedIdentityModule.outputs.managedIdentityOutput.id
     baseUrl:baseUrl
+    functionAppVersion: functionAppversion
   }
   dependsOn:[storageAccountModule]
 }
