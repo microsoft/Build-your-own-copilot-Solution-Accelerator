@@ -17,7 +17,7 @@ var resourceGroupName = resourceGroup().name
 // var subscriptionId  = subscription().subscriptionId
 
 var solutionLocation = resourceGroupLocation
-var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/'
+var baseUrl = 'https://raw.githubusercontent.com/Roopan-Microsoft/rp0907/main/ClientAdvisor/'
 var functionAppversion = 'latest'
 
 // ========== Managed Identity ========== //
