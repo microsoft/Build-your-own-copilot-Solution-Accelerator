@@ -32,4 +32,4 @@ jobs:
           az deployment group create \
             --resource-group pslautomationbyoa \
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-            --parameters environmentName=pslautomation location=eastus2
+            --parameters solutionPrefix=pslre
