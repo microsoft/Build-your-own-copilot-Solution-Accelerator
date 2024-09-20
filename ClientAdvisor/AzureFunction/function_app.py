@@ -4,7 +4,6 @@ from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import asyncio
 import os
 from typing import Annotated
-from dotenv import  load_dotenv
 from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatCompletion
 from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.open_ai_prompt_execution_settings import (
@@ -17,7 +16,6 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
-load_dotenv()
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -280,7 +278,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
     Always recognize and respond to the selected client by their full name or common variations.
-    Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion.
+    Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
     If asked to Summarize each call transcript then You must have to Explain all call transcripts for that Client in Format as - First Call Summary and Ensure that whatever call transcripts do we have for the client must included in response.
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
