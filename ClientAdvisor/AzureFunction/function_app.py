@@ -170,9 +170,9 @@ class ChatWithDataPlugin:
         You have access of client’s meeting call transcripts So ensure never respond like "I cannot answer this question from the data available", if asked summary of calls.
         If asked, consistently provide the action items from the last or previous client meeting only for past dates.
         If asked to summarize each call transcript,Always must List out all call transcripts in short with Date and time and ensure every call transcript's summary must be returned with date and time in format of "[Date] "HH:mm"". (i.e "First Call summary Date Time", "Second Call Summary Date Time" and so on.).
-        If asked to summarize each transcripts, Do not stop after giving first call summary,Always continue with List out of call transcript's summary for that client with Date and Time in (Summary of [Date] "HH:mm") format.
+        If asked to summarize each transcripts, Do not stop after giving first call summary,Always continue with List out of all call transcript's summary for that client with Date and Time in (Summary of [Date] "HH:mm") format.(i.e "First Call summary Date Time", "Second Call Summary Date Time" and so on.)
         If asked,Explain or Summarize each call transcript,Respond with all calls discussion summary without omission and include them in chronological order and Response should be consistent.
-        if summaries are not available then after explaining of calls transcript give the message at last as - "Unfortunately, I am not able to summaries for number of (Whatever call transcripts do we have for the client - how many you summarized) call transcripts..
+        If summaries are not available then after explaining of calls transcript give the message at last as - "Unfortunately, I am not able to summaries for number of (Whatever call transcripts do we have for the client - how many you summarized) call transcripts..
         Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
