@@ -3,7 +3,7 @@ import openai
 from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import asyncio
 import os
-
+from dotenv import load_dotenv
 from typing import Annotated
 
 from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
@@ -103,7 +103,6 @@ class ChatWithDataPlugin:
         Always return time in "HH:mm" format for the client meetings in response.
         If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings, including the scheduled time in the query.
         If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date in the query.
-        If asked, provide a summary of the most recent meeting with the client from past dates in the query.
         If asked, provide information on the client's investment risk tolerance level in the query.
         If asked, provide information on the client's portfolio performance in the query.
         If asked, provide information about the client's top-performing investments in the query.
@@ -169,8 +168,12 @@ class ChatWithDataPlugin:
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
+        You have access of client’s meeting call transcripts So ensure never respond like "I cannot answer this question from the data available", if asked summary of calls.
         If asked, consistently provide the action items from the last or previous client meeting only for past dates.
-        If asked, consistently provide the summary of the last meeting with the client only for past dates.
+        If asked to summarize each call transcript,Always must List out all call transcripts in short with Date and time and ensure every call transcript's summary must be returned with date and time in format of "[Date] "HH:mm"". (i.e "First Call summary Date Time", "Second Call Summary Date Time" and so on.).
+        If asked to summarize each transcripts, Do not stop after giving first call summary,Always continue with List out of call transcript's summary for that client with Date and Time in (Summary of [Date] "HH:mm") format.
+        If asked,Explain or Summarize each call transcript,Respond with all calls discussion summary without omission and include them in chronological order and Response should be consistent.
+        if summaries are not available then after explaining of calls transcript give the message at last as - "Unfortunately, I am not able to summaries for number of (Whatever call transcripts do we have for the client - how many you summarized) call transcripts..
         Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
@@ -275,17 +278,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
 
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
-    If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings, including the scheduled time.
-    If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date.
-    If asked, provide a summary of the most recent meeting with the client from past dates.
-    If asked, provide information on the client's investment risk tolerance level.
-    If asked, provide information on the client's portfolio performance.
-    If asked, provide the action items from the last or previous client meeting for past dates.
-    If asked, provide information about the client's top-performing investments.
-    If asked, provide information about any recent changes in the client's investment allocations.
-    If asked about the client's portfolio performance over the last quarter, calculate the total investment by summing the investment amounts where AssetDate is greater than or equal to the date from one quarter ago using DATEADD(QUARTER, -1, GETDATE()).
-    If asked about upcoming important dates or deadlines for the client, always ensure that StartTime is greater than the current date. Do not convert the formats of StartTime and EndTime and consistently provide the upcoming dates along with the scheduled times.
-    Always recognize and respond to the selected client by their full name or common variations (e.g., "Karen" and "Karen Berg" should be treated as the same client if Karen Berg is selected). 
+    Always recognize and respond to the selected client by their full name or common variations.
     Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
