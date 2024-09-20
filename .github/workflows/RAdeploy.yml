@@ -24,6 +24,19 @@ jobs:
 
       - name: Install Bicep CLI
         run: az bicep install
+      
+      - name: Check and Create Resource Group
+        id: check_create_rg
+        run: |
+          set -e  
+          echo "Checking if resource group exists..."
+          rg_exists=$(az group exists --name pslautomationbyoa)
+          if [ "$rg_exists" = "false" ]; then
+            echo "Resource group does not exist. Creating..."
+            az group create --name pslautomationbyoa --location eastus || { echo "Error creating resource group"; exit 1; }
+          else
+            echo "Resource group already exists."
+          fi
 
       - name: Deploy Bicep Template
         id: deploy
