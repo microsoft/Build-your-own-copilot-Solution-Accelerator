@@ -3,7 +3,6 @@ import openai
 from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import asyncio
 import os
-from dotenv import load_dotenv
 from typing import Annotated
 
 from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
