@@ -29,8 +29,6 @@ jobs:
         id: deploy
         run: |
           set -e
-          az deployment sub create \
-            --name autoDemo \
-            --location eastus \
+          az deployment group create \
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
             --parameters environmentName=pslautomation location=eastus2
