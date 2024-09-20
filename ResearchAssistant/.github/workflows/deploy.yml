@@ -1,0 +1,36 @@
+name: Deploy Azure Resources:ResearchAssitent
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az --version  # Verify installation
+
+      - name: Login to Azure
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Install Bicep CLI
+        run: az bicep install
+
+      - name: Deploy Bicep Template
+        id: deploy
+        run: |
+          set -e
+          az deployment sub create \
+            --name autoDemo \
+            --location eastus \
+            --template-file ResearchAssistant/Deployment/bicep/main.bicep \
+            --parameters environmentName=pslautomation location=eastus2
