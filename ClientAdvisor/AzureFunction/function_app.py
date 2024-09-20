@@ -4,7 +4,7 @@ from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import asyncio
 import os
 from typing import Annotated
-
+from dotenv import  load_dotenv
 from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatCompletion
 from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.open_ai_prompt_execution_settings import (
@@ -17,7 +17,7 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
-
+load_dotenv()
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -167,12 +167,14 @@ class ChatWithDataPlugin:
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
-        You have access of client’s meeting call transcripts So ensure never respond like "I cannot answer this question from the data available", if asked summary of calls.
-        If asked, consistently provide the action items from the last or previous client meeting only for past dates.
-        If asked to summarize each call transcript,Always must List out all call transcripts in short with Date and time and ensure every call transcript's summary must be returned with date and time in format of "[Date] "HH:mm"". (i.e "First Call summary Date Time", "Second Call Summary Date Time" and so on.).
-        If asked to summarize each transcripts, Do not stop after giving first call summary,Always continue with List out of all call transcript's summary for that client with Date and Time in (Summary of [Date] "HH:mm") format.(i.e "First Call summary Date Time", "Second Call Summary Date Time" and so on.)
-        If asked,Explain or Summarize each call transcript,Respond with all calls discussion summary without omission and include them in chronological order and Response should be consistent.
-        If summaries are not available then after explaining of calls transcript give the message at last as - "Unfortunately, I am not able to summaries for number of (Whatever call transcripts do we have for the client - how many you summarized) call transcripts..
+        You have access of client’s meeting call transcripts,if asked summary of calls, Do never respond like "I cannot answer this question from the data available".
+        If asked to Summarize each call transcript then You must have to respond as you are responding on "What calls transcript do we have?" prompt.
+        When asked to summarize each call transcripts for the client, strictly follow the format: "First Call Summary [Date and Time of that call]".
+        Provide summaries for all available calls in chronological order without stopping until all calls not included in response.
+        Ensure that each summary is detailed and covers only main points discussed during the call.
+        If asked to Summarization of each call you must always have to strictly include all calls transcript available in client’s meeting call transcripts for that client.
+        Before stopping the response check the number of transcript and If there are any calls that cannot be summarized, at the end of your response, include: "Unfortunately, I am not able to summarize [X] out of [Y] call transcripts." Where [X] is the number of transcripts you couldn't summarize, and [Y] is the total number of transcripts.
+        Ensure all summaries are consistent and uniform, adhering to the specified format for each call.
         Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
@@ -278,7 +280,8 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
     Always recognize and respond to the selected client by their full name or common variations.
-    Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
+    Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion.
+    If asked to Summarize each call transcript then You must have to Explain all call transcripts for that Client in Format as - First Call Summary and Ensure that whatever call transcripts do we have for the client must included in response.
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
