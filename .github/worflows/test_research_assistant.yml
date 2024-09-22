@@ -36,7 +36,8 @@ jobs:
       - name: Run Backend Tests with Coverage
         run: |
           cd ResearchAssistant/App
-          python -m pytest --cov=app --cov-report=xml --cov-report=html --cov-report=term-missing --junitxml=coverage-junit.xml      - uses: actions/upload-artifact@v4
+          python -m pytest --cov=app --cov-report=xml --cov-report=html --cov-report=term-missing --junitxml=coverage-junit.xml     
+      - uses: actions/upload-artifact@v4
         with:
           name: research-assistant-coverage
           path: |
