@@ -7,3 +7,5 @@ python-dotenv==1.0.0
 azure-cosmos==4.5.0
 pytest
 pytest-asyncio
+pytest-cov>=5.0
+coverage>=6.0
