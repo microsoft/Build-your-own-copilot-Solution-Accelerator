@@ -73,4 +73,4 @@ jobs:
           output="${{ env.output }}"
           curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \
-            -d '{"failureMessage": $output}'
+            -d "{\"failureMessage\": \"$output\"}"
