@@ -55,13 +55,16 @@ jobs:
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
             --parameters solutionPrefix=pslre2 --debug 2>&1) || {
               echo "Deployment failed. Here is the error message:"
+              echo "output=$output" >> $GITHUB_ENV
               echo "$output"
+              echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"              
               exit 1
             }
       
       - name: Send Notification on Failure
         if: failure()
         run: |
+          output="${{ env.output }}"
           curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \
             -d '{"failureMessage": "The deployment failed. Please find below more details. $output"}'
