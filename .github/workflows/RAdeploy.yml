@@ -53,4 +53,4 @@ jobs:
           az deployment group create \
             --resource-group pslautomationbyoa2 \
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=pslre
+            --parameters solutionPrefix=pslre2
