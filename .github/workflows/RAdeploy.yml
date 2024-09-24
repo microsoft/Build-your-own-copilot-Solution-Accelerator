@@ -30,27 +30,27 @@ jobs:
         run: |
           set -e  
           echo "Checking if resource group exists..."
-          rg_exists=$(az group exists --name pslautomationbyoa)
+          rg_exists=$(az group exists --name pslautomationbyoa2)
           if [ "$rg_exists" = "false" ]; then
             echo "Resource group does not exist. Creating..."
-            az group create --name pslautomationbyoa --location eastus || { echo "Error creating resource group"; exit 1; }
+            az group create --name pslautomationbyoa2 --location eastus || { echo "Error creating resource group"; exit 1; }
           else
             echo "Resource group already exists."
           fi
 
           
-      - name: Assign Role to Service Principal
-        id: assign_role
-        run: |
-          set -e
-          echo "Assigning User Access Administrator role to the service principal..."
-          az role assignment create --assignee ${{ secrets.AZURE_CLIENT_ID }} --role "User Access Administrator" --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/pslautomationbyoa || { echo "Error assigning role"; exit 1; }
+      # - name: Assign Role to Service Principal
+      #   id: assign_role
+      #   run: |
+      #     set -e
+      #     echo "Assigning User Access Administrator role to the service principal..."
+      #     az role assignment create --assignee ${{ secrets.AZURE_CLIENT_ID }} --role "User Access Administrator" --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/pslautomationbyoa2 || { echo "Error assigning role"; exit 1; }
           
       - name: Deploy Bicep Template
         id: deploy
         run: |
           set -e
           az deployment group create \
-            --resource-group pslautomationbyoa \
+            --resource-group pslautomationbyoa2 \
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
             --parameters solutionPrefix=pslre
