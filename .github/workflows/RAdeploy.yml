@@ -44,7 +44,7 @@ jobs:
         run: |
           set -e
           echo "Assigning User Access Administrator role to the service principal..."
-          az role assignment create --assignee ${{ secrets.AZURE_CLIENT_ID }} --role "Owner" --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/pslautomationbyoa || { echo "Error assigning role"; exit 1; }
+          az role assignment create --assignee ${{ secrets.AZURE_CLIENT_ID }} --role "User Access Administrator" --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/pslautomationbyoa || { echo "Error assigning role"; exit 1; }
           
       - name: Deploy Bicep Template
         id: deploy
