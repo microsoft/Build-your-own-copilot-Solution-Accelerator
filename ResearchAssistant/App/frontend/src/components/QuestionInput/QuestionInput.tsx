@@ -80,7 +80,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                 tabIndex={0}
                 aria-label="Ask question button"
                 onClick={sendQuestion}
-                onKeyDown={e => e.key === "Enter" || e.key === " " ? sendQuestion() : null}
+                onKeyDown={e => e.key === "Enter" ? sendQuestion() : null}
             >
                 { sendQuestionDisabled ? 
                     <SendRegular className={styles.questionInputSendButtonDisabled}/>

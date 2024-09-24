@@ -1,24 +1,27 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QuestionInput } from './QuestionInput';
+import { renderWithContext, mockDispatch,defaultMockState } from '../../test/test.utils';
 
 const mockOnSend = jest.fn();
+const documentSectionData = [
+  { title: 'Introduction', content: 'This is the introduction section.', metaPrompt: 'Meta for Introduction' },
+  { title: 'Methods', content: 'Methods content here.', metaPrompt: 'Meta for Methods' }
+];
 
-jest.mock('../../state/AppProvider', () => ({
-    AppStateContext: {
-        state: {
-            documentSections: [],
-            researchTopic: '',
-            showInitialChatMessage: true,
-            sidebarSelection: null,
-        },
-        dispatch: jest.fn(),
-    },
- }));
+const renderComponent = (props = {}) => {
+  return renderWithContext(
+    <QuestionInput
+      onSend={mockOnSend}
+      disabled={false}
+      {...props}
+    />
+  );
+};
 
 describe('QuestionInput Component', () => {
-   afterEach(() => {
-       jest.clearAllMocks();
-   });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
    test('renders correctly with placeholder', () => {
        render(<QuestionInput onSend={mockOnSend} disabled={false} placeholder="Ask a question" />);
@@ -77,9 +80,67 @@ describe('QuestionInput Component', () => {
     //expect(screen.getByTestId('send-icon')).toBeInTheDocument()
   })
 
-  test('send button shows Send SVG when enabled', () => {
-    render(<QuestionInput onSend={mockOnSend} disabled={false} />)
-   // expect(screen.getByAltText('Send Button')).toBeInTheDocument()
-  })
+  it("should call sendQuestion on Enter key press", () => {
+    const { getByRole } = renderComponent();
+
+    const input = getByRole("textbox");
+    
+    fireEvent.change(input, { target: { value: "Test question" } });
+    fireEvent.keyDown(input, { key: "Enter", code: "Enter" });
+
+    expect(mockOnSend).toHaveBeenCalledWith("Test question");
+});
+
+it("should not call sendQuestion on other key press via onKeyDown", () => {
+    const { getByRole } = renderComponent();
+
+    const input = getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "Test question" } });
+    fireEvent.keyDown(input, { key: "a", code: "KeyA" });
+
+    expect(mockOnSend).not.toHaveBeenCalled();
+});
+
+
+it("should not call sendQuestion if input is empty", () => {
+    const { getByRole } = renderComponent();
+
+    const input = getByRole("textbox");
+    fireEvent.change(input, { target: { value: "" } });
+    fireEvent.keyDown(input, { key: "Enter", code: "Enter" });
+
+    expect(mockOnSend).not.toHaveBeenCalled();
+});
+
+it("should not call sendQuestion if disabled", () => {
+    const { getByRole } = renderComponent({ disabled: true });
+
+    const input = getByRole("textbox");
+    fireEvent.change(input, { target: { value: "Test question" } });
+    fireEvent.keyDown(input, { key: "Enter", code: "Enter" });
+
+    expect(mockOnSend).not.toHaveBeenCalled();
+});
+it("should set the initial question and dispatch when showInitialChatMessage is true", () => {
+    // Mock the initial state with showInitialChatMessage as true and a research topic
+    const mockState = {
+        ...defaultMockState,
+        showInitialChatMessage: true,
+        researchTopic: "Test Research Topic"
+    };
+
+    const { getByRole } = renderWithContext(<QuestionInput onSend={mockOnSend} disabled={false} />, mockState);
+
+    // The input box should now contain the lowercased research topic
+    const input = getByRole("textbox");
+    expect(input).toHaveValue("test research topic");  // researchTopic.toLowerCase()
+
+    // Verify that dispatch was called to reset the showInitialChatMessage flag
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_SHOW_INITIAL_CHAT_MESSAGE_FLAG', payload: false });
+});
+
+
+
 
 })
