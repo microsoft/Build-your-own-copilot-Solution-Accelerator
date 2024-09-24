@@ -54,8 +54,10 @@ jobs:
             --resource-group pslautomationbyoa2 \
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
             --parameters solutionPrefix=pslre2 --debug 2>&1) || {
-              echo "Deployment failed. Here is the error message:"
+              echo "Deployment failed. Here is the error mesage:"
+              echo "###########################################################################"              
               echo "output=$output" >> $GITHUB_ENV
+              echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"              
               echo "$output"
               echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"              
               exit 1
