@@ -38,6 +38,14 @@ jobs:
             echo "Resource group already exists."
           fi
 
+          
+      - name: Assign Role to Service Principal
+        id: assign_role
+        run: |
+          set -e
+          echo "Assigning User Access Administrator role to the service principal..."
+          az role assignment create --assignee ${{ secrets.AZURE_CLIENT_ID }} --role "User Access Administrator" --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/pslautomationbyoa || { echo "Error assigning role"; exit 1; }
+          
       - name: Deploy Bicep Template
         id: deploy
         run: |
