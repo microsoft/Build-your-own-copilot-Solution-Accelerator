@@ -77,7 +77,7 @@ jobs:
           # Construct the email body
           EMAIL_BODY=$(cat <<EOF
           {
-            "body": "<p>Dear Team,</p><p>We would like to inform you that the CWYD Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Run ID:</strong> ${RUN_URL}<br><strong>Failure Message:</strong> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
+            "body": "<p>Dear Team,</p><p>We would like to inform you that the Research Assistant Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
           }
           EOF
           )
