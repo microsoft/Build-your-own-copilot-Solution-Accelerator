@@ -65,7 +65,7 @@ jobs:
           echo "******************************************************************************"
 
           # Extract only the lines containing 'error' or 'failed'
-          error_output=$(grep -i -e "error" -e "failed" "$output_file" || true)
+          error_output=$(grep -i -e "Error" "$output_file" || true)
 
           echo "===============================================================================" 
           cat "$error_output"
