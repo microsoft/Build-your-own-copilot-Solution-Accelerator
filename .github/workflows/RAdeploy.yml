@@ -50,19 +50,20 @@ jobs:
         id: deploy
         run: |
           set -e
-          output=$(az deployment group create \
+          output_file=$(mktemp)
+          az deployment group create \
             --resource-group pslautomationbyoa2 \
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=pslre2  2>&1)
+            --parameters solutionPrefix=pslre2 \
+            &> "$output_file" || echo "Command failed, capturing output and error."
           
-          echo "7777777777777777777777777777777777777777777777777777777"
-          echo "$output"
-          echo "8888888888888888888888888888888888888888888888888888888"
-            
+          output=$(cat "$output_file")
+          echo "===============================================================================" 
+          echo "$output
           echo "******************************************************************************" 
           echo "output=$output" >> $GITHUB_ENV
           echo "******************************************************************************" 
-
+          rm "$output_file"
       
       - name: Send Notification on Failure
         if: failure()
