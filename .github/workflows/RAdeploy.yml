@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
-    # Trigger on changes in these specific paths
-    paths:
-      - 'ResearchAssistant/**'
+    # # Trigger on changes in these specific paths
+    # paths:
+    #   - 'ResearchAssistant/**'
 
 jobs:
   deploy:
