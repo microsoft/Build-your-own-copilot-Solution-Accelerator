@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-    # Trigger on changes in these specific paths
     paths:
       - 'ResearchAssistant/**'
 
@@ -41,46 +40,14 @@ jobs:
             echo "Resource group already exists."
           fi
 
-          
-      ## - name: Assign Role to Service Principal
-      #   id: assign_role
-      #   run: |
-      #     set -e
-      #     echo "Assigning Owner role to the service principal..."
-      #     az role assignment create --assignee ${{ secrets.AZURE_CLIENT_ID }} --role "Owner" --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }} || { echo "Error assigning role"; exit 1; }
-          
       - name: Deploy Bicep Template
         id: deploy
         run: |
-          set -e
-          output_file=$(mktemp)
           az deployment group create \
             --resource-group pslautomationbyoa2 \
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-            --parameters \
-            &> "$output_file" || echo "Command failed, capturing output and error."
-          
-          echo "===============================================================================" 
-          cat "$output_file"
-          echo "******************************************************************************"
-
-          # Extract only the lines containing 'error' or 'failed'
-          error_output=$(grep -i -e "ERROR:" "$output_file" || true)
-
-          echo "===============================================================================" 
-          cat "$error_output"
-          echo "******************************************************************************"
-
-
-          if [[ -n "$error_output" ]]; then
-            echo "error_output=$error_output" >> $GITHUB_ENV
-          else
-            echo "No errors found in the output."
-          fi
-
-          echo "******************************************************************************" 
-          rm "$output_file"
-            
+            --parameters solutionPrefix=pslre2 \
+         
       - name: Send Notification on Failure
         if: failure()
         run: |
