@@ -1,4 +1,4 @@
-name: Deploy Azure Resources:ResearchAssitent
+name: Deploy Azure Resources:ClientAdvisior
 
 on:
   push:
@@ -30,48 +30,26 @@ jobs:
         run: |
           set -e  
           echo "Checking if resource group exists..."
-          rg_exists=$(az group exists --name pslautomationbyoa2)
+          rg_exists=$(az group exists --name pslautomationca)
           if [ "$rg_exists" = "false" ]; then
             echo "Resource group does not exist. Creating..."
             az group create --name pslautomationbyoa2 --location eastus || { echo "Error creating resource group"; exit 1; }
           else
             echo "Resource group already exists."
           fi
-
-          
-      # - name: Assign Role to Service Principal
-      #   id: assign_role
-      #   run: |
-      #     set -e
-      #     echo "Assigning Owner role to the service principal..."
-      #     az role assignment create --assignee ${{ secrets.AZURE_CLIENT_ID }} --role "Owner" --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }} || { echo "Error assigning role"; exit 1; }
           
       - name: Deploy Bicep Template
         id: deploy
         run: |
           set -e
-          output_file=$(mktemp)
           az deployment group create \
             --resource-group pslautomationbyoa2 \
-            --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=pslre2 \
-            &> "$output_file" || echo "Command failed, capturing output and error."
-          
-          output=$(cat "$output_file")
-          echo "===============================================================================" 
-          echo "$output"
-          echo "******************************************************************************" 
-          echo "output=$output" >> $GITHUB_ENV
-          echo "******************************************************************************" 
-          rm "$output_file"
+            --template-file ClientAdvisor/Deployment/bicep/main.bicep \
+            --parameters solutionPrefix=pslca 
       
       - name: Send Notification on Failure
         if: failure()
         run: |
-          output="${{ env.output }}"
-          echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-          echo "$output"
-          echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
           curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \
             -d "{\"failureMessage\": \"$output\"}"
