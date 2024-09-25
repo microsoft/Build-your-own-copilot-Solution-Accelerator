@@ -72,6 +72,7 @@ jobs:
       - name: Send Notification on Failure
         if: failure()
         run: |
+          echo "GitHub Context:"     echo "${{ toJson(github) }}"
           output="${{ env.output }}"
           echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
           echo "$output"
