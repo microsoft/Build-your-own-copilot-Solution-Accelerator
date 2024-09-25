@@ -42,7 +42,7 @@ jobs:
           fi
 
           
-      # - name: Assign Role to Service Principal
+      ## - name: Assign Role to Service Principal
       #   id: assign_role
       #   run: |
       #     set -e
