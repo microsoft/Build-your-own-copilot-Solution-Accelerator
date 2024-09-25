@@ -48,7 +48,7 @@ jobs:
           az deployment group create \
             --resource-group pslautomationbyoa2 \
             --template-file ClientAdvisor/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=pslca 
+            --parameters solutionPrefix=pslca cosmosLocation=eastus2
       
       - name: Send Notification on Failure
         if: failure()
