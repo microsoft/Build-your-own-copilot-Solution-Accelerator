@@ -84,4 +84,4 @@ jobs:
            )
            curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \
-            -d "{\"failureMessage\": $EMAIL_BODY}\"} || echo "Failed to send notification"
+            -d "{\"failureMessage\": "$EMAIL_BODY"}\"} || echo "Failed to send notification"
