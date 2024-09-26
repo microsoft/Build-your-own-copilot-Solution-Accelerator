@@ -37,14 +37,17 @@ jobs:
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
           echo "##########################"
           echo "$RESOURCE_GROUP_NAME"
-          echo "$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+          echo "111111111111111111111111111"
           echo "${{ env.RESOURCE_GROUP_NAME }}"
+          echo "222222222222222222222222222"
+          echo "resssoucce grp: ${{ env.RESOURCE_GROUP_NAME }}"
           echo "888888888888888888888888888"
           echo "Generated SOLUTION_PREFIX: ${RESOURCE_GROUP_NAME}" 
       
       - name: Check and Create Resource Group
         id: check_create_rg
         run: |
+          echo "ressource grp:  ${{ env.RESOURCE_GROUP_NAME }}"
           set -e  
           echo "Checking if resource group exists..."
           rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
@@ -67,15 +70,6 @@ jobs:
           echo "ssssssssssssssssssssssssssssssssssssssssssssssssssss"
           echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}" 
 
-      - name: Deploy Bicep Template
-        id: deploy
-        run: |
-          set -e
-          az deployment group create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=pslre2 
-
       - name: Delete Bicep Deployment
         run: |
           set -e  
@@ -87,6 +81,17 @@ jobs:
                 --name ${{ env.RESOURCE_GROUP_NAME }} \
                 --yes \
                 --no-wait
+
+      - name: Deploy Bicep Template
+        id: deploy
+        run: |
+          set -e
+          az deployment group create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --template-file ResearchAssistant/Deployment/bicep/main.bicep \
+            --parameters solutionPrefix=pslre2 
+
+    
           
          
       - name: Send Notification on Failure
