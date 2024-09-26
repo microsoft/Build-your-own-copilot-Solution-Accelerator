@@ -35,7 +35,7 @@ jobs:
           rg_exists=$(az group exists --name pslautomationca)
           if [ "$rg_exists" = "false" ]; then
             echo "Resource group does not exist. Creating..."
-            az group create --name pslautomationbyoa2 --location eastus || { echo "Error creating resource group"; exit 1; }
+            az group create --name pslautomationbyoa2 --location northcentralus || { echo "Error creating resource group"; exit 1; }
           else
             echo "Resource group already exists."
           fi
