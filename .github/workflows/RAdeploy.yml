@@ -46,7 +46,7 @@ jobs:
           az deployment group create \
             --resource-group pslautomationbyoa2 \
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=pslre2 \
+            --parameters  \
          
       - name: Send Notification on Failure
         if: failure()
