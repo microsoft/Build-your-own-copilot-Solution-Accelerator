@@ -101,18 +101,6 @@ class ChatWithDataPlugin:
         Do not include assets values unless asked for.
         Always use ClientId = {clientid} in the query filter.
         Always return client name in the query.
-        If a question involves date and time, always use FORMAT(YourDateTimeColumn, 'yyyy-MM-dd HH:mm:ss') in the query.
-        If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings including the scheduled time and don't filter with "LIMIT 1"  in the query.
-        If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date in the query.
-        If asked, provide a summary of the most recent meeting with the client from past dates in the query.
-        If asked, provide information on the client's investment risk tolerance level in the query.
-        If asked, provide information on the client's portfolio performance in the query.
-        If asked, provide information about the client's top-performing investments in the query.
-        If asked, provide information about any recent changes in the client's investment allocations in the query.
-        If asked about the client's portfolio performance over the last quarter, calculate the total investment by summing the investment amounts where AssetDate is greater than or equal to the date from one quarter ago using DATEADD(QUARTER, -1, GETDATE()) in the query.
-        If asked about upcoming important dates or deadlines for the client, always ensure that StartTime is greater than the current date. Do not convert the formats of StartTime and EndTime and consistently provide the upcoming dates along with the scheduled times in the query.
-        To determine the asset value, sum the investment values for the most recent available date.  If asked for the asset types in the portfolio and the present of each, provide a list of each asset type with its most recent investment value.
-        If the user inquires about asset on a specific date ,sum the investment values for the specific date avoid summing values from all dates prior to the requested date.If asked for the asset types in the portfolio and the value of each for specific date , provide a list of each asset type with specific date investment value avoid summing values from all dates prior to the requested date.
         Only return the generated sql query. do not return anything else''' 
         try:
 
@@ -171,10 +159,6 @@ class ChatWithDataPlugin:
         query = question
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts. 
-        If asked, consistently provide the action items from the last or previous client meeting only for past dates.
-        If asked, consistently provide the summary of the last meeting with the client only for past dates.
-        If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
-        Always return time in "HH:mm" format for the client in response.
         You can use this information to answer questions about the clients'''
 
         completion = client.chat.completions.create(
@@ -233,7 +217,7 @@ class ChatWithDataPlugin:
 
         answer = completion.choices[0].message.content
         return answer
-    
+
 # Get data from Azure Open AI
 async def stream_processor(response):
     async for message in response:
@@ -282,23 +266,8 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
 
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
-    If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings including the scheduled time.
-    If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date.
-    If asked, provide a summary of the most recent meeting with the client from past dates.
-    If asked, provide information on the client's investment risk tolerance level.
-    If asked, provide information on the client's portfolio performance.
-    If asked, provide the action items from the last or previous client meeting for past dates.
-    If asked, provide information about the client's top-performing investments.
-    If asked, provide information about any recent changes in the client's investment allocations.
-    If asked about the client's portfolio performance over the last quarter, calculate the total investment by summing the investment amounts where AssetDate is greater than or equal to the date from one quarter ago using DATEADD(QUARTER, -1, GETDATE()).
-    If asked about upcoming important dates or deadlines for the client, always ensure that StartTime is greater than the current date. Do not convert the formats of StartTime and EndTime and consistently provide the upcoming dates along with the scheduled times.
-    If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
-    Always recognize and respond to the selected client by their full name or common variations.
-    Ensure responses are consistent and up-to-date, clearly stating the date of the data to avoid confusion
-    If asked to summarize each transcript, provide a summary for all available transcripts and ensure all call transcript's summary should returned.
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
-    Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
     For any questions requiring a table, always render the table using the following HTML format:

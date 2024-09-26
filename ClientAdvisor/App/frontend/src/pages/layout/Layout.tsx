@@ -157,7 +157,7 @@ const Layout = () => {
       />
       <div className={styles.cardsColumn}>
         <div className={styles.selectClientHeading}>
-          <h4 className={styles.meeting}>Upcoming meetings</h4>
+          <h3 className={styles.meeting}>Upcoming meetings</h3>
         </div>
 
         <Cards onCardClick={handleCardClick} />
@@ -191,7 +191,7 @@ const Layout = () => {
                     <div className={styles.welcomeCardIcon}>
                       <img src={welcomeIcon} alt="Icon" className={styles.icon} />
                     </div>
-                    <h3 className={styles.welcomeTitle}>Select a client</h3>
+                    <h2 className={styles.welcomeTitle}>Select a client</h2>
                     <p className={styles.welcomeText}>
                       You can ask questions about their portfolio details and previous conversations or view their
                       profile.
