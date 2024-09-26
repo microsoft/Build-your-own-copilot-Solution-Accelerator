@@ -35,15 +35,12 @@ jobs:
           COMMON_PART="pslautomationRes"
           UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
-          echo "888888888888888888888888888"
           echo "Generated SOLUTION_PREFIX: ${UNIQUE_RG_NAME}" 
-          echo "999999999999999999999999999"
-          echo "Generated SOLUTION_PREFIX:  ${{ env.RESOURCE_GROUP_NAME }}" 
+  
       
       - name: Check and Create Resource Group
         id: check_create_rg
         run: |
-          echo "ressource grp:  ${{ env.RESOURCE_GROUP_NAME }}"
           set -e  
           echo "Checking if resource group exists..."
           rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
@@ -60,12 +57,20 @@ jobs:
           set -e
           COMMON_PART="psl"
           TIMESTAMP=$(date +%s)  
-          UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 2) 
+          UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
           UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
           echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
-          echo "ssssssssssssssssssssssssssssssssssssssssssssssssssss"
           echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}" 
 
+      - name: Deploy Bicep Template
+        id: deploy
+        run: |
+          set -e
+          az deployment group create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --template-file ResearchAssistant/Deployment/bicep/main.bicep \
+            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
+            
       - name: Delete Bicep Deployment
         run: |
           set -e  
@@ -80,15 +85,6 @@ jobs:
           else
             echo "Resource group does not exists."
           fi
-
-      - name: Deploy Bicep Template
-        id: deploy
-        run: |
-          set -e
-          az deployment group create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=pslre2 
 
       - name: Send Notification on Failure
         if: failure()
