@@ -71,6 +71,7 @@ jobs:
             --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
             
       - name: Delete Bicep Deployment
+        if: success()
         run: |
           set -e  
           echo "Checking if resource group exists..."
