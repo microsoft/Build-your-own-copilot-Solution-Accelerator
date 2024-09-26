@@ -35,12 +35,6 @@ jobs:
           COMMON_PART="pslautomationRes"
           UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
-          echo "##########################"
-          echo "$RESOURCE_GROUP_NAME"
-          echo "111111111111111111111111111"
-          echo "${{ env.RESOURCE_GROUP_NAME }}"
-          echo "222222222222222222222222222"
-          echo "resssoucce grp: ${{ env.RESOURCE_GROUP_NAME }}"
           echo "888888888888888888888888888"
           echo "Generated SOLUTION_PREFIX: ${RESOURCE_GROUP_NAME}" 
       
@@ -81,6 +75,9 @@ jobs:
                 --name ${{ env.RESOURCE_GROUP_NAME }} \
                 --yes \
                 --no-wait
+          else
+            echo "Resource group does not exists."
+          fi
 
       - name: Deploy Bicep Template
         id: deploy
@@ -91,9 +88,6 @@ jobs:
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
             --parameters solutionPrefix=pslre2 
 
-    
-          
-         
       - name: Send Notification on Failure
         if: failure()
         run: |
