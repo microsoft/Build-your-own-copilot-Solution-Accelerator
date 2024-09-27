@@ -6,6 +6,8 @@ targetScope = 'resourceGroup'
 @description('Prefix Name')
 param solutionPrefix string
 
+param vitePowerBIEmbed_URL string
+
 @description('CosmosDB Location')
 param cosmosLocation string
 
