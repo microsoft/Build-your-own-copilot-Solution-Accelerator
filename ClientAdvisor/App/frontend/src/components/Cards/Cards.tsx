@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import UserCard from '../UserCard/UserCard';
+import {UserCard} from '../UserCard/UserCard';
 import styles from './Cards.module.css';
 import { getUsers, selectUser } from '../../api/api';
 import { AppStateContext } from '../../state/AppProvider';

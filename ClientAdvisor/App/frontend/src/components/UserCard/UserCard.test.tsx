@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import UserCard from './UserCard';
+import {UserCard} from './UserCard';
 
 const mockOnCardClick = jest.fn();
 

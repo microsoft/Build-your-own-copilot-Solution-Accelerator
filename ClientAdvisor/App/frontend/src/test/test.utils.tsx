@@ -1,26 +1,10 @@
 // test-utils.tsx
 import React from 'react';
 import { render, RenderResult } from '@testing-library/react';
-import { AppStateContext, AppState } from './TestProvider'; // Adjust import path if needed
-import { Conversation, ChatHistoryLoadingState } from '../api/models';
-
-// Define the extended state type if necessary
-interface MockState extends AppState {
-  chatHistory: Conversation[];
-  isCosmosDBAvailable: { cosmosDB: boolean; status: string };
-  isChatHistoryOpen: boolean;
-  filteredChatHistory: Conversation[];
-  currentChat: Conversation | null;
-  frontendSettings: Record<string, unknown>;
-  feedbackState: Record<string, unknown>;
-  clientId: string;
-  isRequestInitiated: boolean;
-  isLoader: boolean;
-  chatHistoryLoadingState: ChatHistoryLoadingState;
-}
-
+import { AppStateContext } from '../state/AppProvider';
+import { Conversation, ChatHistoryLoadingState } from '../api/models'; 
 // Default mock state
-const defaultMockState: MockState = {
+const defaultMockState = {
   chatHistory: [],
   isCosmosDBAvailable: { cosmosDB: true, status: 'success' },
   isChatHistoryOpen: true,
@@ -35,11 +19,14 @@ const defaultMockState: MockState = {
 };
 
 // Create a custom render function
-const renderWithContext = (contextValue: Partial<MockState> & { children: React.ReactNode }): RenderResult => {
-  const value = { ...defaultMockState, ...contextValue };
+const renderWithContext = (
+  component: React.ReactElement,
+  contextState = {}
+): RenderResult => {
+  const state = { ...defaultMockState, ...contextState };
   return render(
-    <AppStateContext.Provider value={{ state: value, dispatch: jest.fn() }}>
-      {contextValue.children}
+    <AppStateContext.Provider value={{ state, dispatch: jest.fn() }}>
+      {component}
     </AppStateContext.Provider>
   );
 };

@@ -2,18 +2,23 @@ import React, { createContext, ReactNode, useEffect,
   useReducer } from 'react'
 
 import {
-  ChatHistoryLoadingState,
-  Conversation,
-  CosmosDBHealth,
-  CosmosDBStatus,
-  Feedback,
-  FrontendSettings,
   frontendSettings,
   historyEnsure,
   historyList,
   // UserSelectRequest
 
 } from '../api'
+
+import {
+  ChatHistoryLoadingState,
+  Conversation,
+  CosmosDBHealth,
+  CosmosDBStatus,
+  Feedback,
+  FrontendSettings,
+  // UserSelectRequest
+
+} from '../api/models'
 
 import { appStateReducer } from './AppReducer'
 

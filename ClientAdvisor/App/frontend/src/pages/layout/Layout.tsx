@@ -15,7 +15,7 @@ import { User } from '../../types/User'
 
 import welcomeIcon from '../../assets/welcomeIcon.png'
 import styles from './Layout.module.css';
-import SpinnerComponent from '../../components/Spinner/Spinner';
+import {SpinnerComponent} from '../../components/Spinner/SpinnerComponent';
 
 
 

@@ -1,6 +1,6 @@
 // SpinnerComponent.test.tsx
 import { render, screen } from '@testing-library/react';
-import SpinnerComponent from './Spinner';
+import {SpinnerComponent} from './SpinnerComponent';
 import { Spinner } from '@fluentui/react';
 
 // Mock the Fluent UI Spinner component

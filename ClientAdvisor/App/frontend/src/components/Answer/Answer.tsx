@@ -308,6 +308,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
                     </span>
                   </Text>
                   <FontIcon
+                  data-testid="ChevronIcon"
                     className={styles.accordionIcon}
                     onClick={handleChevronClick}
                     iconName={chevronIsExpanded ? 'ChevronDown' : 'ChevronRight'}

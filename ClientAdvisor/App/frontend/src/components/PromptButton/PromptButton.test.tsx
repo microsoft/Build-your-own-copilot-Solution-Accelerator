@@ -1,40 +1,46 @@
-// PromptButton.test.tsx
-import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
-import { PromptButton } from './PromptButton'
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { PromptButton } from './PromptButton';
 
+// Mock Fluent UI's DefaultButton
+jest.mock('@fluentui/react', () => ({
+  DefaultButton: ({ className, disabled, text, onClick }: any) => (
+    <button className={className} disabled={disabled} onClick={onClick}>
+      {text}
+    </button>
+  ),
+}));
 
-describe('PromptButton', () => {
-  const mockOnClick = jest.fn()
+describe('PromptButton component', () => {
+  const mockOnClick = jest.fn();
 
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-  it('renders with the correct text', () => {
-    render(<PromptButton onClick={mockOnClick} name="Click Me" disabled={false} />)
-    expect(screen.getByText('Click Me')).toBeInTheDocument()
-  })
+  test('renders button with provided name', () => {
+    render(<PromptButton onClick={mockOnClick} name="Click Me" disabled={false} />);
+    const button = screen.getByRole('button');
+    expect(button).toHaveTextContent('Click Me');
+  });
 
-  it('calls onClick when clicked', () => {
-    render(<PromptButton onClick={mockOnClick} name="Click Me" disabled={false} />)
-    fireEvent.click(screen.getByText('Click Me'))
-    expect(mockOnClick).toHaveBeenCalledTimes(1)
-  })
+  test('renders button with default name if no name is provided', () => {
+    render(<PromptButton onClick={mockOnClick} name="" disabled={false} />);
+    const button = screen.getByRole('button');
+    expect(button).toHaveTextContent('Default');
+  });
 
-  it('does not call onClick when disabled', () => {
-    render(<PromptButton onClick={mockOnClick} name="Click Me" disabled={true} />)
-    fireEvent.click(screen.getByText('Click Me'))
-    expect(mockOnClick).not.toHaveBeenCalled()
-  })
+  test('does not trigger onClick when button is disabled', () => {
+    render(<PromptButton onClick={mockOnClick} name="Click Me" disabled={true} />);
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+    expect(mockOnClick).not.toHaveBeenCalled();
+  });
 
-  it('has the correct class name applied', () => {
-    render(<PromptButton onClick={mockOnClick} name="Click Me" disabled={false} />)
-    //expect(screen.getByText('Click Me')).toHaveClass('mockPromptBtn')
-  })
-
-  it('renders with default name when not provided', () => {
-    render(<PromptButton name="Click Me" onClick={mockOnClick} disabled={false} />)
-    //expect(screen.getByRole('button')).toHaveTextContent('')  
-})
-})
+  test('triggers onClick when button is clicked and not disabled', () => {
+    render(<PromptButton onClick={mockOnClick} name="Click Me" disabled={false} />);
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+    expect(mockOnClick).toHaveBeenCalledTimes(1);
+  });
+});

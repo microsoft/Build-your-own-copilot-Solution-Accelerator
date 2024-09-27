@@ -15,11 +15,43 @@ const config: Config.InitialOptions = {
   },
   moduleNameMapper: {
     '\\.(css|less|scss|svg|png|jpg)$': 'identity-obj-proxy', // For mocking static file imports
+    //'^react-markdown$': '<rootDir>/__mocks__/react-markdown.js',
+    //'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js' // For mocking static file imports
+    //'^react-syntax-highlighter$': '<rootDir>/__mocks__/react-syntax-highlighter.js',
+   // '^react-syntax-highlighter$': '<rootDir>/__mocks__/react-syntax-highlighter.js',
+   //'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js',
   },
   setupFilesAfterEnv: ['<rootDir>/src/test/setupTests.ts'], // For setting up testing environment like jest-dom
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest', // Transform TypeScript files using ts-jest
+    '^.+\\.(ts|tsx)$': 'ts-jest' // Transform TypeScript files using ts-jest
+    //'^.+\\.ts(x)?$': 'ts-jest',  // For TypeScript files
+    //'^.+\\.js$': 'babel-jest',  // For JavaScript files if you have Babel
+
+    // "^.+\\.tsx?$": "babel-jest", // Use babel-jest for TypeScript
+    // "^.+\\.jsx?$": "babel-jest", // Use babel-jest for JavaScript/JSX
+
+    //'^.+\\.[jt]sx?$': 'babel-jest',
+
   },
+
+  // transformIgnorePatterns: [
+  //   "/node_modules/(?!(react-syntax-highlighter|react-markdown)/)"
+  // ],
+
+  // transformIgnorePatterns: [
+  //   'node_modules/(?!react-markdown/)'
+  // ],
+
+  // transformIgnorePatterns: [
+  //   '/node_modules/(?!react-markdown|vfile|unist-util-stringify-position|unist-util-visit|bail|is-plain-obj|react-syntax-highlighter|)',
+  // ],
+
+  // transformIgnorePatterns: [
+  //   "/node_modules/(?!react-syntax-highlighter/)", // Transform react-syntax-highlighter module
+  // ],
+
+  //testPathIgnorePatterns: ['./node_modules/'],
+ // moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   //globals: { fetch },
   setupFiles: ['<rootDir>/jest.polyfills.js'],
   // globals: {
@@ -30,6 +62,20 @@ const config: Config.InitialOptions = {
   // globals: {
   //     IS_REACT_ACT_ENVIRONMENT: true,
   //   }
+
+  // collectCoverage: true,
+  // //collectCoverageFrom: ['src/**/*.{ts,tsx}'],  // Adjust the path as needed
+  // //coverageReporters: ['json', 'lcov', 'text', 'clover'],
+  // coverageThreshold: {
+  //   global: {
+  //     branches: 80,
+  //     functions: 80,
+  //     lines: 80,
+  //     statements: 80,
+  //   },
+  // },
+
+  
 }
 
 export default config
