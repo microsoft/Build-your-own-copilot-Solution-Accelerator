@@ -47,7 +47,7 @@ jobs:
           az deployment group create \
             --resource-group pslautomationbyoa7 \
             --template-file ClientAdvisor/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=pslc5 cosmosLocation=eastus2 VITE_POWERBI_EMBED_URL=test.com
+            --parameters solutionPrefix=pslc5 cosmosLocation=eastus2 vitePowerBIEmbed_URL=test.com
       
       - name: Send Notification on Failure
         if: failure()
