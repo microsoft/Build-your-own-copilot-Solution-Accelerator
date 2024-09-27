@@ -35,7 +35,7 @@ jobs:
           COMMON_PART="pslautomationRes"
           UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
-          echo "Generated SOLUTION_PREFIX: ${UNIQUE_RG_NAME}" 
+          echo "Generated Resource_GROUP_PREFIX: ${UNIQUE_RG_NAME}" 
       
       - name: Check and Create Resource Group
         id: check_create_rg
@@ -54,7 +54,7 @@ jobs:
         id: generate_solution_prefix
         run: |
           set -e
-          COMMON_PART="psl"
+          COMMON_PART="pslr"
           TIMESTAMP=$(date +%s)  
           UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
           UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
@@ -82,6 +82,7 @@ jobs:
                 --name ${{ env.RESOURCE_GROUP_NAME }} \
                 --yes \
                 --no-wait
+            echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
           else
             echo "Resource group does not exists."
           fi
