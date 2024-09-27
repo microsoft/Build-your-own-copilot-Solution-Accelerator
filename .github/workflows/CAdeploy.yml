@@ -37,18 +37,18 @@ jobs:
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
           echo "Generated RESOURCE_GROUP_PREFIX: ${UNIQUE_RG_NAME}"
       
-      # - name: Check and Create Resource Group
-      #   id: check_create_rg
-      #   run: |
-      #     set -e  
-      #     echo "Checking if resource group exists..."
-      #     rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
-      #     if [ "$rg_exists" = "false" ]; then
-      #       echo "Resource group does not exist. Creating..."
-      #       az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location uksouth || { echo "Error creating resource group"; exit 1; }
-      #     else
-      #       echo "Resource group already exists."
-      #     fi
+      - name: Check and Create Resource Group
+        id: check_create_rg
+        run: |
+          set -e  
+          echo "Checking if resource group exists..."
+          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+          if [ "$rg_exists" = "false" ]; then
+            echo "Resource group does not exist. Creating..."
+            az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location uksouth || { echo "Error creating resource group"; exit 1; }
+          else
+            echo "Resource group already exists."
+          fi
       
       # - name: Generate Unique Solution Prefix
       #   id: generate_solution_prefix
