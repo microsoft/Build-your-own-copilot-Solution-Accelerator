@@ -35,7 +35,7 @@ jobs:
           rg_exists=$(az group exists --name pslautomationca)
           if [ "$rg_exists" = "false" ]; then
             echo "Resource group does not exist. Creating..."
-            az group create --name pslautomationbyoa4 --location uksouth || { echo "Error creating resource group"; exit 1; }
+            az group create --name pslautomationbyoa5 --location uksouth || { echo "Error creating resource group"; exit 1; }
           else
             echo "Resource group already exists."
           fi
@@ -45,9 +45,9 @@ jobs:
         run: |
           set -e
           az deployment group create \
-            --resource-group pslautomationbyoa4 \
+            --resource-group pslautomationbyoa5 \
             --template-file ClientAdvisor/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=pslc2 cosmosLocation=eastus2
+            --parameters solutionPrefix=pslc3 cosmosLocation=eastus2
       
       - name: Send Notification on Failure
         if: failure()
