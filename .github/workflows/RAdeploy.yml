@@ -20,10 +20,10 @@ jobs:
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
           az --version  # Verify installation
           
-      - name: Install Azure Developer CLI
-        run: |
-          curl -sL https://aka.ms/InstallAzureDevCLI | sudo bash
-          azd --version  # Verify installation
+      # - name: Install Azure Developer CLI
+      #   run: |
+      #     curl -sL https://aka.ms/InstallAzureDevCLI | sudo bash
+      #     azd --version  # Verify installation
 
       - name: Login to Azure
         run: |
@@ -75,21 +75,49 @@ jobs:
       #       --template-file ResearchAssistant/Deployment/bicep/main.bicep \
       #       --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
             
-      - name: Delete Bicep Deployment
+      - name: Delete OpenAI Resources
         if: success()
         run: |
           set -e  
           echo "Checking if resource group exists..."
           rg_exists=$(az group exists --name pslautomationRes20240930052609)
           if [ "$rg_exists" = "true" ]; then
-            echo "Resource group exists. Cleaning..."
-            # Using azd down to remove all resources associated with the project
-            azd down --force --purge --no-prompt
-            echo "All resources in the resource group deleted..."
+            echo "Resource group exists. Cleaning up OpenAI resources..."
+            
+            # List all OpenAI resources in the resource group
+            resources=$(az resource list --resource-group pslautomationRes20240930052609 --query "[?type=='Microsoft.CognitiveServices/accounts' || type=='Microsoft.CognitiveServices/openAIModels'].{id:id, type:type}" -o json)
+            
+            # Check if there are resources to delete
+            if [ "$(echo $resources | jq '. | length')" -gt 0 ]; then
+              for resource in $(echo $resources | jq -c '.[]'); do
+                resource_id=$(echo $resource | jq -r '.id')
+                resource_type=$(echo $resource | jq -r '.type')
+      
+                echo "Deleting resource: $resource_id"
+      
+                # Use specific commands for OpenAI resources
+                case $resource_type in
+                  "Microsoft.CognitiveServices/accounts")
+                    account_name=$(basename "$resource_id")
+                    az cognitiveservices account delete --name "$account_name" --resource-group pslautomationRes20240930052609 --yes --no-wait
+                    ;;
+                  "Microsoft.CognitiveServices/openAIModels")
+                    model_name=$(basename "$resource_id")
+                    az cognitiveservices openai model delete --name "$model_name" --resource-group pslautomationRes20240930052609 --yes --no-wait
+                    ;;
+                  *)
+                    echo "Unknown resource type: $resource_type. Skipping deletion."
+                    ;;
+                esac
+              done
+              echo "All OpenAI resources processed in resource group pslautomationRes20240930052609"
+            else
+              echo "No OpenAI resources found in resource group."
+            fi
           else
             echo "Resource group does not exist."
           fi
-
+    
 
       # - name: Send Notification on Failure
       #   if: failure()
