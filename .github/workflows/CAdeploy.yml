@@ -12,7 +12,7 @@ on:
         description: 'The name of the powerbi url'
         required: true
         default: "test.com"
-      ApplicationName:
+      applicationName:
         description: 'The application name'
         required: true
         default: "test"
@@ -40,11 +40,13 @@ jobs:
 
       - name: Generate Resource Group Name
         id: generate_rg_name
+        if: ${{ github.event_name == 'workflow_dispatch'}}
         run: |
           echo "Generating a unique resource group name..."
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           COMMON_PART="pslautomationCli"
-          UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
+          # UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
+          UNIQUE_RG_NAME="pslautomationbyoa5"
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
           echo "Generated RESOURCE_GROUP_PREFIX: ${UNIQUE_RG_NAME}"
       
@@ -79,7 +81,23 @@ jobs:
       #     az deployment group create \
       #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
       #       --template-file ClientAdvisor/Deployment/bicep/main.bicep \
-      #       --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2 vitePowerBIEmbed_URL=${{ github.event.inputs.powerbiURL }}
+      #       --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
+
+      - name: Update PowerBI URL
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.powerbiURL != 'TBD' }}
+        run: |
+          set -e
+          echo "application name: ${{ github.event.inputs.applicationName }}"
+          echo "powerBI URL: ${{ github.event.inputs.powerbiURL }}"
+          az webapp config appsettings set --name ${{ github.event.inputs.applicationName }} --resource-group pslautomationbyoa5 --settings VITE_POWERBI_EMBED_URL=${{ github.event.inputs.powerbiURL }}
+          # Restart App Service
+          az webapp restart --resource-group $resourceGroup --name $appServiceName
+          # Check if the update was successful
+          if [ $? -eq 0 ]; then
+              echo "Power BI URL updated successfully."
+          else
+              echo "Failed to update Power BI URL."
+          fi
 
       # - name: Delete Bicep Deployment
       #   if: success()
@@ -98,30 +116,21 @@ jobs:
       #       echo "Resource group does not exists."
       #     fi
       
-      # - name: Send Notification on Failure
-      #   if: failure()
-      #   run: |
-      #     RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-      
-      #     # Construct the email body
-      #     EMAIL_BODY=$(cat <<EOF
-      #     {
-      #       "body": "<p>Dear Team,</p><p>We would like to inform you that the Client Advisor Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
-      #     }
-      #     EOF
-      #     )
-      
-      #     # Send the notification
-      #     curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
-      #       -H "Content-Type: application/json" \
-      #       -d "$EMAIL_BODY" || echo "Failed to send notification"
-
-      - name: Update powerBI URL
-        if: ${{ github.event.inputs.powerbiURL != 'TBD' }}
+      - name: Send Notification on Failure
+        if: failure()
         run: |
-          echo "resource grp powerbi: ${{ env.RESOURCE_GROUP_NAME }}"
-          echo "application name: ${{ github.event.inputs.ApplicationName }}"
-          echo "powerbi: ${{ github.event.inputs.powerbiURL }}"
-          set -e
-          az webapp config appsettings set --name ${{ github.event.inputs.ApplicationName }} --resource-group pslautomationbyoa5 --settings VITE_POWERBI_EMBED_URL=${{ github.event.inputs.powerbiURL }}
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      
+          # Construct the email body
+          EMAIL_BODY=$(cat <<EOF
+          {
+            "body": "<p>Dear Team,</p><p>We would like to inform you that the Client Advisor Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
+          }
+          EOF
+          )
+      
+          # Send the notification
+          curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "$EMAIL_BODY" || echo "Failed to send notification"
 
