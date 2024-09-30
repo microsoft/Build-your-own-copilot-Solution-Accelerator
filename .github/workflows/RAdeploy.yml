@@ -20,14 +20,9 @@ jobs:
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
           az --version  # Verify installation
           
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'  # Specify the desired Node.js version
-
       - name: Install Azure Developer CLI
         run: |
-          npm install -g azure-dev-cli
+          curl -sL https://aka.ms/InstallAzureDevCLI | sudo bash
           azd --version  # Verify installation
 
       - name: Login to Azure
