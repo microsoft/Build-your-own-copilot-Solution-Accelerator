@@ -70,22 +70,22 @@ jobs:
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
             --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
             
-      # - name: Delete Bicep Deployment
-      #   if: success()
-      #   run: |
-      #     set -e  
-      #     echo "Checking if resource group exists..."
-      #     rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
-      #     if [ "$rg_exists" = "true" ]; then
-      #       echo "Resource group exist. Cleaning..."
-      #       az group delete \
-      #           --name ${{ env.RESOURCE_GROUP_NAME }} \
-      #           --yes \
-      #           --no-wait
-      #       echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
-      #     else
-      #       echo "Resource group does not exists."
-      #     fi
+      - name: Delete Bicep Deployment
+        if: success()
+        run: |
+          set -e  
+          echo "Checking if resource group exists..."
+          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+          if [ "$rg_exists" = "true" ]; then
+            echo "Resource group exist. Cleaning..."
+            az group delete \
+                --name ${{ env.RESOURCE_GROUP_NAME }} \
+                --yes \
+                --no-wait
+            echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
+          else
+            echo "Resource group does not exists."
+          fi
 
       - name: Send Notification on Failure
         if: failure()
