@@ -75,7 +75,7 @@ jobs:
         run: |
           set -e  
           echo "Checking if resource group exists..."
-          rg_exists=$(az group exists --name pslautomationRes20240930054347
+          rg_exists=$(az group exists --name pslautomationRes20240930054347)
           if [ "$rg_exists" = "true" ]; then
             echo "Resource group exist. Cleaning..."
             az group delete \
