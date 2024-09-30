@@ -19,6 +19,11 @@ jobs:
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
           az --version  # Verify installation
+          
+      - name: Install Azure Developer CLI
+        run: |
+          npm install -g @azure/azure-dev-cli
+          azd --version  # Verify installation
 
       - name: Login to Azure
         run: |
