@@ -9,11 +9,11 @@ on:
   workflow_dispatch:
     inputs:
       powerbiURL:
-        description: 'The name of the powerbi url'
+        description: 'Enter the powerbi url'
         required: true
         default: "test.com"
       applicationName:
-        description: 'The application name'
+        description: 'Enter the application name'
         required: true
         default: "test"
       
@@ -53,6 +53,7 @@ jobs:
       - name: Check and Create Resource Group
         id: check_create_rg
         run: |
+          echo "GRESOURCE_GROUP: ${{ env.RESOURCE_GROUP_NAME }}"
           set -e  
           echo "Checking if resource group exists..."
           rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
