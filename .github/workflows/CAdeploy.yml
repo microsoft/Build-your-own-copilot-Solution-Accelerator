@@ -8,10 +8,15 @@ on:
       - 'ClientAdvisor/**'
   workflow_dispatch:
     inputs:
-      environmentName:
+      powerbiURL:
         description: 'The name of the powerbi url'
         required: true
         default: "test.com"
+      ApplicationName:
+        description: 'The name of the powerbi url'
+        required: true
+        default: "test"
+      
 
 jobs:
   deploy:
@@ -33,80 +38,88 @@ jobs:
       - name: Install Bicep CLI
         run: az bicep install
 
-      - name: Generate Resource Group Name
-        id: generate_rg_name
-        run: |
-          echo "Generating a unique resource group name..."
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          COMMON_PART="pslautomationCli"
-          UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
-          echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
-          echo "Generated RESOURCE_GROUP_PREFIX: ${UNIQUE_RG_NAME}"
+      # - name: Generate Resource Group Name
+      #   id: generate_rg_name
+      #   run: |
+      #     echo "Generating a unique resource group name..."
+      #     TIMESTAMP=$(date +%Y%m%d%H%M%S)
+      #     COMMON_PART="pslautomationCli"
+      #     UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
+      #     echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
+      #     echo "Generated RESOURCE_GROUP_PREFIX: ${UNIQUE_RG_NAME}"
       
-      - name: Check and Create Resource Group
-        id: check_create_rg
-        run: |
-          set -e  
-          echo "Checking if resource group exists..."
-          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
-          if [ "$rg_exists" = "false" ]; then
-            echo "Resource group does not exist. Creating..."
-            az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location uksouth || { echo "Error creating resource group"; exit 1; }
-          else
-            echo "Resource group already exists."
-          fi
+      # - name: Check and Create Resource Group
+      #   id: check_create_rg
+      #   run: |
+      #     set -e  
+      #     echo "Checking if resource group exists..."
+      #     rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+      #     if [ "$rg_exists" = "false" ]; then
+      #       echo "Resource group does not exist. Creating..."
+      #       az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location uksouth || { echo "Error creating resource group"; exit 1; }
+      #     else
+      #       echo "Resource group already exists."
+      #     fi
       
-      - name: Generate Unique Solution Prefix
-        id: generate_solution_prefix
-        run: |
-          set -e
-          COMMON_PART="pslc"
-          TIMESTAMP=$(date +%s)  
-          UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
-          UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
-          echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
-          echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}"
+      # - name: Generate Unique Solution Prefix
+      #   id: generate_solution_prefix
+      #   run: |
+      #     set -e
+      #     COMMON_PART="pslc"
+      #     TIMESTAMP=$(date +%s)  
+      #     UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
+      #     UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
+      #     echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
+      #     echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}"
           
-      - name: Deploy Bicep Template
-        id: deploy
-        run: |
-          set -e
-          az deployment group create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --template-file ClientAdvisor/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2 vitePowerBIEmbed_URL=${{ github.event.inputs.environmentName }}
+      # - name: Deploy Bicep Template
+      #   id: deploy
+      #   run: |
+      #     set -e
+      #     az deployment group create \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --template-file ClientAdvisor/Deployment/bicep/main.bicep \
+      #       --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2 vitePowerBIEmbed_URL=${{ github.event.inputs.powerbiURL }}
 
-      - name: Delete Bicep Deployment
-        if: success()
+      # - name: Delete Bicep Deployment
+      #   if: success()
+      #   run: |
+      #     set -e  
+      #     echo "Checking if resource group exists..."
+      #     rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+      #     if [ "$rg_exists" = "true" ]; then
+      #       echo "Resource group exist. Cleaning..."
+      #       az group delete \
+      #           --name ${{ env.RESOURCE_GROUP_NAME }} \
+      #           --yes \
+      #           --no-wait
+      #       echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
+      #     else
+      #       echo "Resource group does not exists."
+      #     fi
+      
+      # - name: Send Notification on Failure
+      #   if: failure()
+      #   run: |
+      #     RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      
+      #     # Construct the email body
+      #     EMAIL_BODY=$(cat <<EOF
+      #     {
+      #       "body": "<p>Dear Team,</p><p>We would like to inform you that the Client Advisor Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
+      #     }
+      #     EOF
+      #     )
+      
+      #     # Send the notification
+      #     curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
+      #       -H "Content-Type: application/json" \
+      #       -d "$EMAIL_BODY" || echo "Failed to send notification"
+
+      - name: Update powerBI URL
+        if: ${{ github.event.inputs.powerbiURL != 'TBD' }}
         run: |
-          set -e  
-          echo "Checking if resource group exists..."
-          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
-          if [ "$rg_exists" = "true" ]; then
-            echo "Resource group exist. Cleaning..."
-            az group delete \
-                --name ${{ env.RESOURCE_GROUP_NAME }} \
-                --yes \
-                --no-wait
-            echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
-          else
-            echo "Resource group does not exists."
-          fi
-      
-      - name: Send Notification on Failure
-        if: failure()
-        run: |
-          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-      
-          # Construct the email body
-          EMAIL_BODY=$(cat <<EOF
-          {
-            "body": "<p>Dear Team,</p><p>We would like to inform you that the Client Advisor Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
-          }
-          EOF
-          )
-      
-          # Send the notification
-          curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "$EMAIL_BODY" || echo "Failed to send notification"
+          echo "resource grp powerbi: ${{ env.RESOURCE_GROUP_NAME }}"
+          set -e
+          az webapp config appsettings set --name ${{ github.event.inputs.ApplicationName }} --resource-group ${{ env.RESOURCE_GROUP_NAME }}  --settings VITE_POWERBI_EMBED_URL=${{ github.event.inputs.powerbiURL }}
+
