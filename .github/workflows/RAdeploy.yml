@@ -27,65 +27,77 @@ jobs:
       - name: Install Bicep CLI
         run: az bicep install
 
-      # - name: Generate Resource Group Name
-      #   id: generate_rg_name
-      #   run: |
-      #     echo "Generating a unique resource group name..."
-      #     TIMESTAMP=$(date +%Y%m%d%H%M%S)
-      #     COMMON_PART="pslautomationRes"
-      #     UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
-      #     echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
-      #     echo "Generated Resource_GROUP_PREFIX: ${UNIQUE_RG_NAME}" 
+      - name: Generate Resource Group Name
+        id: generate_rg_name
+        run: |
+          echo "Generating a unique resource group name..."
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          COMMON_PART="pslautomationRes"
+          UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
+          echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
+          echo "Generated Resource_GROUP_PREFIX: ${UNIQUE_RG_NAME}" 
       
-      # - name: Check and Create Resource Group
-      #   id: check_create_rg
-      #   run: |
-      #     set -e  
-      #     echo "Checking if resource group exists..."
-      #     rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
-      #     if [ "$rg_exists" = "false" ]; then
-      #       echo "Resource group does not exist. Creating..."
-      #       az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location eastus || { echo "Error creating resource group"; exit 1; }
-      #     else
-      #       echo "Resource group already exists."
-      #     fi
-
-      # - name: Generate Unique Solution Prefix
-      #   id: generate_solution_prefix
-      #   run: |
-      #     set -e
-      #     COMMON_PART="pslr"
-      #     TIMESTAMP=$(date +%s)  
-      #     UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
-      #     UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
-      #     echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
-      #     echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}" 
-
-      # - name: Deploy Bicep Template
-      #   id: deploy
-      #   run: |
-      #     set -e
-      #     az deployment group create \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-      #       --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
-            
-      - name: Delete Bicep Deployment
-        if: success()
+      - name: Check and Create Resource Group
+        id: check_create_rg
         run: |
           set -e  
           echo "Checking if resource group exists..."
-          rg_exists=$(az group exists --name pslautomationRes20240930054347)
-          if [ "$rg_exists" = "true" ]; then
-            echo "Resource group exist. Cleaning..."
-            az group delete \
-                --name pslautomationRes20240930054347 \
-                --yes \
-                --no-wait
-            echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
+          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+          if [ "$rg_exists" = "false" ]; then
+            echo "Resource group does not exist. Creating..."
+            az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location eastus || { echo "Error creating resource group"; exit 1; }
           else
-            echo "Resource group does not exists."
+            echo "Resource group already exists."
           fi
+
+      - name: Generate Unique Solution Prefix
+        id: generate_solution_prefix
+        run: |
+          set -e
+          COMMON_PART="pslr"
+          TIMESTAMP=$(date +%s)  
+          UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
+          UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
+          echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
+          echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}" 
+
+      - name: Deploy Bicep Template
+        id: deploy
+        run: |
+          set -e
+          az deployment group create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --template-file ResearchAssistant/Deployment/bicep/main.bicep \
+            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
+            
+            - name: Delete Bicep Deployment
+            if: success()
+            run: |
+              set -e
+              echo "Checking if resource group exists..."
+              rg_exists=$(az group exists --name pslautomationRes20240930052609)
+              if [ "$rg_exists" = "true" ]; then
+                echo "Resource group exists. Cleaning resources..."
+                # List all resources in the resource group and delete them
+                resources=$(az resource list --resource-group pslautomationRes20240930052609 --query "[].id" -o tsv)
+                echo "Resource lists...  resources"
+                echo "Resource lists::  $resources"
+                if [ -n "$resources" ]; then
+                  for resource in $resources; do
+                    echo "Deleting resource: $resource"
+                    az resource delete --ids "$resource"
+                  done
+                  echo "All resources deleted from the resource group: pslautomationRes20240930052609"
+                else
+                  echo "No resources found in the resource group."
+                fi
+                # Optionally, you can delete the resource group itself afterward
+                # echo "Deleting resource group: pslautomationRes20240930052609"
+                # az group delete --name pslautomationRes20240930052609 --yes --no-wait
+              else
+                echo "Resource group does not exist."
+              fi
+          
 
       - name: Send Notification on Failure
         if: failure()
