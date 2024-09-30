@@ -73,32 +73,18 @@ jobs:
       - name: Delete Bicep Deployment
         if: success()
         run: |
-          set -e
+          set -e  
           echo "Checking if resource group exists..."
           rg_exists=$(az group exists --name pslautomationRes20240930052609)
           if [ "$rg_exists" = "true" ]; then
-            echo "Resource group exists. Cleaning resources..."
-            # List all resources in the resource group and delete them
-            resources=$(az resource list --resource-group pslautomationRes20240930052609 --query "[].id" -o tsv)
-            echo "Resource lists...  resources"
-            echo "Resource lists:::  "$resources""
-            if [ -n "$resources" ]; then
-              for resource in $resources; do
-                echo "Deleting resource: $resource"
-                echo "Deleting resource:: "$resource""
-                az resource delete --ids "$resource" --verbose
-              done
-              echo "All resources deleted from the resource group: pslautomationRes20240930052609"
-            else
-              echo "No resources found in the resource group."
-            fi
-            # Optionally, you can delete the resource group itself afterward
-            # echo "Deleting resource group: pslautomationRes20240930052609"
-            # az group delete --name pslautomationRes20240930052609 --yes --no-wait
+            echo "Resource group exists. Cleaning..."
+            # Using azd down to remove all resources associated with the project
+            @azd down --force --purge --no-prompt
+            echo "All resources in the resource group deleted..."
           else
             echo "Resource group does not exist."
           fi
-          
+
 
       - name: Send Notification on Failure
         if: failure()
