@@ -79,7 +79,7 @@ jobs:
           if [ "$rg_exists" = "true" ]; then
             echo "Resource group exists. Cleaning..."
             # Using azd down to remove all resources associated with the project
-            @azd down --force --purge --no-prompt
+            azd down --force --purge --no-prompt
             echo "All resources in the resource group deleted..."
           else
             echo "Resource group does not exist."
