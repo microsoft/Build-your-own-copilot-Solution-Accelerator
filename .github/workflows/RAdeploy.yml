@@ -79,7 +79,7 @@ jobs:
           if [ "$rg_exists" = "true" ]; then
             echo "Resource group exist. Cleaning..."
             az group delete \
-                # --name pslautomationRes20240930054347 \
+                --name pslautomationRes20240930054347 \
                 --yes \
                 --no-wait
             echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
