@@ -22,7 +22,7 @@ jobs:
           
       - name: Install Azure Developer CLI
         run: |
-          npm install -g @azure/azure-dev-cli
+          curl -sL https://aka.ms/InstallAzureDevCLI | sudo bash
           azd --version  # Verify installation
 
       - name: Login to Azure
