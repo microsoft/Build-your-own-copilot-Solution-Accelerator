@@ -40,7 +40,7 @@ jobs:
 
       - name: Generate Resource Group Name
         id: generate_rg_name
-        if: ${{ github.event_name == 'workflow_dispatch'}}
+        # if: ${{ github.event_name == 'workflow_dispatch'}}
         run: |
           echo "Generating a unique resource group name..."
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
@@ -84,7 +84,7 @@ jobs:
       #       --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
 
       - name: Update PowerBI URL
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.powerbiURL != 'TBD' }}
+        if: ${{ github.event.inputs.powerbiURL != 'TBD' }}
         run: |
           set -e
           echo "application name: ${{ github.event.inputs.applicationName }}"
