@@ -40,7 +40,7 @@ jobs:
 
       - name: Generate Resource Group Name
         id: generate_rg_name
-        if: success() && github.event_name != 'workflow_dispatch'
+        if: failure() && github.event_name != 'workflow_dispatch'
         # if: ${{ github.event_name != 'workflow_dispatch'}}
         run: |
           echo "Generating a unique resource group name..."
