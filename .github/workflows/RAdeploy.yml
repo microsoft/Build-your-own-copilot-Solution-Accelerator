@@ -81,7 +81,7 @@ jobs:
             # List all resources in the resource group and delete them
             resources=$(az resource list --resource-group pslautomationRes20240930052609 --query "[].id" -o tsv)
             echo "Resource lists...  resources"
-            echo "Resource lists::  $resources"
+            echo "Resource lists:::  "$resources""
             if [ -n "$resources" ]; then
               for resource in $resources; do
                 echo "Deleting resource: $resource"
