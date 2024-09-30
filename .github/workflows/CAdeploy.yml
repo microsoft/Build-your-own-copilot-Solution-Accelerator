@@ -122,5 +122,5 @@ jobs:
           echo "resource grp powerbi: ${{ env.RESOURCE_GROUP_NAME }}"
           echo "application name: ${{ github.event.inputs.ApplicationName }}"
           set -e
-          az webapp config appsettings set --name ${{ github.event.inputs.ApplicationName }} --resource-group ${{ env.RESOURCE_GROUP_NAME }}  --settings VITE_POWERBI_EMBED_URL=${{ github.event.inputs.powerbiURL }}
+          az webapp config appsettings set --name ${{ github.event.inputs.ApplicationName }} --resource-group ${{ env.RESOURCE_GROUP_NAME }} --settings VITE_POWERBI_EMBED_URL=${{ github.event.inputs.powerbiURL }}
 
