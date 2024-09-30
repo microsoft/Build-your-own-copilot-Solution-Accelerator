@@ -85,7 +85,8 @@ jobs:
             if [ -n "$resources" ]; then
               for resource in $resources; do
                 echo "Deleting resource: $resource"
-                az resource delete --ids "$resource"
+                echo "Deleting resource: "$resource""
+                az resource delete --ids "$resource" --verbose
               done
               echo "All resources deleted from the resource group: pslautomationRes20240930052609"
             else
