@@ -6,8 +6,6 @@ targetScope = 'resourceGroup'
 @description('Prefix Name')
 param solutionPrefix string
 
-param vitePowerBIEmbed_URL string
-
 @description('CosmosDB Location')
 param cosmosLocation string
 
@@ -241,7 +239,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosOutput.cosmosContainerName
     AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosOutput.cosmosDatabaseName
     AZURE_COSMOSDB_ENABLE_FEEDBACK: 'True'
-    VITE_POWERBI_EMBED_URL: vitePowerBIEmbed_URL
+    VITE_POWERBI_EMBED_URL: 'TBD'
   }
   scope: resourceGroup(resourceGroup().name)
   dependsOn:[azOpenAI,azAIMultiServiceAccount,azSearchService,sqlDBModule,azureFunctionURL,cosmosDBModule]
