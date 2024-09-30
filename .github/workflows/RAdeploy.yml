@@ -19,11 +19,6 @@ jobs:
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
           az --version  # Verify installation
-          
-      # - name: Install Azure Developer CLI
-      #   run: |
-      #     curl -sL https://aka.ms/InstallAzureDevCLI | sudo bash
-      #     azd --version  # Verify installation
 
       - name: Login to Azure
         run: |
@@ -32,107 +27,80 @@ jobs:
       - name: Install Bicep CLI
         run: az bicep install
 
-      # - name: Generate Resource Group Name
-      #   id: generate_rg_name
-      #   run: |
-      #     echo "Generating a unique resource group name..."
-      #     TIMESTAMP=$(date +%Y%m%d%H%M%S)
-      #     COMMON_PART="pslautomationRes"
-      #     UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
-      #     echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
-      #     echo "Generated Resource_GROUP_PREFIX: ${UNIQUE_RG_NAME}" 
+      - name: Generate Resource Group Name
+        id: generate_rg_name
+        run: |
+          echo "Generating a unique resource group name..."
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          COMMON_PART="pslautomationRes"
+          UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
+          echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
+          echo "Generated Resource_GROUP_PREFIX: ${UNIQUE_RG_NAME}" 
       
-      # - name: Check and Create Resource Group
-      #   id: check_create_rg
-      #   run: |
-      #     set -e  
-      #     echo "Checking if resource group exists..."
-      #     rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
-      #     if [ "$rg_exists" = "false" ]; then
-      #       echo "Resource group does not exist. Creating..."
-      #       az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location eastus || { echo "Error creating resource group"; exit 1; }
-      #     else
-      #       echo "Resource group already exists."
-      #     fi
+      - name: Check and Create Resource Group
+        id: check_create_rg
+        run: |
+          set -e  
+          echo "Checking if resource group exists..."
+          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+          if [ "$rg_exists" = "false" ]; then
+            echo "Resource group does not exist. Creating..."
+            az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location eastus || { echo "Error creating resource group"; exit 1; }
+          else
+            echo "Resource group already exists."
+          fi
 
-      # - name: Generate Unique Solution Prefix
-      #   id: generate_solution_prefix
-      #   run: |
-      #     set -e
-      #     COMMON_PART="pslr"
-      #     TIMESTAMP=$(date +%s)  
-      #     UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
-      #     UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
-      #     echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
-      #     echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}" 
+      - name: Generate Unique Solution Prefix
+        id: generate_solution_prefix
+        run: |
+          set -e
+          COMMON_PART="pslr"
+          TIMESTAMP=$(date +%s)  
+          UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
+          UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
+          echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
+          echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}" 
 
-      # - name: Deploy Bicep Template
-      #   id: deploy
-      #   run: |
-      #     set -e
-      #     az deployment group create \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --template-file ResearchAssistant/Deployment/bicep/main.bicep \
-      #       --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
+      - name: Deploy Bicep Template
+        id: deploy
+        run: |
+          set -e
+          az deployment group create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --template-file ResearchAssistant/Deployment/bicep/main.bicep \
+            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
             
-      - name: Delete OpenAI Resources
+      - name: Delete Bicep Deployment
         if: success()
         run: |
           set -e  
           echo "Checking if resource group exists..."
-          rg_exists=$(az group exists --name pslautomationRes20240930052609)
+          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
           if [ "$rg_exists" = "true" ]; then
-            echo "Resource group exists. Cleaning up OpenAI resources..."
-            
-            # List all OpenAI resources in the resource group
-            resources=$(az resource list --resource-group pslautomationRes20240930052609 --query "[?type=='Microsoft.CognitiveServices/accounts' || type=='Microsoft.CognitiveServices/openAIModels'].{id:id, type:type}" -o json)
-            
-            # Check if there are resources to delete
-            if [ "$(echo $resources | jq '. | length')" -gt 0 ]; then
-              for resource in $(echo $resources | jq -c '.[]'); do
-                resource_id=$(echo $resource | jq -r '.id')
-                resource_type=$(echo $resource | jq -r '.type')
-      
-                echo "Deleting resource: $resource_id"
-      
-                # Use specific commands for OpenAI resources
-                case $resource_type in
-                  "Microsoft.CognitiveServices/accounts")
-                    account_name=$(basename "$resource_id")
-                    az cognitiveservices account delete --name "$account_name" --resource-group pslautomationRes20240930052609 --yes --no-wait
-                    ;;
-                  "Microsoft.CognitiveServices/openAIModels")
-                    model_name=$(basename "$resource_id")
-                    az cognitiveservices openai model delete --name "$model_name" --resource-group pslautomationRes20240930052609 --yes --no-wait
-                    ;;
-                  *)
-                    echo "Unknown resource type: $resource_type. Skipping deletion."
-                    ;;
-                esac
-              done
-              echo "All OpenAI resources processed in resource group pslautomationRes20240930052609"
-            else
-              echo "No OpenAI resources found in resource group."
-            fi
+            echo "Resource group exist. Cleaning..."
+            az group delete \
+                --name ${{ env.RESOURCE_GROUP_NAME }} \
+                --yes \
+                --no-wait
+            echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
           else
-            echo "Resource group does not exist."
+            echo "Resource group does not exists."
           fi
-    
 
-      # - name: Send Notification on Failure
-      #   if: failure()
-      #   run: |
-      #     RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      - name: Send Notification on Failure
+        if: failure()
+        run: |
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       
-      #     # Construct the email body
-      #     EMAIL_BODY=$(cat <<EOF
-      #     {
-      #       "body": "<p>Dear Team,</p><p>We would like to inform you that the Research Assistant Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
-      #     }
-      #     EOF
-      #     )
+          # Construct the email body
+          EMAIL_BODY=$(cat <<EOF
+          {
+            "body": "<p>Dear Team,</p><p>We would like to inform you that the Research Assistant Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
+          }
+          EOF
+          )
       
-      #     # Send the notification
-      #     curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
-      #       -H "Content-Type: application/json" \
-      #       -d "$EMAIL_BODY" || echo "Failed to send notification"
+          # Send the notification
+          curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "$EMAIL_BODY" || echo "Failed to send notification"
