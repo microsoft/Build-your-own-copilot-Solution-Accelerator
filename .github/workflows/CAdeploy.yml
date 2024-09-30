@@ -52,7 +52,6 @@ jobs:
       
       - name: Check and Create Resource Group
         id: check_create_rg
-        if: ${{ github.event_name == 'workflow_dispatch'}}
         run: |
           set -e  
           echo "Checking if resource group exists..."
@@ -87,7 +86,7 @@ jobs:
             --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
 
       - name: Update PowerBI URL
-        if: ${{ github.event_name != 'workflow_dispatch' && github.event.inputs.powerbiURL != 'TBD' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.powerbiURL != 'TBD' }}
         run: |
           set -e
           echo "application name: ${{ github.event.inputs.applicationName }}"
