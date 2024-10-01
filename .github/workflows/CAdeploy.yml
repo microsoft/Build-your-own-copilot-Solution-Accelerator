@@ -77,7 +77,7 @@ jobs:
         run: |
           set -e
           COMMON_PART="-app-service"
-          application_name="$${{ env.SOLUTION_PREFIX }}{COMMON_PART}"
+          application_name="${{ env.SOLUTION_PREFIX }}${COMMON_PART}"
           echo "application name: application_name"
           echo "application name:: $application_name"
           echo "powerBI URL: ${{ vars.VITE_POWERBI_EMBED_URL }}"
