@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QuestionInput } from './QuestionInput';
 import { renderWithContext, mockDispatch,defaultMockState } from "../../test/test.utils";
-
+import React from 'react';
 const mockOnSend = jest.fn();
 const documentSectionData = [
   { title: 'Introduction', content: 'This is the introduction section.', metaPrompt: 'Meta for Introduction' },

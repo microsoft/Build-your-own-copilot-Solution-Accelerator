@@ -1,50 +1,37 @@
-import type { Config } from '@jest/types'
+import type { Config } from '@jest/types';
 
 const config: Config.InitialOptions = {
-   verbose: true,
-  // transform: {
-  //   '^.+\\.tsx?$': 'ts-jest'
-  // },
-  // setupFilesAfterEnv: ['<rootDir>/polyfills.js']
-
+  verbose: true,
   preset: 'ts-jest',
-  //testEnvironment: 'jsdom',  // For React DOM testing
   testEnvironment: "jest-environment-jsdom",
   testEnvironmentOptions: {
     customExportConditions: [''],
   },
   moduleNameMapper: {
-    '\\.(css|less|scss|svg|png|jpg)$': 'identity-obj-proxy', // For mocking static file imports
+    '\\.(css|less|scss)$': 'identity-obj-proxy',
+    '\\.(svg|png|jpg)$': '<rootDir>/__mocks__/fileMock.js',
   },
-  setupFilesAfterEnv: ['<rootDir>/src/test/setupTests.ts'], // For setting up testing environment like jest-dom
+  setupFilesAfterEnv: ['<rootDir>/src/test/setupTests.ts'],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest', // Transform TypeScript files using ts-jest
+            
+    '^.+\\.jsx?$': 'babel-jest',       // Transform JavaScript files using babel-jest
+    '^.+\\.tsx?$': 'babel-jest'
   },
-  //globals: { fetch },
+  transformIgnorePatterns: [
+    '/node_modules/(?!(react-markdown|remark-gfm|rehype-raw)/)',
+  ],
   setupFiles: ['<rootDir>/jest.polyfills.js'],
-  // globals: {
-  //   'ts-jest': {
-  //     isolatedModules: true, // Prevent isolated module errors
-  //   },
-  // }
-  // globals: {
-  //     IS_REACT_ACT_ENVIRONMENT: true,
-  //   }
-   // Collect coverage
-   collectCoverage: true,
-  
-   // Directory for coverage reports
-   coverageDirectory: 'coverage',
-   
-   // Enforce coverage thresholds
-   coverageThreshold: {
-     global: {
-       branches: 80,
-       functions: 80,
-       lines: 80,
-       statements: 80,
-     }
-   }
-}
+  collectCoverage: true,
+  collectCoverageFrom: ['src/**/*.{ts,tsx}'],
+  coverageDirectory: 'coverage',
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+};
 
-export default config
+export default config;
