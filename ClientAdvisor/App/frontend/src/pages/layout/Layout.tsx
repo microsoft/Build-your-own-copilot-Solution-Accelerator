@@ -212,7 +212,7 @@ const Layout = () => {
                   <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span>
                 </div>
               )}
-              <Pivot defaultSelectedKey="chat">
+              <Pivot defaultSelectedKey="chat" className='tabContainer' style={{ paddingTop : 10 }}>
                 <PivotItem headerText="Chat" itemKey="chat">
                   <Chat setIsVisible={setIsVisible}/>
                 </PivotItem>
