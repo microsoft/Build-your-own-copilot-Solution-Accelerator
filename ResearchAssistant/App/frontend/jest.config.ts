@@ -12,6 +12,7 @@ moduleNameMapper: {
     'microsoft-cognitiveservices-speech-sdk':'<rootDir>/__mocks__/microsoft-cognitiveservices-speech-sdk.ts',
     '\\.(css|less|scss|svg|png|jpg)$': 'identity-obj-proxy',
     '^react-markdown$': '<rootDir>/__mocks__/react-markdown.tsx',
+    '^jsPDF$': '<rootDir>/__mocks__/jspdf.ts',
 
 },
 transformIgnorePatterns: [
