@@ -5,7 +5,7 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -15,8 +15,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client", "jest", "node"]
+    "types": ["vite/client", "jest", "node","@testing-library/jest-dom", "@testing-library/react"]
   },
-  "include": ["src"],
+  "include": ["src", "__mocks__"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
