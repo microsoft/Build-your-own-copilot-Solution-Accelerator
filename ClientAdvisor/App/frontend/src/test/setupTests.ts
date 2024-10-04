@@ -56,14 +56,6 @@ class IntersectionObserverMock {
 
 
 
-  import DOMPurify from 'dompurify';
-
-
-
-
-  jest.mock('dompurify', () => ({
-      sanitize: jest.fn((input) => input), // or provide a mock implementation
-  }));
   
 
 

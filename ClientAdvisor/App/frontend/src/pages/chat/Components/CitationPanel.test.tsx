@@ -4,26 +4,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { CitationPanel } from './CitationPanel';
 import { Citation } from '../../../api/models';
 
-// Mocking the Citation data
-// Mocking remark-gfm and rehype-raw
-
-// jest.mock('react-markdown', () => () => {
-//     return <div data-testid="mock-react-markdown"></div>;
-// });
-
-jest.mock(
-    "react-markdown");
-
-    /*
-jest.mock(
-    "react-markdown",
-    () =>
-      ({ children }: { children: React.ReactNode }) => {
-        return <div data-testid="mock-react-markdown">{children} Test</div>;
-      }
-  );
-  */
-
 
 jest.mock('remark-gfm', () => jest.fn());
 jest.mock('rehype-raw', () => jest.fn());
@@ -120,7 +100,7 @@ describe('CitationPanel', () => {
         expect(mockOnViewSource).toHaveBeenCalledWith(mockCitation);
     });
 
-    test.skip('renders the title correctly and sets the title attribute to the citation title for blob URL', () => {
+    test('renders the title correctly and sets the title attribute to the citation title for blob URL', () => {
 
         const mockCitationWithBlobUrl: Citation = {
             ...mockCitation,

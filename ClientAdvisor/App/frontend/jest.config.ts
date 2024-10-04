@@ -20,6 +20,9 @@ const config: Config.InitialOptions = {
     //'^react-syntax-highlighter$': '<rootDir>/__mocks__/react-syntax-highlighter.js',
    // '^react-syntax-highlighter$': '<rootDir>/__mocks__/react-syntax-highlighter.js',
    //'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js',
+   '^react-markdown$': '<rootDir>/__mocks__/react-markdown.tsx', 
+   '^dompurify$': '<rootDir>/__mocks__/dompurify.js', // Point to the mock
+
   },
   setupFilesAfterEnv: ['<rootDir>/src/test/setupTests.ts'], // For setting up testing environment like jest-dom
   transform: {
@@ -74,6 +77,15 @@ const config: Config.InitialOptions = {
   //     statements: 80,
   //   },
   // },
+
+  // coveragePathIgnorePatterns: [
+  //   '<rootDir>/node_modules/', // Ignore node_modules
+  //   '<rootDir>/__mocks__/', // Ignore mocks
+  //   '<rootDir>/src/state/',
+  //   '<rootDir>/src/api/', 
+  //   '<rootDir>/src/mocks/', 
+  //   '<rootDir>/src/test/', 
+  // ],
 
   
 }
