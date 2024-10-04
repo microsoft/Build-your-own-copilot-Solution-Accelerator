@@ -87,7 +87,7 @@ jobs:
           fi
 
       - name: Send Notification on Failure
-        if: success()
+        if: failure()
         run: |
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       
