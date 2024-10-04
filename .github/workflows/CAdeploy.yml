@@ -33,8 +33,8 @@ jobs:
           echo "Generating a unique resource group name..."
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           COMMON_PART="pslautomationCli"
-          UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
-          # UNIQUE_RG_NAME="pslautomationCli20241004042844"
+          # UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
+          UNIQUE_RG_NAME="pslautomationCli20241004045433"
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
           echo "Generated RESOURCE_GROUP_PREFIX: ${UNIQUE_RG_NAME}"
       
@@ -52,44 +52,44 @@ jobs:
             echo "Resource group already exists."
           fi
       
-      - name: Generate Unique Solution Prefix
-        id: generate_solution_prefix
-        run: |
-          set -e
-          COMMON_PART="pslc"
-          TIMESTAMP=$(date +%s)  
-          UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
-          UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
-          echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
-          echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}"
-          
-      - name: Deploy Bicep Template
-        id: deploy
-        run: |
-          set -e
-          az deployment group create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --template-file ClientAdvisor/Deployment/bicep/main.bicep \
-            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
-
-      # - name: Update PowerBI URL
-      #   if: success()
+      # - name: Generate Unique Solution Prefix
+      #   id: generate_solution_prefix
       #   run: |
       #     set -e
-      #     COMMON_PART="-app-service"
-      #     application_name="${{ env.SOLUTION_PREFIX }}${COMMON_PART}"
-      #     echo "application name: application_name"
-      #     echo "application name:: $application_name"
-      #     echo "powerBI URL: ${{ vars.VITE_POWERBI_EMBED_URL }}"
-      #     az webapp config appsettings set --name $application_name --resource-group pslautomationbyoa5 --settings VITE_POWERBI_EMBED_URL=${{ vars.VITE_POWERBI_EMBED_URL }}
-      #     # Restart App Service
-      #     az webapp restart --resource-group pslautomationbyoa5 --name application_name
-      #     # Check if the update was successful
-      #     if [ $? -eq 0 ]; then
-      #         echo "Power BI URL updated successfully."
-      #     else
-      #         echo "Failed to update Power BI URL."
-      #     fi
+      #     COMMON_PART="pslc"
+      #     TIMESTAMP=$(date +%s)  
+      #     UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
+      #     UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
+      #     echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
+      #     echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}"
+          
+      # - name: Deploy Bicep Template
+      #   id: deploy
+      #   run: |
+      #     set -e
+      #     az deployment group create \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --template-file ClientAdvisor/Deployment/bicep/main.bicep \
+      #       --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
+
+      - name: Update PowerBI URL
+        if: success()
+        run: |
+          set -e
+          COMMON_PART="-app-service"
+          application_name="${{ env.SOLUTION_PREFIX }}${COMMON_PART}"
+          echo "application name: application_name"
+          echo "application name:: $application_name"
+          echo "powerBI URL: ${{ vars.VITE_POWERBI_EMBED_URL }}"
+          az webapp config appsettings set --name $application_name --resource-group pslautomationCli20241004045433 --settings VITE_POWERBI_EMBED_URL=${{ vars.VITE_POWERBI_EMBED_URL }}
+          # Restart App Service
+          az webapp restart --resource-group pslautomationCli20241004045433 --name application_name
+          # Check if the update was successful
+          if [ $? -eq 0 ]; then
+              echo "Power BI URL updated successfully."
+          else
+              echo "Failed to update Power BI URL."
+          fi
 
       # - name: Delete Bicep Deployment
       #   if: success()
