@@ -34,7 +34,7 @@ jobs:
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           COMMON_PART="pslautomationCli"
           UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
-          # UNIQUE_RG_NAME="pslautomationbyoa5"
+          # UNIQUE_RG_NAME="pslautomationCli20241004042844"
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
           echo "Generated RESOURCE_GROUP_PREFIX: ${UNIQUE_RG_NAME}"
       
@@ -63,14 +63,14 @@ jobs:
           echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
           echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}"
           
-      # - name: Deploy Bicep Template
-      #   id: deploy
-      #   run: |
-      #     set -e
-      #     az deployment group create \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --template-file ClientAdvisor/Deployment/bicep/main.bicep \
-      #       --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
+      - name: Deploy Bicep Template
+        id: deploy
+        run: |
+          set -e
+          az deployment group create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --template-file ClientAdvisor/Deployment/bicep/main.bicep \
+            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
 
       # - name: Update PowerBI URL
       #   if: success()
