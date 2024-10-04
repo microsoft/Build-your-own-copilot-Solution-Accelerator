@@ -52,16 +52,17 @@ jobs:
             echo "Resource group already exists."
           fi
       
-      # - name: Generate Unique Solution Prefix
-      #   id: generate_solution_prefix
-      #   run: |
-      #     set -e
-      #     COMMON_PART="pslc"
-      #     TIMESTAMP=$(date +%s)  
-      #     UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
-      #     UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
-      #     echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
-      #     echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}"
+      - name: Generate Unique Solution Prefix
+        id: generate_solution_prefix
+        run: |
+          set -e
+          COMMON_PART="pslc"
+          TIMESTAMP=$(date +%s)  
+          UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
+          # UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
+          UNIQUE_SOLUTION_PREFIX="pslc75"
+          echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
+          echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}"
           
       # - name: Deploy Bicep Template
       #   id: deploy
