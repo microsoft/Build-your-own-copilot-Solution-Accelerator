@@ -18,7 +18,7 @@ var resourceGroupName = resourceGroup().name
 
 var solutionLocation = resourceGroupLocation
 var baseUrl = 'https://raw.githubusercontent.com/Roopan-Microsoft/psl-byo-main/main/ClientAdvisor/'
-var functionAppversion = 'latest'
+var functionAppversion = 'dev'
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
