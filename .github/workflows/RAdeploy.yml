@@ -1,4 +1,4 @@
-name: Deploy Azure Resources:ResearchAssitent
+name: CI-Validate Deployment-Research Assistant
 
 on:
   push:

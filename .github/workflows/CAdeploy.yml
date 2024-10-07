@@ -1,4 +1,4 @@
-name: Deploy Azure Resources:ClientAdvisior
+name: CI-Validate Deployment-Client Advisor
 
 on:
   push:
