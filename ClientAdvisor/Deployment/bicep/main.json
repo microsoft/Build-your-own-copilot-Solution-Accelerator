@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "7603870024060537115"
+      "templateHash": "5062834210065422729"
     }
   },
   "parameters": {
@@ -28,8 +28,8 @@
     "resourceGroupLocation": "[resourceGroup().location]",
     "resourceGroupName": "[resourceGroup().name]",
     "solutionLocation": "[variables('resourceGroupLocation')]",
-    "baseUrl": "https://raw.githubusercontent.com/Roopan-Microsoft/rp0907/main/ClientAdvisor/",
-    "functionAppversion": "latest"
+    "baseUrl": "https://raw.githubusercontent.com/Roopan-Microsoft/psl-byo-main/main/ClientAdvisor/",
+    "functionAppversion": "dev"
   },
   "resources": [
     {
