@@ -384,87 +384,101 @@ const Chat = ({ chatType }: Props) => {
 
   return (
     <div className={styles.container} role="main">
-        <Stack horizontal className={styles.chatRoot}>
-            <div className={styles.chatContainer}>
-                <h2>{title}</h2>
-            <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? '40px' : '0px' }} role="log">
-                <AnswersList
-                  messages={messages}
-                  onShowCitation={onShowCitation}
+      <Stack horizontal className={styles.chatRoot}>
+        <div className={styles.chatContainer}>
+          <h2>{title}</h2>
+          <div
+            className={styles.chatMessageStream}
+            style={{ marginBottom: isLoading ? "40px" : "0px" }}
+            role="log"
+          >
+            <AnswersList messages={messages} onShowCitation={onShowCitation} />
+            {showLoadingMessage && (
+              <>
+                <div className={styles.chatMessageGpt}>
+                  <Answer
+                    answer={{
+                      answer: "Generating answer...",
+                      citations: [],
+                    }}
+                    onCitationClicked={() => null}
+                  />
+                </div>
+              </>
+            )}
+            <div ref={chatMessageStreamEnd} />
+          </div>
+
+          <Stack horizontal className={styles.chatInput}>
+            {isLoading && (
+              <Stack
+                horizontal
+                className={styles.stopGeneratingContainer}
+                role="button"
+                aria-label="Stop generating"
+                tabIndex={0}
+                onClick={stopGenerating}
+                onKeyDown={(e) =>
+                  e.key === "Enter" || e.key === " " ? stopGenerating() : null
+                }
+              >
+                <SquareRegular
+                  className={styles.stopGeneratingIcon}
+                  aria-hidden="true"
                 />
-                {showLoadingMessage && (
-                    <>
-                        <div className={styles.chatMessageGpt}>
-                            <Answer
-                                answer={{
-                                  answer: 'Generating answer...',
-                                  citations: []
-                                }}
-                                onCitationClicked={() => null}
-                            />
-                        </div>
-                    </>
-                )}
-                <div ref={chatMessageStreamEnd} />
-            </div>
-
-                        <Stack horizontal className={styles.chatInput}>
-                            {isLoading && (
-                                <Stack 
-                                    horizontal
-                                    className={styles.stopGeneratingContainer}
-                                    role="button"
-                                    aria-label="Stop generating"
-                                    tabIndex={0}
-                                    onClick={stopGenerating}
-                                    onKeyDown={e => e.key === 'Enter' || e.key === ' ' ? stopGenerating() : null}
-                                    >
-                                        <SquareRegular className={styles.stopGeneratingIcon} aria-hidden="true"/>
-                                        <span className={styles.stopGeneratingText} aria-hidden="true">Stop generating</span>
-                                </Stack>
-                            )}
-                            <Stack>
-                                <CommandBarButton
-                                    role="button"
-                                    styles={{ ...clearButtonStyles }}
-                                    className={styles.clearChatBroomNoCosmos}
-                                    iconProps={{ iconName: 'Broom' }}
-                                    onClick={newChat}
-                                    disabled={disabledButton()}
-                                    aria-label="clear chat button"
-
-                                />
-                                <Dialog
-                                    hidden={hideErrorDialog}
-                                    onDismiss={handleErrorDialogClose}
-                                    dialogContentProps={errorDialogContentProps}
-                                    modalProps={modalProps}
-                                >
-                                </Dialog>
-                            </Stack>
-                            <QuestionInput
-                                clearOnSend
-                                placeholder="Type a new question..."
-                                disabled={isLoading}
-                                onSend={(question, id) => { makeApiRequestWithoutCosmosDB(question, id) }}
-                                conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
-                                chatType={chatType}
-                            />
-                        </Stack>
-                    </div>
-
-                    {/* Citation Panel */}
-                    <CitationPanel
-                      activeCitation={activeCitation}
-                      isCitationPanelOpen={isCitationPanelOpen}
-                      messages={messages}
-                      onClickAddFavorite={onClickAddFavorite}
-                      onViewSource={onViewSource}
-                      setIsCitationPanelOpen={setIsCitationPanelOpen}
-                    />
+                <span className={styles.stopGeneratingText} aria-hidden="true">
+                  Stop generating
+                </span>
+              </Stack>
+            )}
+            <Stack>
+              <CommandBarButton
+                role="button"
+                styles={{ ...clearButtonStyles }}
+                className={styles.clearChatBroomNoCosmos}
+                iconProps={{ iconName: "Broom" }}
+                onClick={newChat}
+                disabled={disabledButton()}
+                aria-label="clear chat button"
+              />
+              <Dialog
+                hidden={hideErrorDialog}
+                onDismiss={handleErrorDialogClose}
+                dialogContentProps={errorDialogContentProps}
+                modalProps={modalProps}
+              ></Dialog>
             </Stack>
+            <QuestionInput
+              clearOnSend
+              placeholder="Type a new question..."
+              disabled={isLoading}
+              onSend={(question, id) => {
+                makeApiRequestWithoutCosmosDB(question, id);
+              }}
+              conversationId={
+                appStateContext?.state.currentChat?.id
+                  ? appStateContext?.state.currentChat?.id
+                  : undefined
+              }
+              chatType={chatType}
+            />
+          </Stack>
         </div>
-  )
+
+        {/* Citation Panel */}
+        {messages.length > 0 &&
+          isCitationPanelOpen &&
+          Boolean(activeCitation?.id) && (
+            <CitationPanel
+              activeCitation={activeCitation}
+              onClickAddFavorite={onClickAddFavorite}
+              onViewSource={onViewSource}
+              setIsCitationPanelOpen={setIsCitationPanelOpen}
+            />
+          )}
+      </Stack>
+    </div>
+  );
 }
 
 export default Chat
