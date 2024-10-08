@@ -1,13 +1,14 @@
 import { Fragment } from "react";
 import { Stack } from "@fluentui/react";
 import { ToolMessageContent, type ChatMessage, type Citation } from "../../api";
-import styles from "./AnswersList.module.css";
+import styles from "./ChatMessageContainer.module.css";
 import { Answer } from "../Answer/Answer";
 import { ErrorCircleRegular } from "@fluentui/react-icons";
 
-type AnswersListProps = {
+type ChatMessageContainerProps = {
   messages: ChatMessage[];
   onShowCitation: (citation: Citation) => void;
+  showLoadingMessage: boolean;
 };
 
 const parseCitationFromMessage = (message: ChatMessage) => {
@@ -22,9 +23,9 @@ const parseCitationFromMessage = (message: ChatMessage) => {
   return [];
 };
 
-const AnswersList = (props: AnswersListProps): JSX.Element => {
+const ChatMessageContainer = (props: ChatMessageContainerProps): JSX.Element => {
   const [ASSISTANT, TOOL, ERROR, USER] = ["assistant", "tool", "error", "user"];
-  const { messages, onShowCitation } = props;
+  const { messages, onShowCitation , showLoadingMessage} = props;
   return (
     <Fragment>
       {messages.map((answer, index) => (
@@ -61,8 +62,21 @@ const AnswersList = (props: AnswersListProps): JSX.Element => {
           ) : null}
         </Fragment>
       ))}
+      {showLoadingMessage && (
+        <>
+          <div className={styles.chatMessageGpt}>
+            <Answer
+              answer={{
+                answer: "Generating answer...",
+                citations: [],
+              }}
+              onCitationClicked={() => null}
+            />
+          </div>
+        </>
+      )}
     </Fragment>
   );
 };
 
-export default AnswersList;
+export default ChatMessageContainer;

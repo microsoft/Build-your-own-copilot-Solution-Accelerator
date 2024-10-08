@@ -24,7 +24,7 @@ import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
 import { SidebarOptions } from '../../components/SidebarView/SidebarView'
 import CitationPanel from '../../components/CitationPanel/CitationPanel';
-import AnswersList from '../../components/AnswersList/AnswersList';
+import ChatMessageContainer from '../../components/ChatMessageContainer/ChatMessageContainer';
 
 const enum messageStatus {
   NotRunning = 'Not Running',
@@ -350,27 +350,28 @@ const Chat = ({ chatType }: Props) => {
       }
     })
   }
+  const getCitationProp = (val: any) => (isEmpty(val) ? "" : val);
 
   const onClickAddFavorite = () => {
-    if (((activeCitation?.filepath) !== null) && ((activeCitation?.url) !== null)) {
+    if (activeCitation?.filepath !== null && activeCitation?.url !== null) {
       const newCitation = {
         id: `${activeCitation?.filepath}-${activeCitation?.url}`, // Convert id to string and provide a default value of 0
-        title: activeCitation?.title !== undefined ? activeCitation?.title : "",
-        url: activeCitation?.url !== undefined ? activeCitation?.url : "",
-        content: activeCitation?.content !== undefined ? activeCitation?.content : "",
-        filepath: activeCitation?.filepath !== undefined ? activeCitation?.filepath : "",
-        metadata: activeCitation?.metadata !== undefined ? activeCitation?.metadata : "",
-        chunk_id: activeCitation?.chunk_id !== undefined ? activeCitation?.chunk_id : "",
-        reindex_id: activeCitation?.reindex_id !== undefined ? activeCitation?.reindex_id : "",
-        type: appStateContext?.state.sidebarSelection?.toString() ?? ''
-      }
-      handleToggleFavorite([newCitation])
+        title: activeCitation?.title ?? "",
+        url: getCitationProp(activeCitation?.url),
+        content: getCitationProp(activeCitation?.content),
+        filepath: getCitationProp(activeCitation?.filepath),
+        metadata: getCitationProp(activeCitation?.metadata),
+        chunk_id: getCitationProp(activeCitation?.chunk_id),
+        reindex_id: getCitationProp(activeCitation?.reindex_id),
+        type: appStateContext?.state.sidebarSelection?.toString() ?? "",
+      };
+      handleToggleFavorite([newCitation]);
 
       if (appStateContext?.state?.isSidebarExpanded === false) {
-        appStateContext?.dispatch({ type: 'TOGGLE_SIDEBAR' });
+        appStateContext?.dispatch({ type: "TOGGLE_SIDEBAR" });
       }
     }
-  }
+  };
 
   let title = ''
   switch (appStateContext?.state.sidebarSelection) {
@@ -392,20 +393,7 @@ const Chat = ({ chatType }: Props) => {
             style={{ marginBottom: isLoading ? "40px" : "0px" }}
             role="log"
           >
-            <AnswersList messages={messages} onShowCitation={onShowCitation} />
-            {showLoadingMessage && (
-              <>
-                <div className={styles.chatMessageGpt}>
-                  <Answer
-                    answer={{
-                      answer: "Generating answer...",
-                      citations: [],
-                    }}
-                    onCitationClicked={() => null}
-                  />
-                </div>
-              </>
-            )}
+            <ChatMessageContainer messages={messages} onShowCitation={onShowCitation} showLoadingMessage={showLoadingMessage} />
             <div ref={chatMessageStreamEnd} />
           </div>
 
