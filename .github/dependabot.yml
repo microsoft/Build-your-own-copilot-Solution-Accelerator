@@ -11,7 +11,10 @@ updates:
     commit-message:
       prefix: "build"
   - package-ecosystem: "pip"
-    directory: "/"
+    directories:
+      - "/clientadvisor/app"
+      - "/clientadvisor/azurefunction"
+      - "/researchassistant/app"
     schedule:
       interval: "weekly"
     commit-message:
