@@ -18,7 +18,6 @@ import {
   type Conversation,
   type ErrorMessage
 } from '../../api'
-import { Answer } from '../../components/Answer'
 import { QuestionInput } from '../../components/QuestionInput'
 import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
