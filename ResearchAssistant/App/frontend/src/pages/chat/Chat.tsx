@@ -1,11 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { useRef, useState, useEffect, useContext, useLayoutEffect } from 'react'
-import { Text, CommandBarButton, IconButton, Dialog, DialogType, Stack } from '@fluentui/react'
-import { PrimaryButton } from '@fluentui/react/lib/Button';
-import { SquareRegular, ErrorCircleRegular } from '@fluentui/react-icons'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import rehypeRaw from 'rehype-raw'
+import { CommandBarButton, Dialog, DialogType, Stack } from '@fluentui/react'
+import { SquareRegular } from '@fluentui/react-icons'
 import uuid from 'react-uuid'
 import { isEmpty } from 'lodash-es'
 
@@ -28,6 +24,7 @@ import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
 import { SidebarOptions } from '../../components/SidebarView/SidebarView'
 import CitationPanel from '../../components/CitationPanel/CitationPanel';
+import AnswersList from '../../components/AnswersList/AnswersList';
 
 const enum messageStatus {
   NotRunning = 'Not Running',
@@ -389,48 +386,12 @@ const Chat = ({ chatType }: Props) => {
     <div className={styles.container} role="main">
         <Stack horizontal className={styles.chatRoot}>
             <div className={styles.chatContainer}>
-                <h2
-                    style={{
-                      color: '#72716f',
-                      marginLeft: '15px',
-                      marginTop: '25px',
-                      alignSelf: 'start',
-                      fontWeight: '600',
-                      fontFamily: '"Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
-                      /* -webkit-font-smoothing: antialiased; */
-                      fontSize: '20px'
-                    }}
-                >
-                    {title}
-                </h2>
+                <h2>{title}</h2>
             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? '40px' : '0px' }} role="log">
-                {messages.map((answer, index) => (
-                <>
-                    {answer.role === 'user'
-                      ? (<div className={styles.chatMessageUser} tabIndex={0}>
-                            <div className={styles.chatMessageUserMessage}>{answer.content}</div>
-                        </div>
-                    ) : (answer.role === 'assistant' ?
-                    <div className={styles.chatMessageGpt}>
-                        <Answer
-                            answer={{
-                              answer: answer.content,
-                              citations: parseCitationFromMessage(messages[index - 1]),
-                            }}
-                            onCitationClicked={c => onShowCitation(c)}
-                        />
-                    </div>
-                      : answer.role === ERROR ?
-                    <div className={styles.chatMessageError}>
-                        <Stack horizontal className={styles.chatMessageErrorContent}>
-                            <ErrorCircleRegular className={styles.errorIcon} style={{ color: 'rgba(182, 52, 67, 1)' }} />
-                            <span>Error</span>
-                        </Stack>
-                        <span className={styles.chatMessageErrorContent}>{answer.content}</span>
-                    </div>
-                        : null)}
-                </>
-                ))}
+                <AnswersList
+                  messages={messages}
+                  onShowCitation={onShowCitation}
+                />
                 {showLoadingMessage && (
                     <>
                         <div className={styles.chatMessageGpt}>
