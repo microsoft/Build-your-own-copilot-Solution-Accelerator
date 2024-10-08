@@ -27,13 +27,36 @@ import { QuestionInput } from '../../components/QuestionInput'
 import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
 import { SidebarOptions } from '../../components/SidebarView/SidebarView'
+import CitationPanel from '../../components/CitationPanel/CitationPanel';
 
 const enum messageStatus {
   NotRunning = 'Not Running',
   Processing = 'Processing',
   Done = 'Done'
 }
-
+const clearButtonStyles = {
+  icon: {
+    color: '#FFFFFF'
+  },
+  iconDisabled: {
+    color: '#BDBDBD !important'
+  },
+  root: {
+    color: '#FFFFFF',
+    background: '#0F6CBD',
+    borderRadius: '100px'
+  },
+  rootDisabled: {
+    background: '#F0F0F0'
+  },
+  rootHovered: {
+    background: '#0F6CBD',
+    color: '#FFFFFF'
+  },
+  iconHovered: {
+    color: '#FFFFFF'
+  }
+}
 interface Props {
   chatType: SidebarOptions | null | undefined
 }
@@ -292,8 +315,8 @@ const Chat = ({ chatType }: Props) => {
     setIsCitationPanelOpen(true)
   }
 
-  const onViewSource = (citation: Citation) => {
-    if (citation.url && !citation.url.includes('blob.core')) {
+  const onViewSource = (citation: Citation | undefined) => {
+    if (citation?.url && !citation.url.includes('blob.core')) {
       window.open(citation.url, '_blank')
     }
   }
@@ -329,6 +352,27 @@ const Chat = ({ chatType }: Props) => {
         appStateContext?.dispatch({ type: 'TOGGLE_FAVORITE_CITATION', payload: { citation } })
       }
     })
+  }
+
+  const onClickAddFavorite = () => {
+    if (((activeCitation?.filepath) !== null) && ((activeCitation?.url) !== null)) {
+      const newCitation = {
+        id: `${activeCitation?.filepath}-${activeCitation?.url}`, // Convert id to string and provide a default value of 0
+        title: activeCitation?.title !== undefined ? activeCitation?.title : "",
+        url: activeCitation?.url !== undefined ? activeCitation?.url : "",
+        content: activeCitation?.content !== undefined ? activeCitation?.content : "",
+        filepath: activeCitation?.filepath !== undefined ? activeCitation?.filepath : "",
+        metadata: activeCitation?.metadata !== undefined ? activeCitation?.metadata : "",
+        chunk_id: activeCitation?.chunk_id !== undefined ? activeCitation?.chunk_id : "",
+        reindex_id: activeCitation?.reindex_id !== undefined ? activeCitation?.reindex_id : "",
+        type: appStateContext?.state.sidebarSelection?.toString() ?? ''
+      }
+      handleToggleFavorite([newCitation])
+
+      if (appStateContext?.state?.isSidebarExpanded === false) {
+        appStateContext?.dispatch({ type: 'TOGGLE_SIDEBAR' });
+      }
+    }
   }
 
   let title = ''
@@ -421,32 +465,7 @@ const Chat = ({ chatType }: Props) => {
                             <Stack>
                                 <CommandBarButton
                                     role="button"
-                                    styles={{
-                                      icon: {
-                                        color: '#FFFFFF'
-                                      },
-                                      iconDisabled: {
-                                        color: '#BDBDBD !important'
-                                      },
-                                      root: {
-                                        color: '#FFFFFF',
-                                        background: '#0F6CBD',
-                                        borderRadius: '100px'
-                                      },
-                                      rootDisabled: {
-                                        background: '#F0F0F0'
-                                      },
-
-                                      // disable hover effect
-                                      rootHovered: {
-                                        background: '#0F6CBD',
-                                        color: '#FFFFFF'
-                                      },
-
-                                      iconHovered: {
-                                        color: '#FFFFFF'
-                                      }
-                                    }}
+                                    styles={{ ...clearButtonStyles }}
                                     className={styles.clearChatBroomNoCosmos}
                                     iconProps={{ iconName: 'Broom' }}
                                     onClick={newChat}
@@ -474,55 +493,14 @@ const Chat = ({ chatType }: Props) => {
                     </div>
 
                     {/* Citation Panel */}
-                    {messages && messages.length > 0 && isCitationPanelOpen && activeCitation && (
-                    <Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Citations Panel">
-                        <Stack aria-label="Citations Panel Header Container" horizontal className={styles.citationPanelHeaderContainer} horizontalAlign="space-between" verticalAlign="center">
-                            <Stack horizontal verticalAlign="center">
-                                <span aria-label="Citations" className={styles.citationPanelHeader}>References</span>
-                            </Stack>
-                            <IconButton iconProps={{ iconName: 'Cancel', style: { color: '#424242' } }} aria-label="Close citations panel" onClick={() => setIsCitationPanelOpen(false)} />
-                        </Stack>
-                        <h5 className={styles.citationPanelTitle} tabIndex={0} title={activeCitation.url && !activeCitation.url.includes('blob.core') ? activeCitation.url : activeCitation.title ?? ''} onClick={() => onViewSource(activeCitation)}>{activeCitation.title}</h5>
-                        <PrimaryButton
-                            iconProps={{ iconName: 'CirclePlus', style: { color: 'white' } }} // Set icon color to white
-                            onClick={() => {
-                              if (activeCitation.filepath && activeCitation.url) {
-                                const newCitation = {
-                                  id: `${activeCitation.filepath}-${activeCitation.url}`, // Convert id to string and provide a default value of 0
-                                  title: activeCitation.title,
-                                  url: activeCitation.url,
-                                  content: activeCitation.content,
-                                  filepath: activeCitation.filepath,
-                                  metadata: activeCitation.metadata,
-                                  chunk_id: activeCitation.chunk_id,
-                                  reindex_id: activeCitation.reindex_id,
-                                  type: appStateContext?.state.sidebarSelection?.toString() ?? '',
-                                }
-                                handleToggleFavorite([newCitation])
-
-                                if (!appStateContext?.state.isSidebarExpanded) {
-                                  appStateContext?.dispatch({ type: 'TOGGLE_SIDEBAR' });
-                                }
-                              }
-                            }}
-                            styles={{
-                              root: { borderRadius: '4px', marginTop: '10px', padding: '12px 24px' }
-                            }}
-                        >
-                            Favorite
-                        </PrimaryButton>
-                        <div tabIndex={0}>
-                            <ReactMarkdown
-                                linkTarget="_blank"
-                                className={styles.citationPanelContent}
-                                children={activeCitation.content}
-                                remarkPlugins={[remarkGfm]}
-                                rehypePlugins={[rehypeRaw]}
-                            />
-                        </div>
-                        
-                    </Stack.Item>
-                    )}
+                    <CitationPanel
+                      activeCitation={activeCitation}
+                      isCitationPanelOpen={isCitationPanelOpen}
+                      messages={messages}
+                      onClickAddFavorite={onClickAddFavorite}
+                      onViewSource={onViewSource}
+                      setIsCitationPanelOpen={setIsCitationPanelOpen}
+                    />
             </Stack>
         </div>
   )
