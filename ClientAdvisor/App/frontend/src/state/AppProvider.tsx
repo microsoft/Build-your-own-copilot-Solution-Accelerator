@@ -51,7 +51,8 @@ export type Action =
   | { type: 'GET_FEEDBACK_STATE'; payload: string }
   | { type: 'UPDATE_CLIENT_ID'; payload: string }
   | { type: 'SET_IS_REQUEST_INITIATED'; payload: boolean }
-  | { type: 'TOGGLE_LOADER' };
+  | { type: 'TOGGLE_LOADER' }
+  | { type: 'RESET_CLIENT_ID'};
 
 const initialState: AppState = {
   isChatHistoryOpen: false,
