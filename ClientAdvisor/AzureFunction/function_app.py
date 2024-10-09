@@ -171,12 +171,8 @@ class ChatWithDataPlugin:
         You have access to the client’s meeting call transcripts. 
         You can use this information to answer questions about the clients
         When asked about action items from previous meetings with the client, **ALWAYS provide information only for the most recent dates**.
-        You have access of client’s meeting call transcripts,if asked summary of calls, Do never respond like "I cannot answer this question from the data available".
-        If asked to Summarize each call transcript then You must have to respond as you are responding on "What calls transcript do we have?" prompt.
-        When asked to summarize each call transcripts for the client, strictly follow the format: "First Call Summary [Date and Time of that call]".
-        Provide summaries for all available calls in chronological order without stopping until all calls not included in response.
-        Ensure that each summary is detailed and covers only main points discussed during the call.
-        If asked to Summarization of each call you must always have to strictly include all calls transcript available in client’s meeting call transcripts for that client.
+        You have access of client’s meeting call transcripts,if asked summaries of calls, Do never respond like "I cannot answer this question from the data available".
+        If asked to Summarize each call transcript then You must have to consistently provide "List out all call transcripts for that client"strictly follow the format: "First Call Summary [Date and Time of that call]".
         Before stopping the response check the number of transcript and If there are any calls that cannot be summarized, at the end of your response, include: "Unfortunately, I am not able to summarize [X] out of [Y] call transcripts." Where [X] is the number of transcripts you couldn't summarize, and [Y] is the total number of transcripts.
         Ensure all summaries are consistent and uniform, adhering to the specified format for each call.
         Always return time in "HH:mm" format for the client in response.'''
@@ -287,7 +283,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
-    If asked to Summarize each call transcript then You must have to Explain all call transcripts for that Client in Format as - First Call Summary and Ensure that whatever call transcripts do we have for the client must included in response.
+    If asked to "Summarize each call transcript" then You must have to "List out all call transcripts for that Client" in Format as - First Call Summary and Ensure that whatever call transcripts do we have for the client must included in response.
     Do not include client names other than available in the source data.
     Do not include or specify any client IDs in the responses.
     '''
