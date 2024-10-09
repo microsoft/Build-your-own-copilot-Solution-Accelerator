@@ -10,12 +10,13 @@ const config: Config.InitialOptions = {
   moduleNameMapper: {
     '\\.(css|less|scss)$': 'identity-obj-proxy',
     '\\.(svg|png|jpg)$': '<rootDir>/__mocks__/fileMock.js',
+    '^lodash-es$': 'lodash',
   },
   setupFilesAfterEnv: ['<rootDir>/src/test/setupTests.ts'],
   transform: {
             
     '^.+\\.jsx?$': 'babel-jest',       // Transform JavaScript files using babel-jest
-    '^.+\\.tsx?$': 'babel-jest'
+    '^.+\\.tsx?$': 'ts-jest'
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(react-markdown|remark-gfm|rehype-raw)/)',
