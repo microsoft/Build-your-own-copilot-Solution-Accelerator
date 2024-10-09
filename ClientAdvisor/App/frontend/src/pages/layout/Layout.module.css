@@ -179,6 +179,7 @@
   height: 100%; */
   display: flex;
   flex-direction: column;
+  padding-top : 10px ;
 }
 
 .pivotContainer > div {
@@ -315,5 +316,12 @@
       border: 2px solid WindowText;
       background-color: Window;
       color: WindowText;
+  }
+
+  .selectedName{
+    border-radius:25px;
+    border: 2px solid WindowText;
+    background-color: Window;
+    color: WindowText;
   }
 }
