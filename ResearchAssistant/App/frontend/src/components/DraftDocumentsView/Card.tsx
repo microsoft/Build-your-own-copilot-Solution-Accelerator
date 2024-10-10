@@ -37,7 +37,7 @@ const SystemErrMessage = 'I am sorry, I don’t have this information in the kno
 export const ResearchTopicCard = (): JSX.Element => {
   const [is_bad_request, set_is_bad_request] = useState(false)
   const appStateContext = useContext(AppStateContext)
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = useState(false)
 
   const callGenerateSectionContent = async (documentSection: DocumentSection) => {
     if (appStateContext?.state.researchTopic === undefined || appStateContext?.state.researchTopic === '') {
@@ -156,7 +156,7 @@ interface CardProps {
 
 export const Card = (props: CardProps) => {
   const appStateContext = useContext(AppStateContext)
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false)
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
   const index: number = props.index
   const sectionInformation: DocumentSection | undefined = appStateContext?.state.documentSections?.[index]
   const [loading, setLoading] = useState(false)

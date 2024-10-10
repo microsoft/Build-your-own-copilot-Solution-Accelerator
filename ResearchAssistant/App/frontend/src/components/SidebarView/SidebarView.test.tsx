@@ -96,16 +96,14 @@ describe('SidebarView', () => {
   it('renders collapsed sidebar', () => {
     renderWithContext(<SidebarView />, { isSidebarExpanded: false });
   
-    // Check that the user name is not visible in collapsed state
     expect(screen.queryByText(/John Doe/i)).not.toBeInTheDocument();
   });
 
   it('renders DraftDocumentsView when Draft option is selected', () => {
     renderWithContext(<SidebarView />, { isSidebarExpanded: true, sidebarSelection: 'Draft' });
   
-    // Narrow down the specific "Draft" element you are targeting
     const draftElements = screen.getAllByText(/Draft/i);
-    const sidebarDraftOption = draftElements.find(element => element.tagName === 'SPAN'); // or check other attributes
+    const sidebarDraftOption = draftElements.find(element => element.tagName === 'SPAN');
   
     expect(sidebarDraftOption).toBeInTheDocument();
   });
@@ -113,17 +111,17 @@ describe('SidebarView', () => {
   it('does not render selected view when sidebar is collapsed', () => {
     renderWithContext(<SidebarView />, { isSidebarExpanded: false, sidebarSelection: 'Articles' });
   
-    // Check that detailed content is not rendered when collapsed
+   
     expect(screen.queryByText(/Article details/i)).not.toBeInTheDocument();
   });
 
   it('dispatches TOGGLE_SIDEBAR when DraftDocuments option is clicked and sidebar is expanded', () => {
-    renderWithContext(<SidebarView />, { isSidebarExpanded: true, sidebarSelection: null }); // Start with no selection
+    renderWithContext(<SidebarView />, { isSidebarExpanded: true, sidebarSelection: null }); 
 
-    const draftButtons = screen.getAllByText(/Draft/i); // Get all "Draft" buttons
-    fireEvent.click(draftButtons[0]); // Click the Draft button
+    const draftButtons = screen.getAllByText(/Draft/i); 
+    fireEvent.click(draftButtons[0]); 
 
-    // Check if the expected actions were dispatched
+    
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'UPDATE_SIDEBAR_SELECTION', payload: 'Draft' });
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'TOGGLE_SIDEBAR' });
 });
@@ -133,10 +131,8 @@ it('dispatches TOGGLE_SIDEBAR when any option other than DraftDocuments is click
   const grantButton = screen.getByText(/Grants/i);
   fireEvent.click(grantButton);
 
-  // Expect UPDATE_SIDEBAR_SELECTION to be dispatched
   expect(mockDispatch).toHaveBeenCalledWith({ type: 'UPDATE_SIDEBAR_SELECTION', payload: 'Grants' });
 
-  // Expect TOGGLE_SIDEBAR to not be dispatched, adjust this based on actual behavior
   expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'TOGGLE_SIDEBAR' });
 });
 
@@ -145,8 +141,8 @@ it('dispatches TOGGLE_SIDEBAR when any option other than DraftDocuments is click
   it('does not dispatch TOGGLE_SIDEBAR when DraftDocuments is selected and clicked again', () => {
     renderWithContext(<SidebarView />, { isSidebarExpanded: true, sidebarSelection: 'Draft' });
 
-    const draftButtons = screen.getAllByText(/Draft/i); // Get all "Draft" buttons
-    fireEvent.click(draftButtons[0]); // Click the Draft button again
+    const draftButtons = screen.getAllByText(/Draft/i);
+    fireEvent.click(draftButtons[0]);
 
     expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'TOGGLE_SIDEBAR' });
   });
