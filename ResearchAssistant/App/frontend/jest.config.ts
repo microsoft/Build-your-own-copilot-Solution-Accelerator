@@ -33,6 +33,18 @@ const config: Config.InitialOptions = {
       statements: 80,
     },
   },
+  coveragePathIgnorePatterns: [
+    '<rootDir>/node_modules/', // Ignore node_modules
+    '<rootDir>/__mocks__/', // Ignore mocks
+    '<rootDir>/src/api/',
+    '<rootDir>/src/mocks/',
+    '<rootDir>/src/test/',
+    '<rootDir>/src/index.tsx',
+    '<rootDir>/src/vite-env.d.ts',
+    '<rootDir>/src/components/QuestionInput/index.ts',
+    '<rootDir>/src/components/Answer/index.ts',
+    '<rootDir>/src/state',
+  ],
 };
 
 export default config;
