@@ -65,3 +65,20 @@ export const citationObj = {
 export const conversationResponseWithExceptionFromAI = {
   error: "AI Error",
 };
+
+export const enterKeyCodes = {
+  key: "Enter",
+  code: "Enter",
+  charCode: 13,
+};
+export const spaceKeyCodes = {
+  key: " ",
+  code: "Space",
+  charCode: 32,
+};
+
+export const escapeKeyCodes = {
+  key: "Escape",
+  code: "Escape",
+  keyCode: 27,
+};
