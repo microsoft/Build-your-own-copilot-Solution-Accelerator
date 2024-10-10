@@ -1,16 +1,25 @@
-import React from "react";
 import { screen, fireEvent } from "@testing-library/react";
 import { SidebarOptions } from "../../components/SidebarView/SidebarView";
 import Chat from "./Chat";
-import { mockDispatch, renderWithContext } from "../../test/test.utils";
+import {
+  defaultMockState,
+  renderWithContext,
+  renderWithNoContext,
+  mockAppContextStateProvider,
+  delay,
+} from "../../test/test.utils";
 import { act } from "react-dom/test-utils";
 
 import * as api from "../../api";
 import {
   citationObj,
   conversationResponseWithExceptionFromAI,
+  currentChat,
   enterKeyCodes,
   escapeKeyCodes,
+  expectedUpdateCurrentChatActionPayload,
+  firstQuestion,
+  mockedUsersData,
   simpleConversationResponse,
   simpleConversationResponseWithCitations,
   simpleConversationResponseWithEmptyChunk,
@@ -19,14 +28,11 @@ import {
 
 jest.mock("../../api", () => ({
   conversationApi: jest.fn(),
-  // getAssistantTypeApi: jest.fn(),
-  // getFrontEndSettings: jest.fn(),
-  // historyList: jest.fn(),
-  // historyUpdate: jest.fn(),
+  getUserInfo: jest.fn(),
 }));
 
 const mockConversationApi = api.conversationApi as jest.Mock;
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const mockGetUserInfo = api.getUserInfo as jest.Mock;
 
 const createMockConversationAPI = () => {
   mockConversationApi.mockResolvedValueOnce({
@@ -116,6 +122,10 @@ const createMockConversationAPIWithErrorInReader = () => {
   });
 };
 
+const createMockGetUsersAPI = () => {
+  mockGetUserInfo.mockResolvedValue(mockedUsersData);
+};
+
 jest.mock("../../components/SidebarView/SidebarView", () => ({
   SidebarView: () => <div>Mocked SidebarView</div>,
   SidebarOptions: {
@@ -128,7 +138,7 @@ jest.mock("../../components/SidebarView/SidebarView", () => ({
 jest.mock(
   "../../components/CitationPanel/CitationPanel",
   () => (props: any) => {
-    const { onClickAddFavorite } = props;
+    const { onClickAddFavorite, onViewSource } = props;
     return (
       <div>
         <div data-testid="citation-panel-component">
@@ -136,6 +146,12 @@ jest.mock(
         </div>
         <div data-testid="add-favorite" onClick={() => onClickAddFavorite()}>
           Add Citation to Favorite
+        </div>
+        <div
+          data-testid="view-source"
+          onClick={() => onViewSource(citationObj)}
+        >
+          View Source
         </div>
       </div>
     );
@@ -150,20 +166,22 @@ jest.mock(
       onShowCitation: any;
       showLoadingMessage: any;
     }) => {
-      console.log("ChatMessageContainer", props);
       const [ASSISTANT, TOOL, ERROR, USER] = [
         "assistant",
         "tool",
         "error",
         "user",
       ];
-      const { messages, onShowCitation, showLoadingMessage } = props;
+      const { messages, onShowCitation } = props;
 
       return (
         <div>
           <div>ChatMessage Container Component</div>
           {messages.map((answer: any, index: number) => (
-            <div data-testid="chat-message-item">
+            <div
+              data-testid="chat-message-item"
+              key={`${answer.role} - ${index}`}
+            >
               {answer.role === USER ? (
                 <div data-testid="user-content">{answer.content}</div>
               ) : answer.role === ASSISTANT ? (
@@ -189,23 +207,21 @@ jest.mock(
     }
 );
 
-const firstQuestion = "Hi";
-
 jest.mock("../../components/QuestionInput", () => ({
   QuestionInput: (props: any) => {
-    // console.log("Question input props", props);
     return (
       <div>
         <div>Question Input Component</div>
         <div
           data-testid="submit-first-question"
-          onClick={() => props.onSend(firstQuestion)}
+          onClick={() => props.onSend(firstQuestion, props.conversationId)}
         >
           submit-first-question
         </div>
         <div
           data-testid="submit-second-question"
-          onClick={() => props.onSend("Hi", "convId")}
+          // TO MOCK CONV ID EXISTS BUT NO conversation exists (currentChat)
+          onClick={() => props.onSend("Hello", "some-temp-conversation-id")}
         >
           submit-second-question
         </div>
@@ -216,40 +232,45 @@ jest.mock("../../components/QuestionInput", () => ({
 
 const renderComponent = (
   props: { chatType: SidebarOptions | null | undefined },
-  contextData = {}
+  contextData = {},
+  mockDispatch: any
 ) => {
-  return renderWithContext(<Chat chatType={props.chatType} />, contextData);
+  return renderWithContext(
+    <Chat chatType={props.chatType} />,
+    contextData,
+    mockDispatch
+  );
 };
 
-const expectedMessages = expect.arrayContaining([
-  expect.objectContaining({
-    id: expect.any(String),
-    role: "user",
-    content: firstQuestion,
-    date: expect.any(String),
-  }),
-]);
-
-const expectedPayload = expect.objectContaining({
-  id: expect.any(String),
-  title: firstQuestion,
-  messages: expectedMessages,
-  date: expect.any(String),
-});
+const renderComponentWithNoContext = (props: {
+  chatType: SidebarOptions | null | undefined;
+}) => {
+  return () => renderWithNoContext(<Chat chatType={props.chatType} />);
+};
 
 describe("Chat Component", () => {
-  const consoleErrorMock = jest
-    .spyOn(console, "error")
-    .mockImplementation(() => {});
-  afterEach(() => {
+  let mockDispatch = jest.fn();
+  beforeEach(() => {
     jest.clearAllMocks();
+    Element.prototype.scrollIntoView = jest.fn();
+    mockDispatch = jest.fn();
+    window.open = jest.fn();
+    mockConversationApi.mockClear();
+    mockGetUserInfo.mockClear();
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllTimers();
+    mockConversationApi.mockReset();
+    mockGetUserInfo.mockReset();
   });
 
   test("should show 'Explore scientific journals header' for Articles", () => {
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByRole } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const h2Element = getByRole("heading", { level: 2 });
     expect(h2Element).toHaveTextContent("Explore scientific journals");
@@ -259,10 +280,38 @@ describe("Chat Component", () => {
     const contextData = { sidebarSelection: SidebarOptions?.Grant };
     const { getByRole } = renderComponent(
       { chatType: SidebarOptions.Grant },
-      contextData
+      contextData,
+      mockDispatch
     );
     const h2Element = getByRole("heading", { level: 2 });
     expect(h2Element).toHaveTextContent("Explore grant documents");
+  });
+
+  test("should call userinfo list api when frontend setting auth enabled", async () => {
+    const contextData = {
+      sidebarSelection: SidebarOptions?.Article,
+      frontendSettings: { auth_enabled: "false" },
+    };
+    const contextDataUpdated = {
+      sidebarSelection: SidebarOptions?.Article,
+      frontendSettings: { auth_enabled: "true" },
+    };
+    createMockGetUsersAPI();
+    const { rerender } = renderComponent(
+      { chatType: SidebarOptions.Article },
+      contextData,
+      mockDispatch
+    );
+    const state = { ...defaultMockState, ...contextDataUpdated };
+    rerender(
+      mockAppContextStateProvider(
+        state,
+        mockDispatch,
+        <Chat chatType={SidebarOptions.Article} />
+      )
+    );
+    const streamMessage = await screen.findByTestId("chat-stream-end");
+    expect(streamMessage).toBeInTheDocument();
   });
 
   test("Should be able to stop the generation by clicking Stop Generating btn", async () => {
@@ -270,7 +319,8 @@ describe("Chat Component", () => {
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     act(() => {
@@ -283,7 +333,6 @@ describe("Chat Component", () => {
     });
     expect(stopGeneratingBtn).toBeInTheDocument();
 
-    screen.debug();
     await act(async () => {
       fireEvent.click(stopGeneratingBtn);
     });
@@ -293,12 +342,13 @@ describe("Chat Component", () => {
     expect(stopGeneratingBtnAfterClick).not.toBeInTheDocument();
   });
 
-  test.only("Should be able to stop the generation by Focus and Triggering  Enter in Keyboard", async () => {
+  test("Should be able to stop the generation by Focus and Triggering  Enter in Keyboard", async () => {
     createMockConversationWithDelay();
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     act(() => {
@@ -313,7 +363,6 @@ describe("Chat Component", () => {
 
     await act(async () => {
       stopGeneratingBtn.focus();
-      // Trigger the Enter key
       fireEvent.keyDown(stopGeneratingBtn, enterKeyCodes);
     });
     const stopGeneratingBtnAfterClick = screen.queryByRole("button", {
@@ -322,12 +371,13 @@ describe("Chat Component", () => {
     expect(stopGeneratingBtnAfterClick).not.toBeInTheDocument();
   });
 
-  test.only("Should be able to stop the generation by Focus and Triggering Space in Keyboard", async () => {
+  test("Should be able to stop the generation by Focus and Triggering Space in Keyboard", async () => {
     createMockConversationWithDelay();
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     act(() => {
@@ -350,12 +400,13 @@ describe("Chat Component", () => {
     expect(stopGeneratingBtnAfterClick).not.toBeInTheDocument();
   });
 
-  test.only("Focus on Stop generating btn and Triggering Any key other than Enter/Space should not hide the Stop Generating btn", async () => {
+  test("Focus on Stop generating btn and Triggering Any key other than Enter/Space should not hide the Stop Generating btn", async () => {
     createMockConversationWithDelay();
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     act(() => {
@@ -375,15 +426,16 @@ describe("Chat Component", () => {
     const stopGeneratingBtnAfterClick = screen.queryByRole("button", {
       name: "Stop generating",
     });
-    expect(stopGeneratingBtnAfterClick).not.toBeInTheDocument();
+    expect(stopGeneratingBtnAfterClick).toBeInTheDocument();
   });
 
-  test.skip("on user sends first question should handle conversation API call", async () => {
+  test("on user sends first question should handle conversation API call", async () => {
     createMockConversationAPI();
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
 
     const submitQuestionElement = getByTestId("submit-first-question");
@@ -391,20 +443,26 @@ describe("Chat Component", () => {
       fireEvent.click(submitQuestionElement);
     });
 
-    // expect(mockDispatch).toHaveBeenCalledWith({
-    //   type: "UPDATE_CURRENT_CHAT",
-    //   payload: expectedPayload,
-    // });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "UPDATE_CURRENT_CHAT",
+      payload: expectedUpdateCurrentChatActionPayload,
+    });
   });
 
-  test.skip("on user sends second question but conversation chat not exist should handle", async () => {
+  test("on user sends second question (with conversation id) but conversation not exist should handle", async () => {
     createMockConversationAPI();
+    const consoleErrorMock = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
-    const contextData = { sidebarSelection: SidebarOptions?.Article };
+    const contextData = {
+      sidebarSelection: SidebarOptions?.Article,
+    };
 
     const { getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-second-question");
 
@@ -417,20 +475,21 @@ describe("Chat Component", () => {
 
   test("should handle API call when sends question conv Id exists and previous conversation chat exists ", async () => {
     createMockConversationAPI();
-    const contextData = { sidebarSelection: SidebarOptions?.Article };
-    const { getByTestId } = renderComponent(
+    const contextData = {
+      sidebarSelection: SidebarOptions?.Article,
+      currentChat: currentChat,
+    };
+    const { getByText, getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     await act(async () => {
       fireEvent.click(submitQuestionElement);
     });
-
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: "UPDATE_CURRENT_CHAT",
-      payload: expectedPayload,
-    });
+    const responseTextElement = getByText(/AI response for user question/i);
+    expect(responseTextElement).toBeInTheDocument();
   });
 
   test("on Click Clear button messages should be empty", async () => {
@@ -438,7 +497,8 @@ describe("Chat Component", () => {
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByRole, getByTestId, queryAllByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     await act(async () => {
@@ -462,7 +522,8 @@ describe("Chat Component", () => {
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     await act(async () => {
@@ -477,7 +538,8 @@ describe("Chat Component", () => {
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByText, getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     await act(async () => {
@@ -488,12 +550,13 @@ describe("Chat Component", () => {
     );
     expect(errorTextElement).toBeInTheDocument();
   });
-  test.skip("On Click citation should show citation panel", async () => {
+  test("On Click citation should show citation panel", async () => {
     createMockConversationAPI();
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     act(() => {
@@ -508,15 +571,52 @@ describe("Chat Component", () => {
     expect(
       await screen.findByTestId("citation-panel-component")
     ).toBeInTheDocument();
-    // expect(citationPanelComponent).toBeInTheDocument();
   });
 
-  test.only("After view Citation Should be able to add to Facourite ", async () => {
+  test("On Click view Source in citation panel should open url", async () => {
     createMockConversationAPI();
     const contextData = { sidebarSelection: SidebarOptions?.Article };
     const { getByTestId } = renderComponent(
       { chatType: SidebarOptions.Article },
-      contextData
+      contextData,
+      mockDispatch
+    );
+    const submitQuestionElement = getByTestId("submit-first-question");
+    act(() => {
+      fireEvent.click(submitQuestionElement);
+    });
+
+    const showCitationButton = getByTestId("show-citation-btn");
+    await act(async () => {
+      fireEvent.click(showCitationButton);
+    });
+
+    expect(
+      await screen.findByTestId("citation-panel-component")
+    ).toBeInTheDocument();
+
+    const viewSourceButton = getByTestId("view-source");
+    fireEvent.click(viewSourceButton);
+    expect(window.open).toHaveBeenCalledTimes(1);
+  });
+
+  test("rendering with no context should throw an error", async () => {
+    const renderedChat = renderComponentWithNoContext({
+      chatType: SidebarOptions.Article,
+    });
+
+    expect(renderedChat).toThrow(
+      "AppStateContext is undefined. Make sure you have wrapped your component tree with AppStateProvider."
+    );
+  });
+
+  test("After view Citation Should be able to add to Favorite ", async () => {
+    createMockConversationAPI();
+    const contextData = { sidebarSelection: SidebarOptions?.Article };
+    const { getByTestId } = renderComponent(
+      { chatType: SidebarOptions.Article },
+      contextData,
+      mockDispatch
     );
     const submitQuestionElement = getByTestId("submit-first-question");
     act(() => {
@@ -533,13 +633,12 @@ describe("Chat Component", () => {
     ).toBeInTheDocument();
 
     const addFavoriteBtn = getByTestId("add-favorite");
-    await act(async () => {
-      fireEvent.click(addFavoriteBtn);
-    });
+    fireEvent.click(addFavoriteBtn);
 
-    // expect(mockDispatch).toHaveBeenCalledWith({ type: "UPDATE_ARTICLES_CHAT" });
-    // expect(mockDispatch).toHaveBeenCalledWith({ type: "TOGGLE_SIDEBAR" });
-    // expect(mockDispatch).toHaveBeenCalledWith({ type: "TOGGLE_SIDEBAR" });
-    // // expect(mockDispatch).toHaveBeenCalledWith({ type: "TOGGLE_SIDEBAR" });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "UPDATE_ARTICLES_CHAT",
+      payload: null,
+    });
+    expect(mockDispatch).toHaveBeenCalledTimes(5);
   });
 });

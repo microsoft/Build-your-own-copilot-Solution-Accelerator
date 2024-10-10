@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "watch": "tsc && vite build --watch",
-    "test": "jest"
+    "test": "jest --coverage --verbose",
+    "test-dev": "jest --coverage --watchAll --verbose"
   },
   "dependencies": {
     "@fluentui/react": "^8.105.3",

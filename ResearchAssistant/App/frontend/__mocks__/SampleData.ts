@@ -14,47 +14,51 @@ export const simpleConversationResponseWithCitations = {
       ],
     },
   ],
-  "apim-request-id": "8099948f-5539-49a0-b9e7-2bf971419309",
+  "apim-request-id": "apim_req_id",
   history_metadata: {},
 };
 
 export const simpleConversationResponse = {
-  id: "09dd033e-7305-44e4-bce2-ff34b91ebfa8",
+  id: "cond_id",
   model: "gpt-35-turbo-16k",
   created: 1728447811,
   object: "extensions.chat.completion.chunk",
-  choices: [{ messages: [{ role: "assistant", content: "How can I " }] }],
-  "apim-request-id": "99024129-2e20-4224-ac92-0b6c30a68dfb",
+  choices: [
+    {
+      messages: [
+        { role: "assistant", content: "AI response for user question" },
+      ],
+    },
+  ],
+  "apim-request-id": "apim_req_id",
   history_metadata: {},
 };
 
 export const simpleConversationResponseWithEmptyChunk = {
-  id: "6a7e595b-5963-4af2-9c64-e7e3ea49eb21",
+  id: "conv_id",
   model: "gpt-35-turbo-16k",
   created: 1728461403,
   object: "extensions.chat.completion.chunk",
   choices: [{ messages: [{ role: "assistant", content: "" }] }],
-  "apim-request-id": "6b79a379-b0bd-4c00-955a-5fb265d1bda6",
+  "apim-request-id": "apim_req_id",
   history_metadata: {},
 };
 
 export const citationObj = {
   content:
-    "[/documents/MSFT_FY23Q4_10K.docx](https://str5z43dncphzu3k.blob.core.windows.net/documents/MSFT_FY23Q4_10K.docx?se=2024-10-01T05%3A38%3A07Z&sp=r&sv=2024-05-04&sr=c&sig=8fFfpNI/tv2rdTKAcunuWpW6zJkZuw%2BGvEGo2zQ1QSA%3D)\n\n\n<p>The ability to convert data into AI drives our competitive advantage. The Microsoft Intelligent Data Platform is a leading cloud data platform that fully integrates databases, analytics, and governance. The platform empowers organizations to invest more time creating value rather than integrating and managing their data. Microsoft Fabric is an end-to-end, unified analytics platform that brings together all the data and analytics tools that organizations need. </p>\n<p>GitHub Copilot is at the forefront of AI-powered software development, giving developers a new tool to write code easier and faster so they can focus on more creative problem-solving. From GitHub to Visual Studio, we provide a developer tool chain for everyone, no matter the technical experience, across all platforms, whether Azure, Windows, or any other cloud or client platform.</p>\n<p>Windows also plays a critical role in fueling our cloud business with Windows 365, a desktop operating system that’s also a cloud service. From another internet-connected device, including Android or macOS devices, users can run Windows 365, just like a virtual machine.</p>\n<p>Additionally, we are extending our infrastructure beyond the planet, bringing cloud computing to space. Azure Orbital is a fully managed ground station as a service for fast downlinking of data.</p>\n<p>Create More Personal Computing</p>\n<p>We strive to make computing more personal, enabling users to interact with technology in more intuitive, engaging, and dynamic ways. </p>\n<p>Windows 11 offers innovations focused on enhancing productivity, including Windows Copilot with centralized AI assistance and Dev Home to help developers become more productive. Windows 11 security and privacy features include operating system security, application security, and user and identity security. </p>\n<p>Through our Search, News, Mapping, and Browser services, Microsoft delivers unique trust, privacy, and safety features. In February 2023, we launched an all new, AI-powered Microsoft Edge browser and Bing search engine with Bing Chat to deliver better search, more complete answers, and the ability to generate content. Microsoft Edge is our fast and secure browser that helps protect users’ data. Quick access to AI-powered tools, apps, and more within Microsoft Edge’s sidebar enhance browsing capabilities.</p>",
+    "[/documents/MSFT_FY23Q4_10K.docx](https://www.sampleurl.com?se=2024-10-01T05%3A38%3A07Z&sp=r&sv=2024-05-04&sr=c&sig=8fFfpNI/tv2rdTKAcunuWpW6zJkZuw%2BGvEGo2zQ1QSA%3D)\n\n\n<p>this is some long text.........</p>",
   id: "2",
   chunk_id: 8,
   title: "/documents/MSFT_FY23Q4_10K.docx",
   filepath: "MSFT_FY23Q4_10K.docx",
-  url: "[/documents/MSFT_FY23Q4_10K.docx](https://str5z43dncphzu3k.blob.core.windows.net/documents/MSFT_FY23Q4_10K.docx?se=2024-10-01T05%3A38%3A07Z&sp=r&sv=2024-05-04&sr=c&sig=8fFfpNI/tv2rdTKAcunuWpW6zJkZuw%2BGvEGo2zQ1QSA%3D)",
+  url: "https://www.sampleurl.com",
   metadata: {
     offset: 15580,
-    source:
-      "https://str5z43dncphzu3k.blob.core.windows.net/documents/MSFT_FY23Q4_10K.docx_SAS_TOKEN_PLACEHOLDER_",
+    source: "https://www.sampleurl.com",
     markdown_url:
-      "[/documents/MSFT_FY23Q4_10K.docx](https://str5z43dncphzu3k.blob.core.windows.net/documents/MSFT_FY23Q4_10K.docx?se=2024-10-01T05%3A38%3A07Z&sp=r&sv=2024-05-04&sr=c&sig=8fFfpNI/tv2rdTKAcunuWpW6zJkZuw%2BGvEGo2zQ1QSA%3D)",
+      "[/documents/MSFT_FY23Q4_10K.docx](https://www.sampleurl.com)",
     title: "/documents/MSFT_FY23Q4_10K.docx",
-    original_url:
-      "https://str5z43dncphzu3k.blob.core.windows.net/documents/MSFT_FY23Q4_10K.docx_SAS_TOKEN_PLACEHOLDER_",
+    original_url: "https://www.sampleurl.com",
     chunk: 8,
     key: "doc_d85da45581d92f2ff59e261197d2c70c2b6f8802",
     filename: "MSFT_FY23Q4_10K",
@@ -82,3 +86,59 @@ export const escapeKeyCodes = {
   code: "Escape",
   keyCode: 27,
 };
+
+export const currentChat = {
+  id: "fe15715e-3d25-551e-d803-0803a35c2b59",
+  title: "conversation title",
+  messages: [
+    {
+      id: "55661888-159b-038a-bc57-a8c1d8f6951b",
+      role: "user",
+      content: "hi",
+      date: "2024-10-10T10:27:35.335Z",
+    },
+    {
+      role: "tool",
+      content: '{"citations":[],"intent":"[]"}',
+      id: "f1f9006a-d2f6-4ede-564a-fe7255abe5b6",
+      date: "2024-10-10T10:27:36.709Z",
+    },
+    {
+      role: "assistant",
+      content: "Hello! How can I assist you today?",
+      id: "a69e71c0-35a3-a332-3a55-5519ffc826df",
+      date: "2024-10-10T10:27:36.862Z",
+    },
+  ],
+  date: "2024-10-10T10:27:35.335Z",
+};
+
+export const firstQuestion = "user prompt question";
+
+const expectedMessages = expect.arrayContaining([
+  expect.objectContaining({
+    id: expect.any(String),
+    role: "user",
+    content: firstQuestion,
+    date: expect.any(String),
+  }),
+]);
+
+export const expectedUpdateCurrentChatActionPayload = expect.objectContaining({
+  id: expect.any(String),
+  title: firstQuestion,
+  messages: expectedMessages,
+  date: expect.any(String),
+});
+
+
+export const mockedUsersData = [
+  {
+    access_token: "token",
+    expires_on: "2022",
+    id_token: "id",
+    provider_name: "abc",
+    user_claims: "abc",
+    user_id: "a",
+  },
+];

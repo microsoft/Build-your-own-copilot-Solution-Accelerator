@@ -317,19 +317,6 @@ const Chat = ({ chatType }: Props) => {
     }
   }
 
-  const parseCitationFromMessage = (message: ChatMessage) => {
-    if (message?.role && message?.role === 'tool') {
-      try {
-        const toolMessage = JSON.parse(message.content) as ToolMessageContent
-        return toolMessage.citations
-      }
-      catch {
-        return []
-      }
-    }
-    return []
-  }
-
   const disabledButton = () => {
     return isLoading || (messages && messages.length === 0) || clearingChat
   }
@@ -355,14 +342,16 @@ const Chat = ({ chatType }: Props) => {
     if (activeCitation?.filepath !== null && activeCitation?.url !== null) {
       const newCitation = {
         id: `${activeCitation?.filepath}-${activeCitation?.url}`, // Convert id to string and provide a default value of 0
-        title: activeCitation?.title ?? "",
+        title: getCitationProp(activeCitation?.title),
         url: getCitationProp(activeCitation?.url),
         content: getCitationProp(activeCitation?.content),
         filepath: getCitationProp(activeCitation?.filepath),
         metadata: getCitationProp(activeCitation?.metadata),
         chunk_id: getCitationProp(activeCitation?.chunk_id),
         reindex_id: getCitationProp(activeCitation?.reindex_id),
-        type: appStateContext?.state.sidebarSelection?.toString() ?? "",
+        type: getCitationProp(
+          appStateContext?.state.sidebarSelection?.toString()
+        ),
       };
       handleToggleFavorite([newCitation]);
 
@@ -393,7 +382,7 @@ const Chat = ({ chatType }: Props) => {
             role="log"
           >
             <ChatMessageContainer messages={messages} onShowCitation={onShowCitation} showLoadingMessage={showLoadingMessage} />
-            <div ref={chatMessageStreamEnd} />
+            <div data-testid="chat-stream-end" ref={chatMessageStreamEnd} />
           </div>
 
           <Stack horizontal className={styles.chatInput}>
