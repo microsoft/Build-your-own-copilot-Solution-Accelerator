@@ -11,7 +11,7 @@ type ChatMessageContainerProps = {
   showLoadingMessage: boolean;
 };
 
-const parseCitationFromMessage = (message: ChatMessage) => {
+export const parseCitationFromMessage = (message: ChatMessage) => {
   if (message?.role && message?.role === "tool") {
     try {
       const toolMessage = JSON.parse(message.content) as ToolMessageContent;

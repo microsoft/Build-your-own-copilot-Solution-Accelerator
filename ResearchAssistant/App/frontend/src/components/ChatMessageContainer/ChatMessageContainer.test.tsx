@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ChatMessageContainer } from './ChatMessageContainer'
+import { ChatMessageContainer, parseCitationFromMessage } from './ChatMessageContainer'
 import { type ChatMessage } from '../../api/models'
 import { Answer } from '../Answer'
 jest.mock('remark-supersub', () => () => {})
@@ -150,5 +150,36 @@ describe('ChatMessageContainer', () => {
     const buttonEle = await screen.findByRole('button', { name: 'citationButton' })
     fireEvent.click(buttonEle)
     expect(mockOnCitationClicked).not.toHaveBeenCalled()
+  })
+
+  it('returns citations when message role is "tool" and content is valid JSON', () => {
+    const message: ChatMessage = {
+      role: 'tool',
+      content: JSON.stringify({ citations: [{ filepath: 'path/to/file', chunk_id: '1' }] }),
+      id: '1',
+      date: ''
+    }
+    const citations = parseCitationFromMessage(message)
+    expect(citations).toEqual([{ filepath: 'path/to/file', chunk_id: '1' }])
+  })
+  it('returns an empty array when message role is "tool" and content is invalid JSON', () => {
+    const message: ChatMessage = {
+      role: 'tool',
+      content: 'invalid JSON',
+      id: '1',
+      date: ''
+    }
+    const citations = parseCitationFromMessage(message)
+    expect(citations).toEqual([])
+  })
+  it('returns an empty array when message role is not "tool"', () => {
+    const message: ChatMessage = {
+      role: 'user',
+      content: JSON.stringify({ citations: [{ filepath: 'path/to/file', chunk_id: '1' }] }),
+      id: '1',
+      date: ''
+    }
+    const citations = parseCitationFromMessage(message)
+    expect(citations).toEqual([])
   })
 })
