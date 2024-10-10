@@ -11,7 +11,7 @@ type ChatMessageContainerProps = {
   showLoadingMessage: boolean;
 };
 
-export const parseCitationFromMessage = (message: ChatMessage) => {
+const parseCitationFromMessage = (message: ChatMessage) => {
   if (message?.role && message?.role === "tool") {
     try {
       const toolMessage = JSON.parse(message.content) as ToolMessageContent;
@@ -23,7 +23,7 @@ export const parseCitationFromMessage = (message: ChatMessage) => {
   return [];
 };
 
-const ChatMessageContainer = (props: ChatMessageContainerProps): JSX.Element => {
+export const ChatMessageContainer = (props: ChatMessageContainerProps): JSX.Element => {
   const [ASSISTANT, TOOL, ERROR, USER] = ["assistant", "tool", "error", "user"];
   const { messages, onShowCitation , showLoadingMessage} = props;
   return (
