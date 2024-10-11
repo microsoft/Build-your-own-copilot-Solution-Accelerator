@@ -18,17 +18,18 @@ const config: Config.InitialOptions = {
     //'^react-markdown$': '<rootDir>/__mocks__/react-markdown.js',
     //'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js' // For mocking static file imports
     //'^react-syntax-highlighter$': '<rootDir>/__mocks__/react-syntax-highlighter.js',
-    // '^react-syntax-highlighter$': '<rootDir>/__mocks__/react-syntax-highlighter.js',
-    //'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js',
-    '^react-markdown$': '<rootDir>/__mocks__/react-markdown.tsx',
-    '^dompurify$': '<rootDir>/__mocks__/dompurify.js', // Point to the mock
-    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.ts'
+   // '^react-syntax-highlighter$': '<rootDir>/__mocks__/react-syntax-highlighter.js',
+   //'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js',
+   '^react-markdown$': '<rootDir>/__mocks__/react-markdown.tsx', 
+   '^dompurify$': '<rootDir>/__mocks__/dompurify.js', // Point to the mock
+   '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.ts',
+
   },
   setupFilesAfterEnv: ['<rootDir>/src/test/setupTests.ts'], // For setting up testing environment like jest-dom
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest' // Transform TypeScript files using ts-jest
-    //'^.+\\.ts(x)?$': 'ts-jest',  // For TypeScript files
-    //'^.+\\.js$': 'babel-jest',  // For JavaScript files if you have Babel
+    //'^.+\\.(ts|tsx)$': 'ts-jest' // Transform TypeScript files using ts-jest
+    '^.+\\.ts(x)?$': 'ts-jest',  // For TypeScript files
+    '^.+\\.js$': 'babel-jest',  // For JavaScript files if you have Babel
 
     // "^.+\\.tsx?$": "babel-jest", // Use babel-jest for TypeScript
     // "^.+\\.jsx?$": "babel-jest", // Use babel-jest for JavaScript/JSX

@@ -1,3 +1,4 @@
-const fileMock = 'test-file-stub'
+// __mocks__/fileMock.ts
+const fileMock = 'test-file-stub';
 
-export default fileMock
+export default fileMock;

@@ -24,8 +24,7 @@
   },
   "include": [
     "src", // Your source files
-    "__mocks__", // Include your mocks if necessary
-    ""
+    "testMock", // Include your mocks if necessary
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
