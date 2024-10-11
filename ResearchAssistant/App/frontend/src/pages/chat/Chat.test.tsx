@@ -604,10 +604,14 @@ describe("Chat Component", () => {
     const renderedChat = renderComponentWithNoContext({
       chatType: SidebarOptions.Article,
     });
+    const consoleErrorMock = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
 
     expect(renderedChat).toThrow(
       "AppStateContext is undefined. Make sure you have wrapped your component tree with AppStateProvider."
     );
+    expect(consoleErrorMock).toHaveBeenCalled();
   });
 
   test("After view Citation Should be able to add to Favorite ", async () => {
