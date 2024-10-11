@@ -9,7 +9,7 @@ jest.mock('../../api/api', () => ({
 }))
 
 beforeEach(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => { })
+  jest.spyOn(console, 'error').mockImplementation(() => {})
 })
 
 afterEach(() => {
@@ -67,7 +67,7 @@ const multipleUsers = [
 describe('Card Component', () => {
   beforeEach(() => {
     global.fetch = mockDispatch
-    jest.spyOn(console, 'error').mockImplementation(() => { })
+    jest.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -76,7 +76,7 @@ describe('Card Component', () => {
   })
 
   test('displays loading message while fetching users', async () => {
-    ; (getUsers as jest.Mock).mockResolvedValueOnce([])
+    ;(getUsers as jest.Mock).mockResolvedValueOnce([])
 
     renderWithContext(<Cards onCardClick={mockDispatch} />)
 
@@ -86,7 +86,7 @@ describe('Card Component', () => {
   })
 
   test('displays no meetings message when there are no users', async () => {
-    ; (getUsers as jest.Mock).mockResolvedValueOnce([])
+    ;(getUsers as jest.Mock).mockResolvedValueOnce([])
 
     renderWithContext(<Cards onCardClick={mockDispatch} />)
 
@@ -96,7 +96,7 @@ describe('Card Component', () => {
   })
 
   test('displays user cards when users are fetched', async () => {
-    ; (getUsers as jest.Mock).mockResolvedValueOnce(mockUsers)
+    ;(getUsers as jest.Mock).mockResolvedValueOnce(mockUsers)
 
     renderWithContext(<Cards onCardClick={mockDispatch} />)
 
@@ -106,9 +106,9 @@ describe('Card Component', () => {
   })
 
   test('handles API failure and stops loading', async () => {
-    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => { })
+    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {})
 
-      ; (getUsers as jest.Mock).mockRejectedValueOnce(new Error('API Error'))
+    ;(getUsers as jest.Mock).mockRejectedValueOnce(new Error('API Error'))
 
     renderWithContext(<Cards onCardClick={mockDispatch} />)
 
@@ -127,7 +127,7 @@ describe('Card Component', () => {
   })
 
   test('handles card click and updates context with selected user', async () => {
-    ; (getUsers as jest.Mock).mockResolvedValueOnce(mockUsers)
+    ;(getUsers as jest.Mock).mockResolvedValueOnce(mockUsers)
 
     const mockOnCardClick = mockDispatch
 
@@ -157,7 +157,7 @@ describe('Card Component', () => {
   })
 
   test('display "No future meetings have been arranged" when there is only one user', async () => {
-    ; (getUsers as jest.Mock).mockResolvedValueOnce(mockUsers)
+    ;(getUsers as jest.Mock).mockResolvedValueOnce(mockUsers)
 
     renderWithContext(<Cards onCardClick={mockDispatch} />)
 
@@ -167,7 +167,7 @@ describe('Card Component', () => {
   })
 
   test('renders future meetings when there are multiple users', async () => {
-    ; (getUsers as jest.Mock).mockResolvedValueOnce(multipleUsers)
+    ;(getUsers as jest.Mock).mockResolvedValueOnce(multipleUsers)
 
     renderWithContext(<Cards onCardClick={mockDispatch} />)
 
@@ -175,5 +175,49 @@ describe('Card Component', () => {
 
     expect(screen.getByText('Client 2')).toBeInTheDocument()
     expect(screen.queryByText('No future meetings have been arranged')).not.toBeInTheDocument()
+  })
+
+  test('logs error when user does not have a ClientId and ClientName', async () => {
+    ;(getUsers as jest.Mock).mockResolvedValueOnce([
+      {
+        ClientId: null,
+        ClientName: '',
+        NextMeeting: 'Test Meeting 1',
+        NextMeetingTime: '10:00 AM',
+        AssetValue: 10000,
+        LastMeeting: 'Last Meeting 1',
+        ClientSummary: 'Summary for User One',
+        chartUrl: ''
+      }
+    ])
+
+    renderWithContext(<Cards onCardClick={mockDispatch} />, {
+      context: {
+        AppStateContext: { dispatch: mockDispatch }
+      }
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('user-card-mock')).toBeInTheDocument()
+    })
+
+    const userCard = screen.getByTestId('user-card-mock')
+    fireEvent.click(userCard)
+
+    expect(console.error).toHaveBeenCalledWith(
+      'User does not have a ClientId and clientName:',
+      expect.objectContaining({
+        ClientId: null,
+        ClientName: ''
+      })
+    )
+  })
+
+  test('logs error when appStateContext is not defined', async () => {
+    renderWithContext(<Cards onCardClick={jest.fn()} />, {
+      context: undefined
+    })
+
+    expect(console.error).toHaveBeenCalledWith('App state context is not defined')
   })
 })
