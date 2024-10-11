@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.30.23.60470",
-      "templateHash": "8134406242431507145"
+      "templateHash": "4335964797327276348"
     }
   },
   "parameters": {
@@ -146,7 +146,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.30.23.60470",
-              "templateHash": "5615497128133890049"
+              "templateHash": "2785991873795581274"
             }
           },
           "parameters": {
@@ -245,6 +245,7 @@
                 "databaseAccountOfferType": "Standard",
                 "enableAutomaticFailover": false,
                 "enableMultipleWriteLocations": false,
+                "disableLocalAuth": true,
                 "apiProperties": "[if(equals(parameters('kind'), 'MongoDB'), createObject('serverVersion', '4.0'), createObject())]",
                 "capabilities": [
                   {
