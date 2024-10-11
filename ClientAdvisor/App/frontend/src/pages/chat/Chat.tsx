@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useContext, useLayoutEffect  } from 'react'
+import { useRef, useState, useEffect, useContext, useLayoutEffect } from 'react'
 import { CommandBarButton, Dialog, DialogType, Stack } from '@fluentui/react'
 import { SquareRegular } from '@fluentui/react-icons'
 
@@ -8,12 +8,21 @@ import { isEmpty } from 'lodash'
 import styles from './Chat.module.css'
 import TeamAvatar from '../../assets/TeamAvatar.svg'
 
-import {getUserInfo,historyUpdate,historyClear, historyGenerate,conversationApi,
-  ChatMessage,Citation,
-  ChatHistoryLoadingState,CosmosDBStatus,
-   ErrorMessage,ConversationRequest ,
-   ChatResponse,Conversation
- } from '../../api'
+import {
+  getUserInfo,
+  historyUpdate,
+  historyClear,
+  historyGenerate,
+  conversationApi,
+  ChatMessage,
+  Citation,
+  ChatHistoryLoadingState,
+  CosmosDBStatus,
+  ErrorMessage,
+  ConversationRequest,
+  ChatResponse,
+  Conversation
+} from '../../api'
 
 import { QuestionInput } from '../../components/QuestionInput'
 import { ChatHistoryPanel } from '../../components/ChatHistory/ChatHistoryPanel'
@@ -21,9 +30,9 @@ import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
 import { PromptsSection, PromptType } from '../../components/PromptsSection/PromptsSection'
 
-import { parseErrorMessage } from '../../helpers/helpers';
-import { AuthNotConfigure } from './Components/AuthNotConfigure';
-import { ChatMessageContainer } from './Components/ChatMessageContainer';
+import { parseErrorMessage } from '../../helpers/helpers'
+import { AuthNotConfigure } from './Components/AuthNotConfigure'
+import { ChatMessageContainer } from './Components/ChatMessageContainer'
 import { CitationPanel } from './Components/CitationPanel'
 
 const enum messageStatus {
@@ -31,8 +40,11 @@ const enum messageStatus {
   Processing = 'Processing',
   Done = 'Done'
 }
+type ChatProps = {
+  setIsVisible: any
+}
 
-const Chat:React.FC = () => {
+const Chat = (props: ChatProps) => {
   const appStateContext = useContext(AppStateContext)
   const ui = appStateContext?.state.frontendSettings?.ui
   const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled
@@ -276,7 +288,7 @@ const Chat:React.FC = () => {
       id: uuid(),
       role: 'user',
       content: question,
-      date: new Date().toISOString(),
+      date: new Date().toISOString()
     }
 
     //api call params set here (generate)
@@ -375,9 +387,9 @@ const Chat:React.FC = () => {
                   })
                 }
                 runningText = ''
-              } else{
-                result.error = "There was an error generating a response. Chat history can't be saved at this time.";
-                console.error("Error : ", result.error);
+              } else {
+                result.error = "There was an error generating a response. Chat history can't be saved at this time."
+                console.error('Error : ', result.error)
                 throw Error(result.error)
               }
             } catch (e) {
@@ -498,11 +510,11 @@ const Chat:React.FC = () => {
     return abortController.abort()
   }
 
-  useEffect(()=>{
-    if(JSON.stringify(finalMessages) != JSON.stringify(messages)){
+  useEffect(() => {
+    if (JSON.stringify(finalMessages) != JSON.stringify(messages)) {
       setFinalMessages(messages)
     }
-  },[messages])
+  }, [messages])
 
   const clearChat = async () => {
     setClearingChat(true)
@@ -528,10 +540,8 @@ const Chat:React.FC = () => {
     setClearingChat(false)
   }
 
-
-
-
   const newChat = () => {
+    props.setIsVisible(true)
     setProcessMessages(messageStatus.Processing)
     setMessages([])
     setIsCitationPanelOpen(false)
@@ -614,9 +624,9 @@ const Chat:React.FC = () => {
   }, [AUTH_ENABLED])
 
   useLayoutEffect(() => {
-    const element = document.getElementById("chatMessagesContainer")!;
-    if(element){
-      element.scroll({ top: element.scrollHeight, behavior: 'smooth' });
+    const element = document.getElementById('chatMessagesContainer')!
+    if (element) {
+      element.scroll({ top: element.scrollHeight, behavior: 'smooth' })
     }
   }, [showLoadingMessage, processMessages])
 
@@ -630,8 +640,6 @@ const Chat:React.FC = () => {
       window.open(citation.url, '_blank')
     }
   }
-
-
 
   const disabledButton = () => {
     return (
@@ -781,7 +789,9 @@ const Chat:React.FC = () => {
             />
           )}
           {appStateContext?.state.isChatHistoryOpen &&
-            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
+            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+              <ChatHistoryPanel isLoading={isLoading} />
+            )}
         </Stack>
       )}
     </div>

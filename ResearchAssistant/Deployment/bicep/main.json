@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.27.1.19265",
-      "templateHash": "17199993380115324710"
+      "version": "0.29.47.4906",
+      "templateHash": "7163812400877459703"
     }
   },
   "parameters": {
@@ -50,8 +50,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "14492986622884712635"
+              "version": "0.29.47.4906",
+              "templateHash": "14160084237240395045"
             }
           },
           "parameters": {
@@ -142,8 +142,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "1732388101011268083"
+              "version": "0.29.47.4906",
+              "templateHash": "16818958292648129851"
             }
           },
           "parameters": {
@@ -295,8 +295,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "11463009197950800876"
+              "version": "0.29.47.4906",
+              "templateHash": "14900700646237730459"
             }
           },
           "parameters": {
@@ -377,8 +377,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "14406720787668575764"
+              "version": "0.29.47.4906",
+              "templateHash": "5512132473254602596"
             }
           },
           "parameters": {
@@ -465,8 +465,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "655463873191032186"
+              "version": "0.29.47.4906",
+              "templateHash": "3158286966136205910"
             }
           },
           "parameters": {
@@ -599,8 +599,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "31465269254160942"
+              "version": "0.29.47.4906",
+              "templateHash": "12313557719833661787"
             }
           },
           "parameters": {
@@ -734,8 +734,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "854911663640104817"
+              "version": "0.29.47.4906",
+              "templateHash": "5809784669625572911"
             }
           },
           "parameters": {
@@ -1211,8 +1211,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "17397239230654067580"
+              "version": "0.29.47.4906",
+              "templateHash": "9147908724141769749"
             }
           },
           "parameters": {
@@ -1300,8 +1300,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "3046192829404893789"
+              "version": "0.29.47.4906",
+              "templateHash": "13153561406831829345"
             }
           },
           "parameters": {
@@ -1507,8 +1507,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "8188065307631787845"
+              "version": "0.29.47.4906",
+              "templateHash": "7109834445090495169"
             }
           },
           "parameters": {
@@ -1878,7 +1878,7 @@
             }
           },
           "variables": {
-            "WebAppImageName": "DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest"
+            "WebAppImageName": "DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest"
           },
           "resources": [
             {

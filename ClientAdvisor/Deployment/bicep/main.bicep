@@ -109,7 +109,7 @@ module azureFunctions 'deploy_azure_function_script.bicep' = {
     solutionLocation: solutionLocation
     resourceGroupName:resourceGroupName
     azureOpenAIApiKey:azOpenAI.outputs.openAIOutput.openAPIKey
-    azureOpenAIApiVersion:'2023-09-01-preview'
+    azureOpenAIApiVersion:'2024-02-15-preview'
     azureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
     azureSearchAdminKey:azSearchService.outputs.searchServiceOutput.searchServiceAdminKey
     azureSearchServiceEndpoint:azSearchService.outputs.searchServiceOutput.searchServiceEndpoint
@@ -147,7 +147,7 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
     adlsAccountName:storageAccountModule.outputs.storageAccountOutput.storageAccountName
     adlsAccountKey:storageAccountModule.outputs.storageAccountOutput.key
     azureOpenAIApiKey:azOpenAI.outputs.openAIOutput.openAPIKey
-    azureOpenAIApiVersion:'2023-07-01-preview'
+    azureOpenAIApiVersion:'2024-02-15-preview'
     azureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
     azureSearchAdminKey:azSearchService.outputs.searchServiceOutput.searchServiceAdminKey
     azureSearchServiceEndpoint:azSearchService.outputs.searchServiceOutput.searchServiceEndpoint
