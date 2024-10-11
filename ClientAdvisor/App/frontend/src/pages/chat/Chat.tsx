@@ -751,7 +751,7 @@ const Chat = (props: any) => {
               <Stack className={styles.chatEmptyState}>
                 <img src={ui?.chat_logo ? ui.chat_logo : TeamAvatar} className={styles.chatIcon} aria-hidden="true" />
                 <h1 className={styles.chatEmptyStateTitle}>{ui?.chat_title}</h1>
-                <h2 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h2>
+                <h3 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h3>
               </Stack>
             ) : (
               <div id="chatMessagesContainer" className={styles.chatMessageStream} style={{ marginBottom: isLoading ? '40px' : '0px' }} role="log">

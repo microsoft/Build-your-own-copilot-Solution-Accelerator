@@ -52,6 +52,11 @@ const Layout = () => {
     fetchpbi()
   }, [])
 
+  const resetClientId= ()=>{
+    appStateContext?.dispatch({ type: 'RESET_CLIENT_ID' });
+    setSelectedUser(null);
+    setShowWelcomeCard(true);
+  }
 
   const closePopup = () => {
     setIsVisible(!isVisible);
@@ -157,7 +162,7 @@ const Layout = () => {
       />
       <div className={styles.cardsColumn}>
         <div className={styles.selectClientHeading}>
-          <h3 className={styles.meeting}>Upcoming meetings</h3>
+          <h2 className={styles.meeting}>Upcoming meetings</h2>
         </div>
 
         <Cards onCardClick={handleCardClick} />
@@ -167,9 +172,9 @@ const Layout = () => {
           <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
             <Stack horizontal verticalAlign="center">
               <img src={ui?.logo ? ui.logo : TeamAvatar} className={styles.headerIcon} aria-hidden="true" alt="" />
-              <Link to="/" className={styles.headerTitleContainer}>
-                <h1 className={styles.headerTitle}>{ui?.title}</h1>
-              </Link>
+              <div className={styles.headerTitleContainer} onClick={resetClientId} onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? resetClientId() : null)} tabIndex={-1}>
+                <h2 className={styles.headerTitle} tabIndex={0}>{ui?.title}</h2>
+              </div>
             </Stack>
             <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
               {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
@@ -212,7 +217,7 @@ const Layout = () => {
                   <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span>
                 </div>
               )}
-              <Pivot defaultSelectedKey="chat">
+              <Pivot defaultSelectedKey="chat" className='tabContainer' style={{ paddingTop : 10 }}>
                 <PivotItem headerText="Chat" itemKey="chat">
                   <Chat setIsVisible={setIsVisible}/>
                 </PivotItem>
