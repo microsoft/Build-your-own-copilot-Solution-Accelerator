@@ -32,10 +32,6 @@ const enum messageStatus {
   Done = 'Done'
 }
 
-// export const uuid = ()=>{
-//   return Math.random().toString(36);
-// }
-
 const Chat:React.FC = () => {
   const appStateContext = useContext(AppStateContext)
   const ui = appStateContext?.state.frontendSettings?.ui
