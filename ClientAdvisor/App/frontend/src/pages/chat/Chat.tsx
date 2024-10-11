@@ -532,6 +532,7 @@ const Chat:React.FC = () => {
 
 
   const newChat = () => {
+    props.setIsVisible(true);
     setProcessMessages(messageStatus.Processing)
     setMessages([])
     setIsCitationPanelOpen(false)
@@ -781,7 +782,7 @@ const Chat:React.FC = () => {
             />
           )}
           {appStateContext?.state.isChatHistoryOpen &&
-            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
+            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel isLoading={isLoading} />}
         </Stack>
       )}
     </div>
