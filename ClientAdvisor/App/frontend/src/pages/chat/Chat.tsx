@@ -40,11 +40,8 @@ const enum messageStatus {
   Processing = 'Processing',
   Done = 'Done'
 }
-type ChatProps = {
-  setIsVisible: any
-}
 
-const Chat = (props: ChatProps) => {
+const Chat = (props: any) => {
   const appStateContext = useContext(AppStateContext)
   const ui = appStateContext?.state.frontendSettings?.ui
   const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled
