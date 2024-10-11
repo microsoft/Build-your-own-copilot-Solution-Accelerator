@@ -18,8 +18,6 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
-from dotenv import load_dotenv
-load_dotenv()
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -188,8 +186,8 @@ class ChatWithDataPlugin:
                 }
             ],
             seed = 42,
-            temperature = 1,
-            max_tokens = 1000,
+            temperature = 0,
+            max_tokens = 800,
             extra_body = {
                 "data_sources": [
                     {
