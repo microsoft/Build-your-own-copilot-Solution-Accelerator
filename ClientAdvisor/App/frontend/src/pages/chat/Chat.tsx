@@ -8,12 +8,12 @@ import { isEmpty } from 'lodash'
 import styles from './Chat.module.css'
 import TeamAvatar from '../../assets/TeamAvatar.svg'
 
-import { ChatMessage,Citation,
+import {getUserInfo,historyUpdate,historyClear, historyGenerate,conversationApi,
+  ChatMessage,Citation,
   ChatHistoryLoadingState,CosmosDBStatus,
    ErrorMessage,ConversationRequest ,
-   ChatResponse,Conversation} from '../../api/models'
-
-import {getUserInfo,historyUpdate,historyClear, historyGenerate,conversationApi } from '../../api'
+   ChatResponse,Conversation
+ } from '../../api'
 
 import { QuestionInput } from '../../components/QuestionInput'
 import { ChatHistoryPanel } from '../../components/ChatHistory/ChatHistoryPanel'
@@ -51,6 +51,8 @@ const Chat:React.FC = () => {
   const [clearingChat, setClearingChat] = useState<boolean>(false)
   const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true)
   const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
+
+  const [finalMessages, setFinalMessages] = useState<ChatMessage[]>([])
 
   const errorDialogContentProps = {
     type: DialogType.close,
@@ -377,7 +379,9 @@ const Chat:React.FC = () => {
                   })
                 }
                 runningText = ''
-              } else if (result.error) {
+              } else{
+                result.error = "There was an error generating a response. Chat history can't be saved at this time.";
+                console.error("Error : ", result.error);
                 throw Error(result.error)
               }
             } catch (e) {
@@ -497,6 +501,12 @@ const Chat:React.FC = () => {
     }
     return abortController.abort()
   }
+
+  useEffect(()=>{
+    if(JSON.stringify(finalMessages) != JSON.stringify(messages)){
+      setFinalMessages(messages)
+    }
+  },[messages])
 
   const clearChat = async () => {
     setClearingChat(true)
@@ -661,7 +671,7 @@ const Chat:React.FC = () => {
               </Stack>
             ) : (
               <ChatMessageContainer
-                messages={messages}
+                messages={finalMessages}
                 isLoading={isLoading}
                 onShowCitation={onShowCitation}
                 showLoadingMessage={showLoadingMessage}

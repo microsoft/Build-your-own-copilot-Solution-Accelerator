@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {UserCard} from '../UserCard/UserCard';
 import styles from './Cards.module.css';
-import { getUsers, selectUser } from '../../api/api';
+import { getUsers, selectUser } from '../../api';
 import { AppStateContext } from '../../state/AppProvider';
 import { User } from '../../types/User';
 import BellToggle from '../../assets/BellToggle.svg'
