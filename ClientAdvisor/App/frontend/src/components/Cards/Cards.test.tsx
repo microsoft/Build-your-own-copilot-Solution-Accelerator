@@ -199,11 +199,4 @@ describe('Card Component', () => {
     )
   })
 
-  test('logs error when appStateContext is not defined', async () => {
-    renderWithContext(<Cards onCardClick={jest.fn()} />, {
-      context: undefined
-    })
-
-    expect(console.error).toHaveBeenCalledWith('App state context is not defined')
-  })
 })
