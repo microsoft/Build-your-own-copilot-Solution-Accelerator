@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "7163812400877459703"
+      "templateHash": "10711406236308727919"
     }
   },
   "parameters": {
@@ -23,7 +23,7 @@
     "resourceGroupName": "[resourceGroup().name]",
     "subscriptionId": "[subscription().subscriptionId]",
     "solutionLocation": "[variables('resourceGroupLocation')]",
-    "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/"
+    "baseUrl": "https://raw.githubusercontent.com/Roopan-Microsoft/Build-your-own-copilot-Solution-Accelerator/main/"
   },
   "resources": [
     {
@@ -1508,7 +1508,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "7109834445090495169"
+              "templateHash": "1558876662595106054"
             }
           },
           "parameters": {
@@ -1878,7 +1878,7 @@
             }
           },
           "variables": {
-            "WebAppImageName": "DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest"
+            "WebAppImageName": "DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:dev"
           },
           "resources": [
             {
