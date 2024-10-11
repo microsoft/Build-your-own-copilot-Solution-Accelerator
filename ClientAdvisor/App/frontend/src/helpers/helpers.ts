@@ -74,7 +74,7 @@ export const parseCitationFromMessage = (message: ChatMessage) => {
     return []
 }
 
-const tryGetRaiPrettyError = (errorMessage: string) => {
+export const tryGetRaiPrettyError = (errorMessage: string) => {
     try {
         // Using a regex to extract the JSON part that contains "innererror"
         const match = errorMessage.match(/'innererror': ({.*})\}\}/)

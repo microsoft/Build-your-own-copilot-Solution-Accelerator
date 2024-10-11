@@ -111,7 +111,6 @@ describe('ChatHistoryListItemCell', () => {
       json: async () => ({})
     })
 
-    console.log('mockAppState', mockAppState)
     renderWithContext(<ChatHistoryListItemCell item={conversation} onSelect={mockOnSelect} />, mockAppState)
 
     const deleteButton = screen.getByTitle(/Delete/i)

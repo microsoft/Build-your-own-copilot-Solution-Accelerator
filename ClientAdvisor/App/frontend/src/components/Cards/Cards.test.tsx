@@ -140,20 +140,6 @@ describe('Card Component', () => {
     await act(() => {
       fireEvent.click(userCard)
     })
-
-    // screen.debug()
-    // expect(mockOnCardClick).toHaveBeenCalledWith(
-    //   expect.objectContaining({
-    //     ClientId: '1',
-    //     ClientName: 'Client 1',
-    //     NextMeeting: 'Test Meeting 1',
-    //     NextMeetingTime: '10:00',
-    //     AssetValue: 10000,
-    //     LastMeeting: 'Last Meeting 1',
-    //     ClientSummary: 'Summary for User One',
-    //     chartUrl: ''
-    //   })
-    // )
   })
 
   test('display "No future meetings have been arranged" when there is only one user', async () => {

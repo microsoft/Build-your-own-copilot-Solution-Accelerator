@@ -36,7 +36,7 @@ az storage account create --name $storageAccount --location eastus --resource-gr
 az functionapp create --resource-group $resourceGroupName --name $functionappname \
                 --environment $env_name --storage-account $storageAccount \
                 --functions-version 4 --runtime python \
-                --image bycwacontainer.azurecr.io/byc-wa-fn:latest
+                --image bycwacontainerreg.azurecr.io/byc-wa-fn:latest
 
 # Sleep for 120 seconds
 echo "Waiting for 120 seconds to ensure the Function App is properly created..."

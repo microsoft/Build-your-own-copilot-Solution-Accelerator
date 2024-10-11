@@ -134,7 +134,6 @@ describe('ChatHistoryListItemGroups Component', () => {
         await act(async () => {
             fireEvent.scroll(lastElem, { target: { scrollY: 100 } });
         });
-        //screen.debug();
         // Check that the spinner is hidden after the API call
         await waitFor(() => {
             expect(screen.queryByLabelText(/loading/i)).not.toBeInTheDocument();
