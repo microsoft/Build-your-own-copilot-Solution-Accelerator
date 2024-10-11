@@ -12,7 +12,7 @@ const config: Config.InitialOptions = {
     '\\.(svg|png|jpg)$': '<rootDir>/__mocks__/fileMock.js',
     '^lodash-es$': 'lodash',
   },
-  setupFilesAfterEnv: ['<rootDir>/src/test/setupTests.ts'],
+  setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
   transform: {
             
     '^.+\\.jsx?$': 'babel-jest',       // Transform JavaScript files using babel-jest
