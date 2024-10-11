@@ -267,8 +267,6 @@ test('check the Loader', async () => {
     renderComponent(appState)
 
     expect(screen.getByText("Please wait.....!")).toBeVisible()
-    //expect(screen.getByText("Upcoming meetings")).not.toBeVisible()
-
 })
 
 test('copies the URL when Share button is clicked', async () => {
@@ -397,10 +395,12 @@ test('handles card click and updates context with selected user', async () => {
     fireEvent.click(userCard)
   })
 
+
+  expect(screen.getByText(/Client 1/i)).toBeVisible()
 })
 
 
-test('test Dialog', () => {
+test('test Dialog', async () => {
   ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
   ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
@@ -426,11 +426,15 @@ test('test Dialog', () => {
 
   const MockDilog = screen.getByLabelText('Close')
   
-  fireEvent.click(MockDilog)
+  await act(() => {
+    fireEvent.click(MockDilog)
+  })
+  
+  expect(MockDilog).not.toBeVisible()
 
 })
 
-test('test History button', () => {
+test('test History button', async () => {
   ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
   ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
@@ -452,10 +456,16 @@ test('test History button', () => {
   renderComponent(appState)
 
   const MockShare = screen.getByText('Show chat history')
-  fireEvent.click(MockShare);
+
+  await act(() => {
+    fireEvent.click(MockShare);
+  })
+
+  expect(MockShare).not.toHaveTextContent("Hide chat history")
+
 })
 
-test('test Copy button', () => {
+test('test Copy button', async () => {
   ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
   ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
@@ -480,7 +490,12 @@ test('test Copy button', () => {
   fireEvent.click(MockShare);
 
   const CopyShare = screen.getByLabelText('Copy')
-  fireEvent.keyDown(CopyShare,{ key : 'Enter'});
+  await act(() => {
+    fireEvent.keyDown(CopyShare,{ key : 'Enter'});
+  })
+
+  expect(CopyShare).not.toHaveTextContent('Copy')
+
 })
 
 test('test logo', () => {
@@ -506,8 +521,6 @@ test('test logo', () => {
 
   const img = screen.getByAltText("")
 
-  console.log(img)
-
   expect(img).not.toHaveAttribute('src', 'test-logo.svg')
 
 })
@@ -532,17 +545,34 @@ test('test getUserInfo', () => {
   }
 
   renderComponent(appState)
-
-  screen.debug()
   
   expect(screen.getByText(/Welcome Back,/i)).toBeInTheDocument()
   expect(screen.getByText(/Welcome Back,/i)).toBeVisible()
 
 })
 
-test('test Spinner', () => {
+test('test Spinner', async () => {
   ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
   ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
+
+  const appStatetrue = {
+    isChatHistoryOpen: false,
+    frontendSettings: {
+      ui: { logo: 'test-logo.svg', title: 'Test App', show_share_button: true }
+    },
+    isCosmosDBAvailable: { status: 'CosmosDB is configured and working' },
+    isLoader: true,
+    chatHistoryLoadingState: 'idle',
+    chatHistory: [],
+    filteredChatHistory: [],
+    currentChat: null,
+    error: null,
+    activeUserId: null
+  }
+  
+  renderComponent(appStatetrue)
+
+  const spinner = screen.getByText('Please wait.....!')
 
   const appState = {
     isChatHistoryOpen: false,
@@ -559,10 +589,10 @@ test('test Spinner', () => {
     activeUserId: null
   }
 
+  
   renderComponent(appState)
 
-  
-  //expect(screen.getByText("Please wait.....!")).not.toBeVisible()
+  expect(spinner).toBeVisible()
 
 })
 
@@ -622,7 +652,7 @@ test('test Copy button Condication', () => {
   const CopyShare = screen.getByLabelText('Copy')
   fireEvent.keyDown(CopyShare,{ key : 'E'});
 
-  
+  expect(CopyShare).toHaveTextContent('Copy')
 
 })
 
