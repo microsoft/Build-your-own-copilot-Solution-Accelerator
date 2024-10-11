@@ -51,8 +51,6 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
     if (user.ClientId) {
       appStateContext.dispatch({ type: 'UPDATE_CLIENT_ID', payload: user.ClientId.toString() });
       setSelectedClientId(user.ClientId.toString());
-      console.log('User clicked:', user);
-      console.log('Selected ClientId:', user.ClientId.toString());
       onCardClick(user);
    
   } else {

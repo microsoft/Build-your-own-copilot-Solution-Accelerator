@@ -1428,7 +1428,6 @@ describe("Chat Component", () => {
         await userEvent.click(questionInputtButton)
 
         await waitFor(async() => {
-            screen.debug();
             expect(console.error).toHaveBeenCalledWith('Conversation not found.')
             expect(screen.queryByTestId("chat-message-container")).not.toBeInTheDocument();
         })
@@ -1450,7 +1449,6 @@ describe("Chat Component", () => {
         await userEvent.click(questionInputtButton)
 
         await waitFor(async() => {
-            screen.debug();
             expect(screen.getByText(/error API result/i)).toBeInTheDocument();
         })
     })
@@ -1471,7 +1469,6 @@ describe("Chat Component", () => {
         await userEvent.click(questionInputtButton)
 
         await waitFor(async() => {
-            screen.debug();
             expect(screen.getByText(/error API result/i)).toBeInTheDocument();
         })
     })
@@ -1493,7 +1490,6 @@ describe("Chat Component", () => {
         await userEvent.click(questionInputtButton)
 
         await waitFor(async() => {
-            screen.debug();
             expect(consoleLogSpy).toHaveBeenCalledWith('Incomplete message. Continuing...');
         })
         consoleLogSpy.mockRestore();
@@ -1518,41 +1514,5 @@ describe("Chat Component", () => {
             expect(screen.getByText(/An error occurred. Please try again. If the problem persists, please contact the site administrator./i)).toBeInTheDocument();
         })
     })
-
-    test.skip("Should handle : Request was aborted! when the request is aborted", async()=>{
-        userEvent.setup();
-        
-        //(mockCallConversationApi).mockRejectedValueOnce(new Error('Request Aborted !'));
-
-        mockCallConversationApi.mockImplementation(async (request:any, signal:any) => {
-            if (signal.aborted) {
-                throw new Error('Request was aborted');
-            }
-            // Simulate a successful response
-            return { body: new Response() }; // Adjust as needed
-        });
-        //mockAbortController.abort();
-        (historyUpdateApi).mockResolvedValueOnce({ ok: true });
-        const tempMockState = { ...mockState };
-        tempMockState.isCosmosDBAvailable.cosmosDB = false;
-        tempMockState.frontendSettings = {
-            ...tempMockState.frontendSettings,
-            "auth_enabled": false
-        }
-        renderWithContext(<Chat />, tempMockState);
-        const questionInputtButton = screen.getByRole('button', { name: /question-input/i });
-
-        userEvent.click(questionInputtButton)
-        mockAbortController.abort();
-
-        await waitFor(async() => {
-            screen.debug()
-        })
-    })
-
-
-    
-
-
 
 });

@@ -506,7 +506,6 @@ test('test logo', () => {
 
   const img = screen.getByAltText("")
 
-  console.log(img)
 
   expect(img).not.toHaveAttribute('src', 'test-logo.svg')
 
@@ -532,8 +531,6 @@ test('test getUserInfo', () => {
   }
 
   renderComponent(appState)
-
-  screen.debug()
   
   expect(screen.getByText(/Welcome Back,/i)).toBeInTheDocument()
   expect(screen.getByText(/Welcome Back,/i)).toBeVisible()

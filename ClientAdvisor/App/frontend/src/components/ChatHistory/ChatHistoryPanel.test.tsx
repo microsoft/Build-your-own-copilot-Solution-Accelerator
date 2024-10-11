@@ -68,7 +68,6 @@ describe('ChatHistoryPanel Component', () => {
     await act(() => {
       userEvent.click(clearAllItem)
     })
-    //screen.debug();
     await waitFor(() =>
       expect(screen.getByText(/are you sure you want to clear all chat history/i)).toBeInTheDocument()
     )
@@ -95,7 +94,6 @@ describe('ChatHistoryPanel Component', () => {
 
     //const clearAllItem = screen.getByText('Clear all chat history')
     const clearAllItem = await screen.findByRole('menuitem')
-    // screen.debug(clearAllItem);
     await act(() => {
       userEvent.click(clearAllItem)
     })
@@ -103,7 +101,6 @@ describe('ChatHistoryPanel Component', () => {
     await waitFor(() =>
       expect(screen.getByText(/are you sure you want to clear all chat history/i)).toBeInTheDocument()
     )
-    // screen.debug();
     const clearAllButton = screen.getByRole('button', { name: /clear all/i })
 
     await act(async () => {
@@ -138,7 +135,6 @@ describe('ChatHistoryPanel Component', () => {
     fireEvent.click(moreButton)
 
     const clearAllItem = await screen.findByRole('menuitem')
-    // screen.debug(clearAllItem);
     await act(() => {
       userEvent.click(clearAllItem)
     })
@@ -176,7 +172,6 @@ describe('ChatHistoryPanel Component', () => {
 
     //const clearAllItem = screen.getByText('Clear all chat history')
     const clearAllItem = await screen.findByRole('menuitem')
-    // screen.debug(clearAllItem);
     await act(() => {
       userEvent.click(clearAllItem)
     })
@@ -184,7 +179,6 @@ describe('ChatHistoryPanel Component', () => {
     await waitFor(() =>
       expect(screen.getByText(/are you sure you want to clear all chat history/i)).toBeInTheDocument()
     )
-    // screen.debug();
     const clearAllButton = screen.getByRole('button', { name: /clear all/i })
 
     await act(async () => {

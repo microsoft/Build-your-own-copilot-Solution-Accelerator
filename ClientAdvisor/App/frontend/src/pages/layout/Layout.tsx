@@ -105,7 +105,6 @@ const Layout = () => {
   useEffect(() => {
     getUserInfo()
       .then(res => {
-        console.log('User info: ', res)
         const name: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? ''
         setName(name)
       })

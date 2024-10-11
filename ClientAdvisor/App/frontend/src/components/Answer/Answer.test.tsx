@@ -95,11 +95,9 @@ describe('Answer Component', () => {
     const isEmpty = (obj: any) => Object.keys(obj).length === 0;
 
     const renderComponent = (props?: any, appState?: any) => {
-        //console.log("props",props);
         if (appState != undefined) {
             mockAppState = { ...mockAppState, ...appState }
         }
-        //console.log("mockAppState" , mockAppState)
         return (
             renderWithContext(<Answer answer={(props == undefined || isEmpty(props)) ? mockAnswerProps : props} onCitationClicked={onCitationClicked} />, mockAppState)
         )
@@ -367,10 +365,6 @@ describe('Answer Component', () => {
         await waitFor(() => {
             userEvent.click(checkboxEle);
         });
-
-        // expect(handleChange).toHaveBeenCalledTimes(1);
-        //expect(checkboxEle).toBeChecked();
-        //screen.debug()
         await userEvent.click(screen.getByText('Submit'));
 
         await waitFor(() => {
@@ -392,7 +386,6 @@ describe('Answer Component', () => {
         await userEvent.click(dislikeButton);
         expect(screen.getByText("Why wasn't this response helpful?")).toBeInTheDocument();
 
-        //screen.debug(screen.getByRole('dialog'));
         // Assuming there is a close button in the dialog that dismisses it
         const dismissButton = screen.getByRole('button', { name: /close/i }); // Adjust selector as needed
 
@@ -415,7 +408,6 @@ describe('Answer Component', () => {
         // Click dislike to open dialog
         await userEvent.click(dislikeButton);
 
-        //screen.debug(screen.getByRole('dialog'));
         expect(screen.getByText("Why wasn't this response helpful?")).toBeInTheDocument();
 
         // Select feedback and submit
@@ -444,8 +436,6 @@ describe('Answer Component', () => {
 
         // Click dislike to open dialog
         await userEvent.click(dislikeButton);
-
-        //screen.debug(screen.getByRole('dialog'));
 
         const InappropriateFeedbackDivBtn = screen.getByTestId("InappropriateFeedback")
         expect(InappropriateFeedbackDivBtn).toBeInTheDocument();
@@ -492,10 +482,6 @@ describe('Answer Component', () => {
             feedbackState: { '123': Feedback.Positive },
         }
         renderComponent(answerWithMissingFeedback, extraMockState);
-        // renderComponent();
-
-        //screen.debug();
-
         const likeButton = screen.getByLabelText('Like this response');
 
         // Initially neutral feedback
@@ -520,15 +506,11 @@ describe('Answer Component', () => {
             feedbackState: { '123': Feedback.OtherHarmful },
         }
         renderComponent(answerWithMissingFeedback, extraMockState);
-
-        //screen.debug();
         const handleChange = jest.fn();
         const dislikeButton = screen.getByLabelText('Dislike this response');
 
         // Click dislike to open dialog
         await userEvent.click(dislikeButton);
-
-        // screen.debug();
         await waitFor(() => {
             expect(historyMessageFeedback).toHaveBeenCalledWith(mockAnswerProps.message_id, Feedback.Neutral);
         });
