@@ -18,7 +18,8 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
-
+from dotenv import load_dotenv
+load_dotenv()
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -167,15 +168,12 @@ class ChatWithDataPlugin:
         )
 
         query = question
-        system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
-        You have access to the client’s meeting call transcripts. 
-        You can use this information to answer questions about the clients
+        system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings and provide details on the call transcripts.
+        You have access to the client’s meetings and call transcripts
         When asked about action items from previous meetings with the client, **ALWAYS provide information only for the most recent dates**.
-        You have access of client’s meeting call transcripts,if asked summaries of calls, Do never respond like "I cannot answer this question from the data available".
-        If asked to Summarize each call transcript then You must have to consistently provide "List out all call transcripts for that client"strictly follow the format: "First Call Summary [Date and Time of that call]".
-        Before stopping the response check the number of transcript and If there are any calls that cannot be summarized, at the end of your response, include: "Unfortunately, I am not able to summarize [X] out of [Y] call transcripts." Where [X] is the number of transcripts you couldn't summarize, and [Y] is the total number of transcripts.
-        Ensure all summaries are consistent and uniform, adhering to the specified format for each call.
-        Always return time in "HH:mm" format for the client in response.'''
+        Always return time in "HH:mm" format for the client in response.
+        If requested for call transcript(s), the response for each transcript should be summarized separately and Ensure all transcripts for the specified client are retrieved and format **must** follow as First Call Summary,Second Call Summary etc.
+        Your answer must **not** include any client identifiers or ids or numbers or ClientId in the final response.'''
 
         completion = client.chat.completions.create(
             model = deployment,
@@ -190,8 +188,8 @@ class ChatWithDataPlugin:
                 }
             ],
             seed = 42,
-            temperature = 0,
-            max_tokens = 800,
+            temperature = 1,
+            max_tokens = 1000,
             extra_body = {
                 "data_sources": [
                     {
@@ -199,7 +197,6 @@ class ChatWithDataPlugin:
                         "parameters": {
                             "endpoint": search_endpoint,
                             "index_name": index_name,
-                            "semantic_configuration": "default",
                             "query_type": "vector_simple_hybrid", #"vector_semantic_hybrid"
                             "fields_mapping": {
                                 "content_fields_separator": "\n",
@@ -279,13 +276,12 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
-    Only use the client name returned from database in the response.
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
-    If asked to "Summarize each call transcript" then You must have to "List out all call transcripts for that Client" in Format as - First Call Summary and Ensure that whatever call transcripts do we have for the client must included in response.
     Do not include client names other than available in the source data.
     Do not include or specify any client IDs in the responses.
+    Client name **must be** same  as retrieved from database.
     '''
 
     user_query = query.replace('?',' ')
