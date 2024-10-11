@@ -38,7 +38,7 @@ describe('ChatHistoryPanel Component', () => {
   }
 
   it('renders the ChatHistoryPanel with chat history loaded', () => {
-    renderWithContext(<ChatHistoryPanel />, mockAppState)
+    renderWithContext(<ChatHistoryPanel isLoading={false} />, mockAppState)
     expect(screen.getByText('Chat history')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /clear all chat history/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /hide/i })).toBeInTheDocument()
@@ -49,7 +49,7 @@ describe('ChatHistoryPanel Component', () => {
       ...mockAppState,
       chatHistoryLoadingState: ChatHistoryLoadingState.Loading
     }
-    renderWithContext(<ChatHistoryPanel />, stateVal)
+    renderWithContext(<ChatHistoryPanel isLoading={false} />, stateVal)
     await waitFor(() => {
       expect(screen.getByText('Loading chat history')).toBeInTheDocument()
     })
@@ -57,7 +57,7 @@ describe('ChatHistoryPanel Component', () => {
 
   it('opens the clear all chat history dialog when the command button is clicked', async () => {
     userEvent.setup()
-    renderWithContext(<ChatHistoryPanel />, mockAppState)
+    renderWithContext(<ChatHistoryPanel isLoading={false} />, mockAppState)
 
     const moreButton = screen.getByRole('button', { name: /clear all chat history/i })
     fireEvent.click(moreButton)
@@ -87,7 +87,7 @@ describe('ChatHistoryPanel Component', () => {
       json: async () => ({})
     })
 
-    renderWithContext(<ChatHistoryPanel />, compState)
+    renderWithContext(<ChatHistoryPanel isLoading={false} />, compState)
 
     const moreButton = screen.getByRole('button', { name: /clear all chat history/i })
     fireEvent.click(moreButton)
@@ -129,7 +129,7 @@ describe('ChatHistoryPanel Component', () => {
       isCosmosDBAvailable: { cosmosDB: true, status: CosmosDBStatus.Working }
     }
 
-    renderWithContext(<ChatHistoryPanel />, compState)
+    renderWithContext(<ChatHistoryPanel isLoading={false} />, compState)
 
     const moreButton = screen.getByRole('button', { name: /clear all chat history/i })
     fireEvent.click(moreButton)
@@ -166,7 +166,7 @@ describe('ChatHistoryPanel Component', () => {
       isCosmosDBAvailable: { cosmosDB: true, status: CosmosDBStatus.Working }
     }
 
-    renderWithContext(<ChatHistoryPanel />, compState)
+    renderWithContext(<ChatHistoryPanel isLoading={false} />, compState)
     const moreButton = screen.getByRole('button', { name: /clear all chat history/i })
     fireEvent.click(moreButton)
 
@@ -198,7 +198,7 @@ describe('ChatHistoryPanel Component', () => {
       chatHistoryLoadingState: ChatHistoryLoadingState.Success,
       isCosmosDBAvailable: { cosmosDB: false, status: '' }
     }
-    renderWithContext(<ChatHistoryPanel />, stateVal)
+    renderWithContext(<ChatHistoryPanel isLoading={false} />, stateVal)
 
     const hideBtn = screen.getByRole('button', { name: /hide button/i })
     fireEvent.click(hideBtn)
@@ -213,7 +213,7 @@ describe('ChatHistoryPanel Component', () => {
       isCosmosDBAvailable: { cosmosDB: true, status: '' } // Falsy status to trigger the error message
     }
 
-    renderWithContext(<ChatHistoryPanel />, errorState)
+    renderWithContext(<ChatHistoryPanel isLoading={false} />, errorState)
 
     await waitFor(() => {
       expect(screen.getByText('Error loading chat history')).toBeInTheDocument()
@@ -225,7 +225,7 @@ describe('ChatHistoryPanel Component', () => {
 
   //     userEvent.setup()
 
-  //     renderWithContext(<ChatHistoryPanel />, mockAppState)
+  //     renderWithContext(<ChatHistoryPanel isLoading={false} />, mockAppState)
 
   //     const moreButton = screen.getByRole('button', { name: /clear all chat history/i })
   //     fireEvent.click(moreButton)
