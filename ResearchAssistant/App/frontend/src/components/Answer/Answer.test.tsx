@@ -354,20 +354,17 @@ test('handles keyboard events to open the accordion', () => {
 
   const chevronButton = screen.getByLabelText(/Open references/i);
   
-  // Check if the initial state is not expanded (you may omit the aria-expanded check)
-  // Optionally, use another way to check the visibility of the accordion or state
-  
-  // Simulate pressing Enter key
+ 
   fireEvent.keyDown(chevronButton, { key: 'Enter', code: 'Enter' });
-  // Since we can't check aria-expanded, check if the accordion is visible instead
-  expect(screen.getByText(/Citation/i)).toBeVisible(); // Assuming citations text is present
+ 
+  expect(screen.getByText(/Citation/i)).toBeVisible(); 
 
-  // Reset state for the next test
-  fireEvent.click(chevronButton); // Collapse again
+ 
+  fireEvent.click(chevronButton); 
 
-  // Simulate pressing Space key
+  
   fireEvent.keyDown(chevronButton, { key: ' ', code: 'Space' });
-  expect(screen.getByText(/Citation/i)).toBeVisible(); // Check again for visibility
+  expect(screen.getByText(/Citation/i)).toBeVisible(); 
 });
 
 
