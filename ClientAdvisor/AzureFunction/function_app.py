@@ -279,8 +279,6 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
-    Do not include client names other than available in the source data.
-    Do not include or specify any client IDs in the responses.
     Client name **must be** same  as retrieved from database.
     '''
 
