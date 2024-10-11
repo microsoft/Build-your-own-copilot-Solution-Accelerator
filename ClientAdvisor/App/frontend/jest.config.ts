@@ -1,7 +1,7 @@
 import type { Config } from '@jest/types'
 
 const config: Config.InitialOptions = {
-   verbose: true,
+  verbose: true,
   // transform: {
   //   '^.+\\.tsx?$': 'ts-jest'
   // },
@@ -9,9 +9,9 @@ const config: Config.InitialOptions = {
 
   preset: 'ts-jest',
   //testEnvironment: 'jsdom',  // For React DOM testing
-  testEnvironment: "jest-environment-jsdom",
+  testEnvironment: 'jest-environment-jsdom',
   testEnvironmentOptions: {
-    customExportConditions: [''],
+    customExportConditions: ['']
   },
   moduleNameMapper: {
     '\\.(css|less|scss)$': 'identity-obj-proxy', // For mocking static file imports
@@ -35,7 +35,6 @@ const config: Config.InitialOptions = {
     // "^.+\\.jsx?$": "babel-jest", // Use babel-jest for JavaScript/JSX
 
     //'^.+\\.[jt]sx?$': 'babel-jest',
-
   },
 
   // transformIgnorePatterns: [
@@ -55,9 +54,9 @@ const config: Config.InitialOptions = {
   // ],
 
   //testPathIgnorePatterns: ['./node_modules/'],
- // moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  // moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   //globals: { fetch },
-  setupFiles: ['<rootDir>/jest.polyfills.js'],
+  setupFiles: ['<rootDir>/jest.polyfills.js']
   // globals: {
   //   'ts-jest': {
   //     isolatedModules: true, // Prevent isolated module errors
@@ -83,12 +82,10 @@ const config: Config.InitialOptions = {
   //   '<rootDir>/node_modules/', // Ignore node_modules
   //   '<rootDir>/__mocks__/', // Ignore mocks
   //   '<rootDir>/src/state/',
-  //   '<rootDir>/src/api/', 
-  //   '<rootDir>/src/mocks/', 
-  //   '<rootDir>/src/test/', 
+  //   '<rootDir>/src/api/',
+  //   '<rootDir>/src/mocks/',
+  //   '<rootDir>/src/test/',
   // ],
-
-  
 }
 
 export default config
