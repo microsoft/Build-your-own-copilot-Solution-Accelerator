@@ -1,76 +1,90 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {UserCard} from './UserCard';
+import '@testing-library/jest-dom';
+import { UserCard } from './UserCard';
+import { Icon } from '@fluentui/react/lib/Icon';
 
-const mockOnCardClick = jest.fn();
+// Mocking the Fluent UI Icon component (if needed)
+jest.mock('@fluentui/react/lib/Icon', () => ({
+  Icon: () => <span data-testid="icon"></span>,
+}));
 
-const defaultProps = {
+const mockProps = {
   ClientId: 1,
   ClientName: 'John Doe',
-  NextMeeting: 'Meeting',
+  NextMeeting: '10th October, 2024',
   NextMeetingTime: '10:00 AM',
   NextMeetingEndTime: '11:00 AM',
-  AssetValue: '1000',
-  LastMeeting: 'Previous Meeting',
-  LastMeetingStartTime: '09:00 AM',
+  AssetValue: '100,000',
+  LastMeeting: '5th October, 2024',
+  LastMeetingStartTime: '9:00 AM',
   LastMeetingEndTime: '10:00 AM',
-  ClientSummary: 'Summary of the client',
-  onCardClick: mockOnCardClick,
+  ClientSummary: 'A summary of the client details.',
+  onCardClick: jest.fn(),
   isSelected: false,
-  isNextMeeting: false,
-  chartUrl: '',
+  isNextMeeting: true,
+  chartUrl: '/path/to/chart',
 };
 
-
 describe('UserCard Component', () => {
-  it('should render with default props', () => {
-    render(<UserCard {...defaultProps} />);
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('Meeting')).toBeInTheDocument();
-    expect(screen.getByText('10:00 AM - 11:00 AM')).toBeInTheDocument();
+  it('renders user card with basic details', () => {
+    render(<UserCard {...mockProps} />);
+    
+    expect(screen.getByText(mockProps.ClientName)).toBeInTheDocument();
+    expect(screen.getByText(mockProps.NextMeeting)).toBeInTheDocument();
+    expect(screen.getByText(`${mockProps.NextMeetingTime} - ${mockProps.NextMeetingEndTime}`)).toBeInTheDocument();
+    expect(screen.getByText('More details')).toBeInTheDocument();
+    expect(screen.getAllByTestId('icon')).toHaveLength(2); 
   });
 
-  it('should call onCardClick when the card is clicked', () => {
-    render(<UserCard {...defaultProps} />);
-    fireEvent.click(screen.getByText('John Doe'));
-    expect(mockOnCardClick).toHaveBeenCalled();
+  it('handles card click correctly', () => {
+    render(<UserCard {...mockProps} />);
+    fireEvent.click(screen.getByText(mockProps.ClientName));
+    expect(mockProps.onCardClick).toHaveBeenCalled();
   });
-/*
-  it('should toggle details when "More details" button is clicked', () => {
-    render(<UserCard {...defaultProps} />);
-    const moreDetailsButton = screen.getByText('More details');
-    fireEvent.click(moreDetailsButton);
+
+  it('toggles show more details on button click', () => {
+    render(<UserCard {...mockProps} />);
+    const showMoreButton = screen.getByText('More details');
+    fireEvent.click(showMoreButton);
     expect(screen.getByText('Asset Value')).toBeInTheDocument();
-    expect(screen.getByText('$1000')).toBeInTheDocument();
-    expect(screen.getByText('Previous Meeting')).toBeInTheDocument();
-    expect(screen.getByText('Summary of the client')).toBeInTheDocument();
-    expect(moreDetailsButton).toHaveTextContent('Less details');
-  });
-  */
-
-  it('should hide details when "Less details" button is clicked', () => {
-    render(<UserCard {...defaultProps} isNextMeeting={true} />);
-    const moreDetailsButton = screen.getByText('More details');
-    fireEvent.click(moreDetailsButton); // Show details
-    fireEvent.click(moreDetailsButton); // Hide details
+    expect(screen.getByText('Less details')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Less details'));
     expect(screen.queryByText('Asset Value')).not.toBeInTheDocument();
-    expect(screen.queryByText('$1000')).not.toBeInTheDocument();
-    expect(screen.queryByText('Previous Meeting')).not.toBeInTheDocument();
-    expect(screen.queryByText('Summary of the client')).not.toBeInTheDocument();
-    expect(moreDetailsButton).toHaveTextContent('More details');
   });
 
-  /*
-  it('should apply selected style when isSelected is true', () => {
-    render(<UserCard {...defaultProps} isSelected={true} />);
-    expect(screen.getByText('John Doe').closest('div')).toHaveClass('selected');
+  it('handles keydown event for show more/less details', () => {
+    render(<UserCard {...mockProps} />);
+    const showMoreButton = screen.getByText('More details');
+    fireEvent.keyDown(showMoreButton, { key: ' ', code: 'Space' }); // Testing space key for show more
+    expect(screen.getByText('Asset Value')).toBeInTheDocument();
+    fireEvent.keyDown(screen.getByText('Less details'), { key: 'Enter', code: 'Enter' }); // Testing enter key for less details
+    expect(screen.queryByText('Asset Value')).not.toBeInTheDocument();
   });
-  */
 
-  it('should display the chart URL if provided', () => {
-    const props = { ...defaultProps, chartUrl: 'https://example.com/chart.png' };
-    render(<UserCard {...props} />);
-    // Assuming there's an img tag or some other element to display the chartUrl
-    // You would replace this with the actual implementation details.
-    //expect(screen.getByAltText('Chart')).toHaveAttribute('src', props.chartUrl);
+  it('handles keydown event for card click (Enter)', () => {
+    render(<UserCard {...mockProps} />);
+    const card = screen.getByText(mockProps.ClientName);
+    fireEvent.keyDown(card, { key: 'Enter', code: 'Enter' }); // Testing Enter key for card click
+    expect(mockProps.onCardClick).toHaveBeenCalled();
   });
+
+  it('handles keydown event for card click Space', () => {
+    render(<UserCard {...mockProps} />);
+    const card = screen.getByText(mockProps.ClientName);
+    
+    fireEvent.keyDown(card, { key: ' ', code: 'Space' }); // Testing Space key for card click
+    expect(mockProps.onCardClick).toHaveBeenCalledTimes(1); // Check if it's been called twice now
+  });
+
+
+  it('adds selected class when isSelected is true', () => {
+    render(<UserCard {...mockProps} isSelected={true} />);
+    const card = screen.getByText(mockProps.ClientName).parentElement;
+    expect(card).toHaveClass('selected');
+  });
+
 });
+
+// Fix for the isolatedModules error
+export {};
