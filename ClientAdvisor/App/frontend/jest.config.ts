@@ -14,7 +14,7 @@ const config: Config.InitialOptions = {
     customExportConditions: [''],
   },
   moduleNameMapper: {
-    '\\.(css|less|scss|svg|png|jpg)$': 'identity-obj-proxy', // For mocking static file imports
+    '\\.(css|less)$': 'identity-obj-proxy', // For mocking static file imports
     //'^react-markdown$': '<rootDir>/__mocks__/react-markdown.js',
     //'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js' // For mocking static file imports
     //'^react-syntax-highlighter$': '<rootDir>/__mocks__/react-syntax-highlighter.js',
@@ -22,7 +22,7 @@ const config: Config.InitialOptions = {
    //'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js',
    '^react-markdown$': '<rootDir>/__mocks__/react-markdown.tsx', 
    '^dompurify$': '<rootDir>/__mocks__/dompurify.js', // Point to the mock
-
+   '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.ts',
   },
   setupFilesAfterEnv: ['<rootDir>/src/test/setupTests.ts'], // For setting up testing environment like jest-dom
   transform: {
