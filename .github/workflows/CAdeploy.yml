@@ -1,0 +1,128 @@
+name: CI-Validate Deployment-Client Advisor
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ClientAdvisor/**'   
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az --version  # Verify installation
+
+      - name: Login to Azure
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Install Bicep CLI
+        run: az bicep install
+
+      - name: Generate Resource Group Name
+        id: generate_rg_name
+        run: |
+          echo "Generating a unique resource group name..."
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          COMMON_PART="pslautomationCli"
+          UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
+          echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
+          echo "Generated RESOURCE_GROUP_PREFIX: ${UNIQUE_RG_NAME}"
+      
+      - name: Check and Create Resource Group
+        id: check_create_rg
+        run: |
+          echo "RESOURCE_GROUP: ${{ env.RESOURCE_GROUP_NAME }}"
+          set -e  
+          echo "Checking if resource group exists..."
+          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+          if [ "$rg_exists" = "false" ]; then
+            echo "Resource group does not exist. Creating..."
+            az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location uksouth || { echo "Error creating resource group"; exit 1; }
+          else
+            echo "Resource group already exists."
+          fi
+      
+      - name: Generate Unique Solution Prefix
+        id: generate_solution_prefix
+        run: |
+          set -e
+          COMMON_PART="pslc"
+          TIMESTAMP=$(date +%s)  
+          UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
+          UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
+          echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
+          echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}"
+          
+      - name: Deploy Bicep Template
+        id: deploy
+        run: |
+          set -e
+          az deployment group create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --template-file ClientAdvisor/Deployment/bicep/main.bicep \
+            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
+
+      - name: Update PowerBI URL
+        if: success()
+        run: |
+          set -e
+
+          COMMON_PART="-app-service"
+          application_name="${{ env.SOLUTION_PREFIX }}${COMMON_PART}"
+          echo "Updating application: $application_name"
+          
+          # Log the Power BI URL being set
+          echo "Setting Power BI URL: ${{ vars.VITE_POWERBI_EMBED_URL }}"
+          
+          # Update the application settings
+          az webapp config appsettings set --name "$application_name" --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --settings VITE_POWERBI_EMBED_URL="${{ vars.VITE_POWERBI_EMBED_URL }}"
+
+          # Restart the web app
+          az webapp restart --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --name "$application_name"
+
+          echo "Power BI URL updated successfully for application: $application_name."
+
+      - name: Delete Bicep Deployment
+        if: success()
+        run: |
+          set -e  
+          echo "Checking if resource group exists..."
+          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+          if [ "$rg_exists" = "true" ]; then
+            echo "Resource group exist. Cleaning..."
+            az group delete \
+                --name ${{ env.RESOURCE_GROUP_NAME }} \
+                --yes \
+                --no-wait
+            echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
+          else
+            echo "Resource group does not exists."
+          fi
+      
+      - name: Send Notification on Failure
+        if: failure()
+        run: |
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      
+          # Construct the email body
+          EMAIL_BODY=$(cat <<EOF
+          {
+            "body": "<p>Dear Team,</p><p>We would like to inform you that the Client Advisor Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
+          }
+          EOF
+          )
+      
+          # Send the notification
+          curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "$EMAIL_BODY" || echo "Failed to send notification"
+

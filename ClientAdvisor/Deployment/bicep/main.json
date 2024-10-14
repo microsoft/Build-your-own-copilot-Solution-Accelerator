@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "13616077515444443649"
+      "templateHash": "5062834210065422729"
     }
   },
   "parameters": {
@@ -28,7 +28,8 @@
     "resourceGroupLocation": "[resourceGroup().location]",
     "resourceGroupName": "[resourceGroup().name]",
     "solutionLocation": "[variables('resourceGroupLocation')]",
-    "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/"
+    "baseUrl": "https://raw.githubusercontent.com/Roopan-Microsoft/psl-byo-main/main/ClientAdvisor/",
+    "functionAppversion": "dev"
   },
   "resources": [
     {
@@ -1046,6 +1047,9 @@
           },
           "baseUrl": {
             "value": "[variables('baseUrl')]"
+          },
+          "functionAppVersion": {
+            "value": "[variables('functionAppversion')]"
           }
         },
         "template": {
@@ -1055,7 +1059,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "3863583258880925565"
+              "templateHash": "12686893977991317957"
             }
           },
           "parameters": {
@@ -1106,6 +1110,9 @@
             },
             "sqlDbPwd": {
               "type": "securestring"
+            },
+            "functionAppVersion": {
+              "type": "string"
             }
           },
           "resources": [
@@ -1124,7 +1131,7 @@
               "properties": {
                 "azCliVersion": "2.50.0",
                 "primaryScriptUri": "[format('{0}Deployment/scripts/create_azure_functions.sh', parameters('baseUrl'))]",
-                "arguments": "[format('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}', parameters('solutionName'), parameters('solutionLocation'), parameters('resourceGroupName'), parameters('baseUrl'), parameters('azureOpenAIApiKey'), parameters('azureOpenAIApiVersion'), parameters('azureOpenAIEndpoint'), parameters('azureSearchAdminKey'), parameters('azureSearchServiceEndpoint'), parameters('azureSearchIndex'), parameters('sqlServerName'), parameters('sqlDbName'), parameters('sqlDbUser'), parameters('sqlDbPwd'))]",
+                "arguments": "[format('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14}', parameters('solutionName'), parameters('solutionLocation'), parameters('resourceGroupName'), parameters('baseUrl'), parameters('azureOpenAIApiKey'), parameters('azureOpenAIApiVersion'), parameters('azureOpenAIEndpoint'), parameters('azureSearchAdminKey'), parameters('azureSearchServiceEndpoint'), parameters('azureSearchIndex'), parameters('sqlServerName'), parameters('sqlDbName'), parameters('sqlDbUser'), parameters('sqlDbPwd'), parameters('functionAppVersion'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
                 "cleanupPreference": "OnSuccess"
@@ -1992,7 +1999,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "5513270017559796037"
+              "templateHash": "10803780472687780653"
             }
           },
           "parameters": {
@@ -2377,7 +2384,7 @@
             }
           },
           "variables": {
-            "WebAppImageName": "DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:latest"
+            "WebAppImageName": "DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:dev"
           },
           "resources": [
             {

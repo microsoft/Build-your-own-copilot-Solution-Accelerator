@@ -112,7 +112,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
         <StackItem>
           <Text
             role="heading"
-            aria-level={2}
+            aria-level={3}
             style={{
               alignSelf: 'center',
               fontWeight: '600',
