@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.29.47.4906",
-      "templateHash": "5062834210065422729"
+      "version": "0.30.23.60470",
+      "templateHash": "4335964797327276348"
     }
   },
   "parameters": {
@@ -56,8 +56,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "14160084237240395045"
+              "version": "0.30.23.60470",
+              "templateHash": "8775325455752085588"
             }
           },
           "parameters": {
@@ -137,9 +137,6 @@
           },
           "solutionLocation": {
             "value": "[parameters('cosmosLocation')]"
-          },
-          "identity": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.objectId]"
           }
         },
         "template": {
@@ -148,8 +145,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "17399517323120345417"
+              "version": "0.30.23.60470",
+              "templateHash": "2785991873795581274"
             }
           },
           "parameters": {
@@ -178,9 +175,6 @@
             "collectionName": {
               "type": "string",
               "defaultValue": "conversations"
-            },
-            "identity": {
-              "type": "string"
             },
             "containers": {
               "type": "array",
@@ -251,6 +245,7 @@
                 "databaseAccountOfferType": "Standard",
                 "enableAutomaticFailover": false,
                 "enableMultipleWriteLocations": false,
+                "disableLocalAuth": true,
                 "apiProperties": "[if(equals(parameters('kind'), 'MongoDB'), createObject('serverVersion', '4.0'), createObject())]",
                 "capabilities": [
                   {
@@ -278,17 +273,13 @@
               "type": "object",
               "value": {
                 "cosmosAccountName": "[parameters('accountName')]",
-                "cosmosAccountKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), '2022-08-15').primaryMasterKey]",
                 "cosmosDatabaseName": "[parameters('databaseName')]",
                 "cosmosContainerName": "[parameters('collectionName')]"
               }
             }
           }
         }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -317,8 +308,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "16818958292648129851"
+              "version": "0.30.23.60470",
+              "templateHash": "6504191191293913024"
             }
           },
           "parameters": {
@@ -474,8 +465,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "17750640431748386549"
+              "version": "0.30.23.60470",
+              "templateHash": "2160762555547388608"
             }
           },
           "parameters": {
@@ -632,8 +623,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "14900700646237730459"
+              "version": "0.30.23.60470",
+              "templateHash": "7447797843632120632"
             }
           },
           "parameters": {
@@ -714,8 +705,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "5512132473254602596"
+              "version": "0.30.23.60470",
+              "templateHash": "1208105245776066647"
             }
           },
           "parameters": {
@@ -802,8 +793,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "18087275960613812283"
+              "version": "0.30.23.60470",
+              "templateHash": "7369022468994960259"
             }
           },
           "parameters": {
@@ -936,8 +927,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "5446272928246139512"
+              "version": "0.30.23.60470",
+              "templateHash": "6415253687626078091"
             }
           },
           "parameters": {
@@ -1058,8 +1049,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "12686893977991317957"
+              "version": "0.30.23.60470",
+              "templateHash": "7374909295293677257"
             }
           },
           "parameters": {
@@ -1171,8 +1162,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "17656221802073055142"
+              "version": "0.30.23.60470",
+              "templateHash": "12066912124638066503"
             }
           },
           "parameters": {
@@ -1288,8 +1279,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "15721711795451128385"
+              "version": "0.30.23.60470",
+              "templateHash": "16513457206594462189"
             }
           },
           "parameters": {
@@ -1794,8 +1785,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "9953522498407272740"
+              "version": "0.30.23.60470",
+              "templateHash": "17279604675307278350"
             }
           },
           "parameters": {
@@ -1856,14 +1847,8 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "identity": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.id]"
-          },
           "solutionName": {
             "value": "[parameters('solutionPrefix')]"
-          },
-          "solutionLocation": {
-            "value": "[variables('solutionLocation')]"
           },
           "AzureSearchService": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_ai_search_service'), '2022-09-01').outputs.searchServiceOutput.value.searchServiceName]"
@@ -1976,9 +1961,6 @@
           "AZURE_COSMOSDB_ACCOUNT": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosOutput.value.cosmosAccountName]"
           },
-          "AZURE_COSMOSDB_ACCOUNT_KEY": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosOutput.value.cosmosAccountKey]"
-          },
           "AZURE_COSMOSDB_CONVERSATIONS_CONTAINER": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosOutput.value.cosmosContainerName]"
           },
@@ -1998,8 +1980,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "10803780472687780653"
+              "version": "0.30.23.60470",
+              "templateHash": "3306232384194992378"
             }
           },
           "parameters": {
@@ -2010,15 +1992,6 @@
               "metadata": {
                 "description": "Solution Name"
               }
-            },
-            "solutionLocation": {
-              "type": "string",
-              "metadata": {
-                "description": "Solution Location"
-              }
-            },
-            "identity": {
-              "type": "string"
             },
             "HostingPlanName": {
               "type": "string",
@@ -2574,10 +2547,6 @@
                       "value": "[parameters('AZURE_COSMOSDB_ACCOUNT')]"
                     },
                     {
-                      "name": "AZURE_COSMOSDB_ACCOUNT_KEY",
-                      "value": "[parameters('AZURE_COSMOSDB_ACCOUNT_KEY')]"
-                    },
-                    {
                       "name": "AZURE_COSMOSDB_CONVERSATIONS_CONTAINER",
                       "value": "[parameters('AZURE_COSMOSDB_CONVERSATIONS_CONTAINER')]"
                     },
@@ -2626,6 +2595,134 @@
                 "Application_Type": "web"
               },
               "kind": "web"
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "cosmos-sql-role-definition",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "accountName": {
+                    "value": "[parameters('AZURE_COSMOSDB_ACCOUNT')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.30.23.60470",
+                      "templateHash": "17906960830343188834"
+                    },
+                    "description": "Creates a SQL role definition under an Azure Cosmos DB account."
+                  },
+                  "parameters": {
+                    "accountName": {
+                      "type": "string"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
+                      "apiVersion": "2022-08-15",
+                      "name": "[format('{0}/{1}', parameters('accountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), parameters('accountName'), 'sql-role'))]",
+                      "properties": {
+                        "assignableScopes": [
+                          "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName'))]"
+                        ],
+                        "permissions": [
+                          {
+                            "dataActions": [
+                              "Microsoft.DocumentDB/databaseAccounts/readMetadata",
+                              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*",
+                              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*"
+                            ],
+                            "notDataActions": []
+                          }
+                        ],
+                        "roleName": "Reader Writer",
+                        "type": "CustomRole"
+                      }
+                    }
+                  ],
+                  "outputs": {
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('accountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), parameters('accountName'), 'sql-role'))]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('cosmos-sql-user-role-{0}', parameters('WebsiteName'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "accountName": {
+                    "value": "[parameters('AZURE_COSMOSDB_ACCOUNT')]"
+                  },
+                  "roleDefinitionId": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-sql-role-definition'), '2022-09-01').outputs.id.value]"
+                  },
+                  "principalId": {
+                    "value": "[reference(resourceId('Microsoft.Web/sites', parameters('WebsiteName')), '2020-06-01', 'full').identity.principalId]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.30.23.60470",
+                      "templateHash": "2622922268469466870"
+                    },
+                    "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
+                  },
+                  "parameters": {
+                    "accountName": {
+                      "type": "string"
+                    },
+                    "roleDefinitionId": {
+                      "type": "string"
+                    },
+                    "principalId": {
+                      "type": "string",
+                      "defaultValue": ""
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+                      "apiVersion": "2022-05-15",
+                      "name": "[format('{0}/{1}', parameters('accountName'), guid(parameters('roleDefinitionId'), parameters('principalId'), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName'))))]",
+                      "properties": {
+                        "principalId": "[parameters('principalId')]",
+                        "roleDefinitionId": "[parameters('roleDefinitionId')]",
+                        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName'))]"
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'cosmos-sql-role-definition')]",
+                "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
+              ]
             }
           ]
         }
@@ -2636,7 +2733,6 @@
         "[resourceId('Microsoft.Resources/deployments', 'deploy_ai_search_service')]",
         "[resourceId('Microsoft.Resources/deployments', 'deploy_azure_function_script_url')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db')]"
       ]
     }
