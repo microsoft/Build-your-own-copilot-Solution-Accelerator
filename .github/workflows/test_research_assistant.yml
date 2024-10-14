@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches: main
+    # Trigger on changes in these specific paths
+    paths:
+      - 'ResearchAssistant/**'
+  pull_request:
+    branches: main
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+    paths:
+      - 'ResearchAssistant/**'
+
+jobs:
+  test_research_assistant:
+    name: Research Assistant Tests
+    runs-on: ubuntu-latest
+    # The if condition ensures that this job only runs if changes are in the ResearchAssistant folder
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Backend Dependencies
+        run: |
+          cd ResearchAssistant/App
+          python -m pip install -r requirements.txt
+          python -m pip install coverage pytest-cov
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install Frontend Dependencies
+        run: |
+          cd ResearchAssistant/App/frontend
+          npm install
+      - name: Run Frontend Tests with Coverage
+        run: |
+          cd ResearchAssistant/App/frontend
+          npm run test -- --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-assistant-frontend-coverage
+          path: |
+            ResearchAssistant/App/frontend/coverage/
+            ResearchAssistant/App/frontend/coverage/lcov-report/
