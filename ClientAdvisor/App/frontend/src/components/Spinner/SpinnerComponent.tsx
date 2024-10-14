@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Spinner, SpinnerSize,ISpinnerStyles } from '@fluentui/react';
-import styles from  './Spinner.module.css';
+import styles from  './SpinnerComponent.module.css';
 
 interface SpinnerComponentProps {
     loading: boolean;
@@ -16,14 +16,13 @@ interface SpinnerComponentProps {
   };
 
 
-  const SpinnerComponent: React.FC<SpinnerComponentProps> = ({ loading, label }) => {
+  export const SpinnerComponent: React.FC<SpinnerComponentProps> = ({ loading, label }) => {
     if (!loading) return null;
   
     return (
-      <div className={styles.overlay}>
+      <div className={styles.overlay} data-testid="spinnerContainer">
           <Spinner label={label || undefined} size={SpinnerSize.large} styles={spinnerStyles} />
       </div>
     );
   };
 
-export default SpinnerComponent;

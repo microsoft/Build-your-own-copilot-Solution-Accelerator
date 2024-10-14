@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import UserCard from '../UserCard/UserCard';
+import {UserCard} from '../UserCard/UserCard';
 import styles from './Cards.module.css';
-import { getUsers, selectUser } from '../../api/api';
+import { getUsers, selectUser } from '../../api';
 import { AppStateContext } from '../../state/AppProvider';
 import { User } from '../../types/User';
 import BellToggle from '../../assets/BellToggle.svg'
@@ -17,6 +17,13 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [loadingUsers, setLoadingUsers] = useState<boolean>(true);
 
+
+  useEffect(() => {
+    if(selectedClientId != null && appStateContext?.state.clientId == ''){
+      setSelectedClientId('')
+    }
+  },[appStateContext?.state.clientId]);
+  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -51,8 +58,6 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
     if (user.ClientId) {
       appStateContext.dispatch({ type: 'UPDATE_CLIENT_ID', payload: user.ClientId.toString() });
       setSelectedClientId(user.ClientId.toString());
-      console.log('User clicked:', user);
-      console.log('Selected ClientId:', user.ClientId.toString());
       onCardClick(user);
    
   } else {

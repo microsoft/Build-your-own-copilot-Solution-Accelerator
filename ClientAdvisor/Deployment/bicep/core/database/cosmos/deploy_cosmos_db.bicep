@@ -9,8 +9,6 @@ param accountName string = '${ solutionName }-cosmos'
 param databaseName string = 'db_conversation_history'
 param collectionName string = 'conversations'
 
-param identity string
-
 param containers array = [
   {
     name: collectionName
@@ -41,6 +39,7 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' = {
     databaseAccountOfferType: 'Standard'
     enableAutomaticFailover: false
     enableMultipleWriteLocations: false
+    disableLocalAuth: true
     apiProperties: (kind == 'MongoDB') ? { serverVersion: '4.0' } : {}
     capabilities: [ { name: 'EnableServerless' } ]
   }
@@ -69,12 +68,8 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15
   ]
 }
 
-var cosmosAccountKey = cosmos.listKeys().primaryMasterKey
-// #listKeys(cosmos.id, cosmos.apiVersion).primaryMasterKey
-
 output cosmosOutput object = {
   cosmosAccountName: cosmos.name
-  cosmosAccountKey: cosmosAccountKey 
   cosmosDatabaseName: databaseName
   cosmosContainerName: collectionName
 }

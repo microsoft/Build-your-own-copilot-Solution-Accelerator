@@ -22,7 +22,7 @@ interface UserCardProps {
   chartUrl: string;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ 
+export const UserCard: React.FC<UserCardProps> = ({ 
   ClientId,
   ClientName,
   NextMeeting,
@@ -50,7 +50,7 @@ const UserCard: React.FC<UserCardProps> = ({
     <div tabIndex={0} className={`${styles.userInfo} ${isSelected ? styles.selected : ''}`} onClick={onCardClick} onKeyDown={(e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();  // Prevent the default action like scrolling.
-      handleShowMoreClick(e);  // Call the same function as onClick.
+      onCardClick();  // Call the same function as onClick.
     }
   }}>
       <div className={styles.clientName}>{ClientName}</div>
@@ -85,4 +85,3 @@ const UserCard: React.FC<UserCardProps> = ({
 );
 };
 
-export default UserCard;

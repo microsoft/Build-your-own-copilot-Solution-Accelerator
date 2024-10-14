@@ -80,6 +80,8 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
       return {...state, isRequestInitiated : action.payload}
     case 'TOGGLE_LOADER':
       return {...state, isLoader : !state.isLoader}
+    case 'RESET_CLIENT_ID':
+      return {...state, clientId: ''}
     default:
       return state
   }

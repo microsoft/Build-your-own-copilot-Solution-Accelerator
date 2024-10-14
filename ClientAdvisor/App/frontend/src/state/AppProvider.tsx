@@ -2,18 +2,23 @@ import React, { createContext, ReactNode, useEffect,
   useReducer } from 'react'
 
 import {
-  ChatHistoryLoadingState,
-  Conversation,
-  CosmosDBHealth,
-  CosmosDBStatus,
-  Feedback,
-  FrontendSettings,
   frontendSettings,
   historyEnsure,
   historyList,
   // UserSelectRequest
 
 } from '../api'
+
+import {
+  ChatHistoryLoadingState,
+  Conversation,
+  CosmosDBHealth,
+  CosmosDBStatus,
+  Feedback,
+  FrontendSettings,
+  // UserSelectRequest
+
+} from '../api/models'
 
 import { appStateReducer } from './AppReducer'
 
@@ -51,7 +56,8 @@ export type Action =
   | { type: 'GET_FEEDBACK_STATE'; payload: string }
   | { type: 'UPDATE_CLIENT_ID'; payload: string }
   | { type: 'SET_IS_REQUEST_INITIATED'; payload: boolean }
-  | { type: 'TOGGLE_LOADER' };
+  | { type: 'TOGGLE_LOADER' }
+  | { type: 'RESET_CLIENT_ID'};
 
 const initialState: AppState = {
   isChatHistoryOpen: false,

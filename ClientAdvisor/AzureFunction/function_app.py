@@ -18,7 +18,6 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
-
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -40,7 +39,7 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version="2023-09-01-preview"
+            api_version=api_version
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
         try:
@@ -75,7 +74,7 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version="2023-09-01-preview"
+            api_version=api_version
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
 
@@ -100,6 +99,17 @@ class ChatWithDataPlugin:
         Do not include assets values unless asked for.
         Always use ClientId = {clientid} in the query filter.
         Always return client name in the query.
+        If a question involves date and time, always use FORMAT(YourDateTimeColumn, 'yyyy-MM-dd HH:mm:ss') in the query.
+        If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings including the scheduled time and don't filter with "LIMIT 1"  in the query.
+        If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date in the query.
+        If asked, provide information on the client's investment risk tolerance level in the query.
+        If asked, provide information on the client's portfolio performance in the query.
+        If asked, provide information about the client's top-performing investments in the query.
+        If asked, provide information about any recent changes in the client's investment allocations in the query.
+        If asked about the client's portfolio performance over the last quarter, calculate the total investment by summing the investment amounts where AssetDate is greater than or equal to the date from one quarter ago using DATEADD(QUARTER, -1, GETDATE()) in the query.
+        If asked about upcoming important dates or deadlines for the client, always ensure that StartTime is greater than the current date. Do not convert the formats of StartTime and EndTime and consistently provide the upcoming dates along with the scheduled times in the query.
+        To determine the asset value, sum the investment values for the most recent available date.  If asked for the asset types in the portfolio and the present of each, provide a list of each asset type with its most recent investment value.
+        If the user inquires about asset on a specific date ,sum the investment values for the specific date avoid summing values from all dates prior to the requested date.If asked for the asset types in the portfolio and the value of each for specific date , provide a list of each asset type with specific date investment value avoid summing values from all dates prior to the requested date.
         Only return the generated sql query. do not return anything else''' 
         try:
 
@@ -152,13 +162,16 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint= endpoint, #f"{endpoint}/openai/deployments/{deployment}/extensions", 
             api_key=apikey, 
-            api_version="2024-02-01"
+            api_version=api_version
         )
 
         query = question
-        system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
-        You have access to the client’s meeting call transcripts. 
-        You can use this information to answer questions about the clients'''
+        system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings and provide details on the call transcripts.
+        You have access to the client’s meetings and call transcripts
+        When asked about action items from previous meetings with the client, **ALWAYS provide information only for the most recent dates**.
+        Always return time in "HH:mm" format for the client in response.
+        If requested for call transcript(s), the response for each transcript should be summarized separately and Ensure all transcripts for the specified client are retrieved and format **must** follow as First Call Summary,Second Call Summary etc.
+        Your answer must **not** include any client identifiers or ids or numbers or ClientId in the final response.'''
 
         completion = client.chat.completions.create(
             model = deployment,
@@ -182,7 +195,6 @@ class ChatWithDataPlugin:
                         "parameters": {
                             "endpoint": search_endpoint,
                             "index_name": index_name,
-                            "semantic_configuration": "default",
                             "query_type": "vector_simple_hybrid", #"vector_semantic_hybrid"
                             "fields_mapping": {
                                 "content_fields_separator": "\n",
@@ -259,14 +271,20 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     settings.max_tokens = 800
     settings.temperature = 0
 
+    # Read the HTML file
+    with open("table.html", "r") as file:
+        html_content = file.read() 
+
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
-    If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
-    Only use the client name returned from database in the response.
+    **If the client name in the question does not match the selected client's name**, always return: "Please ask questions only about the selected client." Do not provide any other information.     
+    Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
+    Client name **must be** same  as retrieved from database.
     '''
-
+    system_message += html_content
+   
     user_query = query.replace('?',' ')
 
     user_query_prompt = f'''{user_query}. Always send clientId as {user_query.split(':::')[-1]} '''
