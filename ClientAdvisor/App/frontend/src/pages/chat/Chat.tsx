@@ -1,40 +1,39 @@
 import { useRef, useState, useEffect, useContext, useLayoutEffect } from 'react'
-import { CommandBarButton, IconButton, Dialog, DialogType, Stack } from '@fluentui/react'
-import { SquareRegular, ShieldLockRegular, ErrorCircleRegular } from '@fluentui/react-icons'
+import { CommandBarButton, Dialog, DialogType, Stack } from '@fluentui/react'
+import { SquareRegular } from '@fluentui/react-icons'
 
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import rehypeRaw from 'rehype-raw'
 import uuid from 'react-uuid'
 import { isEmpty } from 'lodash'
-import DOMPurify from 'dompurify'
 
 import styles from './Chat.module.css'
 import TeamAvatar from '../../assets/TeamAvatar.svg'
-import { XSSAllowTags } from '../../constants/xssAllowTags'
 
 import {
-  ChatMessage,
-  ConversationRequest,
-  conversationApi,
-  Citation,
-  ToolMessageContent,
-  ChatResponse,
   getUserInfo,
-  Conversation,
-  historyGenerate,
   historyUpdate,
   historyClear,
+  historyGenerate,
+  conversationApi,
+  ChatMessage,
+  Citation,
   ChatHistoryLoadingState,
   CosmosDBStatus,
-  ErrorMessage
+  ErrorMessage,
+  ConversationRequest,
+  ChatResponse,
+  Conversation
 } from '../../api'
-import { Answer } from '../../components/Answer'
+
 import { QuestionInput } from '../../components/QuestionInput'
 import { ChatHistoryPanel } from '../../components/ChatHistory/ChatHistoryPanel'
 import { AppStateContext } from '../../state/AppProvider'
 import { useBoolean } from '@fluentui/react-hooks'
 import { PromptsSection, PromptType } from '../../components/PromptsSection/PromptsSection'
+
+import { parseErrorMessage } from '../../helpers/helpers'
+import { AuthNotConfigure } from './Components/AuthNotConfigure'
+import { ChatMessageContainer } from './Components/ChatMessageContainer'
+import { CitationPanel } from './Components/CitationPanel'
 
 const enum messageStatus {
   NotRunning = 'Not Running',
@@ -57,6 +56,8 @@ const Chat = (props: any) => {
   const [clearingChat, setClearingChat] = useState<boolean>(false)
   const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true)
   const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
+
+  const [finalMessages, setFinalMessages] = useState<ChatMessage[]>([])
 
   const errorDialogContentProps = {
     type: DialogType.close,
@@ -284,7 +285,7 @@ const Chat = (props: any) => {
       id: uuid(),
       role: 'user',
       content: question,
-      date: new Date().toISOString(),
+      date: new Date().toISOString()
     }
 
     //api call params set here (generate)
@@ -383,7 +384,9 @@ const Chat = (props: any) => {
                   })
                 }
                 runningText = ''
-              } else if (result.error) {
+              } else {
+                result.error = "There was an error generating a response. Chat history can't be saved at this time."
+                console.error('Error : ', result.error)
                 throw Error(result.error)
               }
             } catch (e) {
@@ -504,6 +507,12 @@ const Chat = (props: any) => {
     return abortController.abort()
   }
 
+  useEffect(() => {
+    if (JSON.stringify(finalMessages) != JSON.stringify(messages)) {
+      setFinalMessages(messages)
+    }
+  }, [messages])
+
   const clearChat = async () => {
     setClearingChat(true)
     if (appStateContext?.state.currentChat?.id && appStateContext?.state.isCosmosDBAvailable.cosmosDB) {
@@ -528,63 +537,8 @@ const Chat = (props: any) => {
     setClearingChat(false)
   }
 
-  const tryGetRaiPrettyError = (errorMessage: string) => {
-    try {
-      // Using a regex to extract the JSON part that contains "innererror"
-      const match = errorMessage.match(/'innererror': ({.*})\}\}/)
-      if (match) {
-        // Replacing single quotes with double quotes and converting Python-like booleans to JSON booleans
-        const fixedJson = match[1]
-          .replace(/'/g, '"')
-          .replace(/\bTrue\b/g, 'true')
-          .replace(/\bFalse\b/g, 'false')
-        const innerErrorJson = JSON.parse(fixedJson)
-        let reason = ''
-        // Check if jailbreak content filter is the reason of the error
-        const jailbreak = innerErrorJson.content_filter_result.jailbreak
-        if (jailbreak.filtered === true) {
-          reason = 'Jailbreak'
-        }
-
-        // Returning the prettified error message
-        if (reason !== '') {
-          return (
-            'The prompt was filtered due to triggering Azure OpenAI’s content filtering system.\n' +
-            'Reason: This prompt contains content flagged as ' +
-            reason +
-            '\n\n' +
-            'Please modify your prompt and retry. Learn more: https://go.microsoft.com/fwlink/?linkid=2198766'
-          )
-        }
-      }
-    } catch (e) {
-      console.error('Failed to parse the error:', e)
-    }
-    return errorMessage
-  }
-
-  const parseErrorMessage = (errorMessage: string) => {
-    let errorCodeMessage = errorMessage.substring(0, errorMessage.indexOf('-') + 1)
-    const innerErrorCue = "{\\'error\\': {\\'message\\': "
-    if (errorMessage.includes(innerErrorCue)) {
-      try {
-        let innerErrorString = errorMessage.substring(errorMessage.indexOf(innerErrorCue))
-        if (innerErrorString.endsWith("'}}")) {
-          innerErrorString = innerErrorString.substring(0, innerErrorString.length - 3)
-        }
-        innerErrorString = innerErrorString.replaceAll("\\'", "'")
-        let newErrorMessage = errorCodeMessage + ' ' + innerErrorString
-        errorMessage = newErrorMessage
-      } catch (e) {
-        console.error('Error parsing inner error message: ', e)
-      }
-    }
-
-    return tryGetRaiPrettyError(errorMessage)
-  }
-
   const newChat = () => {
-    props.setIsVisible(true);
+    props.setIsVisible(true)
     setProcessMessages(messageStatus.Processing)
     setMessages([])
     setIsCitationPanelOpen(false)
@@ -667,9 +621,9 @@ const Chat = (props: any) => {
   }, [AUTH_ENABLED])
 
   useLayoutEffect(() => {
-    const element = document.getElementById("chatMessagesContainer")!;
-    if(element){
-      element.scroll({ top: element.scrollHeight, behavior: 'smooth' });
+    const element = document.getElementById('chatMessagesContainer')!
+    if (element) {
+      element.scroll({ top: element.scrollHeight, behavior: 'smooth' })
     }
   }, [showLoadingMessage, processMessages])
 
@@ -682,18 +636,6 @@ const Chat = (props: any) => {
     if (citation.url && !citation.url.includes('blob.core')) {
       window.open(citation.url, '_blank')
     }
-  }
-
-  const parseCitationFromMessage = (message: ChatMessage) => {
-    if (message?.role && message?.role === 'tool') {
-      try {
-        const toolMessage = JSON.parse(message.content) as ToolMessageContent
-        return toolMessage.citations
-      } catch {
-        return []
-      }
-    }
-    return []
   }
 
   const disabledButton = () => {
@@ -714,36 +656,11 @@ const Chat = (props: any) => {
         : makeApiRequestWithoutCosmosDB(question, conversationId)
     }
   }
-  
+
   return (
     <div className={styles.container} role="main">
       {showAuthMessage ? (
-        <Stack className={styles.chatEmptyState}>
-          <ShieldLockRegular
-            className={styles.chatIcon}
-            style={{ color: 'darkorange', height: '200px', width: '200px' }}
-          />
-          <h1 className={styles.chatEmptyStateTitle}>Authentication Not Configured</h1>
-          <h2 className={styles.chatEmptyStateSubtitle}>
-            This app does not have authentication configured. Please add an identity provider by finding your app in the{' '}
-            <a href="https://portal.azure.com/" target="_blank">
-              Azure Portal
-            </a>
-            and following{' '}
-            <a
-              href="https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service#3-configure-authentication-and-authorization"
-              target="_blank">
-              these instructions
-            </a>
-            .
-          </h2>
-          <h2 className={styles.chatEmptyStateSubtitle} style={{ fontSize: '20px' }}>
-            <strong>Authentication configuration takes a few minutes to apply. </strong>
-          </h2>
-          <h2 className={styles.chatEmptyStateSubtitle} style={{ fontSize: '20px' }}>
-            <strong>If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</strong>
-          </h2>
-        </Stack>
+        <AuthNotConfigure />
       ) : (
         <Stack horizontal className={styles.chatRoot}>
           <div className={styles.chatContainer}>
@@ -754,50 +671,12 @@ const Chat = (props: any) => {
                 <h3 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h3>
               </Stack>
             ) : (
-              <div id="chatMessagesContainer" className={styles.chatMessageStream} style={{ marginBottom: isLoading ? '40px' : '0px' }} role="log">
-                {messages.map((answer, index) => (
-                  <>
-                    {answer.role === 'user' ? (
-                      <div className={styles.chatMessageUser} tabIndex={0}>
-                        <div className={styles.chatMessageUserMessage}>{answer.content}</div>
-                      </div>
-                    ) : answer.role === 'assistant' ? (
-                      <div className={styles.chatMessageGpt}>
-                        <Answer
-                          answer={{
-                            answer: answer.content,
-                            citations: parseCitationFromMessage(messages[index - 1]),
-                            message_id: answer.id,
-                            feedback: answer.feedback
-                          }}
-                          onCitationClicked={c => onShowCitation(c)}
-                        />
-                      </div>
-                    ) : answer.role === ERROR ? (
-                      <div className={styles.chatMessageError}>
-                        <Stack horizontal className={styles.chatMessageErrorContent}>
-                          <ErrorCircleRegular className={styles.errorIcon} style={{ color: 'rgba(182, 52, 67, 1)' }} />
-                          <span>Error</span>
-                        </Stack>
-                        <span className={styles.chatMessageErrorContent}>{answer.content}</span>
-                      </div>
-                    ) : null}
-                  </>
-                ))}
-                {showLoadingMessage && (
-                  <>
-                    <div className={styles.chatMessageGpt}>
-                      <Answer
-                        answer={{
-                          answer: 'Generating answer...',
-                          citations: []
-                        }}
-                        onCitationClicked={() => null}
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
+              <ChatMessageContainer
+                messages={finalMessages}
+                isLoading={isLoading}
+                onShowCitation={onShowCitation}
+                showLoadingMessage={showLoadingMessage}
+              />
             )}
             <Stack horizontal className={styles.promptsContainer}>
               <PromptsSection onClickPrompt={onClickPrompt} isLoading={isLoading} />
@@ -900,46 +779,16 @@ const Chat = (props: any) => {
           </div>
           {/* Citation Panel */}
           {messages && messages.length > 0 && isCitationPanelOpen && activeCitation && (
-            <Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Citations Panel">
-              <Stack
-                aria-label="Citations Panel Header Container"
-                horizontal
-                className={styles.citationPanelHeaderContainer}
-                horizontalAlign="space-between"
-                verticalAlign="center">
-                <span aria-label="Citations" className={styles.citationPanelHeader}>
-                  Citations
-                </span>
-                <IconButton
-                  iconProps={{ iconName: 'Cancel' }}
-                  aria-label="Close citations panel"
-                  onClick={() => setIsCitationPanelOpen(false)}
-                />
-              </Stack>
-              <h5
-                className={styles.citationPanelTitle}
-                tabIndex={0}
-                title={
-                  activeCitation.url && !activeCitation.url.includes('blob.core')
-                    ? activeCitation.url
-                    : activeCitation.title ?? ''
-                }
-                onClick={() => onViewSource(activeCitation)}>
-                {activeCitation.title}
-              </h5>
-              <div tabIndex={0}>
-                <ReactMarkdown
-                  linkTarget="_blank"
-                  className={styles.citationPanelContent}
-                  children={DOMPurify.sanitize(activeCitation.content, { ALLOWED_TAGS: XSSAllowTags })}
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw]}
-                />
-              </div>
-            </Stack.Item>
+            <CitationPanel
+              IsCitationPanelOpen={setIsCitationPanelOpen}
+              activeCitation={activeCitation}
+              onViewSource={onViewSource}
+            />
           )}
           {appStateContext?.state.isChatHistoryOpen &&
-            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel isLoading={isLoading} />}
+            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+              <ChatHistoryPanel isLoading={isLoading} />
+            )}
         </Stack>
       )}
     </div>

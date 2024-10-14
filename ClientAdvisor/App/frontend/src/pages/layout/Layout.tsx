@@ -12,13 +12,11 @@ import Chat from '../chat/Chat' // Import the Chat component
 import { AppStateContext } from '../../state/AppProvider'
 import { getUserInfo, getpbi } from '../../api'
 import { User } from '../../types/User'
-import TickIcon  from '../../assets/TickIcon.svg'
+import TickIcon from '../../assets/TickIcon.svg'
 import DismissIcon from '../../assets/Dismiss.svg'
 import welcomeIcon from '../../assets/welcomeIcon.png'
-import styles from './Layout.module.css';
-import SpinnerComponent from '../../components/Spinner/Spinner';
-
-
+import styles from './Layout.module.css'
+import { SpinnerComponent } from '../../components/Spinner/SpinnerComponent'
 
 const Layout = () => {
   // const [contentType, setContentType] = useState<string | null>(null);
@@ -38,7 +36,7 @@ const Layout = () => {
   const [name, setName] = useState<string>('')
 
   const [pbiurl, setPbiUrl] = useState<string>('')
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
   useEffect(() => {
     const fetchpbi = async () => {
       try {
@@ -52,6 +50,7 @@ const Layout = () => {
     fetchpbi()
   }, [])
 
+
   const resetClientId= ()=>{
     appStateContext?.dispatch({ type: 'RESET_CLIENT_ID' });
     setSelectedUser(null);
@@ -59,18 +58,18 @@ const Layout = () => {
   }
 
   const closePopup = () => {
-    setIsVisible(!isVisible);
-  };
+    setIsVisible(!isVisible)
+  }
 
   useEffect(() => {
     if (isVisible) {
       const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 4000); // Popup will disappear after 3 seconds
+        setIsVisible(false)
+      }, 4000) // Popup will disappear after 3 seconds
 
-      return () => clearTimeout(timer); // Cleanup the timer on component unmount
+      return () => clearTimeout(timer) // Cleanup the timer on component unmount
     }
-  }, [isVisible]);
+  }, [isVisible])
 
   const handleCardClick = (user: User) => {
     setSelectedUser(user)
@@ -126,7 +125,6 @@ const Layout = () => {
   useEffect(() => {
     getUserInfo()
       .then(res => {
-        console.log('User info: ', res)
         const name: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? ''
         setName(name)
       })
@@ -142,20 +140,24 @@ const Layout = () => {
 
   return (
     <div className={styles.layout}>
-       {isVisible && (
+      {isVisible && (
         <div className={styles.popupContainer}>
           <div className={styles.popupContent}>
             <div className={styles.popupText}>
-              <div className={styles.headerText}><span className={styles.checkmark}>
-                <img alt="check mark" src={TickIcon} /></span>Chat saved
-                <img alt="close icon" src={DismissIcon} className={styles.closeButton} onClick={closePopup}/>
+              <div className={styles.headerText}>
+                <span className={styles.checkmark}>
+                  <img alt="check mark" src={TickIcon} />
+                </span>
+                Chat saved
+                <img alt="close icon" src={DismissIcon} className={styles.closeButton} onClick={closePopup} />
               </div>
-              <div className={styles.popupSubtext}><span className={styles.popupMsg}>Your chat history has been saved successfully!</span></div>
+              <div className={styles.popupSubtext}>
+                <span className={styles.popupMsg}>Your chat history has been saved successfully!</span>
+              </div>
             </div>
-            
           </div>
         </div>
-    )}
+      )}
       <SpinnerComponent
         loading={appStateContext?.state.isLoader != undefined ? appStateContext?.state.isLoader : false}
         label="Please wait.....!"
@@ -219,7 +221,7 @@ const Layout = () => {
               )}
               <Pivot defaultSelectedKey="chat" className='tabContainer' style={{ paddingTop : 10 }}>
                 <PivotItem headerText="Chat" itemKey="chat">
-                  <Chat setIsVisible={setIsVisible}/>
+                  <Chat setIsVisible={setIsVisible} />
                 </PivotItem>
                 <PivotItem headerText="Client 360 Profile" itemKey="profile">
                   <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
