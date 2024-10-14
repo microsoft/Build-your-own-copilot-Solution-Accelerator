@@ -1588,7 +1588,7 @@ def get_users():
         cursor.execute(sql_stmt)
         rows = cursor.fetchall()
 
-        if len(rows) <= 6:
+        if len(rows) == 0:
             #update ClientMeetings,Assets,Retirement tables sample data to current date
             cursor = conn.cursor()
             cursor.execute("""select DATEDIFF(d,CAST(max(StartTime) AS Date),CAST(GETDATE() AS Date)) + 3 as ndays from ClientMeetings""")
