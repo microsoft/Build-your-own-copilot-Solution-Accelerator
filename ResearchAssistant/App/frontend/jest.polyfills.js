@@ -8,15 +8,20 @@
  * you don't want to deal with this.
  */
 
-const { TextDecoder, TextEncoder } = require('node:util')
+const { TextDecoder, TextEncoder, ReadableStream } = require("node:util")
 
 Object.defineProperties(globalThis, {
   TextDecoder: { value: TextDecoder },
   TextEncoder: { value: TextEncoder },
+  ReadableStream: { value: ReadableStream },
 })
 
 const { Blob } = require('node:buffer')
 const { fetch, Headers, FormData, Request, Response } = require('undici')
+
+// if (typeof global.ReadableStream === 'undefined') {
+//   global.ReadableStream = require('web-streams-polyfill/ponyfill').ReadableStream;
+// }
 
 Object.defineProperties(globalThis, {
   fetch: { value: fetch, writable: true },
