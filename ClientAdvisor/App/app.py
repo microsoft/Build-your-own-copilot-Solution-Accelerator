@@ -1598,7 +1598,6 @@ def get_users():
         cursor.execute(sql_stmt)
         rows = cursor.fetchall()
 
-
         if len(rows) <= 6:
             # update ClientMeetings,Assets,Retirement tables sample data to current date
             cursor = conn.cursor()
