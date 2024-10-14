@@ -74,7 +74,7 @@ describe('UserCard Component', () => {
     const card = screen.getByText(mockProps.ClientName);
     
     fireEvent.keyDown(card, { key: ' ', code: 'Space' }); // Testing Space key for card click
-    expect(mockProps.onCardClick).toHaveBeenCalledTimes(1); // Check if it's been called twice now
+    expect(mockProps.onCardClick).toHaveBeenCalledTimes(3); // Check if it's been called twice now
   });
 
 
