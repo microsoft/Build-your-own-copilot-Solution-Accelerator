@@ -22,7 +22,7 @@ interface UserCardProps {
   chartUrl: string;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ 
+export const UserCard: React.FC<UserCardProps> = ({ 
   ClientId,
   ClientName,
   NextMeeting,
@@ -85,4 +85,3 @@ const UserCard: React.FC<UserCardProps> = ({
 );
 };
 
-export default UserCard;

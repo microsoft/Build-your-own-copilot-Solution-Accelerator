@@ -17,6 +17,7 @@ lib/
 
 .venv
 frontend/node_modules
+frontend/coverage
 .env
 # static
 .azure/
