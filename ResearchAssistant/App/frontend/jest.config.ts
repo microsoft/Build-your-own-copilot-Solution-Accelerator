@@ -43,8 +43,7 @@ const config: Config.InitialOptions = {
     '<rootDir>/src/vite-env.d.ts',
     '<rootDir>/src/components/QuestionInput/index.ts',
     '<rootDir>/src/components/Answer/index.ts',
-    '<rootDir>/src/state',
-    '<rootDir>/src/components/DraftDocumentsView'
+    '<rootDir>/src/state'
   ],
 };
 
