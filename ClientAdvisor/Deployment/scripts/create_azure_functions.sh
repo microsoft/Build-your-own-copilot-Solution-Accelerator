@@ -32,7 +32,7 @@ sqlDBConn="TBD"
 
 az containerapp env create --name $env_name --enable-workload-profiles --resource-group $resourceGroupName --location $solutionLocation
 
-az storage account create --name $storageAccount --location eastus --resource-group $resourceGroupName --sku Standard_LRS
+az storage account create --name $storageAccount --location eastus --resource-group $resourceGroupName --sku Standard_LRS --allow-shared-key-access false
 
 az functionapp create --resource-group $resourceGroupName --name $functionappname \
                 --environment $env_name --storage-account $storageAccount \
