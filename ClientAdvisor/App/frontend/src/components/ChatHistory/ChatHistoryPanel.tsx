@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import React from 'react'
+import React , {useState,useEffect,useCallback, MouseEvent} from 'react'
 import {
   CommandBarButton,
   ContextualMenu,
@@ -19,10 +19,11 @@ import {
 } from '@fluentui/react'
 import { useBoolean } from '@fluentui/react-hooks'
 
-import { ChatHistoryLoadingState, historyDeleteAll } from '../../api'
+import { historyDeleteAll } from '../../api'
+import { ChatHistoryLoadingState } from '../../api/models'
 import { AppStateContext } from '../../state/AppProvider'
 
-import ChatHistoryList from './ChatHistoryList'
+import {ChatHistoryList} from './ChatHistoryList'
 
 import styles from './ChatHistoryPanel.module.css'
 
@@ -48,10 +49,10 @@ const commandBarButtonStyle: Partial<IStackStyles> = { root: { height: '50px' } 
 export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
   const { isLoading} = _props
   const appStateContext = useContext(AppStateContext)
-  const [showContextualMenu, setShowContextualMenu] = React.useState(false)
+  const [showContextualMenu, setShowContextualMenu] = useState(false)
   const [hideClearAllDialog, { toggle: toggleClearAllDialog }] = useBoolean(true)
-  const [clearing, setClearing] = React.useState(false)
-  const [clearingError, setClearingError] = React.useState(false)
+  const [clearing, setClearing] = useState(false)
+  const [clearingError, setClearingError] = useState(false)
   const hasChatHistory = appStateContext?.state.chatHistory && appStateContext.state.chatHistory.length > 0;
   const clearAllDialogContentProps = {
     type: DialogType.close,
@@ -77,12 +78,12 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
     appStateContext?.dispatch({ type: 'TOGGLE_CHAT_HISTORY' })
   }
 
-  const onShowContextualMenu = React.useCallback((ev: React.MouseEvent<HTMLElement>) => {
+  const onShowContextualMenu = useCallback((ev: MouseEvent<HTMLElement>) => {
     ev.preventDefault() // don't navigate
     setShowContextualMenu(true)
   }, [])
 
-  const onHideContextualMenu = React.useCallback(() => setShowContextualMenu(false), [])
+  const onHideContextualMenu = useCallback(() => setShowContextualMenu(false), [])
 
   const onClearAllChatHistory = async () => {
     setClearing(true)
@@ -103,7 +104,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
     }, 2000)
   }
 
-  React.useEffect(() => {}, [appStateContext?.state.chatHistory, clearingError])
+  useEffect(() => {}, [appStateContext?.state.chatHistory, clearingError])
 
   return (
     <section className={styles.container} data-is-scrollable aria-label={'chat history panel'}>
