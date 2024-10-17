@@ -201,3 +201,10 @@ sup {
     margin-bottom: 5px;
   }
 }
+@media screen and (-ms-high-contrast: active), (forced-colors: active) {
+  .answerContainer{
+      border: 2px solid WindowText;
+      background-color: Window;
+      color: WindowText;
+  }
+}
