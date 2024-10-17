@@ -1,4 +1,4 @@
-name: Tests
+name: Unit Tests - Research Assistant
 
 on:
   push:
@@ -33,7 +33,17 @@ jobs:
           cd ResearchAssistant/App
           python -m pip install -r requirements.txt
           python -m pip install coverage pytest-cov
-      
+      - name: Run Backend Tests with Coverage
+        run: |
+          cd ResearchAssistant/App
+          python -m pytest -vv --cov=app --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=80 --junitxml=coverage-junit.xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-assistant-coverage
+          path: |
+            ResearchAssistant/App/coverage.xml
+            ResearchAssistant/App/coverage-junit.xml
+            ResearchAssistant/App/htmlcov/
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
