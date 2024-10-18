@@ -16,6 +16,7 @@ import { AppStateContext } from '../../state/AppProvider'
 import { parseAnswer } from './AnswerParser'
 
 import styles from './Answer.module.css'
+import rehypeRaw from 'rehype-raw'
 
 interface Props {
   answer: AskResponse
@@ -77,8 +78,8 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
       } else {
         citationFilename = `${citation.filepath} - Part ${part_i}`
       }
-    } else if (citation.filepath && citation.reindex_id) {
-      citationFilename = `${citation.filepath} - Part ${citation.reindex_id}`
+      // } else if (citation.filepath && citation.reindex_id) {
+      //   citationFilename = `${citation.filepath} - Part ${citation.reindex_id}`
     } else {
       citationFilename = `Citation ${index}`
     }
@@ -86,63 +87,70 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
   }
 
   const onLikeResponseClicked = async () => {
-    if (answer.message_id == undefined) return
+    // if (answer.message_id == undefined) return
+    if (answer.message_id) {
+      let newFeedbackState = feedbackState
+      // Set or unset the thumbs up state
+      if (feedbackState == Feedback.Positive) {
+        newFeedbackState = Feedback.Neutral
+      } else {
+        newFeedbackState = Feedback.Positive
+      }
+      appStateContext?.dispatch({
+        type: 'SET_FEEDBACK_STATE',
+        payload: { answerId: answer.message_id, feedback: newFeedbackState }
+      })
+      setFeedbackState(newFeedbackState)
 
-    let newFeedbackState = feedbackState
-    // Set or unset the thumbs up state
-    if (feedbackState == Feedback.Positive) {
-      newFeedbackState = Feedback.Neutral
-    } else {
-      newFeedbackState = Feedback.Positive
+      // Update message feedback in db
+      await historyMessageFeedback(answer.message_id, newFeedbackState)
     }
-    appStateContext?.dispatch({
-      type: 'SET_FEEDBACK_STATE',
-      payload: { answerId: answer.message_id, feedback: newFeedbackState }
-    })
-    setFeedbackState(newFeedbackState)
-
-    // Update message feedback in db
-    await historyMessageFeedback(answer.message_id, newFeedbackState)
   }
 
   const onDislikeResponseClicked = async () => {
-    if (answer.message_id == undefined) return
-
-    let newFeedbackState = feedbackState
-    if (feedbackState === undefined || feedbackState === Feedback.Neutral || feedbackState === Feedback.Positive) {
-      newFeedbackState = Feedback.Negative
-      setFeedbackState(newFeedbackState)
-      setIsFeedbackDialogOpen(true)
-    } else {
-      // Reset negative feedback to neutral
-      newFeedbackState = Feedback.Neutral
-      setFeedbackState(newFeedbackState)
-      await historyMessageFeedback(answer.message_id, Feedback.Neutral)
+    //if (answer.message_id == undefined) return
+    if (answer.message_id) {
+      let newFeedbackState = feedbackState
+      if (feedbackState === undefined || feedbackState === Feedback.Neutral || feedbackState === Feedback.Positive) {
+        newFeedbackState = Feedback.Negative
+        setFeedbackState(newFeedbackState)
+        setIsFeedbackDialogOpen(true)
+      } else {
+        // Reset negative feedback to neutral
+        newFeedbackState = Feedback.Neutral
+        setFeedbackState(newFeedbackState)
+        await historyMessageFeedback(answer.message_id, Feedback.Neutral)
+      }
+      appStateContext?.dispatch({
+        type: 'SET_FEEDBACK_STATE',
+        payload: { answerId: answer.message_id, feedback: newFeedbackState }
+      })
     }
-    appStateContext?.dispatch({
-      type: 'SET_FEEDBACK_STATE',
-      payload: { answerId: answer.message_id, feedback: newFeedbackState }
-    })
   }
 
   const updateFeedbackList = (ev?: FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
-    if (answer.message_id == undefined) return
-    const selectedFeedback = (ev?.target as HTMLInputElement)?.id as Feedback
+    //if (answer.message_id == undefined) return
+    if (answer.message_id){
+      const selectedFeedback = (ev?.target as HTMLInputElement)?.id as Feedback
 
-    let feedbackList = negativeFeedbackList.slice()
-    if (checked) {
-      feedbackList.push(selectedFeedback)
-    } else {
-      feedbackList = feedbackList.filter(f => f !== selectedFeedback)
+      let feedbackList = negativeFeedbackList.slice()
+      if (checked) {
+        feedbackList.push(selectedFeedback)
+      } else {
+        feedbackList = feedbackList.filter(f => f !== selectedFeedback)
+      }
+  
+      setNegativeFeedbackList(feedbackList)
     }
-
-    setNegativeFeedbackList(feedbackList)
+  
   }
 
   const onSubmitNegativeFeedback = async () => {
-    if (answer.message_id == undefined) return
-    await historyMessageFeedback(answer.message_id, negativeFeedbackList.join(','))
-    resetFeedbackDialog()
+    //if (answer.message_id == undefined) return
+    if (answer.message_id) {
+      await historyMessageFeedback(answer.message_id, negativeFeedbackList.join(','))
+      resetFeedbackDialog()
+    }
   }
 
   const resetFeedbackDialog = () => {
@@ -182,7 +190,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
             defaultChecked={negativeFeedbackList.includes(Feedback.OtherUnhelpful)}
             onChange={updateFeedbackList}></Checkbox>
         </Stack>
-        <div onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: '#115EA3', cursor: 'pointer' }}>
+        <div data-testid="InappropriateFeedback" onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: '#115EA3', cursor: 'pointer' }}>
           Report inappropriate content
         </div>
       </>
@@ -191,7 +199,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
 
   const ReportInappropriateFeedbackContent = () => {
     return (
-      <>
+      <div data-testid="ReportInappropriateFeedbackContent">
         <div>
           The content is <span style={{ color: 'red' }}>*</span>
         </div>
@@ -222,12 +230,12 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
             defaultChecked={negativeFeedbackList.includes(Feedback.OtherHarmful)}
             onChange={updateFeedbackList}></Checkbox>
         </Stack>
-      </>
+      </div>
     )
   }
 
   const components = {
-    code({ node, ...props }: { node: any; [key: string]: any }) {
+    code({ node, ...props }: { node: any;[key: string]: any }) {
       let language
       if (props.className) {
         const match = props.className.match(/language-(\w+)/)
@@ -250,6 +258,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
               <ReactMarkdown
                 linkTarget="_blank"
                 remarkPlugins={[remarkGfm, supersub]}
+                rehypePlugins={[rehypeRaw]}
                 children={
                   SANITIZE_ANSWER
                     ? DOMPurify.sanitize(parsedAnswer.markdownFormatText, { ALLOWED_TAGS: XSSAllowTags })
@@ -268,7 +277,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
                     onClick={() => onLikeResponseClicked()}
                     style={
                       feedbackState === Feedback.Positive ||
-                      appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive
+                        appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive
                         ? { color: 'darkgreen', cursor: 'pointer' }
                         : { color: 'slategray', cursor: 'pointer' }
                     }
@@ -279,8 +288,8 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
                     onClick={() => onDislikeResponseClicked()}
                     style={
                       feedbackState !== Feedback.Positive &&
-                      feedbackState !== Feedback.Neutral &&
-                      feedbackState !== undefined
+                        feedbackState !== Feedback.Neutral &&
+                        feedbackState !== undefined
                         ? { color: 'darkred', cursor: 'pointer' }
                         : { color: 'slategray', cursor: 'pointer' }
                     }
@@ -292,7 +301,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
         </Stack.Item>
         <Stack horizontal className={styles.answerFooter}>
           {!!parsedAnswer.citations.length && (
-            <Stack.Item onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? toggleIsRefAccordionOpen() : null)}>
+            <Stack.Item data-testid="stack-item" onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? toggleIsRefAccordionOpen() : null)}>
               <Stack style={{ width: '100%' }}>
                 <Stack horizontal horizontalAlign="start" verticalAlign="center">
                   <Text
@@ -308,6 +317,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
                     </span>
                   </Text>
                   <FontIcon
+                    data-testid="ChevronIcon"
                     className={styles.accordionIcon}
                     onClick={handleChevronClick}
                     iconName={chevronIsExpanded ? 'ChevronDown' : 'ChevronRight'}

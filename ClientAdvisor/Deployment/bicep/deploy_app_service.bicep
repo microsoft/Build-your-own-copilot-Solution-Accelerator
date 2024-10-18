@@ -6,11 +6,6 @@ targetScope = 'resourceGroup'
 @description('Solution Name')
 param solutionName string
 
-@description('Solution Location')
-param solutionLocation string
-
-param identity string
-
 @description('Name of App Service plan')
 param HostingPlanName string = '${ solutionName }-app-service-plan'
 
@@ -360,9 +355,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {name: 'AZURE_COSMOSDB_ACCOUNT'
           value: AZURE_COSMOSDB_ACCOUNT
         }
-        {name: 'AZURE_COSMOSDB_ACCOUNT_KEY'
-          value: AZURE_COSMOSDB_ACCOUNT_KEY
-        }
         {name: 'AZURE_COSMOSDB_CONVERSATIONS_CONTAINER'
           value: AZURE_COSMOSDB_CONVERSATIONS_CONTAINER
         }
@@ -406,3 +398,24 @@ resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   kind: 'web'
 }
 
+module cosmosRoleDefinition 'core/database/cosmos/cosmos-sql-role-def.bicep' = {
+  name: 'cosmos-sql-role-definition'
+  params: {
+    accountName: AZURE_COSMOSDB_ACCOUNT
+  }
+  dependsOn: [
+    Website
+  ]
+}
+
+module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
+  name: 'cosmos-sql-user-role-${WebsiteName}'
+  params: {
+    accountName: AZURE_COSMOSDB_ACCOUNT
+    roleDefinitionId: cosmosRoleDefinition.outputs.id
+    principalId: Website.identity.principalId
+  }
+  dependsOn: [
+    cosmosRoleDefinition
+  ]
+}
