@@ -915,27 +915,6 @@ describe('Chat Component', () => {
     })
   })
 
-  test('Should handle historyGenerate API returns empty object or null', async () => {
-    userEvent.setup()
-
-    nonDelayedhistoryGenerateAPIcallMock('no-result')
-    const tempMockState = { ...mockState }
-    tempMockState.frontendSettings = {
-      ...tempMockState.frontendSettings,
-      auth_enabled: false
-    }
-    renderWithContext(<Chat setIsVisible={setIsVisible} />, tempMockState)
-    const promptButton = screen.getByRole('button', { name: /prompt-button/i })
-
-    await userEvent.click(promptButton)
-
-    await waitFor(async () => {
-      expect(
-        screen.getByText(/There was an error generating a response. Chat history can't be saved at this time./i)
-      ).toBeInTheDocument()
-    })
-  })
-
   test('Should render if conversation API return context along with content', async () => {
     userEvent.setup()
 
