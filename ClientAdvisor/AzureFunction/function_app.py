@@ -19,14 +19,9 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
-from dotenv import load_dotenv
-load_dotenv()
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
-
-# Set up logging
-logger = logging.getLogger(__name__)
 
 endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
 api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
@@ -41,8 +36,6 @@ class ChatWithDataPlugin:
     @kernel_function(name="Greeting", description="Respond to any greeting or general questions")
     def greeting(self, input: Annotated[str, "the question"]) -> Annotated[str, "The output is a string"]:
         
-        logger.info("Kernel Function - Greeting Initited")
-
         query = input.split(':::')[0]
         endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
         api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
@@ -80,8 +73,6 @@ class ChatWithDataPlugin:
         query = input
         endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
         api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
-
-        logger.info("Kernel Function - get_SQL_Response Initited")
 
 
         client = openai.AzureOpenAI(
@@ -171,8 +162,6 @@ class ChatWithDataPlugin:
         search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
         index_name = os.environ.get("AZURE_SEARCH_INDEX")
 
-        logger.info("Kernel Function - ChatWithCallTranscripts Initited")
-
         client = openai.AzureOpenAI(
             azure_endpoint= endpoint, #f"{endpoint}/openai/deployments/{deployment}/extensions", 
             api_key=apikey, 
@@ -253,7 +242,6 @@ async def stream_processor(response):
 @app.route(route="stream_openai_text", methods=[func.HttpMethod.GET])
 async def stream_openai_text(req: Request) -> StreamingResponse:
 
-    logger.info("Hit 1: stream_openai_text api initiated")
     query = req.query_params.get("query", None)
 
     if not query:
@@ -272,8 +260,6 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
         deployment_name=deployment
     )
 
-    logger.info("Hit 2: stream_openai_text api - AzureChatCompletion completed")
-
 
     kernel.add_service(ai_service)
 
@@ -288,9 +274,6 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     settings.seed = 42
     settings.max_tokens = 800
     settings.temperature = 0
-
-    logger.info("Hit 3: stream_openai_text api - settings completed")
-
 
     # Read the HTML file
     with open("table.html", "r") as file:
@@ -313,16 +296,11 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     user_query_prompt = f'''{user_query}. Always send clientId as {user_query.split(':::')[-1]} '''
     query_prompt = f'''<message role="system">{system_message}</message><message role="user">{user_query_prompt}</message>'''
 
-    logger.info("Hit 4: stream_openai_text api - Before kernel invoke")
-
     sk_response = kernel.invoke_prompt_stream(
         function_name="prompt_test",
         plugin_name="weather_test",
         prompt=query_prompt,
         settings=settings
     )   
-
-    logger.info("Hit 5: stream_openai_text api - After kernel invoke")
-
 
     return StreamingResponse(stream_processor(sk_response), media_type="text/event-stream")
