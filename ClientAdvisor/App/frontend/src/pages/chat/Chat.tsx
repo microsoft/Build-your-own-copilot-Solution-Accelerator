@@ -670,7 +670,7 @@ const Chat = (props: any) => {
               </Stack>
             ) : (
               <ChatMessageContainer
-                messages={finalMessages}
+                messages={messages}
                 isLoading={isLoading}
                 onShowCitation={onShowCitation}
                 showLoadingMessage={showLoadingMessage}
