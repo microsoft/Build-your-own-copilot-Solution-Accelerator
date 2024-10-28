@@ -3,7 +3,6 @@ import openai
 from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import asyncio
 import os
-import logging
 
 from typing import Annotated
 
