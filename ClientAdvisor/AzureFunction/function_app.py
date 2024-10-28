@@ -277,7 +277,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
 
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
-    **If the client name in the question does not match the selected client's name**, always return: "Please ask questions only about the selected client." Do not provide any other information.     
+    **If the client name in the question does not match the selected client's name or client name and client id do not match**, always return: "Please ask questions only about the selected client." Do not provide any other information.     
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
