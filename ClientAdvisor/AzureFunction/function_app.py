@@ -23,6 +23,7 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 from dotenv import load_dotenv
 load_dotenv()
 
+
 endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
 api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
 api_version = os.environ.get("OPENAI_API_VERSION")

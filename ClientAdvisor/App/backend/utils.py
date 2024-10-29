@@ -1,8 +1,9 @@
-import os
+import dataclasses
 import json
 import logging
+import os
+
 import requests
-import dataclasses
 
 DEBUG = os.environ.get("DEBUG", "false")
 if DEBUG.lower() == "true":
