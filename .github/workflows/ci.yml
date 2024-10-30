@@ -36,7 +36,7 @@ jobs:
           fi
 
       - name: Build Docker Images
-        uses: ./.github/workflows/build-docker-image.yml
+        uses: ./.github/workflows/build-docker.yml
         with:
           # Pass the matrix configuration directly instead of using the commit message
           # This needs to be adapted to include the app_name, dockerfile, and folder
