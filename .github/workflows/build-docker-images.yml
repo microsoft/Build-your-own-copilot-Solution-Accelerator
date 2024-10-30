@@ -31,6 +31,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: List files in current directory
+        run: ls -R
+
       - name: Build Docker Image
         uses: ./.github/workflows/build-docker.yml
         with:
