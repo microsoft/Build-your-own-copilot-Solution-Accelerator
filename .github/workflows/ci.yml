@@ -38,17 +38,21 @@ jobs:
       - name: Build Docker Images
         uses: ./.github/workflows/build-docker-image.yml
         with:
-          folder: ${{ github.event.head_commit.message }}
+          # Pass the matrix configuration directly instead of using the commit message
+          # This needs to be adapted to include the app_name, dockerfile, and folder
+          app_name: ${{ matrix.app_name }}  # Add appropriate matrix configuration
+          dockerfile: ${{ matrix.dockerfile }}  # Adjust for passing Dockerfile
+          folder: ${{ matrix.folder }}  # Adjust for passing folder
 
       - name: Notify Slack
-        if: always()  # Always notify, regardless of success or failure
+        if: always()
         run: |
           STATUS=$(if [[ ${{ job.status }} == 'success' ]]; then echo "SUCCESS"; else echo "FAILURE"; fi)
           curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"CI/CD Pipeline finished with status: $STATUS\"}" ${{ secrets.SLACK_WEBHOOK_URL }}
 
   validate_deployment:
     runs-on: ubuntu-latest
-    needs: build  # Ensure this runs after the build job completes
+    needs: build
     steps:
       - name: Call Validate Deployment Workflow
         run: |
