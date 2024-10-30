@@ -1,0 +1,60 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Client Advisor/**'
+      - 'Research Assistant/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Client Advisor/**'
+      - 'Research Assistant/**'
+  workflow_run:
+    workflows: ["CI-Validate Deployment-Client Advisor"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Determine folder
+        id: folder
+        run: |
+          if [[ $GITHUB_EVENT_NAME == "push" ]]; then
+            echo "PUSH_EVENT=true" >> $GITHUB_ENV
+          fi
+          if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
+            echo "PR_EVENT=true" >> $GITHUB_ENV
+          fi
+
+      - name: Build Docker Images
+        uses: ./.github/workflows/build-docker-image.yml
+        with:
+          folder: ${{ github.event.head_commit.message }}
+
+      - name: Notify Slack
+        if: always()  # Always notify, regardless of success or failure
+        run: |
+          STATUS=$(if [[ ${{ job.status }} == 'success' ]]; then echo "SUCCESS"; else echo "FAILURE"; fi)
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"CI/CD Pipeline finished with status: $STATUS\"}" ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  validate_deployment:
+    runs-on: ubuntu-latest
+    needs: build  # Ensure this runs after the build job completes
+    steps:
+      - name: Call Validate Deployment Workflow
+        run: |
+          echo "Triggering CI-Validate Deployment-Client Advisor workflow..."
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/CI-Validate%20Deployment-Client%20Advisor/dispatches" \
+            -d '{"ref": "main"}'

@@ -1,0 +1,42 @@
+name: Build Docker Images
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - app_name: byc-wa-app  # Client Advisor Web App
+            dockerfile: ClientAdvisor/App/WebApp.Dockerfile
+            folder: ClientAdvisor/App
+          - app_name: byc-fn-app  # Client Advisor Azure Function
+            dockerfile: ClientAdvisor/AzureFunction/Dockerfile
+            folder: ClientAdvisor/AzureFunction
+          - app_name: byai-wa-app  # Research Assistant Web App
+            dockerfile: ResearchAssistant/App/WebApp.Dockerfile
+            folder: ResearchAssistant/App
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker Image
+        uses: ./.github/workflows/build-docker.yml
+        with:
+          registry: pslpricicdcontainerreg.azurecr.io # Your Azure registry
+          username: pslpricicdcontainerreg  # Your Azure username
+          app_name: ${{ matrix.app_name }}
+          dockerfile: ${{ matrix.dockerfile }}
+          folder: ${{ matrix.folder }}  # Pass the folder for context
+          push: true  # Adjust this according to your logic
