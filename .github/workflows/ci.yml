@@ -16,6 +16,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
+      - name: List Directory Contents
+        run: ls -R
+
       - name: Log in to Azure
         uses: azure/login@v1
         with:
@@ -30,18 +33,18 @@ jobs:
 
       - name: Build ClientAdvisor WebApp Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-webapp:${{ github.sha }} -f ClientAdvisor/App/WebApp.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-webapp:${{ github.sha }} -f ClientAdvisor/App/WebApp.Dockerfile ClientAdvisor/App/
           
       - name: Build ClientAdvisor Azure Function Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-azurefunction:${{ github.sha }} -f ClientAdvisor/AzureFunction/Dockerfile .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-azurefunction:${{ github.sha }} -f ClientAdvisor/AzureFunction/Dockerfile ClientAdvisor/AzureFunction/
 
       - name: Push ClientAdvisor images to Azure Container Registry
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-webapp:${{ github.sha }}
           docker push ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-azurefunction:${{ github.sha }}
 
-      - name: Deploy to Azure
+      - name: Deploy to Azure WebApp
         run: |
           az container create --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --name myclientadvisorwebapp \
