@@ -18,28 +18,22 @@ jobs:
       matrix:
         include:
           - app_name: byc-wa-app  # Client Advisor Web App
-            dockerfile: 'Persistent-byoai/ClientAdvisor/App/WebApp.Dockerfile'
-            folder: 'Persistent-byoai/ClientAdvisor/App'
+            dockerfile: ClientAdvisor/App/WebApp.Dockerfile
+            folder: ClientAdvisor/App
           - app_name: byc-fn-app  # Client Advisor Azure Function
-            dockerfile: 'Persistent-byoai/ClientAdvisor/App/AzureFunction/Dockerfile'
-            folder: './ClientAdvisor/AzureFunction'
-          - app_name: byai-wa-app  # Research Assistant Web App
-            dockerfile: 'Persistent-byoai/ResearchAssistant/App/WebApp.Dockerfile'
-            folder: 'Persistent-byoai/ResearchAssistant/App'
+            dockerfile: ClientAdvisor/AzureFunction/Dockerfile
+            folder: ClientAdvisor/AzureFunction
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: List files in current directory
-        run: ls -R
-
       - name: Build Docker Image
         uses: ./.github/workflows/build-docker.yml
         with:
-          registry: pslpricicdcontainerreg.azurecr.io  # Your Azure registry
-          username: pslpricicdcontainerreg  # Your Azure username
+          registry: pslpricicdcontainerreg.azurecr.io
+          username: pslpricicdcontainerreg
           app_name: ${{ matrix.app_name }}
           dockerfile: ${{ matrix.dockerfile }}
-          folder: ${{ matrix.folder }}
+          folder: ${{ matrix.folder }}  # Pass the folder for context
           push: true

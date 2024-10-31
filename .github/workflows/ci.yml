@@ -4,19 +4,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'Client Advisor/**'
-      - 'Research Assistant/**'
   pull_request:
     branches:
       - main
-    paths:
-      - 'Client Advisor/**'
-      - 'Research Assistant/**'
-  workflow_run:
-    workflows: ["CI-Validate Deployment-Client Advisor"]
     types:
-      - completed
+      - closed  # Trigger on pull request closed events (merged)
 
 jobs:
   build:
@@ -25,40 +17,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Determine folder
-        id: folder
-        run: |
-          if [[ $GITHUB_EVENT_NAME == "push" ]]; then
-            echo "PUSH_EVENT=true" >> $GITHUB_ENV
-          fi
-          if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
-            echo "PR_EVENT=true" >> $GITHUB_ENV
-          fi
-
-      - name: Build Docker Images
-        uses: ./.github/workflows/build-docker.yml
+      - name: Build Docker Image
+        id: docker_build
+        uses: ./.github/workflows/build-docker-image.yml
         with:
-          # Pass the matrix configuration directly instead of using the commit message
-          # This needs to be adapted to include the app_name, dockerfile, and folder
-          app_name: ${{ matrix.app_name }}  # Add appropriate matrix configuration
-          dockerfile: ${{ matrix.dockerfile }}  # Adjust for passing Dockerfile
-          folder: ${{ matrix.folder }}  # Adjust for passing folder
+          folder: ClientAdvisor/App  # Specify the folder directly
+          registry: pslpricicdcontainerreg.azurecr.io  # Set your Docker registry
+          username: pslpricicdcontainerreg  # Set your Docker username
+          push: true  # Set to true to push the image
+          app_name: byc-wa-app  # Specify the app name
+          dockerfile: ClientAdvisor/App/WebApp.Dockerfile  # Specify the Dockerfile path
 
-      - name: Notify Slack
+      - name: Notify Slack (Build)
         if: always()
         run: |
           STATUS=$(if [[ ${{ job.status }} == 'success' ]]; then echo "SUCCESS"; else echo "FAILURE"; fi)
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"CI/CD Pipeline finished with status: $STATUS\"}" ${{ secrets.SLACK_WEBHOOK_URL }}
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"Docker image build finished with status: $STATUS\"}" ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  validate_deployment:
+  deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Call Validate Deployment Workflow
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy Docker Image
         run: |
-          echo "Triggering CI-Validate Deployment-Client Advisor workflow..."
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/CI-Validate%20Deployment-Client%20Advisor/dispatches" \
-            -d '{"ref": "main"}'
+          echo "Deploying Docker image..."
+          IMAGE_NAME="${{ steps.docker_build.outputs.image_name }}"  # Capture the image name from the build step
+          docker pull $IMAGE_NAME
+          docker run -d --rm --name app-container $IMAGE_NAME  # Replace with your actual deployment command
+
+      - name: Notify Slack (Deploy)
+        if: always()
+        run: |
+          STATUS=$(if [[ ${{ job.status }} == 'success' ]]; then echo "SUCCESS"; else echo "FAILURE"; fi)
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"Deployment finished with status: $STATUS\"}" ${{ secrets.SLACK_WEBHOOK_URL }}

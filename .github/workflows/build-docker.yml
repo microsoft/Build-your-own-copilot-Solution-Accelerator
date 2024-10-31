@@ -31,9 +31,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: List files in current directory
-        run: ls -R
 
       - name: Docker Login
         if: ${{ inputs.push }}
@@ -53,7 +50,7 @@ jobs:
       - name: Build Docker Image and Optionally Push
         uses: docker/build-push-action@v6
         with:
-          context: ./${{ inputs.folder }}  # Updated to use folder input
+          context: ./${{ inputs.folder }}  # Use the folder input for context
           file: ${{ inputs.dockerfile }}
           push: ${{ inputs.push }}
           cache-from: type=registry,ref=${{ inputs.registry }}/${{ inputs.app_name }}:latest
