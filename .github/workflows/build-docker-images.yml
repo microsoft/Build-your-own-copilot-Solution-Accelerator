@@ -18,14 +18,14 @@ jobs:
       matrix:
         include:
           - app_name: byc-wa-app  # Client Advisor Web App
-            dockerfile: './ClientAdvisor/App/WebApp.Dockerfile'
-            folder: './ClientAdvisor/App'
+            dockerfile: 'Persistent-byoai/ClientAdvisor/App/WebApp.Dockerfile'
+            folder: 'Persistent-byoai/ClientAdvisor/App'
           - app_name: byc-fn-app  # Client Advisor Azure Function
-            dockerfile: './ClientAdvisor/App/AzureFunction/Dockerfile'
+            dockerfile: 'Persistent-byoai/ClientAdvisor/App/AzureFunction/Dockerfile'
             folder: './ClientAdvisor/AzureFunction'
           - app_name: byai-wa-app  # Research Assistant Web App
-            dockerfile: './ResearchAssistant/App/WebApp.Dockerfile'
-            folder: './ResearchAssistant/App'
+            dockerfile: 'Persistent-byoai/ResearchAssistant/App/WebApp.Dockerfile'
+            folder: 'Persistent-byoai/ResearchAssistant/App'
 
     steps:
       - name: Checkout code
