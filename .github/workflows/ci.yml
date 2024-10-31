@@ -30,11 +30,11 @@ jobs:
 
       - name: Build ClientAdvisor WebApp Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-webapp:${{ github.sha }} -f ClientAdvisor/App/WebApp.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-webapp:${{ github.sha }} -f App/WebApp.Dockerfile .
           
       - name: Build ClientAdvisor Azure Function Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-azurefunction:${{ github.sha }} -f ClientAdvisor/AzureFunction/Dockerfile .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}.azurecr.io/clientadvisor-azurefunction:${{ github.sha }} -f AzureFunction/Dockerfile .
 
       - name: Push ClientAdvisor images to Azure Container Registry
         run: |
