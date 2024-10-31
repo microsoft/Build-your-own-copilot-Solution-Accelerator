@@ -29,6 +29,9 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
+    
+    - name: List Directory Contents
+      run: ls -R
 
     - name: Docker Login
       if: ${{ inputs.push }}
