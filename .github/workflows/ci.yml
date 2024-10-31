@@ -61,7 +61,7 @@ jobs:
 
       - name: Notify Success
         if: success()
-        run: echo "Docker images built and deployed successfully."
+        run: echo "Hey, Docker images built and deployed successfully."
 
       - name: Notify Failure
         if: failure()
