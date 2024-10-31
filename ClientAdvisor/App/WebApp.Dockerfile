@@ -4,8 +4,7 @@ RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
 WORKDIR /home/node/app 
 COPY ./ClientAdvisor/App/frontend/package*.json ./  
-USER root
-RUN npm install -g npm@latest
+RUN npm ci
 USER node
 COPY --chown=node:node ./ClientAdvisor/App/frontend/ ./frontend  
 COPY --chown=node:node ./ClientAdvisor/App/static/ ./static  
