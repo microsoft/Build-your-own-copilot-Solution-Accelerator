@@ -1,10 +1,11 @@
 # Lines starting with '#' are comments.
 # Each line is a file pattern followed by one or more owners.
 
-# These owners will be the default owners for everything in the repo.
-
-
 # Specific directory ownership
 /ClientAdvisor/ @Avijit-Microsoft @Roopan-Microsoft @Prajwal-Microsoft
 
 /ResearchAssistant/ @Avijit-Microsoft @Roopan-Microsoft @Prajwal-Microsoft
+
+# Other directory ownership
+/*  @Avijit-Microsoft @Roopan-Microsoft @Prajwal-Microsoft
+/.github/
