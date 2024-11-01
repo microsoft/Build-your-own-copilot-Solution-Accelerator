@@ -384,9 +384,7 @@ const Chat = (props: any) => {
                   })
                 }
                 runningText = ''
-              } else {
-                result.error = "There was an error generating a response. Chat history can't be saved at this time."
-                console.error('Error : ', result.error)
+              } else if (result.error) {
                 throw Error(result.error)
               }
             } catch (e) {
@@ -672,7 +670,7 @@ const Chat = (props: any) => {
               </Stack>
             ) : (
               <ChatMessageContainer
-                messages={finalMessages}
+                messages={messages}
                 isLoading={isLoading}
                 onShowCitation={onShowCitation}
                 showLoadingMessage={showLoadingMessage}
