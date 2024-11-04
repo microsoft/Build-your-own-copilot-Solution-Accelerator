@@ -9,7 +9,7 @@ RUN npm ci
 COPY --chown=node:node ./ClientAdvisor/App/frontend/ ./frontend  
 COPY --chown=node:node ./ClientAdvisor/App/static/ ./static  
 WORKDIR /home/node/app/frontend
-RUN npm run build
+RUN npm install --save-dev @types/jest && npm run build
 
 # Backend stage
 FROM python:3.11-alpine 
