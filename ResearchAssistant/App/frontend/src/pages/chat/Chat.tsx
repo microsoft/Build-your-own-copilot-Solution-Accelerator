@@ -144,7 +144,7 @@ const Chat = ({ chatType }: Props) => {
     } else {
       conversation = appStateContext?.state?.currentChat
       if(!conversation) {
-        console.error('Conversation not found.')
+        console.error(' Conversation not found. ')
         setIsLoading(false)
         setShowLoadingMessage(false)
         abortFuncs.current = abortFuncs.current.filter(a => a !== abortController)
