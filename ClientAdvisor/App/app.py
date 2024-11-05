@@ -1,39 +1,29 @@
 import copy
 import json
-import os
 import logging
-import uuid
-from dotenv import load_dotenv
-import httpx
+import os
 import time
-import requests
+import uuid
 from types import SimpleNamespace
-from db import get_connection
-from quart import (
-    Blueprint,
-    Quart,
-    jsonify,
-    make_response,
-    request,
-    send_from_directory,
-    render_template,
-)
 
+import httpx
+import requests
+from azure.identity.aio import (DefaultAzureCredential,
+                                get_bearer_token_provider)
+from dotenv import load_dotenv
 # from quart.sessions import SecureCookieSessionInterface
 from openai import AsyncAzureOpenAI
-from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider
-from backend.auth.auth_utils import get_authenticated_user_details, get_tenantid
+from quart import (Blueprint, Quart, jsonify, make_response, render_template,
+                   request, send_from_directory)
+
+from backend.auth.auth_utils import (get_authenticated_user_details,
+                                     get_tenantid)
 from backend.history.cosmosdbservice import CosmosConversationClient
-
-
-from backend.utils import (
-    format_as_ndjson,
-    format_stream_response,
-    generateFilterString,
-    parse_multi_columns,
-    convert_to_pf_format,
-    format_pf_non_streaming_response,
-)
+from backend.utils import (convert_to_pf_format, format_as_ndjson,
+                           format_pf_non_streaming_response,
+                           format_stream_response, generateFilterString,
+                           parse_multi_columns)
+from db import get_connection
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
@@ -1597,8 +1587,6 @@ def get_users():
         """
         cursor.execute(sql_stmt)
         rows = cursor.fetchall()
-
-
         if len(rows) <= 6:
             # update ClientMeetings,Assets,Retirement tables sample data to current date
             cursor = conn.cursor()
@@ -1606,6 +1594,7 @@ def get_users():
                 """select DATEDIFF(d,CAST(max(StartTime) AS Date),CAST(GETDATE() AS Date)) + 3 as ndays from ClientMeetings"""
             )
             rows = cursor.fetchall()
+            ndays = 0
             for row in rows:
                 ndays = row["ndays"]
             sql_stmt1 = f"UPDATE ClientMeetings SET StartTime = dateadd(day,{ndays},StartTime), EndTime = dateadd(day,{ndays},EndTime)"
