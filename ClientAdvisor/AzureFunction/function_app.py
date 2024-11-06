@@ -174,8 +174,6 @@ class ChatWithDataPlugin:
         If requested for call transcript(s), the response for each transcript should be summarized separately and Ensure all transcripts for the specified client are retrieved and format **must** follow as First Call Summary,Second Call Summary etc.
         First name and Full name of the client mentioned in prompt should give same response for both.
         You can use this information to answer questions about the clients
-        when asked about action items from previous meetings with the client, ** Always provide information only for most recent dates**
-        **If the normalized client name in the question does not match the normalized selected client name or client name and client id do not match**, always return: "Please ask questions only about the selected client." Do not provide any other information.
         '''
 
         completion = client.chat.completions.create(
@@ -279,9 +277,9 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
 
     # Read the HTML file
     with open("table.html", "r") as file:
-        html_content = file.read() 
-   
-    system_message = '''you are a wealth advisor assistant. 
+        html_content = file.read()
+    
+    system_message = '''you are a helpful assistant to a wealth advisor.
     Do not answer any questions not related to wealth advisors queries.
     **If the normalized client name in the question does not match the normalized selected client name or client name and client id do not match**, always return: "Please ask questions only about the selected client." Do not provide any other information.
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
