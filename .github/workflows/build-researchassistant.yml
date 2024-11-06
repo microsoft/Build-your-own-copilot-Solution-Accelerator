@@ -29,6 +29,7 @@ jobs:
     with:
       registry: pslpriracontainerreg.azurecr.io
       username: pslpriracontainerreg
+      password_secret: ${{ matrix.password_secret }}
       app_name: ${{ matrix.app_name }}
       dockerfile: ${{ matrix.dockerfile }}
       push: true  # Adjust this logic as necessary
