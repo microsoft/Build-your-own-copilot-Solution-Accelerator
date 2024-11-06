@@ -398,24 +398,19 @@ resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   kind: 'web'
 }
 
-module cosmosRoleDefinition 'core/database/cosmos/cosmos-sql-role-def.bicep' = {
-  name: 'cosmos-sql-role-definition'
-  params: {
-    accountName: AZURE_COSMOSDB_ACCOUNT
-  }
-  dependsOn: [
-    Website
-  ]
+resource contributorRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2024-05-15' existing = {
+  name: '${AZURE_COSMOSDB_ACCOUNT}/00000000-0000-0000-0000-000000000002'
 }
+
 
 module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
   name: 'cosmos-sql-user-role-${WebsiteName}'
   params: {
     accountName: AZURE_COSMOSDB_ACCOUNT
-    roleDefinitionId: cosmosRoleDefinition.outputs.id
+    roleDefinitionId: contributorRoleDefinition.id
     principalId: Website.identity.principalId
   }
   dependsOn: [
-    cosmosRoleDefinition
+    Website
   ]
 }

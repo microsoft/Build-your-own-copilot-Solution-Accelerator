@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.30.23.60470",
-      "templateHash": "4335964797327276348"
+      "templateHash": "4626809612134931957"
     }
   },
   "parameters": {
@@ -1981,7 +1981,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.30.23.60470",
-              "templateHash": "3306232384194992378"
+              "templateHash": "1407596493099151041"
             }
           },
           "parameters": {
@@ -2599,72 +2599,6 @@
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "cosmos-sql-role-definition",
-              "properties": {
-                "expressionEvaluationOptions": {
-                  "scope": "inner"
-                },
-                "mode": "Incremental",
-                "parameters": {
-                  "accountName": {
-                    "value": "[parameters('AZURE_COSMOSDB_ACCOUNT')]"
-                  }
-                },
-                "template": {
-                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                  "contentVersion": "1.0.0.0",
-                  "metadata": {
-                    "_generator": {
-                      "name": "bicep",
-                      "version": "0.30.23.60470",
-                      "templateHash": "17906960830343188834"
-                    },
-                    "description": "Creates a SQL role definition under an Azure Cosmos DB account."
-                  },
-                  "parameters": {
-                    "accountName": {
-                      "type": "string"
-                    }
-                  },
-                  "resources": [
-                    {
-                      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
-                      "apiVersion": "2022-08-15",
-                      "name": "[format('{0}/{1}', parameters('accountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), parameters('accountName'), 'sql-role'))]",
-                      "properties": {
-                        "assignableScopes": [
-                          "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName'))]"
-                        ],
-                        "permissions": [
-                          {
-                            "dataActions": [
-                              "Microsoft.DocumentDB/databaseAccounts/readMetadata",
-                              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*",
-                              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*"
-                            ],
-                            "notDataActions": []
-                          }
-                        ],
-                        "roleName": "Reader Writer",
-                        "type": "CustomRole"
-                      }
-                    }
-                  ],
-                  "outputs": {
-                    "id": {
-                      "type": "string",
-                      "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('accountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), parameters('accountName'), 'sql-role'))]"
-                    }
-                  }
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
               "name": "[format('cosmos-sql-user-role-{0}', parameters('WebsiteName'))]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -2676,7 +2610,7 @@
                     "value": "[parameters('AZURE_COSMOSDB_ACCOUNT')]"
                   },
                   "roleDefinitionId": {
-                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-sql-role-definition'), '2022-09-01').outputs.id.value]"
+                    "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', split(format('{0}/00000000-0000-0000-0000-000000000002', parameters('AZURE_COSMOSDB_ACCOUNT')), '/')[0], split(format('{0}/00000000-0000-0000-0000-000000000002', parameters('AZURE_COSMOSDB_ACCOUNT')), '/')[1])]"
                   },
                   "principalId": {
                     "value": "[reference(resourceId('Microsoft.Web/sites', parameters('WebsiteName')), '2020-06-01', 'full').identity.principalId]"
@@ -2720,7 +2654,6 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'cosmos-sql-role-definition')]",
                 "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
               ]
             }
