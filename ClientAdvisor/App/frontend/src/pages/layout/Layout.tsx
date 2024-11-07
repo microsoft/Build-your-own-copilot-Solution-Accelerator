@@ -25,7 +25,7 @@ const Layout = () => {
   const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false)
   const [copyClicked, setCopyClicked] = useState<boolean>(false)
   const [copyText, setCopyText] = useState<string>('Copy URL')
-  const [shareLabel, setShareLabel] = useState<string | undefined>('Share12')
+  const [shareLabel, setShareLabel] = useState<string | undefined>('Share')
   const [hideHistoryLabel, setHideHistoryLabel] = useState<string>('Hide chat history')
   const [showHistoryLabel, setShowHistoryLabel] = useState<string>('Show chat history')
   const appStateContext = useContext(AppStateContext)
