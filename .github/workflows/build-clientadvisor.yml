@@ -21,17 +21,17 @@ jobs:
     strategy:
       matrix:
         include:
-          - app_name: clientadvisor-webapp
+          - app_name: byc-wa-app
             dockerfile: ClientAdvisor/App/WebApp.Dockerfile
             password_secret: DOCKER_PASSWORD
-          - app_name: clientadvisor-azurefunction
+          - app_name: byc-wa-fn
             dockerfile: ClientAdvisor/AzureFunction/Dockerfile
             password_secret: DOCKER_PASSWORD
 
     uses: ./.github/workflows/build-docker.yml
     with:
-      registry: pslpricicdcontainerreg.azurecr.io
-      username: pslpricicdcontainerreg
+      registry: bycwacontainerreg.azurecr.io
+      username: bycwacontainerreg
       password_secret: ${{ matrix.password_secret }}
       app_name: ${{ matrix.app_name }}
       dockerfile: ${{ matrix.dockerfile }}

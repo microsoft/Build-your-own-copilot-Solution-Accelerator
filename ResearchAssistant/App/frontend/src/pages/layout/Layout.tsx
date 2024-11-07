@@ -64,7 +64,7 @@ const Layout = (): JSX.Element => {
                       }
                     }}
                 >
-                    <h1 className={classes.headerTitle}>Grant Writer!!!</h1>
+                    <h1 className={classes.headerTitle}>Grant Writer</h1>
                 </Link>
             </Stack>
 

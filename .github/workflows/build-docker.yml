@@ -56,5 +56,5 @@ jobs:
         push: ${{ inputs.push }}
         cache-from: type=registry,ref=${{ inputs.registry }}/${{ inputs.app_name}}:latest
         tags: |
-          ${{ inputs.registry }}/${{ inputs.app_name}}:latest
+          ${{ inputs.registry }}/${{ inputs.app_name}}:dev
           ${{ inputs.registry }}/${{ inputs.app_name}}:${{ steps.date.outputs.date }}_${{ github.run_number }}
