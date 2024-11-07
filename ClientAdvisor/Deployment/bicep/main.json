@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.30.23.60470",
-      "templateHash": "4335964797327276348"
+      "templateHash": "9162068619207895889"
     }
   },
   "parameters": {
@@ -309,7 +309,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.30.23.60470",
-              "templateHash": "6504191191293913024"
+              "templateHash": "12450674202806076921"
             }
           },
           "parameters": {
@@ -373,7 +373,8 @@
                   },
                   "keySource": "Microsoft.Storage"
                 },
-                "accessTier": "Hot"
+                "accessTier": "Hot",
+                "allowSharedKeyAccess": false
               }
             },
             {
@@ -914,9 +915,6 @@
           "identity": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.id]"
           },
-          "storageAccountKey": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageAccountOutput.value.key]"
-          },
           "baseUrl": {
             "value": "[variables('baseUrl')]"
           }
@@ -928,7 +926,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.30.23.60470",
-              "templateHash": "6415253687626078091"
+              "templateHash": "17179626311402179428"
             }
           },
           "parameters": {
@@ -937,9 +935,6 @@
               "metadata": {
                 "description": "Specifies the location for resources."
               }
-            },
-            "storageAccountKey": {
-              "type": "securestring"
             },
             "storageAccountName": {
               "type": "string"
@@ -970,7 +965,7 @@
               "properties": {
                 "azCliVersion": "2.50.0",
                 "primaryScriptUri": "[format('{0}Deployment/scripts/copy_kb_files.sh', parameters('baseUrl'))]",
-                "arguments": "[format('{0} {1} {2} {3}', parameters('storageAccountName'), parameters('containerName'), parameters('storageAccountKey'), parameters('baseUrl'))]",
+                "arguments": "[format('{0} {1} {2}', parameters('storageAccountName'), parameters('containerName'), parameters('baseUrl'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
                 "cleanupPreference": "OnSuccess"
@@ -1224,9 +1219,6 @@
           "adlsAccountName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageAccountOutput.value.storageAccountName]"
           },
-          "adlsAccountKey": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageAccountOutput.value.key]"
-          },
           "azureOpenAIApiKey": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai'), '2022-09-01').outputs.openAIOutput.value.openAPIKey]"
           },
@@ -1280,7 +1272,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.30.23.60470",
-              "templateHash": "16513457206594462189"
+              "templateHash": "15795256463028395602"
             }
           },
           "parameters": {
@@ -1405,9 +1397,6 @@
             "adlsAccountName": {
               "type": "string"
             },
-            "adlsAccountKey": {
-              "type": "securestring"
-            },
             "azureOpenAIApiKey": {
               "type": "securestring"
             },
@@ -1530,17 +1519,6 @@
               "name": "[format('{0}/{1}', parameters('kvName'), 'ADLS-ACCOUNT-NAME')]",
               "properties": {
                 "value": "[parameters('adlsAccountName')]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('kvName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.KeyVault/vaults/secrets",
-              "apiVersion": "2021-11-01-preview",
-              "name": "[format('{0}/{1}', parameters('kvName'), 'ADLS-ACCOUNT-KEY')]",
-              "properties": {
-                "value": "[parameters('adlsAccountKey')]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.KeyVault/vaults', parameters('kvName'))]"

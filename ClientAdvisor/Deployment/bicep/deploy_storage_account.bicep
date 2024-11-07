@@ -47,6 +47,7 @@ resource storageAccounts_resource 'Microsoft.Storage/storageAccounts@2022-09-01'
       keySource: 'Microsoft.Storage'
     }
     accessTier: 'Hot'
+    allowSharedKeyAccess: false
   }
 }
 
@@ -107,4 +108,3 @@ output storageAccountOutput object = {
   connectionString:storageAccountString
   dataContainer:storageAccounts_default_power_platform_dataflows.name
 }
-
