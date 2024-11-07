@@ -27,11 +27,11 @@ from azure.storage.filedatalake import (
 )
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-account_key = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-KEY")
+credential = DefaultAzureCredential()
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 
-service_client = DataLakeServiceClient(account_url, credential=account_key,api_version='2023-01-03') 
+service_client = DataLakeServiceClient(account_url, credential=credential,api_version='2023-01-03') 
 
 file_system_client_name = "data"
 directory = 'clientdata' 
