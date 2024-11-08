@@ -5,7 +5,9 @@ FROM mcr.microsoft.com/azure-functions/python:4-python3.11
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
-COPY requirements.txt /
+# Copy the requirements.txt from the correct path
+COPY ./ClientAdvisor/App/requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
-COPY . /home/site/wwwroot
+# Copy the application files to the correct directory
+COPY ./ClientAdvisor/App/ /home/site/wwwroot
