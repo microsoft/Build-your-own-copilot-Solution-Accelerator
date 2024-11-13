@@ -172,7 +172,7 @@ class ChatWithDataPlugin:
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts.
         If requested for call transcript(s), the response for each transcript should be summarized separately and Ensure all transcripts for the specified client are retrieved and format **must** follow as First Call Summary,Second Call Summary etc.
-        if asked related to count of call transcripts,**Always** respond the total number of sourceurid involved for the {ClientId} consistently, Do never change if question is reframed or contains "so far" or if the case is altered or having first name or full name of the client present with so far.
+        if asked related to count of call transcripts,**Always** respond the total number of sourceurid involved for the {ClientId} consistently, Do never change if question is reframed or contains "so far" or if the case is altered or having first name or full name of the client present with so far or case altered with first name of the client or case altered with first name of client and  so far.
         You can use this information to answer questions about the clients
         '''
 
@@ -189,7 +189,7 @@ class ChatWithDataPlugin:
                 }
             ],
             seed = 42,
-            temperature = 0.7,
+            temperature = 0,
             max_tokens = 800,
             extra_body = {
                 "data_sources": [
