@@ -6,8 +6,8 @@ ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
 # Copy the requirements.txt from the correct path
-COPY ./ClientAdvisor/App/requirements.txt /requirements.txt
+COPY ./ClientAdvisor/AzureFunction/requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
 # Copy the application files to the correct directory
-COPY ./ClientAdvisor/App/ /home/site/wwwroot
+COPY ./ClientAdvisor/AzureFunction/ /home/site/wwwroot
