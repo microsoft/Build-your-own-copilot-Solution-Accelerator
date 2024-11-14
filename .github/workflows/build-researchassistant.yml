@@ -1,0 +1,36 @@
+name: Build ResearchAssistant Docker Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ResearchAssistant/**
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+    paths:
+      - ResearchAssistant/**
+  merge_group:
+
+jobs:
+  docker-build:
+    strategy:
+      matrix:
+        include:
+          - app_name: byoaia-app
+            dockerfile: ResearchAssistant/App/WebApp.Dockerfile
+            password_secret: DOCKER_PASSWORD_RESEARCHASSISTANT
+
+    uses: ./.github/workflows/build-docker.yml
+    with:
+      registry: byoaiacontainerreg.azurecr.io
+      username: byoaiacontainerreg
+      password_secret: ${{ matrix.password_secret }}
+      app_name: ${{ matrix.app_name }}
+      dockerfile: ${{ matrix.dockerfile }}
+      push: true  # Adjust this logic as necessary
+    secrets: inherit
