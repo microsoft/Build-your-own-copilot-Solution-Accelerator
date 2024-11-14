@@ -25,10 +25,6 @@ from backend.utils import (convert_to_pf_format, format_as_ndjson,
                            parse_multi_columns)
 from db import get_connection
 
-# from flask import Flask
-# from flask_cors import CORS
-
-
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
 # Current minimum Azure OpenAI version supported
