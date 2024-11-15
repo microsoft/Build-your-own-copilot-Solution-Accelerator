@@ -40,20 +40,15 @@ def set_env_vars():
 
 
 @pytest.fixture
-def app():
+def flaskapp():
     """Create a test client for the app."""
-    app = create_app()
-    app.config.update({
-        "TESTING": True,
-        "PROVIDE_AUTOMATIC_OPTIONS": True,  # Ensure this is set in the test environment
-    })
-    return app
+    return create_app()
 
 
 @pytest.fixture
-def client(app):
+def client(flaskapp):
     """Create a test client for the app."""
-    return app.test_client()
+    return flaskapp.test_client()
 
 
 def test_create_app():
