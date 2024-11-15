@@ -33,7 +33,7 @@ jobs:
         run: |
           cd ClientAdvisor/App
           python -m pip install -r requirements.txt
-          python -m pip install coverage pytest-cov
+          python -m pip install coverage
       - name: Run Backend Tests with Coverage
         run: |
           cd ClientAdvisor/App
