@@ -56,6 +56,8 @@ def test_create_app():
     assert app is not None
     assert app.name == "app"
     assert "routes" in app.blueprints
+    app.config["PROVIDE_AUTOMATIC_OPTIONS"] = True
+    assert app.config["PROVIDE_AUTOMATIC_OPTIONS"] is True
 
 
 @patch("app.get_bearer_token_provider")
