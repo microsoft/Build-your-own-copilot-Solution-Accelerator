@@ -58,10 +58,6 @@ def client(app):
 
 def test_create_app():
     app = create_app()
-    app.config.update({
-        "TESTING": True,
-        "PROVIDE_AUTOMATIC_OPTIONS": True,  # Ensure this is set in the test environment
-    })
     assert app is not None
     assert app.name == "app"
     assert "routes" in app.blueprints
