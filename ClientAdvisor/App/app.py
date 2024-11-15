@@ -55,7 +55,6 @@ def create_app():
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
-    # print(app.secret_key)
     return app
 
 
