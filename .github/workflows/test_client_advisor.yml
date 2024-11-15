@@ -2,7 +2,7 @@ name: Unit Tests - Client Advisor
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, unit_test]
     # Trigger on changes in these specific paths
     paths:
       - 'ClientAdvisor/**'
