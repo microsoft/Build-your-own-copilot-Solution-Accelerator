@@ -1592,6 +1592,7 @@ def get_users():
                 """select DATEDIFF(d,CAST(max(StartTime) AS Date),CAST(GETDATE() AS Date)) + 3 as ndays from ClientMeetings"""
             )
             rows = cursor.fetchall()
+            ndays = 0
             for row in rows:
                 ndays = row["ndays"]
             sql_stmt1 = f"UPDATE ClientMeetings SET StartTime = dateadd(day,{ndays},StartTime), EndTime = dateadd(day,{ndays},EndTime)"
