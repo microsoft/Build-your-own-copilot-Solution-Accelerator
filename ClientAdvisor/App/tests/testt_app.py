@@ -47,7 +47,7 @@ def flaskapp():
 
 @pytest.fixture
 def client(flaskapp):
-    """Create a test client for the app."""
+    """Create a test client for the flaskapp."""
     return flaskapp.test_client()
 
 
