@@ -37,7 +37,8 @@ jobs:
       - name: Run Backend Tests with Coverage
         run: |
           cd ClientAdvisor/App
-          python -m pytest -vv --cov=.
+          coverage run --source=. -m pytest --disable-warnings
+          coverage report -m
       - uses: actions/upload-artifact@v4
         with:
           name: client-advisor-coverage
