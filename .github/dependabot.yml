@@ -5,6 +5,8 @@ updates:
     directory: "/ClientAdvisor/App/frontend"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
@@ -12,6 +14,8 @@ updates:
     directory: "/ResearchAssistant/App/frontend"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
@@ -20,6 +24,8 @@ updates:
     directory: "/ClientAdvisor/App"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
@@ -27,6 +33,8 @@ updates:
     directory: "/ClientAdvisor/AzureFunction"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
@@ -34,6 +42,8 @@ updates:
     directory: "/ClientAdvisor/Deployment/scripts/fabric_scripts"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
@@ -41,6 +51,8 @@ updates:
     directory: "/ClientAdvisor/Deployment/scripts/index_scripts"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
@@ -48,6 +60,8 @@ updates:
     directory: "/ResearchAssistant/App"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
@@ -55,6 +69,8 @@ updates:
     directory: "/ResearchAssistant/Deployment/scripts/aihub_scripts"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
@@ -62,6 +78,8 @@ updates:
     directory: "/ResearchAssistant/Deployment/scripts/fabric_scripts"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
@@ -69,5 +87,7 @@ updates:
     directory: "/ResearchAssistant/Deployment/scripts/index_scripts"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "build"
     target-branch: "dependabotchanges"
     open-pull-requests-limit: 16
