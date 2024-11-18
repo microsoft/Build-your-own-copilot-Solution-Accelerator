@@ -162,7 +162,7 @@ jobs:
           echo "List of resources to check: ${resources_to_check[@]}"
          
           # Get the list of resources in YAML format
-          resource_list=$(az resource list --resource-group myResourceGroup4 --output yaml)
+          resource_list=$(az resource list --resource-group ${{ env.RESOURCE_GROUP_NAME }} --output yaml)
 
           # Maximum number of retries
           max_retries=3
