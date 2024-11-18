@@ -5,14 +5,14 @@ updates:
     directory: "/ClientAdvisor/App/frontend"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
   - package-ecosystem: "npm"
     directory: "/ResearchAssistant/App/frontend"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
   # 2. Python dependencies
@@ -20,54 +20,54 @@ updates:
     directory: "/ClientAdvisor/App"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
   - package-ecosystem: "pip"
     directory: "/ClientAdvisor/AzureFunction"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
   - package-ecosystem: "pip"
     directory: "/ClientAdvisor/Deployment/scripts/fabric_scripts"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
   - package-ecosystem: "pip"
     directory: "/ClientAdvisor/Deployment/scripts/index_scripts"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
   - package-ecosystem: "pip"
     directory: "/ResearchAssistant/App"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
   - package-ecosystem: "pip"
     directory: "/ResearchAssistant/Deployment/scripts/aihub_scripts"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
   - package-ecosystem: "pip"
     directory: "/ResearchAssistant/Deployment/scripts/fabric_scripts"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 15
 
   - package-ecosystem: "pip"
     directory: "/ResearchAssistant/Deployment/scripts/index_scripts"
     schedule:
       interval: "monthly"
-    target-branch: "dependentbotchanges"
+    target-branch: "dependabotchanges"
     open-pull-requests-limit: 16
