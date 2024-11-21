@@ -2,12 +2,12 @@ name: Unit Tests - Client Advisor
 
 on:
   push:
-    branches: main
+    branches: [main, dev]
     # Trigger on changes in these specific paths
     paths:
       - 'ClientAdvisor/**'
   pull_request:
-    branches: main
+    branches: [main, dev]
     types:
       - opened
       - ready_for_review
