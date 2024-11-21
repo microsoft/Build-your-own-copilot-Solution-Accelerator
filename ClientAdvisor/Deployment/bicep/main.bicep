@@ -17,7 +17,8 @@ var resourceGroupName = resourceGroup().name
 // var subscriptionId  = subscription().subscriptionId
 
 var solutionLocation = resourceGroupLocation
-var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/'
+var baseUrl = 'https://raw.githubusercontent.com/Roopan-Microsoft/psl-byo-main/main/ClientAdvisor/'
+var functionAppversion = 'dev'
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
@@ -29,12 +30,11 @@ module managedIdentityModule 'deploy_managed_identity.bicep' = {
   scope: resourceGroup(resourceGroup().name)
 }
 
-module cosmosDBModule 'deploy_cosmos_db.bicep' = {
+module cosmosDBModule 'core/database/cosmos/deploy_cosmos_db.bicep' = {
   name: 'deploy_cosmos_db'
   params: {
     solutionName: solutionPrefix
     solutionLocation: cosmosLocation
-    identity:managedIdentityModule.outputs.managedIdentityOutput.objectId
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -96,7 +96,6 @@ module uploadFiles 'deploy_upload_files_script.bicep' = {
     solutionLocation: solutionLocation
     containerName:storageAccountModule.outputs.storageAccountOutput.dataContainer
     identity:managedIdentityModule.outputs.managedIdentityOutput.id
-    storageAccountKey:storageAccountModule.outputs.storageAccountOutput.key
     baseUrl:baseUrl
   }
   dependsOn:[storageAccountModule]
@@ -120,6 +119,7 @@ module azureFunctions 'deploy_azure_function_script.bicep' = {
     sqlDbPwd:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
     identity:managedIdentityModule.outputs.managedIdentityOutput.id
     baseUrl:baseUrl
+    functionAppVersion: functionAppversion
   }
   dependsOn:[storageAccountModule]
 }
@@ -145,7 +145,6 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
     tenantId: subscription().tenantId
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
     adlsAccountName:storageAccountModule.outputs.storageAccountOutput.storageAccountName
-    adlsAccountKey:storageAccountModule.outputs.storageAccountOutput.key
     azureOpenAIApiKey:azOpenAI.outputs.openAIOutput.openAPIKey
     azureOpenAIApiVersion:'2024-02-15-preview'
     azureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
@@ -195,9 +194,7 @@ module createIndex 'deploy_index_scripts.bicep' = {
 module appserviceModule 'deploy_app_service.bicep' = {
   name: 'deploy_app_service'
   params: {
-    identity:managedIdentityModule.outputs.managedIdentityOutput.id
     solutionName: solutionPrefix
-    solutionLocation: solutionLocation
     AzureSearchService:azSearchService.outputs.searchServiceOutput.searchServiceName
     AzureSearchIndex:'transcripts_index'
     AzureSearchKey:azSearchService.outputs.searchServiceOutput.searchServiceAdminKey
@@ -235,7 +232,6 @@ module appserviceModule 'deploy_app_service.bicep' = {
     SQLDB_USERNAME:sqlDBModule.outputs.sqlDbOutput.sqlDbUser
     SQLDB_PASSWORD:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
     AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosOutput.cosmosAccountName
-    AZURE_COSMOSDB_ACCOUNT_KEY: cosmosDBModule.outputs.cosmosOutput.cosmosAccountKey
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosOutput.cosmosContainerName
     AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosOutput.cosmosDatabaseName
     AZURE_COSMOSDB_ENABLE_FEEDBACK: 'True'
