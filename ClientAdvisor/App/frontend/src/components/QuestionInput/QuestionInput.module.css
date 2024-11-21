@@ -62,3 +62,12 @@
     left: 16.5%;
   }
 }
+
+@media screen and (-ms-high-contrast: active), (forced-colors: active) {
+
+  .questionInputContainer{
+    border: 2px solid WindowText;
+    background-color: Window;
+    color: WindowText;
+  }
+}

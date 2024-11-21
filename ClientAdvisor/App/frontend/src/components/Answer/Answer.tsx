@@ -16,6 +16,8 @@ import { AppStateContext } from '../../state/AppProvider'
 import { parseAnswer } from './AnswerParser'
 
 import styles from './Answer.module.css'
+import rehypeRaw from 'rehype-raw'
+
 
 interface Props {
   answer: AskResponse

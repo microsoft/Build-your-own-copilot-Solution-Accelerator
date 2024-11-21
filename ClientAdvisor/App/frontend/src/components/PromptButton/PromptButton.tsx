@@ -8,5 +8,18 @@ interface PromptButtonProps extends IButtonProps {
 }
 
 export const PromptButton: React.FC<PromptButtonProps> = ({ onClick, name = '', disabled }) => {
-  return <DefaultButton className={styles.promptBtn} disabled={disabled} text={name} onClick={onClick} />
-}
+  const handleClick = () => {
+    if (!disabled && onClick) {
+      onClick();
+    }
+  };
+
+  return (
+    <DefaultButton
+      className={styles.promptBtn}
+      disabled={disabled}
+      text={name || 'Default Name'} // Branch: handling empty name
+      onClick={handleClick} // Branch: conditionally handle click
+    />
+  );
+};

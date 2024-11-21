@@ -12,13 +12,11 @@ import Chat from '../chat/Chat' // Import the Chat component
 import { AppStateContext } from '../../state/AppProvider'
 import { getUserInfo, getpbi } from '../../api'
 import { User } from '../../types/User'
-import TickIcon  from '../../assets/TickIcon.svg'
+import TickIcon from '../../assets/TickIcon.svg'
 import DismissIcon from '../../assets/Dismiss.svg'
 import welcomeIcon from '../../assets/welcomeIcon.png'
-import styles from './Layout.module.css';
-import SpinnerComponent from '../../components/Spinner/Spinner';
-
-
+import styles from './Layout.module.css'
+import { SpinnerComponent } from '../../components/Spinner/SpinnerComponent'
 
 const Layout = () => {
   // const [contentType, setContentType] = useState<string | null>(null);
@@ -38,7 +36,7 @@ const Layout = () => {
   const [name, setName] = useState<string>('')
 
   const [pbiurl, setPbiUrl] = useState<string>('')
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
   useEffect(() => {
     const fetchpbi = async () => {
       try {
@@ -53,19 +51,25 @@ const Layout = () => {
   }, [])
 
 
+  const resetClientId= ()=>{
+    appStateContext?.dispatch({ type: 'RESET_CLIENT_ID' });
+    setSelectedUser(null);
+    setShowWelcomeCard(true);
+  }
+
   const closePopup = () => {
-    setIsVisible(!isVisible);
-  };
+    setIsVisible(!isVisible)
+  }
 
   useEffect(() => {
     if (isVisible) {
       const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 4000); // Popup will disappear after 3 seconds
+        setIsVisible(false)
+      }, 4000) // Popup will disappear after 3 seconds
 
-      return () => clearTimeout(timer); // Cleanup the timer on component unmount
+      return () => clearTimeout(timer) // Cleanup the timer on component unmount
     }
-  }, [isVisible]);
+  }, [isVisible])
 
   const handleCardClick = (user: User) => {
     setSelectedUser(user)
@@ -121,7 +125,6 @@ const Layout = () => {
   useEffect(() => {
     getUserInfo()
       .then(res => {
-        console.log('User info: ', res)
         const name: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? ''
         setName(name)
       })
@@ -137,27 +140,31 @@ const Layout = () => {
 
   return (
     <div className={styles.layout}>
-       {isVisible && (
+      {isVisible && (
         <div className={styles.popupContainer}>
           <div className={styles.popupContent}>
             <div className={styles.popupText}>
-              <div className={styles.headerText}><span className={styles.checkmark}>
-                <img alt="check mark" src={TickIcon} /></span>Chat saved
-                <img alt="close icon" src={DismissIcon} className={styles.closeButton} onClick={closePopup}/>
+              <div className={styles.headerText}>
+                <span className={styles.checkmark}>
+                  <img alt="check mark" src={TickIcon} />
+                </span>
+                Chat saved
+                <img alt="close icon" src={DismissIcon} className={styles.closeButton} onClick={closePopup} />
               </div>
-              <div className={styles.popupSubtext}><span className={styles.popupMsg}>Your chat history has been saved successfully!</span></div>
+              <div className={styles.popupSubtext}>
+                <span className={styles.popupMsg}>Your chat history has been saved successfully!</span>
+              </div>
             </div>
-            
           </div>
         </div>
-    )}
+      )}
       <SpinnerComponent
         loading={appStateContext?.state.isLoader != undefined ? appStateContext?.state.isLoader : false}
         label="Please wait.....!"
       />
       <div className={styles.cardsColumn}>
         <div className={styles.selectClientHeading}>
-          <h3 className={styles.meeting}>Upcoming meetings</h3>
+          <h2 className={styles.meeting}>Upcoming meetings</h2>
         </div>
 
         <Cards onCardClick={handleCardClick} />
@@ -167,9 +174,9 @@ const Layout = () => {
           <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
             <Stack horizontal verticalAlign="center">
               <img src={ui?.logo ? ui.logo : TeamAvatar} className={styles.headerIcon} aria-hidden="true" alt="" />
-              <Link to="/" className={styles.headerTitleContainer}>
-                <h1 className={styles.headerTitle}>{ui?.title}</h1>
-              </Link>
+              <div className={styles.headerTitleContainer} onClick={resetClientId} onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? resetClientId() : null)} tabIndex={-1}>
+                <h2 className={styles.headerTitle} tabIndex={0}>{ui?.title}</h2>
+              </div>
             </Stack>
             <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
               {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
@@ -212,9 +219,9 @@ const Layout = () => {
                   <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span>
                 </div>
               )}
-              <Pivot defaultSelectedKey="chat">
+              <Pivot defaultSelectedKey="chat" className='tabContainer' style={{ paddingTop : 10 }}>
                 <PivotItem headerText="Chat" itemKey="chat">
-                  <Chat setIsVisible={setIsVisible}/>
+                  <Chat setIsVisible={setIsVisible} />
                 </PivotItem>
                 <PivotItem headerText="Client 360 Profile" itemKey="profile">
                   <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
