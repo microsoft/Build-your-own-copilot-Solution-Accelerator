@@ -6,11 +6,6 @@ targetScope = 'resourceGroup'
 @description('Solution Name')
 param solutionName string
 
-@description('Solution Location')
-param solutionLocation string
-
-param identity string
-
 @description('Name of App Service plan')
 param HostingPlanName string = '${ solutionName }-app-service-plan'
 
@@ -168,11 +163,13 @@ param AZURE_COSMOSDB_ENABLE_FEEDBACK string = 'True'
 @description('Power BI Embed URL')
 param VITE_POWERBI_EMBED_URL string = ''
 
+param Appversion string
+
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
 // var WebAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
 
-var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:latest'
+var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${Appversion}'
 
 resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: HostingPlanName
@@ -360,9 +357,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {name: 'AZURE_COSMOSDB_ACCOUNT'
           value: AZURE_COSMOSDB_ACCOUNT
         }
-        {name: 'AZURE_COSMOSDB_ACCOUNT_KEY'
-          value: AZURE_COSMOSDB_ACCOUNT_KEY
-        }
         {name: 'AZURE_COSMOSDB_CONVERSATIONS_CONTAINER'
           value: AZURE_COSMOSDB_CONVERSATIONS_CONTAINER
         }
@@ -406,3 +400,19 @@ resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   kind: 'web'
 }
 
+resource contributorRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2024-05-15' existing = {
+  name: '${AZURE_COSMOSDB_ACCOUNT}/00000000-0000-0000-0000-000000000002'
+}
+
+
+module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
+  name: 'cosmos-sql-user-role-${WebsiteName}'
+  params: {
+    accountName: AZURE_COSMOSDB_ACCOUNT
+    roleDefinitionId: contributorRoleDefinition.id
+    principalId: Website.identity.principalId
+  }
+  dependsOn: [
+    Website
+  ]
+}

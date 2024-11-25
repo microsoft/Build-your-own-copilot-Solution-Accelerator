@@ -70,8 +70,6 @@ param managedIdentityObjectId string
 // param environmentId string
 param adlsAccountName string
 @secure()
-param adlsAccountKey string
-@secure()
 param azureOpenAIApiKey string
 param azureOpenAIApiVersion string
 param azureOpenAIEndpoint string
@@ -195,14 +193,6 @@ resource adlsAccountNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-prev
   name: 'ADLS-ACCOUNT-NAME'
   properties: {
     value: adlsAccountName
-  }
-}
-
-resource adlsAccountKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'ADLS-ACCOUNT-KEY'
-  properties: {
-    value: adlsAccountKey
   }
 }
 

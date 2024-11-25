@@ -71,7 +71,6 @@ module uploadFiles 'deploy_upload_files_script.bicep' = {
     solutionLocation: solutionLocation
     containerName:storageAccountModule.outputs.storageAccountOutput.dataContainer
     identity:managedIdentityModule.outputs.managedIdentityOutput.id
-    storageAccountKey:storageAccountModule.outputs.storageAccountOutput.key
     baseUrl:baseUrl
   }
   dependsOn:[storageAccountModule]
@@ -87,7 +86,6 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
     tenantId: subscription().tenantId
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
     adlsAccountName:storageAccountModule.outputs.storageAccountOutput.storageAccountName
-    adlsAccountKey:storageAccountModule.outputs.storageAccountOutput.key
     azureOpenAIApiKey:azOpenAI.outputs.openAIOutput.openAPIKey
     azureOpenAIApiVersion:'2023-07-01-preview'
     azureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
@@ -201,4 +199,4 @@ module appserviceModule 'deploy_app_service.bicep' = {
   dependsOn:[storageAccountModule,azOpenAI,azAIMultiServiceAccount,azSearchService]
 }
 
-     
+
