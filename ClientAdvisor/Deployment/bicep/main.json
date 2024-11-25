@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "3857907099842553430"
+      "templateHash": "10613918248800233733"
     }
   },
   "parameters": {
@@ -28,8 +28,8 @@
     "resourceGroupLocation": "[resourceGroup().location]",
     "resourceGroupName": "[resourceGroup().name]",
     "solutionLocation": "[variables('resourceGroupLocation')]",
-    "baseUrl": "https://raw.githubusercontent.com/Roopan-Microsoft/psl-byo-main/main/ClientAdvisor/",
-    "functionAppversion": "dev"
+    "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/",
+    "functionAppversion": "latest"
   },
   "resources": [
     {
@@ -1959,7 +1959,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "1763789155699571462"
+              "templateHash": "1230729147617687274"
             }
           },
           "parameters": {
@@ -2335,7 +2335,7 @@
             }
           },
           "variables": {
-            "WebAppImageName": "DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:dev"
+            "WebAppImageName": "DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:latest"
           },
           "resources": [
             {

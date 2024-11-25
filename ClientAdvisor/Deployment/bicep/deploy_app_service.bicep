@@ -167,7 +167,7 @@ param VITE_POWERBI_EMBED_URL string = ''
 
 // var WebAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
 
-var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:dev'
+var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:latest'
 
 resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: HostingPlanName
