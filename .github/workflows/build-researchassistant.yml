@@ -2,11 +2,11 @@ name: Build ResearchAssistant Docker Images
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev, demo]
     paths:
       - ResearchAssistant/**
   pull_request:
-    branches: [main]
+    branches: [main, dev, demo]
     types:
       - opened
       - ready_for_review
@@ -32,5 +32,5 @@ jobs:
       password_secret: ${{ matrix.password_secret }}
       app_name: ${{ matrix.app_name }}
       dockerfile: ${{ matrix.dockerfile }}
-      push: true  # Adjust this logic as necessary
+      push: ${{ github.event_name == 'push' && github.ref_name == 'main' || github.ref_name == 'dev' || github.ref_name == 'demo' }}
     secrets: inherit
