@@ -77,3 +77,11 @@
     width: 100%;
   }
 }
+
+@media screen and (-ms-high-contrast: active), (forced-colors: active) {
+  .container{
+      border: 2px solid WindowText;
+      background-color: Window;
+      color: WindowText;
+  }
+}
