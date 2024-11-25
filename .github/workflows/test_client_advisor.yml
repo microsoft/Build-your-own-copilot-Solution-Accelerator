@@ -29,6 +29,25 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install Frontend Dependencies
+        run: |
+          cd ClientAdvisor/App/frontend
+          npm install
+      - name: Run Frontend Tests with Coverage
+        run: |
+          cd ClientAdvisor/App/frontend
+          npm run test -- --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: client-advisor-frontend-coverage
+          path: |
+            ClientAdvisor/App/frontend/coverage/
+            ClientAdvisor/App/frontend/coverage/lcov-report/
+            ClientAdvisor/App/htmlcov/
       - name: Install Backend Dependencies
         run: |
           cd ClientAdvisor/App
@@ -45,7 +64,3 @@ jobs:
             ClientAdvisor/App/coverage.xml
             ClientAdvisor/App/coverage-junit.xml
             ClientAdvisor/App/htmlcov/
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
