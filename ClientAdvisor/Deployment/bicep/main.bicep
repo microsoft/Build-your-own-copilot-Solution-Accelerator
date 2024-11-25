@@ -18,7 +18,7 @@ var resourceGroupName = resourceGroup().name
 
 var solutionLocation = resourceGroupLocation
 var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/'
-var functionAppversion = 'latest'
+var appversion = 'latest'
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
@@ -119,7 +119,7 @@ module azureFunctions 'deploy_azure_function_script.bicep' = {
     sqlDbPwd:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
     identity:managedIdentityModule.outputs.managedIdentityOutput.id
     baseUrl:baseUrl
-    functionAppVersion: functionAppversion
+    functionAppVersion: appversion
   }
   dependsOn:[storageAccountModule]
 }
@@ -236,6 +236,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosOutput.cosmosDatabaseName
     AZURE_COSMOSDB_ENABLE_FEEDBACK: 'True'
     VITE_POWERBI_EMBED_URL: 'TBD'
+    Appversion: appversion
   }
   scope: resourceGroup(resourceGroup().name)
   dependsOn:[azOpenAI,azAIMultiServiceAccount,azSearchService,sqlDBModule,azureFunctionURL,cosmosDBModule]
