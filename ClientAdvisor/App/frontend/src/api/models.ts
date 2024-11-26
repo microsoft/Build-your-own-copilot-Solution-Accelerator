@@ -147,3 +147,7 @@ export interface GroupedChatHistory {
 }
 
 
+export interface GroupedChatHistory {
+  month: string
+  entries: Conversation[]
+}

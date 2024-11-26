@@ -14,6 +14,7 @@ import app
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
+
 def load_env_into_module(module_name, prefix=""):
     load_dotenv()
     module = __import__(module_name)
