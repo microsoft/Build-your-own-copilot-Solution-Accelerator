@@ -140,7 +140,6 @@ export interface ClientIdRequest {
   clientName: string;
 }
 
-
 export interface GroupedChatHistory {
   month: string
   entries: Conversation[]

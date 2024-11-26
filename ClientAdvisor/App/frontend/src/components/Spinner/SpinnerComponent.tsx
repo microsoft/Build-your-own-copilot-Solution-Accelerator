@@ -25,4 +25,3 @@ interface SpinnerComponentProps {
       </div>
     );
   };
-
