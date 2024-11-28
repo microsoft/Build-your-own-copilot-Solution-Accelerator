@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.30.23.60470",
-      "templateHash": "9162068619207895889"
+      "version": "0.31.34.60546",
+      "templateHash": "15258689682412466487"
     }
   },
   "parameters": {
@@ -28,8 +28,8 @@
     "resourceGroupLocation": "[resourceGroup().location]",
     "resourceGroupName": "[resourceGroup().name]",
     "solutionLocation": "[variables('resourceGroupLocation')]",
-    "baseUrl": "https://raw.githubusercontent.com/Roopan-Microsoft/psl-byo-main/main/ClientAdvisor/",
-    "functionAppversion": "dev"
+    "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/",
+    "appversion": "latest"
   },
   "resources": [
     {
@@ -56,8 +56,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "8775325455752085588"
+              "version": "0.31.34.60546",
+              "templateHash": "12508267066278938117"
             }
           },
           "parameters": {
@@ -145,8 +145,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "2785991873795581274"
+              "version": "0.31.34.60546",
+              "templateHash": "11828480827139544665"
             }
           },
           "parameters": {
@@ -308,8 +308,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "12450674202806076921"
+              "version": "0.31.34.60546",
+              "templateHash": "3549774837624453156"
             }
           },
           "parameters": {
@@ -466,8 +466,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "2160762555547388608"
+              "version": "0.31.34.60546",
+              "templateHash": "12627712322898660298"
             }
           },
           "parameters": {
@@ -624,8 +624,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "7447797843632120632"
+              "version": "0.31.34.60546",
+              "templateHash": "17239529093958196867"
             }
           },
           "parameters": {
@@ -706,8 +706,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "1208105245776066647"
+              "version": "0.31.34.60546",
+              "templateHash": "5720304969592308179"
             }
           },
           "parameters": {
@@ -794,8 +794,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "7369022468994960259"
+              "version": "0.31.34.60546",
+              "templateHash": "2043450591502080061"
             }
           },
           "parameters": {
@@ -925,8 +925,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "17179626311402179428"
+              "version": "0.31.34.60546",
+              "templateHash": "6087269027573253102"
             }
           },
           "parameters": {
@@ -1035,7 +1035,7 @@
             "value": "[variables('baseUrl')]"
           },
           "functionAppVersion": {
-            "value": "[variables('functionAppversion')]"
+            "value": "[variables('appversion')]"
           }
         },
         "template": {
@@ -1044,8 +1044,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "7374909295293677257"
+              "version": "0.31.34.60546",
+              "templateHash": "10231530585958508769"
             }
           },
           "parameters": {
@@ -1157,8 +1157,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "12066912124638066503"
+              "version": "0.31.34.60546",
+              "templateHash": "14069568468347897481"
             }
           },
           "parameters": {
@@ -1271,8 +1271,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "15795256463028395602"
+              "version": "0.31.34.60546",
+              "templateHash": "5271454688668874284"
             }
           },
           "parameters": {
@@ -1763,8 +1763,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "17279604675307278350"
+              "version": "0.31.34.60546",
+              "templateHash": "17388889661434191538"
             }
           },
           "parameters": {
@@ -1950,6 +1950,9 @@
           },
           "VITE_POWERBI_EMBED_URL": {
             "value": "TBD"
+          },
+          "Appversion": {
+            "value": "[variables('appversion')]"
           }
         },
         "template": {
@@ -1958,8 +1961,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "1407596493099151041"
+              "version": "0.31.34.60546",
+              "templateHash": "16594210839276135691"
             }
           },
           "parameters": {
@@ -2332,10 +2335,13 @@
               "metadata": {
                 "description": "Power BI Embed URL"
               }
+            },
+            "Appversion": {
+              "type": "string"
             }
           },
           "variables": {
-            "WebAppImageName": "DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:dev"
+            "WebAppImageName": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:{0}', parameters('Appversion'))]"
           },
           "resources": [
             {
@@ -2600,8 +2606,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.30.23.60470",
-                      "templateHash": "2622922268469466870"
+                      "version": "0.31.34.60546",
+                      "templateHash": "8033637033572984239"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },

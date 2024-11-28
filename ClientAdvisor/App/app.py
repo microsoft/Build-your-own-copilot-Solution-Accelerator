@@ -55,7 +55,6 @@ def create_app():
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
-    # print(app.secret_key)
     return app
 
 
@@ -901,7 +900,6 @@ async def complete_chat_request(request_body, request_headers):
         # answer = "Sample response from Azure Function"
         # Construct the URL of your Azure Function endpoint
         # function_url = STREAMING_AZUREFUNCTION_ENDPOINT
-
         # request_headers = {
         #     "Content-Type": "application/json",
         #     # 'Authorization': 'Bearer YOUR_TOKEN_HERE'  # if applicable

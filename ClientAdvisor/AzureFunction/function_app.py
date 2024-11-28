@@ -18,6 +18,7 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
+
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -34,7 +35,6 @@ search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
 class ChatWithDataPlugin:
     @kernel_function(name="Greeting", description="Respond to any greeting or general questions")
     def greeting(self, input: Annotated[str, "the question"]) -> Annotated[str, "The output is a string"]:
-        
         query = input.split(':::')[0]
         endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
         api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
@@ -72,7 +72,6 @@ class ChatWithDataPlugin:
         query = input
         endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
         api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
-
 
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
@@ -168,7 +167,6 @@ class ChatWithDataPlugin:
         )
 
         query = question
-
         system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
         You have access to the client’s meeting call transcripts.
         If requested for call transcript(s), the response for each transcript should be summarized separately and Ensure all transcripts for the specified client are retrieved and format **must** follow as First Call Summary,Second Call Summary etc.
@@ -259,7 +257,6 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
         api_version=api_version,
         deployment_name=deployment
     )
-
 
     kernel.add_service(ai_service)
 

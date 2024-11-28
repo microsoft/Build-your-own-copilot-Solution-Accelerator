@@ -47,6 +47,7 @@ resource storageAccounts_resource 'Microsoft.Storage/storageAccounts@2022-09-01'
       keySource: 'Microsoft.Storage'
     }
     accessTier: 'Hot'
+    allowSharedKeyAccess: false
   }
 }
 
@@ -93,18 +94,12 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-
-var storageAccountKeys = listKeys(storageAccounts_resource.id, '2021-04-01')
-var storageAccountString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccounts_resource.name};AccountKey=${storageAccounts_resource.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
-
 output storageAccountOutput object = {
   id: storageAccounts_resource.id
   name: saName
   uri: storageAccounts_resource.properties.primaryEndpoints.web  
   dfs: storageAccounts_resource.properties.primaryEndpoints.dfs
   storageAccountName:saName
-  key:storageAccountKeys.keys[0].value
-  connectionString:storageAccountString
   dataContainer:storageAccounts_default_power_platform_dataflows.name
 }
 

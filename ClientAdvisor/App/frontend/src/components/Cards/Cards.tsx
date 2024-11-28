@@ -23,7 +23,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
       setSelectedClientId('')
     }
   },[appStateContext?.state.clientId]);
-  
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
