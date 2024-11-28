@@ -100,6 +100,7 @@ class ChatWithDataPlugin:
         Do not include assets values unless asked for.
         Always use ClientId = {clientid} in the query filter.
         Always return client name in the query.
+        If a question involves date and time, always use FORMAT(YourDateTimeColumn, 'yyyy-MM-dd HH:mm:ss') in the query.
         Only return the generated sql query. do not return anything else''' 
         try:
 
@@ -265,6 +266,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     Only use the client name returned from database in the response.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
+    Always return time in "HH:mm" format for the client in response.
     '''
 
     user_query = query.replace('?',' ')
