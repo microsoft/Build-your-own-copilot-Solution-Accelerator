@@ -100,6 +100,7 @@ class ChatWithDataPlugin:
         Do not include assets values unless asked for.
         Always use ClientId = {clientid} in the query filter.
         Always return client name in the query.
+        If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings including the scheduled time and don't filter with "LIMIT 1"  in the query.
         Only return the generated sql query. do not return anything else''' 
         try:
 
