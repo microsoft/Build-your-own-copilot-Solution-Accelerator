@@ -100,6 +100,11 @@ class ChatWithDataPlugin:
         Do not include assets values unless asked for.
         Always use ClientId = {clientid} in the query filter.
         Always return client name in the query.
+        If asked, provide information on the client's portfolio performance in the query.
+        If asked, provide information about the client's top-performing investments in the query.
+        If asked, provide information about any recent changes in the client's investment allocations in the query.
+        If asked about the client's portfolio performance over the last quarter, calculate the total investment by summing the investment amounts where AssetDate is greater than or equal to the date from one quarter ago using DATEADD(QUARTER, -1, GETDATE()) in the query.
+        If asked about upcoming important dates or deadlines for the client, always ensure that StartTime is greater than the current date. Do not convert the formats of StartTime and EndTime and consistently provide the upcoming dates along with the scheduled times in the query.
         Only return the generated sql query. do not return anything else''' 
         try:
 
