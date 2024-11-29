@@ -378,7 +378,6 @@ a {
   }
 }
 
-
 @media screen and (-ms-high-contrast: active), (forced-colors: active) {
   .chatContainer, .chatMessageError, .chatMessageUserMessage{
       border: 2px solid WindowText;

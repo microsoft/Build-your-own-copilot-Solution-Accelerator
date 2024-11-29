@@ -24,7 +24,7 @@ COPY ./ResearchAssistant/App/requirements.txt /usr/src/app/
 RUN pip install --no-cache-dir -r /usr/src/app/requirements.txt \  
     && rm -rf /root/.cache  
   
-COPY . /usr/src/app/  
+COPY ./ResearchAssistant/App/ /usr/src/app/
 COPY --from=frontend /home/node/app/static  /usr/src/app/static/
 WORKDIR /usr/src/app  
 EXPOSE 80  
