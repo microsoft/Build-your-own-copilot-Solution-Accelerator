@@ -259,13 +259,21 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     settings.max_tokens = 800
     settings.temperature = 0
 
+    # Read the HTML file
+    with open("table.html", "r") as file:
+        html_content = file.read()
+
     system_message = '''you are a helpful assistant to a wealth advisor. 
     Do not answer any questions not related to wealth advisors queries.
     If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
     Only use the client name returned from database in the response.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
+    For any questions requiring a table, always render the table using the following HTML format:
     '''
+ 
+    # Make sure you have the system prompt always at the end to append the html content.
+    system_message += html_content
 
     user_query = query.replace('?',' ')
 
