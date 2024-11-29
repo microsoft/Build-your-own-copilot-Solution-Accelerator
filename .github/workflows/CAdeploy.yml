@@ -109,7 +109,6 @@ jobs:
       - name: Update PowerBI URL
         if: success()
         run: |
-
           set -e
 
           COMMON_PART="-app-service"

@@ -84,4 +84,3 @@ export const UserCard: React.FC<UserCardProps> = ({
 </div>
 );
 };
-
