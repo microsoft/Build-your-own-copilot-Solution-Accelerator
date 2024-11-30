@@ -1476,7 +1476,7 @@ async def ensure_cosmos():
             return jsonify({"error": "CosmosDB is not configured or not working"}), 500
 
         await cosmos_conversation_client.cosmosdb_client.close()
-        return jsonify({"message": "CosmosDB is configured and working"}), 200
+        return jsonify({"message": "CosmosDB is configured and working."}), 200
     except Exception as e:
         logging.exception("Exception in /history/ensure")
         cosmos_exception = str(e)
