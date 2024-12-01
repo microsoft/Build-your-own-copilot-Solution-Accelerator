@@ -4,7 +4,7 @@ openai
 pypdf
 # pyodbc
 # tiktoken
-msal[broker]==1.24.0b1
+msal[broker]==1.31.1
 azure-identity
 azure-ai-textanalytics
 azure-search-documents==11.6.0b3
