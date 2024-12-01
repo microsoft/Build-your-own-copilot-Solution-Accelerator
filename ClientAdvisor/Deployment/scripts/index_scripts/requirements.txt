@@ -7,7 +7,7 @@ pypdf
 msal[broker]==1.24.0b1
 azure-identity
 azure-ai-textanalytics
-azure-search-documents==11.6.0b3
+azure-search-documents==11.6.0b8
 azure-keyvault-secrets
 pandas
 pymssql
