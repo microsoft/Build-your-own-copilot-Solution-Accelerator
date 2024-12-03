@@ -1642,4 +1642,5 @@ def get_users():
         if conn:
             conn.close()
 
+
 app = create_app()
