@@ -4,7 +4,7 @@
 
 azure-functions
 azurefunctions-extensions-http-fastapi==1.0.0b1
-openai==1.6.1
+openai==1.55.3
 semantic_kernel==1.0.4
 pymssql==2.3.0
 azure-search-documents==11.6.0b3
