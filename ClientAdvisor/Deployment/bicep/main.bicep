@@ -13,7 +13,7 @@ param cosmosLocation string
 // param fabricWorkspaceId string
 
 var resourceGroupLocation = resourceGroup().location
-// var resourceGroupName = resourceGroup().name
+var resourceGroupName = resourceGroup().name
 // var subscriptionId  = subscription().subscriptionId
 
 var solutionLocation = resourceGroupLocation
@@ -101,11 +101,12 @@ module uploadFiles 'deploy_upload_files_script.bicep' = {
   dependsOn:[storageAccountModule]
 }
 
-module azureFunctions 'deploy_azure_function.bicep' = {
-  name : 'deploy_azure_function'
+module azureFunctions 'deploy_azure_function_script.bicep' = {
+  name : 'deploy_azure_function_script'
   params:{
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
+    resourceGroupName:resourceGroupName
     azureOpenAIApiKey:azOpenAI.outputs.openAIOutput.openAPIKey
     azureOpenAIApiVersion:'2024-02-15-preview'
     azureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
@@ -116,6 +117,8 @@ module azureFunctions 'deploy_azure_function.bicep' = {
     sqlDbName:sqlDBModule.outputs.sqlDbOutput.sqlDbName
     sqlDbUser:sqlDBModule.outputs.sqlDbOutput.sqlDbUser
     sqlDbPwd:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
+    identity:managedIdentityModule.outputs.managedIdentityOutput.id
+    baseUrl:baseUrl
     functionAppVersion: appversion
   }
   dependsOn:[storageAccountModule]
