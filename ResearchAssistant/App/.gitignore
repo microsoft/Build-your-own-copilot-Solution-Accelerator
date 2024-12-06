@@ -1,4 +1,4 @@
-.venv
+.venv/
 frontend/node_modules
 .env
 # static
