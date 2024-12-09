@@ -1,4 +1,4 @@
-name: Unit Tests - Client Advisor
+name: Unit Tests- Client Advisor
 
 on:
   push:
