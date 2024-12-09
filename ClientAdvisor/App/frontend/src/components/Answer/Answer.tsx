@@ -78,8 +78,6 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
       } else {
         citationFilename = `${citation.filepath} - Part ${part_i}`
       }
-      // } else if (citation.filepath && citation.reindex_id) {
-      //   citationFilename = `${citation.filepath} - Part ${citation.reindex_id}`
     } else {
       citationFilename = `Citation ${index}`
     }
@@ -87,7 +85,6 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
   }
 
   const onLikeResponseClicked = async () => {
-    // if (answer.message_id == undefined) return
     if (answer.message_id) {
       let newFeedbackState = feedbackState
       // Set or unset the thumbs up state
@@ -108,7 +105,6 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
   }
 
   const onDislikeResponseClicked = async () => {
-    //if (answer.message_id == undefined) return
     if (answer.message_id) {
       let newFeedbackState = feedbackState
       if (feedbackState === undefined || feedbackState === Feedback.Neutral || feedbackState === Feedback.Positive) {
@@ -129,7 +125,6 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
   }
 
   const updateFeedbackList = (ev?: FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
-    //if (answer.message_id == undefined) return
     if (answer.message_id){
       const selectedFeedback = (ev?.target as HTMLInputElement)?.id as Feedback
 
@@ -146,7 +141,6 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
   }
 
   const onSubmitNegativeFeedback = async () => {
-    //if (answer.message_id == undefined) return
     if (answer.message_id) {
       await historyMessageFeedback(answer.message_id, negativeFeedbackList.join(','))
       resetFeedbackDialog()

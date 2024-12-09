@@ -18,8 +18,10 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
+
 # Azure Function App
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+
 
 endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
 api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
@@ -39,7 +41,7 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version=api_version
+            api_version="2023-09-01-preview"
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
         try:
@@ -74,7 +76,7 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version=api_version
+            api_version="2023-09-01-preview"
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
 
@@ -102,7 +104,6 @@ class ChatWithDataPlugin:
         If a question involves date and time, always use FORMAT(YourDateTimeColumn, 'yyyy-MM-dd HH:mm:ss') in the query.
         If asked, provide information about client meetings according to the requested timeframe: give details about upcoming meetings if asked for "next" or "upcoming" meetings, and provide details about past meetings if asked for "previous" or "last" meetings including the scheduled time and don't filter with "LIMIT 1"  in the query.
         If asked about the number of past meetings with this client, provide the count of records where the ConversationId is neither null nor an empty string and the EndTime is before the current date in the query.
-        If asked, provide information on the client's investment risk tolerance level in the query.
         If asked, provide information on the client's portfolio performance in the query.
         If asked, provide information about the client's top-performing investments in the query.
         If asked, provide information about any recent changes in the client's investment allocations in the query.
@@ -162,16 +163,16 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint= endpoint, #f"{endpoint}/openai/deployments/{deployment}/extensions", 
             api_key=apikey, 
-            api_version=api_version
+            api_version="2024-02-01"
         )
 
         query = question
-        system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings and provide details on the call transcripts.
-        You have access to the client’s meetings and call transcripts
-        When asked about action items from previous meetings with the client, **ALWAYS provide information only for the most recent dates**.
-        Always return time in "HH:mm" format for the client in response.
+        system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
+        You have access to the client’s meeting call transcripts.
         If requested for call transcript(s), the response for each transcript should be summarized separately and Ensure all transcripts for the specified client are retrieved and format **must** follow as First Call Summary,Second Call Summary etc.
-        Your answer must **not** include any client identifiers or ids or numbers or ClientId in the final response.'''
+        if asked related to count of call transcripts,**Always** respond the total number of sourceurid involved for the {ClientId} consistently, Do never change if question is reframed or contains "so far" or if the case is altered or having first name or full name of the client present with so far or case altered with first name of the client or case altered with first name of client and so far.
+        You can use this information to answer questions about the clients
+        '''
 
         completion = client.chat.completions.create(
             model = deployment,
@@ -273,24 +274,23 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
 
     # Read the HTML file
     with open("table.html", "r") as file:
-        html_content = file.read() 
-
-    system_message = '''you are a helpful assistant to a wealth advisor. 
+        html_content = file.read()
+    
+    system_message = '''you are a helpful assistant to a wealth advisor.
     Do not answer any questions not related to wealth advisors queries.
-    **If the client name in the question does not match the selected client's name**, always return: "Please ask questions only about the selected client." Do not provide any other information.     
     Always consider to give selected client full name only in response and do not use other example names also consider my client means currently selected client.
     If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
     ** Remove any client identifiers or ids or numbers or ClientId in the final response.
     Client name **must be** same  as retrieved from database.
+    Always return time in "HH:mm" format for the client in response.
     '''
     system_message += html_content
    
-    user_query = query.replace('?',' ')
+    user_query = query.replace('?','')
 
     user_query_prompt = f'''{user_query}. Always send clientId as {user_query.split(':::')[-1]} '''
     query_prompt = f'''<message role="system">{system_message}</message><message role="user">{user_query_prompt}</message>'''
-
-
+    
     sk_response = kernel.invoke_prompt_stream(
         function_name="prompt_test",
         plugin_name="weather_test",

@@ -2,12 +2,12 @@ name: Unit Tests- Client Advisor
 
 on:
   push:
-    branches: main
+    branches: [main, dev]
     # Trigger on changes in these specific paths
     paths:
       - 'ClientAdvisor/**'
   pull_request:
-    branches: main
+    branches: [main, dev]
     types:
       - opened
       - ready_for_review
@@ -29,22 +29,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install Backend Dependencies
-        run: |
-          cd ClientAdvisor/App
-          python -m pip install -r requirements.txt
-          python -m pip install coverage pytest-cov
-      - name: Run Backend Tests with Coverage
-        run: |
-          cd ClientAdvisor/App
-          python -m pytest -vv --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=80 --junitxml=coverage-junit.xml
-      - uses: actions/upload-artifact@v4
-        with:
-          name: client-advisor-coverage
-          path: |
-            ClientAdvisor/App/coverage.xml
-            ClientAdvisor/App/coverage-junit.xml
-            ClientAdvisor/App/htmlcov/
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -63,3 +47,20 @@ jobs:
           path: |
             ClientAdvisor/App/frontend/coverage/
             ClientAdvisor/App/frontend/coverage/lcov-report/
+            ClientAdvisor/App/htmlcov/
+      - name: Install Backend Dependencies
+        run: |
+          cd ClientAdvisor/App
+          python -m pip install -r requirements.txt
+          python -m pip install coverage pytest-cov
+      - name: Run Backend Tests with Coverage
+        run: |
+          cd ClientAdvisor/App
+          python -m pytest -vv --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=80 --junitxml=coverage-junit.xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: client-advisor-coverage
+          path: |
+            ClientAdvisor/App/coverage.xml
+            ClientAdvisor/App/coverage-junit.xml
+            ClientAdvisor/App/htmlcov/

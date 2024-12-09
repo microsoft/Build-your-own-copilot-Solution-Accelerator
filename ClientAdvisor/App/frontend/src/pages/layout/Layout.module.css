@@ -30,6 +30,7 @@
   display: flex;
   align-items: flex-end;
   color: #242424;
+  cursor: pointer;
 }
 
 .headerIcon {
@@ -325,3 +326,4 @@
     color: WindowText;
   }
 }
+

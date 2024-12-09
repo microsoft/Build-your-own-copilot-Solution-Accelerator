@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.30.23.60470",
-      "templateHash": "4335964797327276348"
+      "version": "0.31.92.45157",
+      "templateHash": "5323335081815035013"
     }
   },
   "parameters": {
@@ -26,10 +26,9 @@
   },
   "variables": {
     "resourceGroupLocation": "[resourceGroup().location]",
-    "resourceGroupName": "[resourceGroup().name]",
     "solutionLocation": "[variables('resourceGroupLocation')]",
-    "baseUrl": "https://raw.githubusercontent.com/Roopan-Microsoft/psl-byo-main/main/ClientAdvisor/",
-    "functionAppversion": "dev"
+    "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/",
+    "appversion": "latest"
   },
   "resources": [
     {
@@ -56,8 +55,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "8775325455752085588"
+              "version": "0.31.92.45157",
+              "templateHash": "14275103612814336681"
             }
           },
           "parameters": {
@@ -145,8 +144,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "2785991873795581274"
+              "version": "0.31.92.45157",
+              "templateHash": "11252542125482186403"
             }
           },
           "parameters": {
@@ -308,8 +307,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "6504191191293913024"
+              "version": "0.31.92.45157",
+              "templateHash": "9069896720095886117"
             }
           },
           "parameters": {
@@ -373,7 +372,8 @@
                   },
                   "keySource": "Microsoft.Storage"
                 },
-                "accessTier": "Hot"
+                "accessTier": "Hot",
+                "allowSharedKeyAccess": false
               }
             },
             {
@@ -465,8 +465,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "2160762555547388608"
+              "version": "0.31.92.45157",
+              "templateHash": "17433323364688871256"
             }
           },
           "parameters": {
@@ -623,8 +623,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "7447797843632120632"
+              "version": "0.31.92.45157",
+              "templateHash": "5436140332954494822"
             }
           },
           "parameters": {
@@ -705,8 +705,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "1208105245776066647"
+              "version": "0.31.92.45157",
+              "templateHash": "8039754860846909988"
             }
           },
           "parameters": {
@@ -793,8 +793,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "7369022468994960259"
+              "version": "0.31.92.45157",
+              "templateHash": "8396159558351441447"
             }
           },
           "parameters": {
@@ -914,9 +914,6 @@
           "identity": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.id]"
           },
-          "storageAccountKey": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageAccountOutput.value.key]"
-          },
           "baseUrl": {
             "value": "[variables('baseUrl')]"
           }
@@ -927,8 +924,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "6415253687626078091"
+              "version": "0.31.92.45157",
+              "templateHash": "4576939703012923038"
             }
           },
           "parameters": {
@@ -937,9 +934,6 @@
               "metadata": {
                 "description": "Specifies the location for resources."
               }
-            },
-            "storageAccountKey": {
-              "type": "securestring"
             },
             "storageAccountName": {
               "type": "string"
@@ -970,7 +964,7 @@
               "properties": {
                 "azCliVersion": "2.50.0",
                 "primaryScriptUri": "[format('{0}Deployment/scripts/copy_kb_files.sh', parameters('baseUrl'))]",
-                "arguments": "[format('{0} {1} {2} {3}', parameters('storageAccountName'), parameters('containerName'), parameters('storageAccountKey'), parameters('baseUrl'))]",
+                "arguments": "[format('{0} {1} {2}', parameters('storageAccountName'), parameters('containerName'), parameters('baseUrl'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
                 "cleanupPreference": "OnSuccess"
@@ -987,7 +981,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "deploy_azure_function_script",
+      "name": "deploy_azure_function",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -999,9 +993,6 @@
           },
           "solutionLocation": {
             "value": "[variables('solutionLocation')]"
-          },
-          "resourceGroupName": {
-            "value": "[variables('resourceGroupName')]"
           },
           "azureOpenAIApiKey": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai'), '2022-09-01').outputs.openAIOutput.value.openAPIKey]"
@@ -1033,14 +1024,8 @@
           "sqlDbPwd": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbOutput.value.sqlDbPwd]"
           },
-          "identity": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.id]"
-          },
-          "baseUrl": {
-            "value": "[variables('baseUrl')]"
-          },
           "functionAppVersion": {
-            "value": "[variables('functionAppversion')]"
+            "value": "[variables('appversion')]"
           }
         },
         "template": {
@@ -1049,8 +1034,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "7374909295293677257"
+              "version": "0.31.92.45157",
+              "templateHash": "15513736071622247788"
             }
           },
           "parameters": {
@@ -1061,15 +1046,6 @@
               }
             },
             "solutionLocation": {
-              "type": "string"
-            },
-            "resourceGroupName": {
-              "type": "string"
-            },
-            "identity": {
-              "type": "string"
-            },
-            "baseUrl": {
               "type": "string"
             },
             "azureOpenAIApiKey": {
@@ -1106,27 +1082,154 @@
               "type": "string"
             }
           },
+          "variables": {
+            "functionAppName": "[format('{0}fn', parameters('solutionName'))]",
+            "azureOpenAIDeploymentModel": "gpt-4",
+            "azureOpenAIEmbeddingDeployment": "text-embedding-ada-002",
+            "valueOne": "1"
+          },
           "resources": [
             {
-              "type": "Microsoft.Resources/deploymentScripts",
-              "apiVersion": "2020-10-01",
-              "name": "deploy_azure_function",
-              "kind": "AzureCLI",
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2021-04-01",
+              "name": "[format('{0}fnstorage', parameters('solutionName'))]",
               "location": "[parameters('solutionLocation')]",
-              "identity": {
-                "type": "UserAssigned",
-                "userAssignedIdentities": {
-                  "[format('{0}', parameters('identity'))]": {}
-                }
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "kind": "StorageV2",
+              "properties": {
+                "allowSharedKeyAccess": false
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2022-10-01",
+              "name": "[format('workspace-{0}', parameters('solutionName'))]",
+              "location": "[parameters('solutionLocation')]"
+            },
+            {
+              "type": "Microsoft.Insights/components",
+              "apiVersion": "2020-02-02",
+              "name": "[variables('functionAppName')]",
+              "location": "[parameters('solutionLocation')]",
+              "kind": "web",
+              "properties": {
+                "Application_Type": "web",
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled",
+                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName')))]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.App/managedEnvironments",
+              "apiVersion": "2022-06-01-preview",
+              "name": "[format('{0}env', parameters('solutionName'))]",
+              "location": "[parameters('solutionLocation')]",
+              "sku": {
+                "name": "Consumption"
               },
               "properties": {
-                "azCliVersion": "2.50.0",
-                "primaryScriptUri": "[format('{0}Deployment/scripts/create_azure_functions.sh', parameters('baseUrl'))]",
-                "arguments": "[format('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14}', parameters('solutionName'), parameters('solutionLocation'), parameters('resourceGroupName'), parameters('baseUrl'), parameters('azureOpenAIApiKey'), parameters('azureOpenAIApiVersion'), parameters('azureOpenAIEndpoint'), parameters('azureSearchAdminKey'), parameters('azureSearchServiceEndpoint'), parameters('azureSearchIndex'), parameters('sqlServerName'), parameters('sqlDbName'), parameters('sqlDbUser'), parameters('sqlDbPwd'), parameters('functionAppVersion'))]",
-                "timeout": "PT1H",
-                "retentionInterval": "PT1H",
-                "cleanupPreference": "OnSuccess"
-              }
+                "appLogsConfiguration": {
+                  "destination": "log-analytics",
+                  "logAnalyticsConfiguration": {
+                    "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName'))), '2022-10-01').customerId]",
+                    "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName'))), '2022-10-01').primarySharedKey]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Web/sites",
+              "apiVersion": "2024-04-01",
+              "name": "[variables('functionAppName')]",
+              "location": "[parameters('solutionLocation')]",
+              "kind": "functionapp",
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', format('{0}env', parameters('solutionName')))]",
+                "siteConfig": {
+                  "linuxFxVersion": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-fn:{0}', parameters('functionAppVersion'))]",
+                  "appSettings": [
+                    {
+                      "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                      "value": "[reference(resourceId('Microsoft.Insights/components', variables('functionAppName')), '2015-05-01').InstrumentationKey]"
+                    },
+                    {
+                      "name": "AZURE_OPEN_AI_API_KEY",
+                      "value": "[parameters('azureOpenAIApiKey')]"
+                    },
+                    {
+                      "name": "AZURE_OPEN_AI_DEPLOYMENT_MODEL",
+                      "value": "[variables('azureOpenAIDeploymentModel')]"
+                    },
+                    {
+                      "name": "AZURE_OPEN_AI_ENDPOINT",
+                      "value": "[parameters('azureOpenAIEndpoint')]"
+                    },
+                    {
+                      "name": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
+                      "value": "[variables('azureOpenAIEmbeddingDeployment')]"
+                    },
+                    {
+                      "name": "OPENAI_API_VERSION",
+                      "value": "[parameters('azureOpenAIApiVersion')]"
+                    },
+                    {
+                      "name": "AZURE_AI_SEARCH_API_KEY",
+                      "value": "[parameters('azureSearchAdminKey')]"
+                    },
+                    {
+                      "name": "AZURE_AI_SEARCH_ENDPOINT",
+                      "value": "[parameters('azureSearchServiceEndpoint')]"
+                    },
+                    {
+                      "name": "AZURE_SEARCH_INDEX",
+                      "value": "[parameters('azureSearchIndex')]"
+                    },
+                    {
+                      "name": "PYTHON_ENABLE_INIT_INDEXING",
+                      "value": "[variables('valueOne')]"
+                    },
+                    {
+                      "name": "PYTHON_ISOLATE_WORKER_DEPENDENCIES",
+                      "value": "[variables('valueOne')]"
+                    },
+                    {
+                      "name": "SQLDB_CONNECTION_STRING",
+                      "value": "TBD"
+                    },
+                    {
+                      "name": "SQLDB_SERVER",
+                      "value": "[parameters('sqlServerName')]"
+                    },
+                    {
+                      "name": "SQLDB_DATABASE",
+                      "value": "[parameters('sqlDbName')]"
+                    },
+                    {
+                      "name": "SQLDB_USERNAME",
+                      "value": "[parameters('sqlDbUser')]"
+                    },
+                    {
+                      "name": "SQLDB_PASSWORD",
+                      "value": "[parameters('sqlDbPwd')]"
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Insights/components', variables('functionAppName'))]",
+                "[resourceId('Microsoft.App/managedEnvironments', format('{0}env', parameters('solutionName')))]"
+              ]
             }
           ]
         }
@@ -1134,7 +1237,6 @@
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai')]",
         "[resourceId('Microsoft.Resources/deployments', 'deploy_ai_search_service')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account')]"
       ]
@@ -1162,8 +1264,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "12066912124638066503"
+              "version": "0.31.92.45157",
+              "templateHash": "9449321404712906545"
             }
           },
           "parameters": {
@@ -1191,7 +1293,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'deploy_azure_function_script')]",
+        "[resourceId('Microsoft.Resources/deployments', 'deploy_azure_function')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]"
       ]
     },
@@ -1223,9 +1325,6 @@
           },
           "adlsAccountName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageAccountOutput.value.storageAccountName]"
-          },
-          "adlsAccountKey": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageAccountOutput.value.key]"
           },
           "azureOpenAIApiKey": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai'), '2022-09-01').outputs.openAIOutput.value.openAPIKey]"
@@ -1279,8 +1378,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "16513457206594462189"
+              "version": "0.31.92.45157",
+              "templateHash": "66098434643239722"
             }
           },
           "parameters": {
@@ -1405,9 +1504,6 @@
             "adlsAccountName": {
               "type": "string"
             },
-            "adlsAccountKey": {
-              "type": "securestring"
-            },
             "azureOpenAIApiKey": {
               "type": "securestring"
             },
@@ -1530,17 +1626,6 @@
               "name": "[format('{0}/{1}', parameters('kvName'), 'ADLS-ACCOUNT-NAME')]",
               "properties": {
                 "value": "[parameters('adlsAccountName')]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('kvName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.KeyVault/vaults/secrets",
-              "apiVersion": "2021-11-01-preview",
-              "name": "[format('{0}/{1}', parameters('kvName'), 'ADLS-ACCOUNT-KEY')]",
-              "properties": {
-                "value": "[parameters('adlsAccountKey')]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.KeyVault/vaults', parameters('kvName'))]"
@@ -1785,8 +1870,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "17279604675307278350"
+              "version": "0.31.92.45157",
+              "templateHash": "5707240720200724295"
             }
           },
           "parameters": {
@@ -1972,6 +2057,9 @@
           },
           "VITE_POWERBI_EMBED_URL": {
             "value": "TBD"
+          },
+          "Appversion": {
+            "value": "[variables('appversion')]"
           }
         },
         "template": {
@@ -1980,8 +2068,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "3306232384194992378"
+              "version": "0.31.92.45157",
+              "templateHash": "15940154560282078894"
             }
           },
           "parameters": {
@@ -2354,10 +2442,13 @@
               "metadata": {
                 "description": "Power BI Embed URL"
               }
+            },
+            "Appversion": {
+              "type": "string"
             }
           },
           "variables": {
-            "WebAppImageName": "DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:dev"
+            "WebAppImageName": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:{0}', parameters('Appversion'))]"
           },
           "resources": [
             {
@@ -2599,72 +2690,6 @@
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "cosmos-sql-role-definition",
-              "properties": {
-                "expressionEvaluationOptions": {
-                  "scope": "inner"
-                },
-                "mode": "Incremental",
-                "parameters": {
-                  "accountName": {
-                    "value": "[parameters('AZURE_COSMOSDB_ACCOUNT')]"
-                  }
-                },
-                "template": {
-                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                  "contentVersion": "1.0.0.0",
-                  "metadata": {
-                    "_generator": {
-                      "name": "bicep",
-                      "version": "0.30.23.60470",
-                      "templateHash": "17906960830343188834"
-                    },
-                    "description": "Creates a SQL role definition under an Azure Cosmos DB account."
-                  },
-                  "parameters": {
-                    "accountName": {
-                      "type": "string"
-                    }
-                  },
-                  "resources": [
-                    {
-                      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
-                      "apiVersion": "2022-08-15",
-                      "name": "[format('{0}/{1}', parameters('accountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), parameters('accountName'), 'sql-role'))]",
-                      "properties": {
-                        "assignableScopes": [
-                          "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName'))]"
-                        ],
-                        "permissions": [
-                          {
-                            "dataActions": [
-                              "Microsoft.DocumentDB/databaseAccounts/readMetadata",
-                              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*",
-                              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*"
-                            ],
-                            "notDataActions": []
-                          }
-                        ],
-                        "roleName": "Reader Writer",
-                        "type": "CustomRole"
-                      }
-                    }
-                  ],
-                  "outputs": {
-                    "id": {
-                      "type": "string",
-                      "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('accountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), parameters('accountName'), 'sql-role'))]"
-                    }
-                  }
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
               "name": "[format('cosmos-sql-user-role-{0}', parameters('WebsiteName'))]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -2676,7 +2701,7 @@
                     "value": "[parameters('AZURE_COSMOSDB_ACCOUNT')]"
                   },
                   "roleDefinitionId": {
-                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-sql-role-definition'), '2022-09-01').outputs.id.value]"
+                    "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', split(format('{0}/00000000-0000-0000-0000-000000000002', parameters('AZURE_COSMOSDB_ACCOUNT')), '/')[0], split(format('{0}/00000000-0000-0000-0000-000000000002', parameters('AZURE_COSMOSDB_ACCOUNT')), '/')[1])]"
                   },
                   "principalId": {
                     "value": "[reference(resourceId('Microsoft.Web/sites', parameters('WebsiteName')), '2020-06-01', 'full').identity.principalId]"
@@ -2688,8 +2713,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.30.23.60470",
-                      "templateHash": "2622922268469466870"
+                      "version": "0.31.92.45157",
+                      "templateHash": "17264897636350402451"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },
@@ -2720,7 +2745,6 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'cosmos-sql-role-definition')]",
                 "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
               ]
             }

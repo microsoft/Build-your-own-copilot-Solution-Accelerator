@@ -43,8 +43,7 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({ activeCitation, Is
         <ReactMarkdown
           linkTarget="_blank"
           className={styles.citationPanelContent}
-          //children={DOMPurify.sanitize(activeCitation.content, { ALLOWED_TAGS: XSSAllowTags })}
-          children={activeCitation.content}
+          children={DOMPurify.sanitize(activeCitation.content, { ALLOWED_TAGS: XSSAllowTags })}
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw]}
         />

@@ -13,12 +13,12 @@ param cosmosLocation string
 // param fabricWorkspaceId string
 
 var resourceGroupLocation = resourceGroup().location
-var resourceGroupName = resourceGroup().name
+// var resourceGroupName = resourceGroup().name
 // var subscriptionId  = subscription().subscriptionId
 
 var solutionLocation = resourceGroupLocation
-var baseUrl = 'https://raw.githubusercontent.com/Roopan-Microsoft/psl-byo-main/main/ClientAdvisor/'
-var functionAppversion = 'dev'
+var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/'
+var appversion = 'latest'
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
@@ -96,18 +96,16 @@ module uploadFiles 'deploy_upload_files_script.bicep' = {
     solutionLocation: solutionLocation
     containerName:storageAccountModule.outputs.storageAccountOutput.dataContainer
     identity:managedIdentityModule.outputs.managedIdentityOutput.id
-    storageAccountKey:storageAccountModule.outputs.storageAccountOutput.key
     baseUrl:baseUrl
   }
   dependsOn:[storageAccountModule]
 }
 
-module azureFunctions 'deploy_azure_function_script.bicep' = {
-  name : 'deploy_azure_function_script'
+module azureFunctions 'deploy_azure_function.bicep' = {
+  name : 'deploy_azure_function'
   params:{
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
-    resourceGroupName:resourceGroupName
     azureOpenAIApiKey:azOpenAI.outputs.openAIOutput.openAPIKey
     azureOpenAIApiVersion:'2024-02-15-preview'
     azureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
@@ -118,9 +116,7 @@ module azureFunctions 'deploy_azure_function_script.bicep' = {
     sqlDbName:sqlDBModule.outputs.sqlDbOutput.sqlDbName
     sqlDbUser:sqlDBModule.outputs.sqlDbOutput.sqlDbUser
     sqlDbPwd:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
-    identity:managedIdentityModule.outputs.managedIdentityOutput.id
-    baseUrl:baseUrl
-    functionAppVersion: functionAppversion
+    functionAppVersion: appversion
   }
   dependsOn:[storageAccountModule]
 }
@@ -146,7 +142,6 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
     tenantId: subscription().tenantId
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
     adlsAccountName:storageAccountModule.outputs.storageAccountOutput.storageAccountName
-    adlsAccountKey:storageAccountModule.outputs.storageAccountOutput.key
     azureOpenAIApiKey:azOpenAI.outputs.openAIOutput.openAPIKey
     azureOpenAIApiVersion:'2024-02-15-preview'
     azureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
@@ -238,6 +233,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosOutput.cosmosDatabaseName
     AZURE_COSMOSDB_ENABLE_FEEDBACK: 'True'
     VITE_POWERBI_EMBED_URL: 'TBD'
+    Appversion: appversion
   }
   scope: resourceGroup(resourceGroup().name)
   dependsOn:[azOpenAI,azAIMultiServiceAccount,azSearchService,sqlDBModule,azureFunctionURL,cosmosDBModule]
