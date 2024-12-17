@@ -172,7 +172,7 @@ AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS = os.environ.get(
     "AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS"
 )
 
-SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
+SHOULD_STREAM = AZURE_OPENAI_STREAM.lower() == "true"
 
 # Chat History CosmosDB Integration Settings
 AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
@@ -373,7 +373,7 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
 
         return azure_openai_client
     except Exception as e:
-        logging.exception("Exception in Azure OpenAI initialization", e)
+        logging.exception("Exception in Azure OpenAI initialization", exc_info=True)
         azure_openai_client = None
         raise e
 
@@ -399,7 +399,7 @@ def init_cosmosdb_client():
                 enable_message_feedback=AZURE_COSMOSDB_ENABLE_FEEDBACK,
             )
         except Exception as e:
-            logging.exception("Exception in CosmosDB initialization", e)
+            logging.exception("Exception in CosmosDB initialization", exc_info=True)
             cosmos_conversation_client = None
             raise e
     else:
@@ -473,7 +473,7 @@ def get_configured_data_source():
                     ),
                 },
                 "in_scope": (
-                    True if AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False
+                    AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true"
                 ),
                 "top_n_documents": (
                     int(AZURE_SEARCH_TOP_K) if AZURE_SEARCH_TOP_K else int(SEARCH_TOP_K)
@@ -534,9 +534,8 @@ def get_configured_data_source():
                     ),
                 },
                 "in_scope": (
-                    True
-                    if AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN.lower() == "true"
-                    else False
+                    
+                    AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN.lower() == "true"
                 ),
                 "top_n_documents": (
                     int(AZURE_COSMOSDB_MONGO_VCORE_TOP_K)
@@ -591,7 +590,7 @@ def get_configured_data_source():
                     ),
                 },
                 "in_scope": (
-                    True if ELASTICSEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False
+                    ELASTICSEARCH_ENABLE_IN_DOMAIN.lower() == "true"
                 ),
                 "top_n_documents": (
                     int(ELASTICSEARCH_TOP_K)
@@ -643,7 +642,7 @@ def get_configured_data_source():
                     ),
                 },
                 "in_scope": (
-                    True if AZURE_MLINDEX_ENABLE_IN_DOMAIN.lower() == "true" else False
+                    AZURE_MLINDEX_ENABLE_IN_DOMAIN.lower() == "true"
                 ),
                 "top_n_documents": (
                     int(AZURE_MLINDEX_TOP_K)
@@ -688,7 +687,7 @@ def get_configured_data_source():
                     ),
                 },
                 "in_scope": (
-                    True if PINECONE_ENABLE_IN_DOMAIN.lower() == "true" else False
+                    PINECONE_ENABLE_IN_DOMAIN.lower() == "true"
                 ),
                 "top_n_documents": (
                     int(PINECONE_TOP_K) if PINECONE_TOP_K else int(SEARCH_TOP_K)

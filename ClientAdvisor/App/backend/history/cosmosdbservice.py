@@ -27,8 +27,7 @@ class CosmosConversationClient:
         except exceptions.CosmosHttpResponseError as e:
             if e.status_code == 401:
                 raise ValueError("Invalid credentials") from e
-            else:
-                raise ValueError("Invalid CosmosDB endpoint") from e
+            raise ValueError("Invalid CosmosDB endpoint") from e
 
         try:
             self.database_client = self.cosmosdb_client.get_database_client(
