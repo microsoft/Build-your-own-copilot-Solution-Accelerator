@@ -24,3 +24,6 @@ disable=
 
 [TYPECHECK]
 generated-members=get_bearer_token_provider
+
+[FORMAT]
+max-module-lines=1700

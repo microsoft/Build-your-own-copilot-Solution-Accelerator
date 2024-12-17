@@ -19,7 +19,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r ClientAdvisor/App/requirements.txt
         pip install -r ResearchAssistant/App/requirements.txt
-        pip install pylint flake8 azure-identity
+        pip install pylint flake8 azure-identity pymssql
     - name: Run flake8 and pylint
       run: |
         flake8 --config=ClientAdvisor/App/.flake8 ClientAdvisor/App
