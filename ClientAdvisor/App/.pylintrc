@@ -3,10 +3,13 @@ ignore=tests  ; Ignore tests folder globally.
 
 [MESSAGES CONTROL]
 disable=
-    missing-module-docstring,      ; Ignore missing module docstrings
-    missing-class-docstring,       ; Ignore missing class docstrings
-    missing-function-docstring,    ; Ignore missing function/method docstrings
-    redefined-outer-name,          ; Ignore redefined variable warnings
-    invalid-name,                  ; Ignore naming convention warnings
-    unspecified-encoding,          ; Ignore open() encoding warnings
-    pointless-string-statement     ; Ignore pointless string warnings
+    line-too-long,                 # Disable long line warnings
+    missing-module-docstring,      # Ignore missing module docstrings
+    missing-function-docstring,    # Ignore missing function docstrings
+    too-many-lines,                # Ignore too many lines in module
+    unused-argument,               # Ignore unused arguments
+    broad-exception-caught,        # Ignore broad exception catching
+    broad-exception-raised,        # Ignore broad exceptions being raised
+    redefined-builtin,             # Ignore redefined built-in names
+    logging-too-many-args,         # Ignore excessive arguments in logging
+    unnecessary-comprehension      # Ignore unnecessary comprehensions
