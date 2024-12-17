@@ -3,31 +3,32 @@ ignore=tests  ; Ignore the tests folder globally.
 
 [MESSAGES CONTROL]
 disable=
-    invalid-name,                  # Ignore naming style errors (C0103)
-    line-too-long,                 # Ignore line too long errors (C0301)
-    missing-function-docstring,    # Ignore missing function docstrings (C0116)
-    missing-class-docstring,       # Ignore missing class docstrings (C0115)
-    missing-module-docstring,      # Ignore missing module docstrings (C0114)
-    redefined-outer-name,          # Ignore redefined variables warnings (W0621)
-    broad-exception-raised,        # Ignore broad exception raised warnings (W0719)
-    broad-exception-caught,        # Ignore broad exception caught warnings (W0718)
-    too-many-arguments,            # Ignore too many arguments warnings (R0913)
-    too-many-locals,               # Ignore too many local variables warnings (R0914)
-    too-many-return-statements,    # Ignore too many return statements warnings (R0911)
-    too-many-branches,             # Ignore too many branches warnings (R0912)
-    unused-argument,               # Ignore unused arguments warnings (W0613)
-    unspecified-encoding,          # Ignore unspecified encoding in open() (W1514)
-    logging-fstring-interpolation, # Ignore lazy formatting warnings (W1203)
-    missing-timeout,               # Ignore missing timeout in requests.get (W3101)
-    no-else-return,                # Ignore unnecessary else after return (R1705)
-    fixme,                         # Ignore TODO comments (W0511)
-    pointless-string-statement,    # Ignore pointless string statements (W0105)
-    no-name-in-module,             # Ignore unresolved module warnings (E0611)
-    no-member                      # Ignore no member warnings in external modules (E1101)
+    global-statement,              # W0603: Ignore usage of global statements
+    redefined-builtin,             # W0622: Ignore redefining built-in names
+    too-many-instance-attributes,  # R0902: Ignore too many instance attributes
+    too-many-positional-arguments, # R0917: Ignore too many positional arguments
+    raise-missing-from,            # W0707: Ignore explicit re-raising
+    import-outside-toplevel,       # C0415: Ignore imports outside top-level
+    unnecessary-comprehension,     # R1721: Ignore unnecessary comprehensions
+    no-value-for-parameter,        # E1120: Ignore missing arguments in function calls
+    invalid-name,                  # C0103: Ignore naming style errors
+    line-too-long,                 # C0301: Ignore long lines
+    missing-function-docstring,    # C0116: Ignore missing function docstrings
+    missing-class-docstring,       # C0115: Ignore missing class docstrings
+    missing-module-docstring,      # C0114: Ignore missing module docstrings
+    broad-exception-raised,        # W0719: Ignore broad exception raised
+    broad-exception-caught,        # W0718: Ignore broad exception caught
+    too-many-arguments,            # R0913: Ignore too many arguments
+    too-many-locals,               # R0914: Ignore too many local variables
+    too-many-return-statements,    # R0911: Ignore too many return statements
+    too-many-branches,             # R0912: Ignore too many branches
+    unspecified-encoding,          # W1514: Ignore unspecified encoding in open()
+    pointless-string-statement,    # W0105: Ignore pointless string statements
+    missing-timeout                # W3101: Ignore missing timeout in requests.get
 
 [TYPECHECK]
 generated-members=get_bearer_token_provider
 
 [FORMAT]
-max-module-lines=1700              # Increase module line limit to 1700
-max-line-length=160                # Increase allowed line length to 160
+max-module-lines=1700              # Allow larger modules up to 1700 lines
+max-line-length=160                # Increase line length to 160
