@@ -534,7 +534,6 @@ def get_configured_data_source():
                     ),
                 },
                 "in_scope": (
-                    
                     AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN.lower() == "true"
                 ),
                 "top_n_documents": (
