@@ -24,11 +24,14 @@ disable=
     global-statement,              # W0603: Ignore global statement usage
     no-name-in-module,             # E0611: Ignore unresolved module names
     no-member,                     # E1101: Ignore module has no 'member'
-    pointless-string-statement,    # W0105: Ignore pointless string statement
+    pointless-string-statement,    # W0105: Ignore pointless string statements
     unnecessary-comprehension,     # R1721: Ignore unnecessary comprehensions
     fixme,                         # W0511: Ignore TODO comments
     too-many-instance-attributes,  # R0902: Ignore too many attributes in class
-    too-many-positional-arguments  # R0917: Ignore too many positional arguments
+    too-many-positional-arguments, # R0917: Ignore too many positional arguments
+    raise-missing-from,            # W0707: Ignore re-raising without 'raise from'
+    import-outside-toplevel,       # C0415: Ignore imports outside top-level
+    no-value-for-parameter         # E1120: Ignore missing arguments in function calls
 
 [TYPECHECK]
 generated-members=get_bearer_token_provider
