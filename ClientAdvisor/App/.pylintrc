@@ -20,7 +20,8 @@ disable=
     logging-fstring-interpolation, # Ignore lazy formatting warnings (W1203)
     missing-timeout,               # Ignore missing timeout in requests.get (W3101)
     no-else-return,                # Ignore unnecessary else after return (R1705)
-    fixme                          # Ignore TODO comments (W0511)
+    fixme,                          # Ignore TODO comments (W0511)
+    pointless-string-statement
 
 [TYPECHECK]
 generated-members=get_bearer_token_provider
