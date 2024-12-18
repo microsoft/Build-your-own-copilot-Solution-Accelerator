@@ -8,22 +8,31 @@ from types import SimpleNamespace
 
 import httpx
 import requests
-from azure.identity.aio import (DefaultAzureCredential,
-                                get_bearer_token_provider)
+from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider
+from backend.auth.auth_utils import get_authenticated_user_details, get_tenantid
+from backend.history.cosmosdbservice import CosmosConversationClient
+from backend.utils import (
+    convert_to_pf_format,
+    format_as_ndjson,
+    format_pf_non_streaming_response,
+    format_stream_response,
+    generateFilterString,
+    parse_multi_columns,
+)
+from db import get_connection
 from dotenv import load_dotenv
+
 # from quart.sessions import SecureCookieSessionInterface
 from openai import AsyncAzureOpenAI
-from quart import (Blueprint, Quart, jsonify, make_response, render_template,
-                   request, send_from_directory)
-
-from backend.auth.auth_utils import (get_authenticated_user_details,
-                                     get_tenantid)
-from backend.history.cosmosdbservice import CosmosConversationClient
-from backend.utils import (convert_to_pf_format, format_as_ndjson,
-                           format_pf_non_streaming_response,
-                           format_stream_response, generateFilterString,
-                           parse_multi_columns)
-from db import get_connection
+from quart import (
+    Blueprint,
+    Quart,
+    jsonify,
+    make_response,
+    render_template,
+    request,
+    send_from_directory,
+)
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
@@ -472,9 +481,7 @@ def get_configured_data_source():
                         else []
                     ),
                 },
-                "in_scope": (
-                    AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true"
-                ),
+                "in_scope": (AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true"),
                 "top_n_documents": (
                     int(AZURE_SEARCH_TOP_K) if AZURE_SEARCH_TOP_K else int(SEARCH_TOP_K)
                 ),
@@ -588,9 +595,7 @@ def get_configured_data_source():
                         else []
                     ),
                 },
-                "in_scope": (
-                    ELASTICSEARCH_ENABLE_IN_DOMAIN.lower() == "true"
-                ),
+                "in_scope": (ELASTICSEARCH_ENABLE_IN_DOMAIN.lower() == "true"),
                 "top_n_documents": (
                     int(ELASTICSEARCH_TOP_K)
                     if ELASTICSEARCH_TOP_K
@@ -640,9 +645,7 @@ def get_configured_data_source():
                         else []
                     ),
                 },
-                "in_scope": (
-                    AZURE_MLINDEX_ENABLE_IN_DOMAIN.lower() == "true"
-                ),
+                "in_scope": (AZURE_MLINDEX_ENABLE_IN_DOMAIN.lower() == "true"),
                 "top_n_documents": (
                     int(AZURE_MLINDEX_TOP_K)
                     if AZURE_MLINDEX_TOP_K
@@ -685,9 +688,7 @@ def get_configured_data_source():
                         else []
                     ),
                 },
-                "in_scope": (
-                    PINECONE_ENABLE_IN_DOMAIN.lower() == "true"
-                ),
+                "in_scope": (PINECONE_ENABLE_IN_DOMAIN.lower() == "true"),
                 "top_n_documents": (
                     int(PINECONE_TOP_K) if PINECONE_TOP_K else int(SEARCH_TOP_K)
                 ),

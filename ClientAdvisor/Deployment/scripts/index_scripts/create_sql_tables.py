@@ -1,47 +1,51 @@
-key_vault_name = 'kv_to-be-replaced'
+key_vault_name = "kv_to-be-replaced"
 
-import pandas as pd
-import pymssql
 import os
 from datetime import datetime
 
-from azure.keyvault.secrets import SecretClient  
-from azure.identity import DefaultAzureCredential 
+import pandas as pd
+import pymssql
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+
 
 def get_secrets_from_kv(kv_name, secret_name):
-    key_vault_name = kv_name  # Set the name of the Azure Key Vault  
+    key_vault_name = kv_name  # Set the name of the Azure Key Vault
     credential = DefaultAzureCredential()
-    secret_client = SecretClient(vault_url=f"https://{key_vault_name}.vault.azure.net/", credential=credential)  # Create a secret client object using the credential and Key Vault name  
-    return(secret_client.get_secret(secret_name).value) # Retrieve the secret value  
+    secret_client = SecretClient(
+        vault_url=f"https://{key_vault_name}.vault.azure.net/", credential=credential
+    )  # Create a secret client object using the credential and Key Vault name
+    return secret_client.get_secret(secret_name).value  # Retrieve the secret value
 
-server = get_secrets_from_kv(key_vault_name,"SQLDB-SERVER")
-database = get_secrets_from_kv(key_vault_name,"SQLDB-DATABASE")
-username = get_secrets_from_kv(key_vault_name,"SQLDB-USERNAME")
-password = get_secrets_from_kv(key_vault_name,"SQLDB-PASSWORD")
+
+server = get_secrets_from_kv(key_vault_name, "SQLDB-SERVER")
+database = get_secrets_from_kv(key_vault_name, "SQLDB-DATABASE")
+username = get_secrets_from_kv(key_vault_name, "SQLDB-USERNAME")
+password = get_secrets_from_kv(key_vault_name, "SQLDB-PASSWORD")
 
 conn = pymssql.connect(server, username, password, database)
 cursor = conn.cursor()
 
-from azure.storage.filedatalake import (
-    DataLakeServiceClient
-)
+from azure.storage.filedatalake import DataLakeServiceClient
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
 credential = DefaultAzureCredential()
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 
-service_client = DataLakeServiceClient(account_url, credential=credential,api_version='2023-01-03') 
+service_client = DataLakeServiceClient(
+    account_url, credential=credential, api_version="2023-01-03"
+)
 
 file_system_client_name = "data"
-directory = 'clientdata' 
+directory = "clientdata"
 
-file_system_client = service_client.get_file_system_client(file_system_client_name)  
+file_system_client = service_client.get_file_system_client(file_system_client_name)
 directory_name = directory
 
 cursor = conn.cursor()
 
-cursor.execute('DROP TABLE IF EXISTS Clients')
+cursor.execute("DROP TABLE IF EXISTS Clients")
 conn.commit()
 
 create_client_sql = """CREATE TABLE Clients (
@@ -56,13 +60,23 @@ cursor.execute(create_client_sql)
 conn.commit()
 
 # Read the CSV file into a Pandas DataFrame
-file_path = directory + '/Clients.csv'
+file_path = directory + "/Clients.csv"
 file_client = file_system_client.get_file_client(file_path)
 csv_file = file_client.download_file()
-df = pd.read_csv(csv_file, encoding='utf-8')
+df = pd.read_csv(csv_file, encoding="utf-8")
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO Clients (ClientId,Client, Email, Occupation, MaritalStatus, Dependents) VALUES (%s,%s,%s,%s,%s,%s)", (item.ClientId, item.Client, item.Email, item.Occupation, item.MaritalStatus, item.Dependents))
+    cursor.execute(
+        f"INSERT INTO Clients (ClientId,Client, Email, Occupation, MaritalStatus, Dependents) VALUES (%s,%s,%s,%s,%s,%s)",
+        (
+            item.ClientId,
+            item.Client,
+            item.Email,
+            item.Occupation,
+            item.MaritalStatus,
+            item.Dependents,
+        ),
+    )
 conn.commit()
 
 
@@ -90,15 +104,15 @@ cursor = conn.cursor()
 # csv_file = file_client.download_file()
 # df = pd.read_csv(csv_file, encoding='utf-8')
 
-# for index, item in df.iterrows():    
+# for index, item in df.iterrows():
 #     cursor.execute(f"INSERT INTO ClientInvestmentPortfolio (ClientId, AssetDate, AssetType, Investment, ROI, RevenueWithoutStrategy) VALUES (%s,%s, %s,%s, %s, %s)", (item.ClientId, item.AssetDate, item.AssetType, item.Investment, item.ROI, item.RevenueWithoutStrategy))
-    
+
 # conn.commit()
 
 
 from decimal import Decimal
 
-cursor.execute('DROP TABLE IF EXISTS Assets')
+cursor.execute("DROP TABLE IF EXISTS Assets")
 conn.commit()
 
 create_assets_sql = """CREATE TABLE Assets (
@@ -113,34 +127,44 @@ create_assets_sql = """CREATE TABLE Assets (
 cursor.execute(create_assets_sql)
 conn.commit()
 
-file_path = directory + '/Assets.csv'
+file_path = directory + "/Assets.csv"
 file_client = file_system_client.get_file_client(file_path)
 csv_file = file_client.download_file()
-df = pd.read_csv(csv_file, encoding='utf-8')
+df = pd.read_csv(csv_file, encoding="utf-8")
 
 # # to adjust the dates to current date
-df['AssetDate'] = pd.to_datetime(df['AssetDate'])
+df["AssetDate"] = pd.to_datetime(df["AssetDate"])
 today = datetime.today()
-days_difference = (today - max(df['AssetDate'])).days - 30
-months_difference = int(days_difference/30)
+days_difference = (today - max(df["AssetDate"])).days - 30
+months_difference = int(days_difference / 30)
 # print(months_difference)
 # df['AssetDate'] = df['AssetDate'] + pd.Timedelta(days=days_difference)
-df['AssetDate'] = df['AssetDate'] + pd.DateOffset(months=months_difference)
+df["AssetDate"] = df["AssetDate"] + pd.DateOffset(months=months_difference)
 
-df['AssetDate'] = pd.to_datetime(df['AssetDate'], format='%m/%d/%Y') #   %Y-%m-%d')
-df['ClientId'] = df['ClientId'].astype(int)
-df['Investment'] = df['Investment'].astype(float)
-df['ROI'] = df['ROI'].astype(float)
-df['Revenue'] = df['Revenue'].astype(float)
+df["AssetDate"] = pd.to_datetime(df["AssetDate"], format="%m/%d/%Y")  #   %Y-%m-%d')
+df["ClientId"] = df["ClientId"].astype(int)
+df["Investment"] = df["Investment"].astype(float)
+df["ROI"] = df["ROI"].astype(float)
+df["Revenue"] = df["Revenue"].astype(float)
 
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO Assets (ClientId,AssetDate, Investment, ROI, Revenue, AssetType) VALUES (%s,%s,%s,%s,%s,%s)", (item.ClientId, item.AssetDate, item.Investment, item.ROI, item.Revenue, item.AssetType))
+    cursor.execute(
+        f"INSERT INTO Assets (ClientId,AssetDate, Investment, ROI, Revenue, AssetType) VALUES (%s,%s,%s,%s,%s,%s)",
+        (
+            item.ClientId,
+            item.AssetDate,
+            item.Investment,
+            item.ROI,
+            item.Revenue,
+            item.AssetType,
+        ),
+    )
 conn.commit()
 
 
-#InvestmentGoals
-cursor.execute('DROP TABLE IF EXISTS InvestmentGoals')
+# InvestmentGoals
+cursor.execute("DROP TABLE IF EXISTS InvestmentGoals")
 conn.commit()
 
 create_ig_sql = """CREATE TABLE InvestmentGoals (
@@ -151,19 +175,22 @@ create_ig_sql = """CREATE TABLE InvestmentGoals (
 cursor.execute(create_ig_sql)
 conn.commit()
 
-file_path = directory + '/InvestmentGoals.csv'
+file_path = directory + "/InvestmentGoals.csv"
 file_client = file_system_client.get_file_client(file_path)
 csv_file = file_client.download_file()
-df = pd.read_csv(csv_file, encoding='utf-8')
+df = pd.read_csv(csv_file, encoding="utf-8")
 
-df['ClientId'] = df['ClientId'].astype(int)
+df["ClientId"] = df["ClientId"].astype(int)
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO InvestmentGoals (ClientId,InvestmentGoal) VALUES (%s,%s)", (item.ClientId, item.InvestmentGoal))
+    cursor.execute(
+        f"INSERT INTO InvestmentGoals (ClientId,InvestmentGoal) VALUES (%s,%s)",
+        (item.ClientId, item.InvestmentGoal),
+    )
 conn.commit()
 
 
-cursor.execute('DROP TABLE IF EXISTS InvestmentGoalsDetails')
+cursor.execute("DROP TABLE IF EXISTS InvestmentGoalsDetails")
 conn.commit()
 
 create_ig_sql = """CREATE TABLE InvestmentGoalsDetails (
@@ -176,19 +203,22 @@ create_ig_sql = """CREATE TABLE InvestmentGoalsDetails (
 cursor.execute(create_ig_sql)
 conn.commit()
 
-file_path = directory + '/InvestmentGoalsDetails.csv'
+file_path = directory + "/InvestmentGoalsDetails.csv"
 file_client = file_system_client.get_file_client(file_path)
 csv_file = file_client.download_file()
-df = pd.read_csv(csv_file, encoding='utf-8')
+df = pd.read_csv(csv_file, encoding="utf-8")
 
-df['ClientId'] = df['ClientId'].astype(int)
+df["ClientId"] = df["ClientId"].astype(int)
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO InvestmentGoalsDetails (ClientId,InvestmentGoal, TargetAmount, Contribution) VALUES (%s,%s,%s,%s)", (item.ClientId, item.InvestmentGoal, item.TargetAmount, item.Contribution))
+    cursor.execute(
+        f"INSERT INTO InvestmentGoalsDetails (ClientId,InvestmentGoal, TargetAmount, Contribution) VALUES (%s,%s,%s,%s)",
+        (item.ClientId, item.InvestmentGoal, item.TargetAmount, item.Contribution),
+    )
 conn.commit()
 
-#ClientSummaries
-cursor.execute('DROP TABLE IF EXISTS ClientSummaries')
+# ClientSummaries
+cursor.execute("DROP TABLE IF EXISTS ClientSummaries")
 conn.commit()
 
 create_cs_sql = """CREATE TABLE ClientSummaries (
@@ -199,19 +229,22 @@ create_cs_sql = """CREATE TABLE ClientSummaries (
 cursor.execute(create_cs_sql)
 conn.commit()
 
-file_path = directory + '/ClientSummaries.csv'
+file_path = directory + "/ClientSummaries.csv"
 file_client = file_system_client.get_file_client(file_path)
 csv_file = file_client.download_file()
-df = pd.read_csv(csv_file, encoding='utf-8')
+df = pd.read_csv(csv_file, encoding="utf-8")
 
-df['ClientId'] = df['ClientId'].astype(int)
+df["ClientId"] = df["ClientId"].astype(int)
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO ClientSummaries (ClientId,ClientSummary) VALUES (%s,%s)", (item.ClientId, item.ClientSummary))
+    cursor.execute(
+        f"INSERT INTO ClientSummaries (ClientId,ClientSummary) VALUES (%s,%s)",
+        (item.ClientId, item.ClientSummary),
+    )
 conn.commit()
 
 # Retirement
-cursor.execute('DROP TABLE IF EXISTS Retirement')
+cursor.execute("DROP TABLE IF EXISTS Retirement")
 conn.commit()
 
 create_cs_sql = """CREATE TABLE Retirement (
@@ -225,30 +258,39 @@ cursor.execute(create_cs_sql)
 conn.commit()
 
 
-file_path = directory + '/Retirement.csv'
+file_path = directory + "/Retirement.csv"
 file_client = file_system_client.get_file_client(file_path)
 csv_file = file_client.download_file()
-df = pd.read_csv(csv_file, encoding='utf-8')
+df = pd.read_csv(csv_file, encoding="utf-8")
 
-df['ClientId'] = df['ClientId'].astype(int)
+df["ClientId"] = df["ClientId"].astype(int)
 
 # to adjust the dates to current date
-df['StatusDate'] = pd.to_datetime(df['StatusDate'])
+df["StatusDate"] = pd.to_datetime(df["StatusDate"])
 today = datetime.today()
-days_difference = (today - max(df['StatusDate'])).days - 30
-months_difference = int(days_difference/30)
-df['StatusDate'] = df['StatusDate'] + pd.DateOffset(months=months_difference)
-df['StatusDate'] = pd.to_datetime(df['StatusDate']).dt.date
+days_difference = (today - max(df["StatusDate"])).days - 30
+months_difference = int(days_difference / 30)
+df["StatusDate"] = df["StatusDate"] + pd.DateOffset(months=months_difference)
+df["StatusDate"] = pd.to_datetime(df["StatusDate"]).dt.date
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO Retirement (ClientId,StatusDate, RetirementGoalProgress, EducationGoalProgress) VALUES (%s,%s,%s,%s)", (item.ClientId, item.StatusDate, item.RetirementGoalProgress, item.EducationGoalProgress))
+    cursor.execute(
+        f"INSERT INTO Retirement (ClientId,StatusDate, RetirementGoalProgress, EducationGoalProgress) VALUES (%s,%s,%s,%s)",
+        (
+            item.ClientId,
+            item.StatusDate,
+            item.RetirementGoalProgress,
+            item.EducationGoalProgress,
+        ),
+    )
 conn.commit()
 
 
 import pandas as pd
+
 cursor = conn.cursor()
 
-cursor.execute('DROP TABLE IF EXISTS ClientMeetings')
+cursor.execute("DROP TABLE IF EXISTS ClientMeetings")
 conn.commit()
 
 create_cs_sql = """CREATE TABLE ClientMeetings (
@@ -265,43 +307,65 @@ cursor.execute(create_cs_sql)
 conn.commit()
 
 
-file_path = directory + '/ClientMeetingsMetadata.csv'
+file_path = directory + "/ClientMeetingsMetadata.csv"
 file_client = file_system_client.get_file_client(file_path)
 csv_file = file_client.download_file()
-df = pd.read_csv(csv_file, encoding='utf-8')
+df = pd.read_csv(csv_file, encoding="utf-8")
 
 # to adjust the dates to current date
-df['StartTime'] = pd.to_datetime(df['StartTime'])
-df['EndTime'] = pd.to_datetime(df['EndTime'])
+df["StartTime"] = pd.to_datetime(df["StartTime"])
+df["EndTime"] = pd.to_datetime(df["EndTime"])
 today = datetime.today()
-days_difference = (today - min(df['StartTime'])).days - 30
+days_difference = (today - min(df["StartTime"])).days - 30
 days_difference
 
-df['StartTime'] = df['StartTime'] + pd.Timedelta(days=days_difference)
-df['EndTime'] = df['EndTime'] + pd.Timedelta(days=days_difference)
+df["StartTime"] = df["StartTime"] + pd.Timedelta(days=days_difference)
+df["EndTime"] = df["EndTime"] + pd.Timedelta(days=days_difference)
 
 for index, item in df.iterrows():
-    
-    cursor.execute(f"INSERT INTO ClientMeetings (ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail) VALUES (%s,%s,%s,%s,%s,%s,%s)", (item.ClientId, item.ConversationId, item.Title, item.StartTime, item.EndTime, item.Advisor, item.ClientEmail))
+
+    cursor.execute(
+        f"INSERT INTO ClientMeetings (ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+        (
+            item.ClientId,
+            item.ConversationId,
+            item.Title,
+            item.StartTime,
+            item.EndTime,
+            item.Advisor,
+            item.ClientEmail,
+        ),
+    )
 conn.commit()
 
 
-file_path = directory + '/ClientFutureMeetings.csv'
+file_path = directory + "/ClientFutureMeetings.csv"
 file_client = file_system_client.get_file_client(file_path)
 csv_file = file_client.download_file()
-df = pd.read_csv(csv_file, encoding='utf-8')
+df = pd.read_csv(csv_file, encoding="utf-8")
 
 # to adjust the dates to current date
-df['StartTime'] = pd.to_datetime(df['StartTime'])
-df['EndTime'] = pd.to_datetime(df['EndTime'])
+df["StartTime"] = pd.to_datetime(df["StartTime"])
+df["EndTime"] = pd.to_datetime(df["EndTime"])
 today = datetime.today()
-days_difference = (today - min(df['StartTime'])).days + 1
-df['StartTime'] = df['StartTime'] + pd.Timedelta(days=days_difference)
-df['EndTime'] = df['EndTime'] + pd.Timedelta(days=days_difference)
+days_difference = (today - min(df["StartTime"])).days + 1
+df["StartTime"] = df["StartTime"] + pd.Timedelta(days=days_difference)
+df["EndTime"] = df["EndTime"] + pd.Timedelta(days=days_difference)
 
-df['ClientId'] = df['ClientId'].astype(int)
-df['ConversationId'] = ''
+df["ClientId"] = df["ClientId"].astype(int)
+df["ConversationId"] = ""
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO ClientMeetings (ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail) VALUES (%s,%s,%s,%s,%s,%s,%s)", (item.ClientId, item.ConversationId, item.Title, item.StartTime, item.EndTime, item.Advisor, item.ClientEmail))
+    cursor.execute(
+        f"INSERT INTO ClientMeetings (ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+        (
+            item.ClientId,
+            item.ConversationId,
+            item.Title,
+            item.StartTime,
+            item.EndTime,
+            item.Advisor,
+            item.ClientEmail,
+        ),
+    )
 conn.commit()

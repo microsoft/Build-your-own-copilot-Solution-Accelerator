@@ -1,16 +1,17 @@
 # Get Azure Key Vault Client
-key_vault_name = 'kv_to-be-replaced'
+key_vault_name = "kv_to-be-replaced"
 
 from azure.ai.ml import MLClient
 from azure.ai.ml.entities import (
-    Hub,
-    Project,
     ApiKeyConfiguration,
     AzureAISearchConnection,
     AzureOpenAIConnection,
+    Hub,
+    Project,
 )
-from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+
 
 def get_secrets_from_kv(kv_name, secret_name):
     # Set the name of the Azure Key Vault
@@ -27,15 +28,16 @@ def get_secrets_from_kv(kv_name, secret_name):
     # Retrieve the secret value
     return secret_client.get_secret(secret_name).value
 
+
 # Azure configuration
 
-key_vault_name = 'kv_to-be-replaced'
-subscription_id = 'subscription_to-be-replaced'
-resource_group_name = 'rg_to-be-replaced'
-aihub_name = 'ai_hub_' + 'solutionname_to-be-replaced'
-project_name = 'ai_project_' + 'solutionname_to-be-replaced'
-deployment_name = 'draftsinference-' + 'solutionname_to-be-replaced'
-solutionLocation = 'solutionlocation_to-be-replaced'
+key_vault_name = "kv_to-be-replaced"
+subscription_id = "subscription_to-be-replaced"
+resource_group_name = "rg_to-be-replaced"
+aihub_name = "ai_hub_" + "solutionname_to-be-replaced"
+project_name = "ai_project_" + "solutionname_to-be-replaced"
+deployment_name = "draftsinference-" + "solutionname_to-be-replaced"
+solutionLocation = "solutionlocation_to-be-replaced"
 
 # Open AI Details
 open_ai_key = get_secrets_from_kv(key_vault_name, "AZURE-OPENAI-KEY")
@@ -90,7 +92,7 @@ open_ai_connection = AzureOpenAIConnection(
     api_key=open_ai_key,
     api_version=openai_api_version,
     azure_endpoint=f"https://{open_ai_res_name}.openai.azure.com/",
-    open_ai_resource_id=f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.CognitiveServices/accounts/{open_ai_res_name}"
+    open_ai_resource_id=f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.CognitiveServices/accounts/{open_ai_res_name}",
 )
 
 ml_client.connections.create_or_update(open_ai_connection)
@@ -104,7 +106,9 @@ aisearch_connection = AzureAISearchConnection(
     credentials=ApiKeyConfiguration(key=ai_search_key),
 )
 
-aisearch_connection.tags["ResourceId"] = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Search/searchServices/{ai_search_res_name}"
+aisearch_connection.tags["ResourceId"] = (
+    f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Search/searchServices/{ai_search_res_name}"
+)
 aisearch_connection.tags["ApiVersion"] = "2024-05-01-preview"
 
 ml_client.connections.create_or_update(aisearch_connection)
