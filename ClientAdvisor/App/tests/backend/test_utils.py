@@ -3,12 +3,17 @@ import json
 from unittest.mock import MagicMock, patch
 
 import pytest
-
-from backend.utils import (JSONEncoder, convert_to_pf_format, fetchUserGroups,
-                           format_as_ndjson, format_non_streaming_response,
-                           format_pf_non_streaming_response,
-                           format_stream_response, generateFilterString,
-                           parse_multi_columns)
+from backend.utils import (
+    JSONEncoder,
+    convert_to_pf_format,
+    fetchUserGroups,
+    format_as_ndjson,
+    format_non_streaming_response,
+    format_pf_non_streaming_response,
+    format_stream_response,
+    generateFilterString,
+    parse_multi_columns,
+)
 
 
 @dataclasses.dataclass

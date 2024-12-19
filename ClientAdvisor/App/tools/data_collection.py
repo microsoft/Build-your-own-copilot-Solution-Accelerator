@@ -3,9 +3,8 @@ import json
 import os
 import sys
 
-from dotenv import load_dotenv
-
 import app
+from dotenv import load_dotenv
 
 # import the app.py module to gain access to the methods to construct payloads and
 # call the API through the sdk
