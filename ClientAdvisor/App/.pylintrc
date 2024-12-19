@@ -1,0 +1,42 @@
+[MASTER]
+ignore=tests,.venv, frontend  ; Ignore the tests folder globally.
+
+[MESSAGES CONTROL]
+disable=
+    invalid-name,                  
+    line-too-long,                 
+    missing-function-docstring,    
+    missing-class-docstring,       
+    missing-module-docstring,      
+    redefined-outer-name,          
+    broad-exception-raised,        
+    broad-exception-caught,        
+    too-many-arguments,            
+    too-many-locals,               
+    too-many-return-statements,    
+    too-many-branches,             
+    unused-argument,               
+    unspecified-encoding,          
+    logging-fstring-interpolation, 
+    missing-timeout,               
+    no-else-return,                
+    redefined-builtin,             
+    global-statement,              
+    no-name-in-module,             
+    no-member,                     
+    pointless-string-statement,    
+    unnecessary-comprehension,     
+    fixme,                         
+    too-many-instance-attributes, 
+    # too-many-positional-arguments,                         
+    raise-missing-from,            
+    import-outside-toplevel,       
+    no-value-for-parameter,        
+    parse-error                    
+
+[TYPECHECK]
+generated-members=get_bearer_token_provider
+
+[FORMAT]
+max-module-lines=1700              # Allow large modules up to 1700 lines
+max-line-length=160                # Allow lines up to 160 characters

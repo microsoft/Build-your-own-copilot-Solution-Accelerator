@@ -1,4 +1,4 @@
 [flake8]
 max-line-length = 88
-extend-ignore = E501, E203
-exclude = .venv, frontend,
+extend-ignore = E501, E203, W503, G004, G200
+exclude = .venv, frontend
