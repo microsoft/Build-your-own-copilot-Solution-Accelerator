@@ -8,22 +8,31 @@ from types import SimpleNamespace
 
 import httpx
 import requests
-from azure.identity.aio import (DefaultAzureCredential,
-                                get_bearer_token_provider)
+from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider
+from backend.auth.auth_utils import get_authenticated_user_details, get_tenantid
+from backend.history.cosmosdbservice import CosmosConversationClient
+from backend.utils import (
+    convert_to_pf_format,
+    format_as_ndjson,
+    format_pf_non_streaming_response,
+    format_stream_response,
+    generateFilterString,
+    parse_multi_columns,
+)
+from db import get_connection
 from dotenv import load_dotenv
+
 # from quart.sessions import SecureCookieSessionInterface
 from openai import AsyncAzureOpenAI
-from quart import (Blueprint, Quart, jsonify, make_response, render_template,
-                   request, send_from_directory)
-
-from backend.auth.auth_utils import (get_authenticated_user_details,
-                                     get_tenantid)
-from backend.history.cosmosdbservice import CosmosConversationClient
-from backend.utils import (convert_to_pf_format, format_as_ndjson,
-                           format_pf_non_streaming_response,
-                           format_stream_response, generateFilterString,
-                           parse_multi_columns)
-from db import get_connection
+from quart import (
+    Blueprint,
+    Quart,
+    jsonify,
+    make_response,
+    render_template,
+    request,
+    send_from_directory,
+)
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
