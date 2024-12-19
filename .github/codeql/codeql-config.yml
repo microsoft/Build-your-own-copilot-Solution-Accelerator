@@ -1,0 +1,6 @@
+name: "CodeQL config"
+
+paths:
+ - 'ClientAdvisor/App/static'
+paths-ignore:
+ - '**/*.js'
