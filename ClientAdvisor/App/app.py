@@ -136,7 +136,7 @@ AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOIN
 AZURE_OPENAI_EMBEDDING_KEY = os.environ.get("AZURE_OPENAI_EMBEDDING_KEY")
 AZURE_OPENAI_EMBEDDING_NAME = os.environ.get("AZURE_OPENAI_EMBEDDING_NAME", "")
 
-# CosmosDB Mongo vcore vector db Settings
+# CosmosDB Mongo vcore vector db Settings.
 AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING = os.environ.get(
     "AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING"
 )  # This has to be secure string
