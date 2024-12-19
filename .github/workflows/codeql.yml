@@ -16,8 +16,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [main]
-    paths-ignore: 
-      - ClientAdvisor/App/static/**
+    paths-ignore:
+      - '**/*.js'
   schedule:
     - cron: '22 13 * * 0'
 
