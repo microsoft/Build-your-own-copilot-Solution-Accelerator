@@ -94,16 +94,4 @@ jobs:
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
-        output: sarif-results/${{ matrix.language }}.sarif
-
-    - name: List SARIF Files
-      run: ls -l sarif-results
-
-    - name: Dismiss CodeQL Alerts
-      uses: advanced-security/dismiss-alerts@v2
-      with:
-        # specify a 'sarif-id' and 'sarif-file'
-        sarif-id: ${{ steps.analyze.outputs.sarif-id }}
-        sarif-file: sarif-results/${{ matrix.language }}.sarif
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        output: sarif-results
