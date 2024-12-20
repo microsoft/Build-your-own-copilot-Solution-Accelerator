@@ -96,6 +96,9 @@ jobs:
         category: "/language:${{matrix.language}}"
         output: sarif-results/${{ matrix.language }}.sarif
 
+    - name: List SARIF Files
+      run: ls -l sarif-results
+
     - name: Dismiss CodeQL Alerts
       uses: advanced-security/dismiss-alerts@v2
       with:
