@@ -18,5 +18,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r ClientAdvisor/App/requirements.txt
-    - name: Run flake8
-      run: flake8 --config=ClientAdvisor/App/.flake8 ClientAdvisor/App
+        pip install -r ResearchAssistant/App/requirements.txt
+    - name: Run flake8 and pylint
+      run: |
+        flake8 --config=ClientAdvisor/App/.flake8 ClientAdvisor/App
+        pylint --rcfile=ClientAdvisor/App/.pylintrc ClientAdvisor/App
+        flake8 --config=ResearchAssistant/App/.flake8 ResearchAssistant/App
+        pylint --rcfile=ResearchAssistant/App/.pylintrc ResearchAssistant/App

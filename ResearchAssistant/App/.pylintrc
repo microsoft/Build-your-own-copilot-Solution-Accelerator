@@ -1,0 +1,40 @@
+[MASTER]
+ignore=tests, .venv, frontend  ; Ignore the tests folder globally.
+
+[MESSAGES CONTROL]
+disable=
+    invalid-name,                  # C0103: Ignore naming style errors
+    line-too-long,                 # C0301: Ignore long lines
+    missing-function-docstring,    # C0116: Ignore missing function docstrings
+    missing-class-docstring,       # C0115: Ignore missing class docstrings
+    missing-module-docstring,      # C0114: Ignore missing module docstrings
+    redefined-outer-name,          # W0621: Ignore redefined variables warnings
+    broad-exception-raised,        # W0719: Ignore broad exception raised warnings
+    broad-exception-caught,        # W0718: Ignore broad exception caught warnings
+    too-many-arguments,            # R0913: Ignore too many arguments
+    too-many-locals,               # R0914: Ignore too many local variables
+    too-many-return-statements,    # R0911: Ignore too many return statements
+    too-many-statements,           # R0915: Ignore too many statements in a function
+    too-many-branches,             # R0912: Ignore too many branches
+    unused-argument,               # W0613: Ignore unused arguments
+    unspecified-encoding,          # W1514: Ignore unspecified encoding in open()
+    logging-fstring-interpolation, # W1203: Ignore lazy f-string interpolation
+    missing-timeout,               # W3101: Ignore missing timeout in requests.get
+    no-else-return,                # R1705: Ignore unnecessary 'else' after return
+    redefined-builtin,             # W0622: Ignore redefining built-ins
+    global-statement,              # W0603: Ignore global statement usage
+    no-name-in-module,             # E0611: Ignore unresolved module names
+    no-member,                     # E1101: Ignore module has no 'member'
+    pointless-string-statement,    # W0105: Ignore pointless string statements
+    unnecessary-comprehension,     # R1721: Ignore unnecessary comprehensions
+    simplifiable-if-expression,    # R1719: Ignore simplifiable if expressions
+    dangerous-default-value,       # W0102: Ignore mutable default arguments
+    consider-using-with,            # R1732: Ignore using 'with' for file or resource management
+    parse-error
+
+[TYPECHECK]
+generated-members=get_bearer_token_provider
+
+[FORMAT]
+max-module-lines=1700              # Allow large modules up to 1700 lines
+max-line-length=160                # Allow lines up to 160 character
