@@ -79,7 +79,9 @@ class ChatWithDataPlugin:
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
 
-        sql_prompt = os.environ.get("AZURE_SQL_SYSTEM_PROMPT") 
+        sql_prompt = os.environ.get("AZURE_SQL_SYSTEM_PROMPT")
+        sql_prompt = sql_prompt.replace("{query}", query)
+        sql_prompt = sql_prompt.replace("{clientid}", clientid)
         try:
 
             completion = client.chat.completions.create(
