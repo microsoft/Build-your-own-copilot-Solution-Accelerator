@@ -13,7 +13,7 @@ name: "CodeQL Advanced"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
     branches: [main]
   schedule:
@@ -96,6 +96,12 @@ jobs:
         category: "/language:${{matrix.language}}"
         output: sarif-results
 
+    - name: Upload SARIF file
+      id: upload-sarif
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: sarif-results/${{ matrix.language }}.sarif
+        
     - name: Dismiss CodeQL Alerts
       uses: advanced-security/dismiss-alerts@v2
       with:
