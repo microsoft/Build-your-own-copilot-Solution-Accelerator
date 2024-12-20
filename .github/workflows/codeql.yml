@@ -90,16 +90,22 @@ jobs:
         exit 1
 
     - name: Perform CodeQL Analysis
+      id: analyze
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
-        output: sarif-results
 
-    - name: Dismiss alerts
-      uses: advanced-security/dismiss-alerts@v2
+    - name: Upload SARIF file
+      id: upload-sarif
+      uses: github/codeql-action/upload-sarif@v3
       with:
-         # specify a 'sarif-id' and 'sarif-file'
-        sarif-id: ${{ steps.analyze.outputs.sarif-id }}
-        sarif-file: sarif-results/${{ matrix.language }}.sarif
+        sarif_file: ${{ steps.analyze.outputs.sarif }}
+        category: "/language:${{matrix.language}}"
+
+    - name: Dismiss CodeQL Alerts
+      uses: advanced-security/dismiss-alerts@v1
+      with:
+        sarif-id: ${{ needs.upload-sarif.outputs.sarif-id }}
+        sarif-file: ${{ needs.upload-sarif.outputs.sarif-file }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
