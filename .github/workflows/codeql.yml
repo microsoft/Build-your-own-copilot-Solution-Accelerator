@@ -15,7 +15,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
   schedule:
     - cron: '22 13 * * 0'
 
@@ -44,9 +44,9 @@ jobs:
       matrix:
         include:
         - language: javascript-typescript
-          build-mode: autobuild 
+          build-mode: none 
         - language: python
-          build-mode: autobuild
+          build-mode: none
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -93,3 +93,4 @@ jobs:
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
+        output: sarif-results
