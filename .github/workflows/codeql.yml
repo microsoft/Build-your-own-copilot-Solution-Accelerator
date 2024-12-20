@@ -38,7 +38,6 @@ jobs:
       # only required for workflows in private repositories
       actions: read
       contents: read
-      pull-requests: read
 
     strategy:
       fail-fast: false
@@ -96,3 +95,50 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
         output: sarif-results
+
+  check_codeql_status:
+    if: $( github.event_name == 'pull_request' )
+    name: Check CodeQL Status
+    needs: analyze
+    permissions: 
+      contents: read
+      checks: read
+      pull-requests: read
+    runs-on: 'ubuntu-latest'
+      steps:
+      - name: Authenticate gh CLI
+        run: |
+          gh auth login --with-token <<< "$"
+
+      - name: Check CodeQL status
+        run: |
+          response=$(gh api graphql -f query='
+            {
+                repository(owner: "$", name: "$") {
+                pullRequest(number: $) {
+                  commits(last: 1) {
+                    nodes {
+                      commit {
+                        checkSuites(first: 1, filterBy: {checkName: "CodeQL"}) {
+                          nodes {
+                            checkRuns(first: 1) {
+                              nodes {
+                                name
+                                status
+                                conclusion
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ')
+          conclusion=$(echo $response | jq -r '.data.repository.pullRequest.commits.nodes[0].commit.checkSuites.nodes[0].checkRuns.nodes[0].conclusion')
+          if [ "$conclusion" != "SUCCESS" ]; then
+            echo "CodeQL check failed"
+            exit 1
+          fi
