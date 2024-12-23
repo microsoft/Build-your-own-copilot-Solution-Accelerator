@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useBoolean } from "@fluentui/react-hooks"
 import { FontIcon, Stack, Text } from "@fluentui/react";
-
+import React from "react";
 import styles from "./Answer.module.css";
 
 import { AskResponse, Citation } from "../../api";
