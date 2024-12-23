@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@fluentui/font-icons-mdl2": "^8.5.57",
-    "@fluentui/react": "^8.105.3",
+    "@fluentui/react": "^8.122.2",
     "@fluentui/react-hooks": "^8.6.29",
     "@fluentui/react-icons": "^2.0.270",
     "dompurify": "^3.0.8",
