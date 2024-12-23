@@ -11,16 +11,16 @@ solutionLocation="$6"
 
 
 requirementFile="requirements.txt"
-requirementFileUrl=${baseUrl}"Deployment/scripts/aihub_scripts/requirements.txt"
+requirementFileUrl=${baseUrl}"ResearchAssistant/Deployment/scripts/aihub_scripts/requirements.txt"
 
 flowFile=DraftFlow.zip
 extractedFlowFolder="DraftFlow"
-flowFileUrl=${baseUrl}"Deployment/scripts/aihub_scripts/flows/DraftFlow.zip"
+flowFileUrl=${baseUrl}"ResearchAssistant/Deployment/scripts/aihub_scripts/flows/DraftFlow.zip"
 
 echo "Download Started"
 
 # Download the create_index python files
-curl --output "create_ai_hub.py" ${baseUrl}"Deployment/scripts/aihub_scripts/create_ai_hub.py"
+curl --output "create_ai_hub.py" ${baseUrl}"ResearchAssistant/Deployment/scripts/aihub_scripts/create_ai_hub.py"
 
 # Download the requirement file
 curl --output "$requirementFile" "$requirementFileUrl"

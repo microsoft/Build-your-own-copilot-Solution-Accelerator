@@ -1,196 +1,236 @@
-import { useContext, useEffect, useState } from 'react';
-import { Link, Outlet } from 'react-router-dom';
-import { Dialog, Stack, TextField, Pivot, PivotItem } from '@fluentui/react';
-import { CopyRegular } from '@fluentui/react-icons';
-import BellToggle from '../../assets/BellToggle.svg';
-import { CosmosDBStatus } from '../../api';
-import TeamAvatar from '../../assets/TeamAvatar.svg';
+import { useContext, useEffect, useState } from 'react'
+import { Link, Outlet } from 'react-router-dom'
+import { Dialog, Stack, TextField, Pivot, PivotItem } from '@fluentui/react'
+import { CopyRegular } from '@fluentui/react-icons'
+import { CosmosDBStatus } from '../../api'
+import TeamAvatar from '../../assets/TeamAvatar.svg'
 import Illustration from '../../assets/Illustration.svg'
-import { HistoryButton, ShareButton } from '../../components/common/Button';
-import Cards from '../../components/Cards/Cards';
-import PowerBIChart from '../../components/PowerBIChart/PowerBIChart';
-import Chat from '../chat/Chat';  // Import the Chat component
-import { AppStateContext } from '../../state/AppProvider';
-import { getUserInfo,getpbi } from '../../api'
-import { User } from '../../types/User'; 
-
-
+import { HistoryButton, ShareButton } from '../../components/common/Button'
+import Cards from '../../components/Cards/Cards'
+import PowerBIChart from '../../components/PowerBIChart/PowerBIChart'
+import Chat from '../chat/Chat' // Import the Chat component
+import { AppStateContext } from '../../state/AppProvider'
+import { getUserInfo, getpbi } from '../../api'
+import { User } from '../../types/User'
+import TickIcon from '../../assets/TickIcon.svg'
+import DismissIcon from '../../assets/Dismiss.svg'
 import welcomeIcon from '../../assets/welcomeIcon.png'
-import styles from './Layout.module.css';
-
-
+import styles from './Layout.module.css'
+import { SpinnerComponent } from '../../components/Spinner/SpinnerComponent'
 
 const Layout = () => {
   // const [contentType, setContentType] = useState<string | null>(null);
   // const [contentUrl, setContentUrl] = useState<string | null>(null);
-  const [isChatDialogOpen, setIsChatDialogOpen] = useState<boolean>(false);
-  const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false);
-  const [copyClicked, setCopyClicked] = useState<boolean>(false);
-  const [copyText, setCopyText] = useState<string>('Copy URL');
-  const [shareLabel, setShareLabel] = useState<string | undefined>('Share');
-  const [hideHistoryLabel, setHideHistoryLabel] = useState<string>('Hide chat history');
-  const [showHistoryLabel, setShowHistoryLabel] = useState<string>('Show chat history');
-  const appStateContext = useContext(AppStateContext);
-  const ui = appStateContext?.state.frontendSettings?.ui;
+  const [isChatDialogOpen, setIsChatDialogOpen] = useState<boolean>(false)
+  const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false)
+  const [copyClicked, setCopyClicked] = useState<boolean>(false)
+  const [copyText, setCopyText] = useState<string>('Copy URL')
+  const [shareLabel, setShareLabel] = useState<string | undefined>('Share')
+  const [hideHistoryLabel, setHideHistoryLabel] = useState<string>('Hide chat history')
+  const [showHistoryLabel, setShowHistoryLabel] = useState<string>('Show chat history')
+  const appStateContext = useContext(AppStateContext)
+  const ui = appStateContext?.state.frontendSettings?.ui
 
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [showWelcomeCard, setShowWelcomeCard] = useState<boolean>(true);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null)
+  const [showWelcomeCard, setShowWelcomeCard] = useState<boolean>(true)
   const [name, setName] = useState<string>('')
 
   const [pbiurl, setPbiUrl] = useState<string>('')
-
+  const [isVisible, setIsVisible] = useState(false)
   useEffect(() => {
     const fetchpbi = async () => {
       try {
-        const pbiurl = await getpbi();
-        setPbiUrl(pbiurl); // Set the power bi url
+        const pbiurl = await getpbi()
+        setPbiUrl(pbiurl) // Set the power bi url
       } catch (error) {
-        console.error('Error fetching PBI url:', error);
+        console.error('Error fetching PBI url:', error)
       }
-    };
+    }
 
-    fetchpbi();
-  }, []);
+    fetchpbi()
+  }, [])
+
+
+  const resetClientId= ()=>{
+    appStateContext?.dispatch({ type: 'RESET_CLIENT_ID' });
+    setSelectedUser(null);
+    setShowWelcomeCard(true);
+  }
+
+  const closePopup = () => {
+    setIsVisible(!isVisible)
+  }
+
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        setIsVisible(false)
+      }, 4000) // Popup will disappear after 3 seconds
+
+      return () => clearTimeout(timer) // Cleanup the timer on component unmount
+    }
+  }, [isVisible])
 
   const handleCardClick = (user: User) => {
-    setSelectedUser(user);
-    setShowWelcomeCard(false);
-  };
+    setSelectedUser(user)
+    setShowWelcomeCard(false)
+  }
 
   const handleShareClick = () => {
-    setIsSharePanelOpen(true);
-  };
+    setIsSharePanelOpen(true)
+  }
 
   const handleSharePanelDismiss = () => {
-    setIsSharePanelOpen(false);
-    setCopyClicked(false);
-    setCopyText('Copy URL');
-  };
+    setIsSharePanelOpen(false)
+    setCopyClicked(false)
+    setCopyText('Copy URL')
+  }
 
   const handleCopyClick = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopyClicked(true);
-  };
+    navigator.clipboard.writeText(window.location.href)
+    setCopyClicked(true)
+  }
 
   const handleHistoryClick = () => {
-    appStateContext?.dispatch({ type: 'TOGGLE_CHAT_HISTORY' });
-  };
+    appStateContext?.dispatch({ type: 'TOGGLE_CHAT_HISTORY' })
+  }
 
   useEffect(() => {
     if (copyClicked) {
-      setCopyText('Copied URL');
+      setCopyText('Copied URL')
     }
-  }, [copyClicked]);
+  }, [copyClicked])
 
-  useEffect(() => {}, [appStateContext?.state.isCosmosDBAvailable.status]);
+  useEffect(() => {}, [appStateContext?.state.isCosmosDBAvailable.status])
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 480) {
-        setShareLabel(undefined);
-        setHideHistoryLabel('Hide history');
-        setShowHistoryLabel('Show history');
+        setShareLabel(undefined)
+        setHideHistoryLabel('Hide history')
+        setShowHistoryLabel('Show history')
       } else {
-        setShareLabel('Share');
-        setHideHistoryLabel('Hide chat history');
-        setShowHistoryLabel('Show chat history');
+        setShareLabel('Share')
+        setHideHistoryLabel('Hide chat history')
+        setShowHistoryLabel('Show chat history')
       }
-    };
+    }
 
-    window.addEventListener('resize', handleResize);
-    handleResize();
+    window.addEventListener('resize', handleResize)
+    handleResize()
 
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
-    getUserInfo().then((res) => {
-      console.log('User info: ', res)
-      const name: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? ''
-      setName(name)
-    }).catch((err) => {
-      console.error('Error fetching user info: ', err)
-    })
+    getUserInfo()
+      .then(res => {
+        const name: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? ''
+        setName(name)
+      })
+      .catch(err => {
+        console.error('Error fetching user info: ', err)
+      })
   }, [])
 
   const calculateChartUrl = (user: User) => {
-    const filter = `&filter=clients/Email eq '${user.ClientEmail}'&navContentPaneEnabled=false`;
-    return `${pbiurl}${filter}`;
-  };
-
-  
+    const filter = `&filter=clients/Email eq '${user.ClientEmail}'&navContentPaneEnabled=false`
+    return `${pbiurl}${filter}`
+  }
 
   return (
     <div className={styles.layout}>
-      <header className={styles.header} role={'banner'}>
-        <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
-          <Stack horizontal verticalAlign="center">
-            <img src={ui?.logo ? ui.logo : TeamAvatar} className={styles.headerIcon} aria-hidden="true" alt="" />
-            <Link to="/" className={styles.headerTitleContainer}>
-              <h1 className={styles.headerTitle}>{ui?.title}</h1>
-            </Link>
-          </Stack>
-          <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
-            {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
-              <HistoryButton
-                onClick={handleHistoryClick}
-                text={appStateContext?.state?.isChatHistoryOpen ? hideHistoryLabel : showHistoryLabel}
-              />
-            )}
-            {ui?.show_share_button && <ShareButton onClick={handleShareClick} text={shareLabel} />}
-          </Stack>
-        </Stack>
-      </header>
-   
-    <div className={styles.ContentContainer}>
+      {isVisible && (
+        <div className={styles.popupContainer}>
+          <div className={styles.popupContent}>
+            <div className={styles.popupText}>
+              <div className={styles.headerText}>
+                <span className={styles.checkmark}>
+                  <img alt="check mark" src={TickIcon} />
+                </span>
+                Chat saved
+                <img alt="close icon" src={DismissIcon} className={styles.closeButton} onClick={closePopup} />
+              </div>
+              <div className={styles.popupSubtext}>
+                <span className={styles.popupMsg}>Your chat history has been saved successfully!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <SpinnerComponent
+        loading={appStateContext?.state.isLoader != undefined ? appStateContext?.state.isLoader : false}
+        label="Please wait.....!"
+      />
       <div className={styles.cardsColumn}>
         <div className={styles.selectClientHeading}>
-        <img src={BellToggle} className={styles.BellToggle} alt="BellToggle"/>
-        <h4 className={styles.meeting}>Upcoming meetings</h4>
+          <h2 className={styles.meeting}>Upcoming meetings</h2>
         </div>
-        
+
         <Cards onCardClick={handleCardClick} />
       </div>
-      <div className={styles.contentColumn}>
-        {!selectedUser && showWelcomeCard ? (
+      <div className={styles.ContentContainer}>
+        <header className={styles.header} role={'banner'}>
+          <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
+            <Stack horizontal verticalAlign="center">
+              <img src={ui?.logo ? ui.logo : TeamAvatar} className={styles.headerIcon} aria-hidden="true" alt="" />
+              <div className={styles.headerTitleContainer} onClick={resetClientId} onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? resetClientId() : null)} tabIndex={-1}>
+                <h2 className={styles.headerTitle} tabIndex={0}>{ui?.title}</h2>
+              </div>
+            </Stack>
+            <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
+              {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+                <HistoryButton
+                  onClick={handleHistoryClick}
+                  text={appStateContext?.state?.isChatHistoryOpen ? hideHistoryLabel : showHistoryLabel}
+                />
+              )}
+              {ui?.show_share_button && <ShareButton onClick={handleShareClick} text={shareLabel} />}
+            </Stack>
+          </Stack>
+        </header>
         <div className={styles.contentColumn}>
-          <div className={styles.mainPage}>
-          <div className={styles.welcomeCard}>
-            <div className={styles.welcomeCardContent}>
-            <div className={styles.welcomeCardIcon}>
-              <img src={welcomeIcon} alt="Icon" className={styles.icon} />
+          {!selectedUser && showWelcomeCard ? (
+            <div>
+              <div className={styles.mainPage}>
+                <div className={styles.welcomeCard}>
+                  <div className={styles.welcomeCardContent}>
+                    <div className={styles.welcomeCardIcon}>
+                      <img src={welcomeIcon} alt="Icon" className={styles.icon} />
+                    </div>
+                    <h2 className={styles.welcomeTitle}>Select a client</h2>
+                    <p className={styles.welcomeText}>
+                      You can ask questions about their portfolio details and previous conversations or view their
+                      profile.
+                    </p>
+                  </div>
+                </div>
+                <div className={styles.welcomeMessage}>
+                  <img src={Illustration} alt="Illustration" className={styles.illustration} />
+                  <h1>Welcome Back, {name}</h1>
+                </div>
+              </div>
             </div>
-            <h3 className={styles.welcomeTitle}>Select a client</h3>
-            <p className={styles.welcomeText}>You can ask questions about their portfolio details and previous conversations or view their profile.</p>
+          ) : (
+            <div className={styles.pivotContainer}>
+              {selectedUser && (
+                <div className={styles.selectedClient}>
+                  Client selected:{' '}
+                  <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span>
+                </div>
+              )}
+              <Pivot defaultSelectedKey="chat" className='tabContainer' style={{ paddingTop : 10 }}>
+                <PivotItem headerText="Chat" itemKey="chat">
+                  <Chat setIsVisible={setIsVisible} />
+                </PivotItem>
+                <PivotItem headerText="Client 360 Profile" itemKey="profile">
+                  <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
+                </PivotItem>
+              </Pivot>
             </div>
-          </div>
-          <div className={styles.welcomeMessage}>
-            <img src={Illustration} alt="Illustration" className={styles.illustration} />
-            <h1>Welcome Back, {name}</h1>
-          </div>
-          </div>
-      </div>
-        ) : (
-          
-           <div className={styles.pivotContainer}>
-            {selectedUser && (
-            <div className={styles.selectedClient}>
-          Client selected: <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span> 
+          )}
         </div>
-            )}
-          <Pivot defaultSelectedKey="chat">
-            <PivotItem headerText="Chat" itemKey="chat">
-              <Chat />
-            </PivotItem>
-            <PivotItem headerText="Client 360 Profile" itemKey="profile">
-              <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
-            </PivotItem>
-          </Pivot>
-       </div>
-        )}
-
       </div>
-    </div>
 
       <Dialog
         onDismiss={handleSharePanelDismiss}
@@ -230,7 +270,7 @@ const Layout = () => {
         </Stack>
       </Dialog>
     </div>
-  );
-};
+  )
+}
 
-export default Layout;
+export default Layout

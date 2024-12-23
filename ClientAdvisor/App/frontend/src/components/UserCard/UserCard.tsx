@@ -22,7 +22,7 @@ interface UserCardProps {
   chartUrl: string;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ 
+export const UserCard: React.FC<UserCardProps> = ({ 
   ClientId,
   ClientName,
   NextMeeting,
@@ -40,14 +40,19 @@ const UserCard: React.FC<UserCardProps> = ({
 }) => {
     const [showMore, setShowMore] = useState(false);
 
-    const handleShowMoreClick = (event: React.MouseEvent) => {
+    const handleShowMoreClick = (event: React.MouseEvent | React.KeyboardEvent) => {
       event.stopPropagation(); // Prevent the onCardClick from triggering
       setShowMore(!showMore);
-    };
+    };  
 
   return (
     <div className={styles.cardContainer}>
-    <div className={`${styles.userInfo} ${isSelected ? styles.selected : ''}`} onClick={onCardClick}>
+    <div tabIndex={0} className={`${styles.userInfo} ${isSelected ? styles.selected : ''}`} onClick={onCardClick} onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();  // Prevent the default action like scrolling.
+      onCardClick();  // Call the same function as onClick.
+    }
+  }}>
       <div className={styles.clientName}>{ClientName}</div>
       <div className={styles.nextMeeting}><span><Icon iconName='Calendar' className={styles.calendarIcon} /></span>{NextMeeting}</div>
       <div className={styles.nextMeeting}><span><Icon iconName='Clock' className={styles.calendarIcon} /></span>{NextMeetingTime} - {NextMeetingEndTime}</div>
@@ -68,11 +73,14 @@ const UserCard: React.FC<UserCardProps> = ({
     
   
   
-  <div className={styles.showBtn} onClick={handleShowMoreClick}>
+  <div tabIndex={0} className={styles.showBtn} onClick={handleShowMoreClick} onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();  // Prevent the default action like scrolling.
+      handleShowMoreClick(e);  // Call the same function as onClick.
+    }
+  }}>
   {showMore ? 'Less details' : 'More details'}
 </div>
 </div>
 );
 };
-
-export default UserCard;

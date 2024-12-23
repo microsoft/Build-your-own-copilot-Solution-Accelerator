@@ -31,7 +31,11 @@ const RegenerateIcon = createSvgIcon({
 export function documentSectionPrompt(title: string, topic: string): any {
   return `Create ${title} section of research grant application for - ${topic}.`
 }
+
+const SystemErrMessage = 'I am sorry, I don’t have this information in the knowledge repository. Please ask another question.'
+
 export const ResearchTopicCard = (): JSX.Element => {
+  const [is_bad_request, set_is_bad_request] = useState(false)
   const appStateContext = useContext(AppStateContext)
   const [open, setOpen] = React.useState(false)
 
@@ -41,12 +45,19 @@ export const ResearchTopicCard = (): JSX.Element => {
       return ''
     }
 
+    if (documentSection.metaPrompt !== '') {
+      documentSection.metaPrompt = ''
+    }
+
     const generatedSection = await documentSectionGenerate(appStateContext?.state.researchTopic, documentSection)
-    if ((generatedSection?.body) != null) {
+    if ((generatedSection?.body) != null && (generatedSection?.status) != 400) {
+      set_is_bad_request(false)
       const response = await generatedSection.json()
       return response.content
     } else {
-      console.error('Error generating section')
+      setTimeout(() => {
+        set_is_bad_request(true)
+      }, 2000)
       return ''
     }
   }
@@ -103,12 +114,13 @@ export const ResearchTopicCard = (): JSX.Element => {
             const newDocumentSections = await Promise.all(newDocumentSectionContent)
             for (let i = 0; i < newDocumentSections.length; i++) {
               if (newDocumentSections[i] === '') {
+                documentSections[i].content = newDocumentSections[i]
                 console.error('Error generating section content')
-                return
+                setOpen(false)
+              }else{
+                documentSections[i].content = newDocumentSections[i]
+                documentSections[i].metaPrompt = documentSectionPrompt(documentSections[i].title, appStateContext?.state.researchTopic ?? '')
               }
-
-              documentSections[i].content = newDocumentSections[i]
-              documentSections[i].metaPrompt = documentSectionPrompt(documentSections[i].title, appStateContext?.state.researchTopic ?? '');
             }
 
             appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: documentSections })
@@ -130,6 +142,9 @@ export const ResearchTopicCard = (): JSX.Element => {
           </DialogSurface>
         </Dialog>
       </Stack>
+      <div>
+        {is_bad_request && (<p className={styles.error}>{SystemErrMessage}</p>)}
+      </div>
     </FluentCard>
   )
 }
@@ -154,15 +169,17 @@ export const Card = (props: CardProps) => {
         setLoading(true)
         const generatedSection = await documentSectionGenerate(appStateContext?.state.researchTopic || '', { ...section, metaPrompt: newPrompt })
 
-        if (generatedSection && generatedSection.body) {
+        const updatedDocumentSections = [...documentSections]
+        if (generatedSection && generatedSection.body && generatedSection?.status != 400) {
           const response = await generatedSection.json()
           const newContent = response.content
-          const updatedDocumentSections = [...documentSections]
           updatedDocumentSections[index].content = newContent
           appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: updatedDocumentSections })
           setLoading(false)
-        } else {
-          console.error('Error generating new content.')
+        } else if ((generatedSection?.body) != null && (generatedSection?.status) === 400){
+          updatedDocumentSections[index].content = SystemErrMessage
+          appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: updatedDocumentSections })
+          setLoading(false)          
         }
       } else {
         console.error('Section information is undefined.')

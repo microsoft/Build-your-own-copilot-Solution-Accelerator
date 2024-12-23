@@ -56,7 +56,7 @@ export const documentSectionGenerate = async (researchTopic: string, documentSec
   // check for errors
   if (!response.ok) {
     console.error('There was an issue fetching your data.')
-    return null
+    return response
   }
 
   return response

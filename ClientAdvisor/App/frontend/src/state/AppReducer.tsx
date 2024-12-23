@@ -76,6 +76,12 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
       }
     case 'UPDATE_CLIENT_ID':
       return { ...state, clientId: action.payload };
+    case 'SET_IS_REQUEST_INITIATED' : 
+      return {...state, isRequestInitiated : action.payload}
+    case 'TOGGLE_LOADER':
+      return {...state, isLoader : !state.isLoader}
+    case 'RESET_CLIENT_ID':
+      return {...state, clientId: ''}
     default:
       return state
   }

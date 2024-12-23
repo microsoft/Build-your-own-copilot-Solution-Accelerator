@@ -1,0 +1,14 @@
+.promptBtn {
+  padding: 0px 4px;
+  height: 24px;
+  font-size: 0.8rem;
+  width: max-content;
+  border-radius: 8px;
+  border: 0.8px solid #036ac4;
+}
+.promptBtn > span > span > span {
+  font-weight: 400;
+}
+.promptBtn:disabled { 
+  border: none;
+}

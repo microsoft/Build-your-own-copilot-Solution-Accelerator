@@ -5,6 +5,6 @@ pypdf
 # tiktoken
 azure-identity
 azure-ai-textanalytics
-azure-search-documents==11.4.0
+azure-search-documents==11.5.2
 azure-keyvault-secrets
 pandas

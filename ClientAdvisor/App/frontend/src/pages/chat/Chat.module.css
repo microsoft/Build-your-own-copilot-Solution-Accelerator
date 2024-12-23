@@ -35,7 +35,7 @@ html, body {
     0px 0px 2px rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   overflow-y: auto;
-  max-height: calc(100vh - 300px);
+  max-height: calc(100vh - 240px);
   height: 100vh;
   width: 100%;
 }
@@ -221,9 +221,10 @@ html, body {
   width: 161px;
   height: 32px;
   left: calc(50% - 161px / 2 + 25.8px);
-  bottom: 116px;
+  bottom: 146px;
   border: 1px solid #d1d1d1;
   border-radius: 16px;
+  cursor: pointer;
 }
 
 .stopGeneratingIcon {
@@ -343,6 +344,12 @@ a {
   text-decoration: underline;
   cursor: pointer;
 }
+.promptsContainer{
+  width: calc(100% - 100px);
+    max-width: 1028px;
+    justify-content: right;
+    margin: 4px 0px;
+}
 
 @media (max-width: 480px) {
   .chatInput {
@@ -370,3 +377,12 @@ a {
     max-width: 100%;
   }
 }
+
+@media screen and (-ms-high-contrast: active), (forced-colors: active) {
+  .chatContainer, .chatMessageError, .chatMessageUserMessage{
+      border: 2px solid WindowText;
+      background-color: Window;
+      color: WindowText;
+  }
+}
+

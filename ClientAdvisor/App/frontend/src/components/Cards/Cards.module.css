@@ -1,5 +1,5 @@
 .cardContainer {
-  height: 100%;
+  /* height: 100%; */
     display: flex;
     flex-direction: column;
   }
@@ -39,7 +39,7 @@
   }
   
   .userCardContainer.selected {
-    background-color: #0078D7;
+    background-color: #0F6CBD;
     color: white;
     box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.14), 0px 0px 2px 0px rgba(0, 0, 0, 0.12); 
   } 
@@ -49,3 +49,63 @@
     font-weight: bold;
     margin-bottom: 8px;
   } */
+  .meetingsHeader {
+    font-weight: 500;
+    color: #616161;
+    margin-bottom: 0.5rem;
+    margin-left: 0.8rem;
+    margin-right: 0.8rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  .meetingsText {
+    display: flex;
+    justify-content: center;
+    color: #717171;
+    font-weight: 400;
+    margin: 3.8rem;
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+  }
+  .noMeetings {
+    margin-top: 40vh;
+  }
+  .noMeetingsIcon {
+    width: 76px;
+  }
+  .futureMeetings {
+    margin: 2.8rem;
+    margin-top: 18vh;
+  }
+  .nextMeetingHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .nextMeetingContent {
+    background: linear-gradient(180deg, rgba(250, 250, 250, 0.00) 0%, #FAFAFA 100%);
+    border-bottom: 2px solid var(--Colors-Neutral-Grey-84, #D6D6D6);
+    padding-right: 0.8rem;
+    padding-left: 0.8rem;
+  }
+  .futureMeetingsContent {
+    margin-inline: 0.8rem;
+  }
+  .BellToggle {
+    width: 2rem; 
+    height: 2rem;
+  }
+  .loadingUsers {
+    display: flex;
+    justify-content: center;
+    margin: 1rem;
+  }
+
+  @media screen and (-ms-high-contrast: active), (forced-colors: active) {
+    .nextMeetingHeader{
+        border: 2px solid WindowText;
+        background-color: Window;
+        color: WindowText;
+    }
+  }

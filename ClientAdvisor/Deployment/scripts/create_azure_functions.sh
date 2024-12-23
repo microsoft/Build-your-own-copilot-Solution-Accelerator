@@ -15,6 +15,7 @@ sqlServerName="${11}"
 sqlDbName="${12}"
 sqlDbUser="${13}"
 sqlDbPwd="${14}"
+functionAppVersion="${15}"
 
 azureOpenAIDeploymentModel="gpt-4"
 azureOpenAIEmbeddingDeployment="text-embedding-ada-002"
@@ -31,12 +32,16 @@ sqlDBConn="TBD"
 
 az containerapp env create --name $env_name --enable-workload-profiles --resource-group $resourceGroupName --location $solutionLocation
 
-az storage account create --name $storageAccount --location eastus --resource-group $resourceGroupName --sku Standard_LRS
+az storage account create --name $storageAccount --location eastus --resource-group $resourceGroupName --sku Standard_LRS --allow-shared-key-access false
 
 az functionapp create --resource-group $resourceGroupName --name $functionappname \
                 --environment $env_name --storage-account $storageAccount \
                 --functions-version 4 --runtime python \
-                --image bycwacontainer.azurecr.io/byc-wa-fn:latest
+                --image bycwacontainerreg.azurecr.io/byc-wa-fn:$functionAppVersion
+
+# Sleep for 120 seconds
+echo "Waiting for 120 seconds to ensure the Function App is properly created..."
+sleep 60
 
 az functionapp config appsettings set --name $functionappname -g $resourceGroupName \
                 --settings AZURE_OPEN_AI_API_KEY=$azureOpenAIApiKey AZURE_OPEN_AI_DEPLOYMENT_MODEL=$azureOpenAIDeploymentModel \
