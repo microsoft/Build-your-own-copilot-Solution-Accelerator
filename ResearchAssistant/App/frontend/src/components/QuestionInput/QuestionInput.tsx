@@ -3,7 +3,7 @@ import { Stack, TextField } from "@fluentui/react";
 import { SendRegular } from "@fluentui/react-icons";
 import Send from "../../assets/Send.svg";
 import styles from "./QuestionInput.module.css";
-
+import React from 'react';
 import { AppStateContext } from "../../state/AppProvider";
 import { SidebarOptions } from "../SidebarView/SidebarView";
 import { set } from "lodash";
