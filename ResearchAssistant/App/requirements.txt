@@ -3,7 +3,7 @@ Flask==3.0.0
 openai==1.58.1
 azure-search-documents==11.4.0b6
 azure-storage-blob==12.17.0
-python-dotenv==1.0.0
+python-dotenv==1.0.1
 azure-cosmos==4.5.0
 pytest-asyncio==0.25.0
 pytest-cov==5.0.0
