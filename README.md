@@ -13,7 +13,7 @@ User story
 
 This solution accelerator is a powerful tool that helps you create your own copilots. The accelerator can be used by any customer looking for reusable architecture and code snippets to build custom copilots with their own enterprise data. 
 
-It leverages Azure Open AI Service, Azure AI Search and Microsoft Fabric, to create custom copilot solutions. 
+It leverages Azure OpenAI Service, Azure AI Search and Microsoft Fabric, to create custom copilot solutions. 
 
 <h2>
 Scenarios
