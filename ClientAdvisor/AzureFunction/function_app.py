@@ -80,8 +80,32 @@ class ChatWithDataPlugin:
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
 
         sql_prompt = os.environ.get("AZURE_SQL_SYSTEM_PROMPT")
-        sql_prompt = sql_prompt.replace("{query}", query)
-        sql_prompt = sql_prompt.replace("{clientid}", clientid)
+        if sql_prompt:
+            sql_prompt = sql_prompt.replace("{query}", query)
+            sql_prompt = sql_prompt.replace("{clientid}", clientid)
+        else:
+            sql_prompt = f'''A valid T-SQL query to find {query} for tables and columns provided below:
+            1. Table: Clients
+            Columns: ClientId,Client,Email,Occupation,MaritalStatus,Dependents
+            2. Table: InvestmentGoals
+            Columns: ClientId,InvestmentGoal
+            3. Table: Assets
+            Columns: ClientId,AssetDate,Investment,ROI,Revenue,AssetType
+            4. Table: ClientSummaries
+            Columns: ClientId,ClientSummary
+            5. Table: InvestmentGoalsDetails
+            Columns: ClientId,InvestmentGoal,TargetAmount,Contribution
+            6. Table: Retirement
+            Columns: ClientId,StatusDate,RetirementGoalProgress,EducationGoalProgress
+            7.Table: ClientMeetings
+            Columns: ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail
+            Use Investement column from Assets table as value always.
+            Assets table has snapshots of values by date. Do not add numbers across different dates for total values.
+            Do not use client name in filter.
+            Do not include assets values unless asked for.
+            Always use ClientId = {clientid} in the query filter.
+            Always return client name in the query.
+            Only return the generated sql query. do not return anything else'''
         try:
 
             completion = client.chat.completions.create(
@@ -138,6 +162,10 @@ class ChatWithDataPlugin:
 
         query = question
         system_message = os.environ.get("AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT")
+        if not system_message:
+            system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
+            You have access to the client’s meeting call transcripts. 
+            You can use this information to answer questions about the clients'''
 
         completion = client.chat.completions.create(
             model = deployment,
@@ -239,6 +267,14 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
     settings.temperature = 0
 
     system_message = os.environ.get("AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT")
+    if not system_message:
+        system_message = '''you are a helpful assistant to a wealth advisor. 
+        Do not answer any questions not related to wealth advisors queries.
+        If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
+        Only use the client name returned from database in the response.
+        If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
+        ** Remove any client identifiers or ids or numbers or ClientId in the final response.
+        '''
 
     user_query = query.replace('?',' ')
 
