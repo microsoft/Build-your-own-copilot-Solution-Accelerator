@@ -2,7 +2,7 @@ azure-identity==1.19.0
 Flask==3.1.0
 openai==1.58.1
 azure-search-documents==11.6.0b8
-azure-storage-blob==12.17.0
+azure-storage-blob==12.24.0
 python-dotenv==1.0.1
 azure-cosmos==4.9.0
 pytest-asyncio==0.25.0
