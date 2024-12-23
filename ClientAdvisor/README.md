@@ -13,7 +13,7 @@ User story
 
 This solution accelerator is a powerful tool that helps you create your own copilots. The accelerator can be used by any customer looking for reusable architecture and code snippets to build custom copilots with their own enterprise data. 
 
-It leverages Azure Open AI Service, Azure AI Search and Microsoft Fabric, to streamline daily tasks and customer meeting preparation for customer-facing roles. As a result, this helps to improve client retention and customer satisfaction. By increasing employee productivity and improving customer conversations, our solution enables organizations to serve more customers and drive increased revenue for the entire company. 
+It leverages Azure OpenAI Service, Azure AI Search and Microsoft Fabric, to streamline daily tasks and customer meeting preparation for customer-facing roles. As a result, this helps to improve client retention and customer satisfaction. By increasing employee productivity and improving customer conversations, our solution enables organizations to serve more customers and drive increased revenue for the entire company. 
 
  
 **Scenario**
@@ -22,7 +22,7 @@ A Woodgrove Bank Client Advisor is preparing for upcoming client meetings. He wa
   
 This solution with an integrated copilot helps Client Advisors to save time and prepare relevant discussion topics for scheduled meetings. It provides an overview of daily client meetings with seamless navigation between viewing client profiles and chatting with data. Altogether, these features streamline meeting preparation for client advisors and result in more productive conversations with clients. 
 
-The sample data used in this repository is synthetic and generated using Azure Open AI service. The data is intended for use as sample data only.
+The sample data used in this repository is synthetic and generated using Azure OpenAI service. The data is intended for use as sample data only.
 
 <br/>
 
@@ -44,11 +44,11 @@ Quick deploy
 
 ### Prerequisites
 
-To use this solution accelerator, you will need access to an [Azure subscription](https://azure.microsoft.com/free/) with permission to create resource groups and resources. While not required, a prior understanding of Azure Open AI, Azure AI Search and Microsoft Fabric will be helpful.
+To use this solution accelerator, you will need access to an [Azure subscription](https://azure.microsoft.com/free/) with permission to create resource groups and resources. While not required, a prior understanding of Azure OpenAI, Azure AI Search and Microsoft Fabric will be helpful.
 
 For additional training and support, please see:
 
-1. [Azure Open AI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
+1. [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
 2. [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
 3. [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/)
 4. [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/)
