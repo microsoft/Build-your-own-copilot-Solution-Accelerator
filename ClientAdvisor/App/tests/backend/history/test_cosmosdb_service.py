@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from azure.cosmos import exceptions
+
 from backend.history.cosmosdbservice import CosmosConversationClient
 
 
