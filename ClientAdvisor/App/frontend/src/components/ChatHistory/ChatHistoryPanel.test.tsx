@@ -121,38 +121,40 @@ describe('ChatHistoryPanel Component', () => {
   })
 
   it('hides the dialog when cancel or close is clicked', async () => {
-    userEvent.setup()
-
+    const user = userEvent.setup();
+  
     const compState = {
       chatHistory: [{ id: 1, message: 'Test Message' }],
       chatHistoryLoadingState: ChatHistoryLoadingState.Success,
-      isCosmosDBAvailable: { cosmosDB: true, status: CosmosDBStatus.Working }
-    }
-
-    renderWithContext(<ChatHistoryPanel isLoading={false} />, compState)
-
-    const moreButton = screen.getByRole('button', { name: /clear all chat history/i })
-    fireEvent.click(moreButton)
-
-    const clearAllItem = await screen.findByRole('menuitem')
+      isCosmosDBAvailable: { cosmosDB: true, status: CosmosDBStatus.Working },
+    };
+  
+    renderWithContext(<ChatHistoryPanel isLoading={false} />, compState);
+  
+    const moreButton = screen.getByRole('button', { name: /clear all chat history/i });
+    fireEvent.click(moreButton);
+  
+    const clearAllItem = await screen.findByRole('menuitem');
     await act(() => {
-      userEvent.click(clearAllItem)
-    })
-
+      user.click(clearAllItem);
+    });
+  
     await waitFor(() =>
       expect(screen.getByText(/are you sure you want to clear all chat history/i)).toBeInTheDocument()
-    )
-
-    const cancelButton = screen.getByRole('button', { name: /cancel/i })
-
-    await act(() => {
-      userEvent.click(cancelButton)
-    })
-
+    );
+  
+    const cancelButton = screen.getByRole('button', { name: /cancel/i });
+    act(() => {
+      user.click(cancelButton);
+    });
+  
     await waitFor(() =>
-      expect(screen.queryByText(/are you sure you want to clear all chat history/i)).not.toBeInTheDocument()
-    )
-  })
+      {
+          expect(screen.queryByText(/are you sure you want to clear all chat history/i)).not.toBeInTheDocument()
+      }
+    );
+  });
+  
 
   test('handles API failure correctly', async () => {
     // Mock historyDeleteAll to return a failed response
