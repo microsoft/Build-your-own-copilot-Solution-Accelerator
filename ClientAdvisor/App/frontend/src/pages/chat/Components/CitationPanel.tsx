@@ -14,11 +14,13 @@ interface CitationPanelProps {
   onViewSource: (citation: Citation) => void;
 }
 
+const renderLink = (props: any) => {
+  return <a {...props} target="_blank" rel="noopener noreferrer" />;
+};
+
 export const CitationPanel: React.FC<CitationPanelProps> = ({ activeCitation, IsCitationPanelOpen, onViewSource }) => {
 
-  const renderLink = (props: any) => {
-    return <a {...props} target="_blank" rel="noopener noreferrer" />;
-  };
+  
   return (
     <Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Citations Panel">
       <Stack
