@@ -341,6 +341,10 @@ const Chat = ({ chatType }: Props) => {
       break
   }
 
+  const renderLink = (props: any) => {
+    return <a {...props} target="_blank" rel="noopener noreferrer" />;
+  };
+
   return (
     <div className={styles.container} role="main">
         <Stack horizontal className={styles.chatRoot}>
@@ -513,11 +517,13 @@ const Chat = ({ chatType }: Props) => {
                         </PrimaryButton>
                         <div tabIndex={0}>
                             <ReactMarkdown
-                                linkTarget="_blank"
                                 className={styles.citationPanelContent}
                                 children={activeCitation.content}
                                 remarkPlugins={[remarkGfm]}
                                 rehypePlugins={[rehypeRaw]}
+                                components={{
+                                  a: renderLink, 
+                              }}
                             />
                         </div>
                         

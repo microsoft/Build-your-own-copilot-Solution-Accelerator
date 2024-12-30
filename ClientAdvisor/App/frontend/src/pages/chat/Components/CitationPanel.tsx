@@ -14,7 +14,13 @@ interface CitationPanelProps {
   onViewSource: (citation: Citation) => void;
 }
 
+const renderLink = (props: any) => {
+  return <a {...props} target="_blank" rel="noopener noreferrer" />;
+};
+
 export const CitationPanel: React.FC<CitationPanelProps> = ({ activeCitation, IsCitationPanelOpen, onViewSource }) => {
+
+  
   return (
     <Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Citations Panel">
       <Stack
@@ -41,11 +47,13 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({ activeCitation, Is
       </h5>
       <div tabIndex={0}>
         <ReactMarkdown
-          linkTarget="_blank"
           className={styles.citationPanelContent}
           children={DOMPurify.sanitize(activeCitation.content, { ALLOWED_TAGS: XSSAllowTags })}
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw]}
+          components={{
+            a: renderLink, 
+          }}
         />
       </div>
     </Stack.Item>
