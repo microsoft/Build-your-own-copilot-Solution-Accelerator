@@ -11,7 +11,7 @@ gunicorn==22.0.0
 aiohttp==3.10.2
 quart-session==3.0.0
 pymssql==2.3.0
-httpx==0.28.0
+httpx==0.28.1
 flake8==7.1.1
 black==24.8.0
 autoflake==2.3.1
