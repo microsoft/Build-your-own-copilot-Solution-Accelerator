@@ -1,5 +1,5 @@
 # Core requirements
-azure-identity==1.15.0
+azure-identity==1.19.0
 # Flask[async]==2.3.2
 openai==1.55.3
 azure-search-documents==11.4.0b6
