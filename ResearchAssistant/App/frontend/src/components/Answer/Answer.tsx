@@ -56,15 +56,21 @@ export const Answer = ({
         return citationFilename;
     }
 
+    const renderLink = (props: any) => {
+        return <a {...props} target="_blank" rel="noopener noreferrer" />;
+      };
+
     return (
         <>
             <Stack className={styles.answerContainer} tabIndex={0}>
                 <Stack.Item grow>
                     <ReactMarkdown
-                        linkTarget="_blank"
                         remarkPlugins={[remarkGfm, supersub]}
                         children={parsedAnswer.markdownFormatText}
                         className={styles.answerText}
+                        components={{
+                            a: renderLink, 
+                        }}
                     />
                 </Stack.Item>
                 <Stack horizontal className={styles.answerFooter}>
