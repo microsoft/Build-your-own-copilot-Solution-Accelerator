@@ -1,5 +1,5 @@
 import { FormEvent, useContext, useEffect, useMemo, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { Components, Options } from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Checkbox, DefaultButton, Dialog, FontIcon, Stack, Text } from '@fluentui/react'
@@ -228,19 +228,38 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
     )
   }
 
-  const components = {
-    code({ node, ...props }: { node: any;[key: string]: any }) {
-      let language
-      if (props.className) {
-        const match = props.className.match(/language-(\w+)/)
-        language = match ? match[1] : undefined
+  const components: Components = {
+    a: ({ href, children, ...props }) => (
+      <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+        {children}
+      </a>
+    ),
+    code({ inline, className, children, ...props }: { 
+      inline?: boolean; 
+      className?: string; 
+      children?: React.ReactNode; 
+      [key: string]: any 
+    }) {
+      const match = /language-(\w+)/.exec(className || '');
+      // Handle inline and block code rendering
+      if (inline) {
+        return (
+          <code className={className} {...props}>
+            {children}
+          </code>
+        );
+      } else if (match) {
+        return (
+          <SyntaxHighlighter
+            style={nord}
+            language={match[1]}
+            PreTag="div"
+            {...props}
+          >
+            {String(children).replace(/\n$/, '')}
+          </SyntaxHighlighter>
+        );
       }
-      const codeString = node.children[0].value ?? ''
-      return (
-        <SyntaxHighlighter style={nord} language={language} PreTag="div" {...props}>
-          {codeString}
-        </SyntaxHighlighter>
-      )
     }
   }
   return (
@@ -249,18 +268,17 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
         <Stack.Item>
           <Stack horizontal grow>
             <Stack.Item grow>
-              <ReactMarkdown
-                linkTarget="_blank"
-                remarkPlugins={[remarkGfm, supersub]}
-                rehypePlugins={[rehypeRaw]}
-                children={
-                  SANITIZE_ANSWER
-                    ? DOMPurify.sanitize(parsedAnswer.markdownFormatText, { ALLOWED_TAGS: XSSAllowTags })
-                    : parsedAnswer.markdownFormatText
-                }
-                className={styles.answerText}
-                components={components}
-              />
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, supersub]}
+              rehypePlugins={[rehypeRaw]}
+              children={
+                SANITIZE_ANSWER
+                  ? DOMPurify.sanitize(parsedAnswer.markdownFormatText, { ALLOWED_TAGS: XSSAllowTags, ALLOWED_ATTR: ['href', 'target', 'rel'] })
+                  : parsedAnswer.markdownFormatText
+              }
+              className={styles.answerText}
+              components={components}
+            />    
             </Stack.Item>
             <Stack.Item className={styles.answerHeader}>
               {FEEDBACK_ENABLED && answer.message_id !== undefined && (
