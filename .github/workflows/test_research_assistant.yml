@@ -2,11 +2,11 @@ name: Unit Tests - Research Assistant
 
 on:
   push:
-    branches: main
+    branches: [main, dev]
     paths:
       - 'ResearchAssistant/**'
   pull_request:
-    branches: main
+    branches: [main, dev]
     types:
       - opened
       - ready_for_review
@@ -46,21 +46,3 @@ jobs:
             ResearchAssistant/App/coverage.xml
             ResearchAssistant/App/coverage-junit.xml
             ResearchAssistant/App/htmlcov/
-      # - name: Set up Node.js
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: '20'
-      # - name: Install Frontend Dependencies
-      #   run: |
-      #     cd ResearchAssistant/App/frontend
-      #     npm install
-      # - name: Run Frontend Tests with Coverage
-      #   run: |
-      #     cd ResearchAssistant/App/frontend
-      #     npm run test -- --coverage
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: research-assistant-frontend-coverage
-      #     path: |
-      #       ResearchAssistant/App/frontend/coverage/
-      #       ResearchAssistant/App/frontend/coverage/lcov-report/
