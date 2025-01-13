@@ -1,22 +1,22 @@
 import json
 import os
 from unittest.mock import MagicMock, Mock, patch
-from flask import Flask
+from flask import Flask, request
 import pytest
+import requests
 import urllib
 
-from app import (extract_value, fetchUserGroups,
+from app import (extract_value, fetchUserGroups, format_as_ndjson,
                  formatApiResponseNoStreaming, formatApiResponseStreaming,
                  generateFilterString, is_chat_model, parse_multi_columns,
                  prepare_body_headers_with_data, should_use_data,
-                 stream_with_data, draft_document_generate)
+                 stream_with_data, conversation_with_data, draft_document_generate)
 
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE", "")
 AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY", "")
 AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get(
     "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN", ""
 )
-
 
 def test_parse_multi_columns():
     assert parse_multi_columns("a|b|c") == ["a", "b", "c"]
@@ -30,6 +30,7 @@ def test_success_single_page(mock_get):
     mock_get.return_value.json.return_value = {
         "value": [{"id": "group1"}, {"id": "group2"}]
     }
+
     userToken = "valid_token"
     result = fetchUserGroups(userToken)
     expected = [{"id": "group1"}, {"id": "group2"}]
@@ -220,6 +221,18 @@ def test_invalid_datasource_type():
         )
 
 
+def test_invalid_datasource_type():
+    mock_request = MagicMock()
+    mock_request.json = {"messages": ["Hello, world!"], "index_name": "grants"}
+
+    with patch("app.DATASOURCE_TYPE", "InvalidType"):
+        with pytest.raises(Exception) as exc_info:
+            prepare_body_headers_with_data(mock_request)
+        assert "DATASOURCE_TYPE is not configured or unknown: InvalidType" in str(
+            exc_info.value
+        )
+
+
 # stream_with_data function
 def mock_format_as_ndjson(data):
     # Ensure data is in a JSON serializable format (like a list or dict)
@@ -309,10 +322,12 @@ def test_stream_with_data_azure_success():
 USE_AZURE_AI_STUDIO = "true"
 AZURE_OPENAI_PREVIEW_API_VERSION = "2023-06-01-preview"
 DEBUG_LOGGING = False
+
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE", "mysearchservice")
 
 
 def test_stream_with_data_azure_error():
+    
     body = {
         "messages": [
             {
@@ -365,16 +380,17 @@ def test_stream_with_data_azure_error():
             }
         ],
     }
-
+    
     if USE_AZURE_AI_STUDIO.lower() == "true":
         body = body
-      
+            
     headers = {
         "Content-Type": "application/json",
         "api-key": "",
         "x-ms-useragent": "GitHubSampleWebApp/PublicAPI/3.0.0",
     }
     history_metadata = {}
+
     with patch("requests.Session.post") as mock_post:
         # if USE_AZURE_AI_STUDIO.lower() == "true":
         #     body = mock_body
@@ -393,7 +409,6 @@ def test_stream_with_data_azure_error():
             )  # Convert generator to a list
             print(results, "result test case")
             assert len(results) == 1
-
 
 def test_formatApiResponseNoStreaming():
     rawResponse = {
@@ -526,14 +541,12 @@ def test_draft_document_generate_with_context(mock_os_environ, mock_urlopen, cli
     assert "content" in response_json
     assert response_json["content"] == "Generated content with context."
 
-
 @pytest.fixture
 def clients():
     app = Flask(__name__)
     app.route('/draft_document/generate_section', methods=['POST'])(draft_document_generate)
     client = app.test_client()
     yield client
-
 
 @patch("urllib.request.urlopen")
 @patch("os.environ.get")
@@ -569,3 +582,5 @@ def test_draft_document_generate_http_error(mock_env_get, mock_urlopen, client):
     )
 
     assert response.status_code == 200
+
+
