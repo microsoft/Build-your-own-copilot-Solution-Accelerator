@@ -314,7 +314,6 @@ AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE", "mysearchservice")
 
 
 def test_stream_with_data_azure_error():
- 
     body = {
         "messages": [
             {
@@ -369,7 +368,7 @@ def test_stream_with_data_azure_error():
     }
 
     if USE_AZURE_AI_STUDIO.lower() == "true":
-        body = body         
+        body = body
     headers = {
         "Content-Type": "application/json",
         "api-key": "",
@@ -448,6 +447,7 @@ def test_extract_value():
     assert extract_value("code", text) == "content_filter"
     assert extract_value("status", text) == "400"
     assert extract_value("unknown", text) == "N/A"
+
 
 app = Flask(__name__)
 
