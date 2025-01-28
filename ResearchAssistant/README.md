@@ -74,7 +74,7 @@ https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-regi
 
    ![image](Deployment/images/readMe/armDeployment.png)
 
-4. When Deployment is complete, follow steps in [AI Foundry Deployment guide](./Deployment/AIStudioDeployment.md) to configure the grant draft proposal endpoint.
+4. When Deployment is complete, follow steps in [AI Foundry Deployment guide](./Deployment/AIFoundryDeployment.md) to configure the grant draft proposal endpoint.
 
 5. When AI Foundry deployment is complete, launch the application by navigating to your Azure resource group, choosing the app service resource, and clicking on the default domain. You should bookmark this URL to have quick access to your deployed application.
 
