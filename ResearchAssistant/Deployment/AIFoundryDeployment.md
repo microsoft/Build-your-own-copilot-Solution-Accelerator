@@ -1,7 +1,7 @@
 # AI Foundry Deployment Guide 
 Please follow the steps below to configure the Prompt flow endpoint in App service configuration.
 
-## Step 1: Open AI Foundry Project
+## Step 1: OpenAI Foundry Project
 1. Launch the [AI Foundry](https://ai.azure.com/) and select `project` under Jump into a project in Azure AI Foundry, If not found click on View all projects from the top menu.
 
     ![Home](/ResearchAssistant/Deployment/images/aiStudio/Home.png)
