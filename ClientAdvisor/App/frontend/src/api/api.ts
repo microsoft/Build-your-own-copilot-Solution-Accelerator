@@ -201,31 +201,47 @@ export const selectUser = async (options: ClientIdRequest): Promise<Response> =>
     return new Response(null, { status: 500, statusText: 'Internal Server Error' });
   }
 };
-
+function isLastObjectNotEmpty(arr:any)
+ {  
+   if (arr.length === 0) return false; 
+   // Handle empty array case 
+   const lastObj = arr[arr.length - 1];  
+    return Object.keys(lastObj).length > 0; 
+  }
 export const historyUpdate = async (messages: ChatMessage[], convId: string): Promise<Response> => {
-  const response = await fetch('/history/update', {
-    method: 'POST',
-    body: JSON.stringify({
-      conversation_id: convId,
-      messages: messages
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-    .then(async res => {
-      return res
+  if(isLastObjectNotEmpty(messages)){
+    const response = await fetch('/history/update', {
+      method: 'POST',
+      body: JSON.stringify({
+        conversation_id: convId,
+        messages: messages
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
     })
-    .catch(_err => {
-      console.error('There was an issue fetching your data.')
+      .then(async res => {
+        return res
+      })
+      .catch(_err => {
+        console.error('There was an issue fetching your data.')
+        const errRes: Response = {
+          ...new Response(),
+          ok: false,
+          status: 500
+        }
+        return errRes
+      })  
+    return response
+    }
+    else{
       const errRes: Response = {
         ...new Response(),
         ok: false,
         status: 500
       }
-      return errRes
-    })
-  return response
+      return errRes 
+    }
 }
 
 export const historyDelete = async (convId: string): Promise<Response> => {
