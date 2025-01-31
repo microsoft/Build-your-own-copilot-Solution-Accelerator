@@ -8,10 +8,10 @@ Please follow the steps below to set up the Fabric Workspace and collect the id 
 3. Enter a Workspace Name and click on `Apply`.
     ![New Workspace](/ResearchAssistant/Deployment/images/fabric/CreateWorkspace.png)
 
-4. On the next page, click on `New`.
+4. On the next page, click on `Import`.
     ![Create Workspace](/ResearchAssistant/Deployment/images/fabric/WorkspaceGuid.png)
 
-5. Click on `Import Notebook`.
+5. Click on `Notebook`.
 
     ![Create Workspace](/ResearchAssistant/Deployment/images/fabric/ImportNotebooks.png)
 
