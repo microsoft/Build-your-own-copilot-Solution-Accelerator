@@ -65,7 +65,7 @@ For additional training and support, please see:
 ### **How to install/deploy**
 
 1. Please check the link [Azure Products by Region](
-https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) and choose a region where Azure AI Search, Semantic Ranker, Azure OpenAI Service, and Azure AI Studio are available. 
+https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) and choose a region where Azure AI Search, Semantic Ranker, Azure OpenAI Service, and Azure AI Foundry are available. 
 
 2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
 
