@@ -43,7 +43,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-n": "^16.0.0",
     "eslint-plugin-promise": "^6.6.0",
-    "eslint-plugin-react": "^7.37.3",
+    "eslint-plugin-react": "^7.37.4",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
     "vite": "^6.0.6"
