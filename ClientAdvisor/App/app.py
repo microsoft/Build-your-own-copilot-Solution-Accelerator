@@ -1616,7 +1616,9 @@ def get_users():
         """
         cursor.execute(asset_stmt)
         asset_rows = cursor.fetchall()
-        nmonths = int(asset_rows[0].get("DaysDifference") / 30)
+        nmonths = 0
+        for row in asset_rows:
+            nmonths = int(row["DaysDifference"] / 30)
         if nmonths > 0:
             asset_update_stmt = (
                 f"UPDATE Assets SET AssetDate = dateadd(MONTH,{nmonths},AssetDate)"
@@ -1640,7 +1642,9 @@ def get_users():
         """
         cursor.execute(retirement_stmt)
         retirement_rows = cursor.fetchall()
-        nmonths = int(retirement_rows[0].get("DaysDifference") / 30)
+        nmonths = 0
+        for row in retirement_rows:
+            nmonths = int(row["DaysDifference"] / 30)
         if nmonths > 0:
             retire_update_stmt = f"UPDATE Retirement SET StatusDate = dateadd(MONTH,{nmonths},StatusDate)"
             cursor.execute(retire_update_stmt)
