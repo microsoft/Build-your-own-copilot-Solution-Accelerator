@@ -208,6 +208,9 @@ async def test_get_users_success(client):
         {
             "ClientId": 1,
             "ndays": 10,
+            "ClientMeetingDaysDifference": 1,
+            "AssetMonthsDifference": 1,
+            "StatusMonthsDifference": 1,
             "DaysDifference": 1,
             "Client": "Client A",
             "Email": "clienta@example.com",

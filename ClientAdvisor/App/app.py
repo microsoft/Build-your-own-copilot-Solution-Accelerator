@@ -1588,67 +1588,69 @@ def get_users():
         if len(rows) <= 6:
             # update ClientMeetings,Assets,Retirement tables sample data to current date
             cursor = conn.cursor()
-            cursor.execute(
-                """select DATEDIFF(d,CAST(max(StartTime) AS Date),CAST(GETDATE() AS Date)) + 3 as ndays from ClientMeetings"""
-            )
-            meeting_rows = cursor.fetchall()
-            ndays = 0
-            for row in meeting_rows:
-                ndays = row["ndays"]
+            combined_stmt = """
+                WITH MaxDates AS (
+                    SELECT
+                        MAX(CAST(StartTime AS Date)) AS MaxClientMeetingDate,
+                        MAX(AssetDate) AS MaxAssetDate,
+                        MAX(StatusDate) AS MaxStatusDate
+                    FROM
+                        (SELECT StartTime, NULL AS AssetDate, NULL AS StatusDate FROM ClientMeetings
+                        UNION ALL
+                        SELECT NULL AS StartTime, AssetDate, NULL AS StatusDate FROM Assets
+                        UNION ALL
+                        SELECT NULL AS StartTime, NULL AS AssetDate, StatusDate FROM Retirement) AS Combined
+                ),
+                Today AS (
+                    SELECT GETDATE() AS TodayDate
+                ),
+                DaysDifference AS (
+                    SELECT
+                        DATEDIFF(DAY, MaxClientMeetingDate, TodayDate) + 3 AS ClientMeetingDaysDifference,
+                        DATEDIFF(DAY, MaxAssetDate, TodayDate) - 30 AS AssetDaysDifference,
+                        DATEDIFF(DAY, MaxStatusDate, TodayDate) - 30 AS StatusDaysDifference
+                    FROM MaxDates, Today
+                )
+                SELECT
+                    ClientMeetingDaysDifference,
+                    AssetDaysDifference / 30 AS AssetMonthsDifference,
+                    StatusDaysDifference / 30 AS StatusMonthsDifference
+                FROM DaysDifference
+                """
+            cursor.execute(combined_stmt)
+            date_diff_rows = cursor.fetchall()
 
-            client_update_stmt = f"UPDATE ClientMeetings SET StartTime = dateadd(day,{ndays},StartTime), EndTime = dateadd(day,{ndays},EndTime)"
-            cursor.execute(client_update_stmt)
-            conn.commit()
+            client_days = (
+                date_diff_rows[0]["ClientMeetingDaysDifference"]
+                if date_diff_rows
+                else 0
+            )
+            asset_months = (
+                int(date_diff_rows[0]["AssetMonthsDifference"]) if date_diff_rows else 0
+            )
+            status_months = (
+                int(date_diff_rows[0]["StatusMonthsDifference"])
+                if date_diff_rows
+                else 0
+            )
 
-        asset_stmt = """WITH MaxAssetDate AS (
-                SELECT MAX(AssetDate) AS MaxDate
-                FROM Assets
-            ),
-            Today AS (
-                SELECT GETDATE() AS TodayDate
-            ),
-            DaysDifference AS (
-                SELECT DATEDIFF(DAY, MaxDate, TodayDate) - 30 AS DaysDifference
-                FROM MaxAssetDate, Today
-            )
-            SELECT DaysDifference
-            FROM DaysDifference
-        """
-        cursor.execute(asset_stmt)
-        asset_rows = cursor.fetchall()
-        nmonths = 0
-        for row in asset_rows:
-            nmonths = int(row["DaysDifference"] / 30)
-        if nmonths > 0:
-            asset_update_stmt = (
-                f"UPDATE Assets SET AssetDate = dateadd(MONTH,{nmonths},AssetDate)"
-            )
-            cursor.execute(asset_update_stmt)
-            conn.commit()
+            # Update ClientMeetings
+            if client_days > 0:
+                client_update_stmt = f"UPDATE ClientMeetings SET StartTime = DATEADD(day, {client_days}, StartTime), EndTime = DATEADD(day, {client_days}, EndTime)"
+                cursor.execute(client_update_stmt)
+                conn.commit()
 
-        retirement_stmt = """WITH MaxStatusDate AS (
-                SELECT MAX(StatusDate) AS MaxDate
-                FROM Retirement
-            ),
-            Today AS (
-                SELECT GETDATE() AS TodayDate
-            ),
-            DaysDifference AS (
-                SELECT DATEDIFF(DAY, MaxDate, TodayDate) - 30 AS DaysDifference
-                FROM MaxStatusDate, Today
-            )
-            SELECT DaysDifference
-            FROM DaysDifference
-        """
-        cursor.execute(retirement_stmt)
-        retirement_rows = cursor.fetchall()
-        nmonths = 0
-        for row in retirement_rows:
-            nmonths = int(row["DaysDifference"] / 30)
-        if nmonths > 0:
-            retire_update_stmt = f"UPDATE Retirement SET StatusDate = dateadd(MONTH,{nmonths},StatusDate)"
-            cursor.execute(retire_update_stmt)
-            conn.commit()
+            # Update Assets
+            if asset_months > 0:
+                asset_update_stmt = f"UPDATE Assets SET AssetDate = DATEADD(month, {asset_months}, AssetDate)"
+                cursor.execute(asset_update_stmt)
+                conn.commit()
+
+            # Update Retirement
+            if status_months > 0:
+                retire_update_stmt = f"UPDATE Retirement SET StatusDate = DATEADD(month, {status_months}, StatusDate)"
+                cursor.execute(retire_update_stmt)
+                conn.commit()
 
         users = []
         for row in rows:
