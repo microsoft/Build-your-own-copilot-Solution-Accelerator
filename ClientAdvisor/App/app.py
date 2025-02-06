@@ -1588,35 +1588,72 @@ def get_users():
         if len(rows) <= 6:
             # update ClientMeetings,Assets,Retirement tables sample data to current date
             cursor = conn.cursor()
-            cursor.execute(
-                """select DATEDIFF(d,CAST(max(StartTime) AS Date),CAST(GETDATE() AS Date)) + 3 as ndays from ClientMeetings"""
-            )
-            rows = cursor.fetchall()
-            ndays = 0
-            for row in rows:
-                ndays = row["ndays"]
-            sql_stmt1 = f"UPDATE ClientMeetings SET StartTime = dateadd(day,{ndays},StartTime), EndTime = dateadd(day,{ndays},EndTime)"
-            cursor.execute(sql_stmt1)
-            conn.commit()
-            nmonths = int(ndays / 30)
-            if nmonths > 0:
-                sql_stmt1 = (
-                    f"UPDATE Assets SET AssetDate = dateadd(MONTH,{nmonths},AssetDate)"
+            combined_stmt = """
+                WITH MaxDates AS (
+                    SELECT
+                        MAX(CAST(StartTime AS Date)) AS MaxClientMeetingDate,
+                        MAX(AssetDate) AS MaxAssetDate,
+                        MAX(StatusDate) AS MaxStatusDate
+                    FROM
+                        (SELECT StartTime, NULL AS AssetDate, NULL AS StatusDate FROM ClientMeetings
+                        UNION ALL
+                        SELECT NULL AS StartTime, AssetDate, NULL AS StatusDate FROM Assets
+                        UNION ALL
+                        SELECT NULL AS StartTime, NULL AS AssetDate, StatusDate FROM Retirement) AS Combined
+                ),
+                Today AS (
+                    SELECT GETDATE() AS TodayDate
+                ),
+                DaysDifference AS (
+                    SELECT
+                        DATEDIFF(DAY, MaxClientMeetingDate, TodayDate) + 3 AS ClientMeetingDaysDifference,
+                        DATEDIFF(DAY, MaxAssetDate, TodayDate) - 30 AS AssetDaysDifference,
+                        DATEDIFF(DAY, MaxStatusDate, TodayDate) - 30 AS StatusDaysDifference
+                    FROM MaxDates, Today
                 )
-                cursor.execute(sql_stmt1)
+                SELECT
+                    ClientMeetingDaysDifference,
+                    AssetDaysDifference / 30 AS AssetMonthsDifference,
+                    StatusDaysDifference / 30 AS StatusMonthsDifference
+                FROM DaysDifference
+                """
+            cursor.execute(combined_stmt)
+            date_diff_rows = cursor.fetchall()
+
+            client_days = (
+                date_diff_rows[0]["ClientMeetingDaysDifference"]
+                if date_diff_rows
+                else 0
+            )
+            asset_months = (
+                int(date_diff_rows[0]["AssetMonthsDifference"]) if date_diff_rows else 0
+            )
+            status_months = (
+                int(date_diff_rows[0]["StatusMonthsDifference"])
+                if date_diff_rows
+                else 0
+            )
+
+            # Update ClientMeetings
+            if client_days > 0:
+                client_update_stmt = f"UPDATE ClientMeetings SET StartTime = DATEADD(day, {client_days}, StartTime), EndTime = DATEADD(day, {client_days}, EndTime)"
+                cursor.execute(client_update_stmt)
                 conn.commit()
 
-                sql_stmt1 = f"UPDATE Retirement SET StatusDate = dateadd(MONTH,{nmonths},StatusDate)"
-                cursor.execute(sql_stmt1)
+            # Update Assets
+            if asset_months > 0:
+                asset_update_stmt = f"UPDATE Assets SET AssetDate = DATEADD(month, {asset_months}, AssetDate)"
+                cursor.execute(asset_update_stmt)
                 conn.commit()
 
-            cursor = conn.cursor()
-            cursor.execute(sql_stmt)
-            rows = cursor.fetchall()
+            # Update Retirement
+            if status_months > 0:
+                retire_update_stmt = f"UPDATE Retirement SET StatusDate = DATEADD(month, {status_months}, StatusDate)"
+                cursor.execute(retire_update_stmt)
+                conn.commit()
 
         users = []
         for row in rows:
-            # print(row)
             user = {
                 "ClientId": row["ClientId"],
                 "ClientName": row["Client"],
@@ -1631,7 +1668,6 @@ def get_users():
                 "ClientSummary": row["ClientSummary"],
             }
             users.append(user)
-            # print(users)
 
         return jsonify(users)
 
