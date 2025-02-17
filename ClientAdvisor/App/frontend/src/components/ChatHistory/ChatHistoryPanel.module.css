@@ -1,11 +1,11 @@
 .container {
-  max-height: calc(100vh - 100px);
-  width: 300px;
+  height: calc(100vh - 100px);
+  width: 305px;
 }
 
 .listContainer {
   overflow: hidden auto;
-  max-height: calc(90vh - 105px);
+  height: calc(90vh - 230px);
 }
 
 .itemCell {
@@ -79,9 +79,9 @@
 }
 
 @media screen and (-ms-high-contrast: active), (forced-colors: active) {
-  .container{
-      border: 2px solid WindowText;
-      background-color: Window;
-      color: WindowText;
+  .container {
+    border: 2px solid WindowText;
+    background-color: Window;
+    color: WindowText;
   }
 }
