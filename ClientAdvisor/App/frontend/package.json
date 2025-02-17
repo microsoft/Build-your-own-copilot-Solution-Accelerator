@@ -68,7 +68,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^15.4.3",
     "msw": "2.7.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.5.1",
     "react-markdown": "^9.0.3",
     "react-test-renderer": "^19.0.0",
     "string.prototype.replaceall": "^1.0.10",
