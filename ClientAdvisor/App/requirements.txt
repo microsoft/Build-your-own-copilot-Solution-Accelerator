@@ -7,7 +7,7 @@ azure-storage-blob==12.24.1
 python-dotenv==1.0.1
 azure-cosmos==4.5.0
 quart==0.20.0
-uvicorn==0.24.0
+uvicorn==0.34.0
 gunicorn==23.0.0
 aiohttp==3.10.2
 quart-session==3.0.0
