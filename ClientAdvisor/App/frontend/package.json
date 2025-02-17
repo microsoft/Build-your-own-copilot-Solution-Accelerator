@@ -29,7 +29,7 @@
     "react-syntax-highlighter": "^15.6.1",
     "react-uuid": "^2.0.0",
     "rehype-raw": "^7.0.0",
-    "remark-gfm": "^4.0.0",
+    "remark-gfm": "^4.0.1",
     "remark-supersub": "^1.0.0"
   },
   "devDependencies": {
@@ -69,13 +69,13 @@
     "lint-staged": "^15.4.3",
     "msw": "2.7.0",
     "prettier": "^3.2.5",
-    "react-markdown": "^9.0.1",
+    "react-markdown": "^9.0.3",
     "react-test-renderer": "^19.0.0",
     "string.prototype.replaceall": "^1.0.10",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3",
-    "vite": "^6.0.6",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
     "undici": "^5.0.0"
   }
 }
