@@ -19,7 +19,7 @@
     "@fluentui/font-icons-mdl2": "^8.5.57",
     "@fluentui/react": "^8.122.9",
     "@fluentui/react-hooks": "^8.6.29",
-    "@fluentui/react-icons": "^2.0.270",
+    "@fluentui/react-icons": "^2.0.274",
     "dompurify": "^3.2.3",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
