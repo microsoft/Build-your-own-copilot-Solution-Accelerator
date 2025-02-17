@@ -8,7 +8,7 @@ azure-cosmos==4.9.0
 quart==0.20.0
 uvicorn==0.34.0
 gunicorn==23.0.0
-aiohttp==3.11.11
+aiohttp==3.11.12
 quart-session==3.0.0
 pymssql==2.3.2
 httpx==0.28.1
