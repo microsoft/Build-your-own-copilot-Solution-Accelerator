@@ -1,7 +1,7 @@
 azure-identity==1.19.0
 Flask==3.1.0
 openai==1.58.1
-azure-search-documents==11.6.0b8
+azure-search-documents==11.6.0b9
 azure-storage-blob==12.24.1
 python-dotenv==1.0.1
 azure-cosmos==4.9.0
