@@ -1,4 +1,4 @@
-name: CI-Validate Deployment-Client Advisor
+name: Validate Deployment - Client Advisor
 
 on:
   push:
