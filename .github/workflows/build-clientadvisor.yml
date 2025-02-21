@@ -1,4 +1,4 @@
-name: Build ClientAdvisor Docker Images
+name: Build Docker and Optional Push - Client Advisor
 
 on:
   push:

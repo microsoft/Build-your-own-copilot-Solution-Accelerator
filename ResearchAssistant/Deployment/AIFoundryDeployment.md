@@ -1,8 +1,8 @@
-# AI Studio Deployment Guide 
+# AI Foundry Deployment Guide 
 Please follow the steps below to configure the Prompt flow endpoint in App service configuration.
 
-## Step 1: Open AI Studio Project
-1. Launch the [AI Studio](https://ai.azure.com/) and select `Build` from the top menu.
+## Step 1: OpenAI Foundry Project
+1. Launch the [AI Foundry](https://ai.azure.com/) and select `project` under Jump into a project in Azure AI Foundry, If not found click on View all projects from the top menu.
 
     ![Home](/ResearchAssistant/Deployment/images/aiStudio/Home.png)
 
@@ -10,7 +10,7 @@ Please follow the steps below to configure the Prompt flow endpoint in App servi
 
 ## Step 2: Import Prompt Flow and Deploy
 
-1. Click on `PromptFlow` button from left menu under `Tools`.
+1. Click on `PromptFlow` button from left menu under `Build and customize`.
 
     ![Prompt Flow](/ResearchAssistant/Deployment/images/aiStudio/PromptFlow.png)
 
@@ -27,7 +27,7 @@ Please follow the steps below to configure the Prompt flow endpoint in App servi
     ![Upload Local File](/ResearchAssistant/Deployment/images/aiStudio/UploadLocalFile.png)
 
 
-5. Click on `Select runtime` and chick on `Start` from the drop-down list. It can take few minutes for the runtime to start.
+5. Click on `Start compute session` and click on `Start compute session` from the drop-down list. It can take few minutes for the runtime to start.
 
     ![Select Runtime](/ResearchAssistant/Deployment/images/aiStudio/SelectRunTime.png)
 
@@ -38,12 +38,12 @@ Please follow the steps below to configure the Prompt flow endpoint in App servi
 
     ![Deploy Draft Flow](/ResearchAssistant/Deployment/images/aiStudio/DeployDraftFlow.png)
 
-7. It will take few minutes for the flow to be validated and deployed. Click on `Deployments` from left menu. You might only see the Default_AzureOpenAI deployments in the page until the deployment is completed. Please wait and click on `Refresh` after few minutes.
+7. It will take few minutes for the flow to be validated and deployed. Click on `Models + endpoints` from left menu. You might only see the Default_AzureOpenAI deployments in the page until the deployment is completed. Please wait and click on `Refresh` after few minutes.
 
    ![Deployments Page](/ResearchAssistant/Deployment/images/aiStudio/BlankDeploymentsPage.png)
 
 
-8. Click on the deployed endpoint with name `draftsinference-1`.
+8. Click on the deployed endpoint with name `ai-project-bycra-jzxzb-1`.
    ![Drafts Endpoint](/ResearchAssistant/Deployment/images/aiStudio/DraftsEndpoint.png)
 
 9. Click on `Consume` from the top menu. Copy below details to use later in step 3.6.

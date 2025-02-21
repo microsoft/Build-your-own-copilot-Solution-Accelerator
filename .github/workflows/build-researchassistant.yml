@@ -1,4 +1,4 @@
-name: Build ResearchAssistant Docker Images
+name: Build Docker and Optional Push - Researcher
 
 on:
   push:
