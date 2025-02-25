@@ -2,12 +2,20 @@ name: Validate Deployment - Client Advisor
 
 on:
   push:
-    branches:
-      - main
+    branches: [main, dev, demo]
     paths:
-      - 'ClientAdvisor/**'
-  # schedule:
-  #   - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
+      - ClientAdvisor/**
+  pull_request:
+    branches: [main, dev, demo]
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+    paths:
+      - ClientAdvisor/**
+  merge_group:
+  workflow_dispatch:
 
 jobs:
   deploy:

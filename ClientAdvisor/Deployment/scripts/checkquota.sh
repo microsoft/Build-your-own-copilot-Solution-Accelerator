@@ -91,7 +91,7 @@ if [ -z "$VALID_REGION" ]; then
     echo "QUOTA_FAILED=true" >> "$GITHUB_ENV"
     exit 0
 else
-    echo "✅ Suggested Region: $VALID_REGION"
+    echo "✅ Deployment Region: $VALID_REGION"
     echo "VALID_REGION=$VALID_REGION" >> "$GITHUB_ENV"
     exit 0
 fi
