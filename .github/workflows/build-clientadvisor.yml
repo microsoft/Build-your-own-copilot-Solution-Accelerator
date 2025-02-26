@@ -1,4 +1,4 @@
-name: Build ClientAdvisor Docker Images
+name: Build Docker and Optional Push - Client Advisor
 
 on:
   push:
@@ -15,6 +15,7 @@ on:
     paths:
       - ClientAdvisor/**
   merge_group:
+  workflow_dispatch:
 
 jobs:
   docker-build:

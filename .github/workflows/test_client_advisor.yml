@@ -1,4 +1,4 @@
-name: Unit Tests - Client Advisor
+name: Test Workflow with Coverage - Client Advisor
 
 on:
   push:

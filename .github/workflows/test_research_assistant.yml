@@ -1,4 +1,4 @@
-name: Unit Tests - Research Assistant
+name: Test Workflow with Coverage - Researcher
 
 on:
   push:
