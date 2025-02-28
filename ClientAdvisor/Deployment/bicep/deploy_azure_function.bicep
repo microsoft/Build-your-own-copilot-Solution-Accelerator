@@ -23,7 +23,7 @@ param callTranscriptSystemPrompt string
 param streamTextSystemPrompt string
 
 var functionAppName = '${solutionName}fn'
-var azureOpenAIDeploymentModel = 'gpt-4'
+var azureOpenAIDeploymentModel = 'gpt-4o-mini'
 var azureOpenAIEmbeddingDeployment = 'text-embedding-ada-002'
 var valueOne = '1'
 
