@@ -31,7 +31,7 @@ search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT")
 search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
 
 class ChatWithDataPlugin:
-    @kernel_function(name="GreetingsResponse", description="Respond to any greeting or general questions, example- Hi, How are you?, etc")
+    @kernel_function(name="GreetingsResponse", description="Respond to any greeting or general questions")
     def greeting(self, input: Annotated[str, "the question"]) -> Annotated[str, "The output is a string"]:
         # query = input.split(':::')[0]
         endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
@@ -39,7 +39,8 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version="2023-09-01-preview"
+            api_version=api_version
+            # api_version="2023-09-01-preview"
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
         try:
@@ -74,7 +75,8 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version="2023-09-01-preview"
+            api_version=api_version
+            # api_version="2023-09-01-preview"
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
 
