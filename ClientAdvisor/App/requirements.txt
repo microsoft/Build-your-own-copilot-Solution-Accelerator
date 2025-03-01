@@ -18,7 +18,7 @@ httpx==0.28.1
 flake8==7.1.2
 black==25.1.0
 autoflake==2.3.1
-isort==6.0.0
+isort==6.0.1
 
 # Testing tools
 pytest>=8.2,<9  # Compatible version for pytest-asyncio
