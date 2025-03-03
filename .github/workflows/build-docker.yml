@@ -48,13 +48,28 @@ jobs:
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
+    - name: Determine Tag Name Based on Branch
+      id: determine_tag
+      run: |
+        if [[ "${{ github.ref_name }}" == "main" ]]; then
+          echo "tagname=latest" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref_name }}" == "dev" ]]; then
+          echo "tagname=dev" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref_name }}" == "demo" ]]; then
+          echo "tagname=demo" >> $GITHUB_OUTPUT
+        else
+          echo "tagname=default" >> $GITHUB_OUTPUT
+      
+        fi
+
+
     - name: Build Docker Image and optionally push
       uses: docker/build-push-action@v6
       with:
         context: .
         file: ${{ inputs.dockerfile }}
         push: ${{ inputs.push }}
-        cache-from: type=registry,ref=${{ inputs.registry }}/${{ inputs.app_name}}:${{ github.ref_name == 'main' && 'latest' || github.ref_name == 'dev' && 'dev' || github.ref_name == 'demo' && 'demo' || 'latest' }}
+        cache-from: type=registry,ref=${{ inputs.registry }}/${{ inputs.app_name}}:${{ steps.determine_tag.outputs.tagname }}
         tags: |
-          ${{ inputs.registry }}/${{ inputs.app_name}}:${{ github.ref_name == 'main' && 'latest' || github.ref_name == 'dev' && 'dev' || github.ref_name == 'demo' && 'demo' || 'latest' }}
-          ${{ inputs.registry }}/${{ inputs.app_name}}:${{ steps.date.outputs.date }}_${{ github.run_number }}
+          ${{ inputs.registry }}/${{ inputs.app_name}}:${{ steps.determine_tag.outputs.tagname }}
+          ${{ inputs.registry }}/${{ inputs.app_name}}:${{ steps.determine_tag.outputs.tagname }}_${{ steps.date.outputs.date }}_${{ github.run_number }}
