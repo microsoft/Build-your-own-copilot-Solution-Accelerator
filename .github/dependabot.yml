@@ -8,7 +8,7 @@ updates:
     commit-message:
       prefix: "build"
     target-branch: "dependabotchanges"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 100
 
   - package-ecosystem: "npm"
     directory: "/ResearchAssistant/App/frontend"
@@ -17,7 +17,7 @@ updates:
     commit-message:
       prefix: "build"
     target-branch: "dependabotchanges"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 100
 
   # 2. Python dependencies
   - package-ecosystem: "pip"
@@ -27,7 +27,7 @@ updates:
     commit-message:
       prefix: "build"
     target-branch: "dependabotchanges"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 100
 
   - package-ecosystem: "pip"
     directory: "/ClientAdvisor/AzureFunction"
@@ -36,7 +36,7 @@ updates:
     commit-message:
       prefix: "build"
     target-branch: "dependabotchanges"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 100
 
   - package-ecosystem: "pip"
     directory: "/ClientAdvisor/Deployment/scripts/fabric_scripts"
@@ -45,7 +45,7 @@ updates:
     commit-message:
       prefix: "build"
     target-branch: "dependabotchanges"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 100
 
   - package-ecosystem: "pip"
     directory: "/ClientAdvisor/Deployment/scripts/index_scripts"
@@ -54,7 +54,7 @@ updates:
     commit-message:
       prefix: "build"
     target-branch: "dependabotchanges"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 100
 
   - package-ecosystem: "pip"
     directory: "/ResearchAssistant/App"
@@ -63,7 +63,7 @@ updates:
     commit-message:
       prefix: "build"
     target-branch: "dependabotchanges"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 100
 
   - package-ecosystem: "pip"
     directory: "/ResearchAssistant/Deployment/scripts/aihub_scripts"
@@ -72,7 +72,7 @@ updates:
     commit-message:
       prefix: "build"
     target-branch: "dependabotchanges"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 100
 
   - package-ecosystem: "pip"
     directory: "/ResearchAssistant/Deployment/scripts/fabric_scripts"
@@ -81,7 +81,7 @@ updates:
     commit-message:
       prefix: "build"
     target-branch: "dependabotchanges"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 100
 
   - package-ecosystem: "pip"
     directory: "/ResearchAssistant/Deployment/scripts/index_scripts"
