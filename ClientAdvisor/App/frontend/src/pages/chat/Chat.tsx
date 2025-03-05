@@ -353,11 +353,30 @@ const Chat = (props: any) => {
       }
       if (response?.body) {
         const reader = response.body.getReader()
-
+        let firstRead = true
         let runningText = ''
         while (true) {
           setProcessMessages(messageStatus.Processing)
           const { done, value } = await reader.read()
+
+          // Handle Null Object (Undefined) response from History Generate Method
+          if (firstRead && done && value === undefined) {
+            let assistantMessage: ChatMessage = {
+              id: uuid(),
+              role: ASSISTANT,
+              content: 'There was an issue retrieving data. Please try again. If the problem persists, please contact the site administrator.',
+              date: new Date().toISOString()
+            };
+    
+            processResultMessage(assistantMessage, userMessage, conversationId);
+    
+            result.history_metadata = {
+              conversation_id: uuid(),
+              title: question,
+              date: assistantMessage.date
+            };
+          }
+          firstRead = false;
           if (done) break
 
           var text = new TextDecoder('utf-8').decode(value)
