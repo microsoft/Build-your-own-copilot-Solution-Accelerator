@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.33.93.31351",
-      "templateHash": "17507267865709776014"
+      "templateHash": "11533427840519533378"
     }
   },
   "parameters": {
@@ -23,7 +23,7 @@
         "description": "CosmosDB Location"
       }
     },
-    "resourceGroupLocation": {
+    "AzureOpenAILocation": {
       "type": "string",
       "allowedValues": [
         "eastus",
@@ -33,17 +33,18 @@
         "swedencentral"
       ],
       "metadata": {
-        "description": "Resource Group Location"
+        "description": "Azure OpenAI Location"
       }
     }
   },
   "variables": {
-    "solutionLocation": "[parameters('resourceGroupLocation')]",
+    "resourceGroupLocation": "[resourceGroup().location]",
+    "solutionLocation": "[variables('resourceGroupLocation')]",
     "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/",
     "appversion": "latest",
-    "functionAppSqlPrompt": "A valid T-SQL query to find {query} for tables and columns provided below:\r\n    1. Table: Clients\r\n    Columns: ClientId,Client,Email,Occupation,MaritalStatus,Dependents\r\n    2. Table: InvestmentGoals\r\n    Columns: ClientId,InvestmentGoal\r\n    3. Table: Assets\r\n    Columns: ClientId,AssetDate,Investment,ROI,Revenue,AssetType\r\n    4. Table: ClientSummaries\r\n    Columns: ClientId,ClientSummary\r\n    5. Table: InvestmentGoalsDetails\r\n    Columns: ClientId,InvestmentGoal,TargetAmount,Contribution\r\n    6. Table: Retirement\r\n    Columns: ClientId,StatusDate,RetirementGoalProgress,EducationGoalProgress\r\n    7.Table: ClientMeetings\r\n    Columns: ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail\r\n    Use Investement column from Assets table as value always.\r\n    Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n    Do not use client name in filter.\r\n    Do not include assets values unless asked for.\r\n    Always use ClientId = {clientid} in the query filter.\r\n    Always return client name in the query.\r\n    Only return the generated sql query. do not return anything else",
-    "functionAppCallTranscriptSystemPrompt": "You are an assistant who provides wealth advisors with helpful information to prepare for client meetings.\r\n  You have access to the client’s meeting call transcripts.\r\n  You can use this information to answer questions about the clients",
-    "functionAppStreamTextSystemPrompt": "You are a helpful assistant to a wealth advisor.\r\n  Do not answer any questions not related to wealth advisors queries.\r\n  If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.\r\n  Only use the client name returned from database in the response.\r\n  If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.\r\n  ** Remove any client identifiers or ids or numbers or ClientId in the final response."
+    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\r\n    1. Table: Clients\r\n    Columns: ClientId,Client,Email,Occupation,MaritalStatus,Dependents\r\n    2. Table: InvestmentGoals\r\n    Columns: ClientId,InvestmentGoal\r\n    3. Table: Assets\r\n    Columns: ClientId,AssetDate,Investment,ROI,Revenue,AssetType\r\n    4. Table: ClientSummaries\r\n    Columns: ClientId,ClientSummary\r\n    5. Table: InvestmentGoalsDetails\r\n    Columns: ClientId,InvestmentGoal,TargetAmount,Contribution\r\n    6. Table: Retirement\r\n    Columns: ClientId,StatusDate,RetirementGoalProgress,EducationGoalProgress\r\n    7.Table: ClientMeetings\r\n    Columns: ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail\r\n    Always use Investement column from Assets table as value.\r\n    Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n    Do not use client name in filter.\r\n    Do not include assets values unless asked for.\r\n    Always use ClientId = {clientid} in the query filter.\r\n    Always return client name in the query.\r\n    Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n    Only return the generated sql query. Do not return anything else",
+    "functionAppCallTranscriptSystemPrompt": "You are an assistant who provides wealth advisors with helpful information to prepare for client meetings.\r\n  You have access to the client’s past meeting call transcripts, which you can use to provide relevant insights and information.\r\n  Answer questions asked about the clients based on the available transcripts.",
+    "functionAppStreamTextSystemPrompt": "You are a helpful assistant to a Wealth Advisor.\r\n  Do not answer any questions not related to wealth advisors queries.\r\n  Only use the client name returned from database in the response.\r\n  If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.\r\n  ** Remove any client identifiers or ids or numbers or ClientId in the final response."
   },
   "resources": [
     {
@@ -800,7 +801,7 @@
             "value": "[parameters('solutionPrefix')]"
           },
           "solutionLocation": {
-            "value": "[parameters('resourceGroupLocation')]"
+            "value": "[parameters('AzureOpenAILocation')]"
           }
         },
         "template": {
@@ -810,7 +811,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.33.93.31351",
-              "templateHash": "9206136347125782951"
+              "templateHash": "2374934605490635244"
             }
           },
           "parameters": {
@@ -856,7 +857,7 @@
               "name": "[format('{0}/{1}', parameters('accounts_byc_openai_name'), 'gpt-4o-mini')]",
               "sku": {
                 "name": "Standard",
-                "capacity": 40
+                "capacity": 45
               },
               "properties": {
                 "model": {

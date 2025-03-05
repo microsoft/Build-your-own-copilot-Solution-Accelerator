@@ -48,7 +48,7 @@ resource accounts_byc_openai_name_gpt_4 'Microsoft.CognitiveServices/accounts/de
   name: 'gpt-4o-mini'
   sku: {
     name: 'Standard'
-    capacity: 40
+    capacity: 45
   }
   properties: {
     model: {
