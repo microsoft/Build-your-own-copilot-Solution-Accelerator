@@ -41,10 +41,10 @@ var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for t
     Columns: ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail
     Always use Investement column from Assets table as value.
     Assets table has snapshots of values by date. Do not add numbers across different dates for total values.
-    Do not use client name in filter.
+    Do not use client name in filters.
     Do not include assets values unless asked for.
-    Always use ClientId = {clientid} in the query filter.
-    Always return client name in the query.
+    ALWAYS use ClientId = {clientid} in the query filter.
+    ALWAYS select Client Name(Column- Client) in the query.
     Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
     Only return the generated sql query. Do not return anything else'''
 
@@ -53,9 +53,10 @@ var functionAppCallTranscriptSystemPrompt = '''You are an assistant who provides
   Answer questions asked about the clients based on the available transcripts.'''
 
 var functionAppStreamTextSystemPrompt = '''You are a helpful assistant to a Wealth Advisor.
-  Do not answer any questions not related to wealth advisors queries.
+  Do not answer any questions not related to financial or wealth advisors queries.
+  If a client’s name (first name or surname) is mentioned in the question, verify it against the name returned from the ChatWithSQLDatabase tool. If the names do not match **(case insensitive)**, respond with: "Please only ask questions about the selected client or select another client to inquire about their details."
   Only use the client name returned from database in the response.
-  If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
+  If you cannot answer the question, always return: "I cannot answer this question from the data available. Please rephrase or add more details."
   ** Remove any client identifiers or ids or numbers or ClientId in the final response.'''
 
 // ========== Managed Identity ========== //
