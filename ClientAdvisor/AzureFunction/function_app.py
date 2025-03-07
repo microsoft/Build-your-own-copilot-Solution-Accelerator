@@ -1,20 +1,13 @@
 import azure.functions as func
 import openai
 from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
-import asyncio
 import os
 
 from typing import Annotated
 
-from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
-from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatCompletion
-from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.open_ai_prompt_execution_settings import (
-    OpenAIChatPromptExecutionSettings,
-)
-from semantic_kernel.contents.chat_history import ChatHistory
-from semantic_kernel.contents.function_call_content import FunctionCallContent
-from semantic_kernel.core_plugins.time_plugin import TimePlugin
-from semantic_kernel.functions.kernel_arguments import KernelArguments
+from semantic_kernel.agents.open_ai import AzureAssistantAgent
+from semantic_kernel.contents.chat_message_content import ChatMessageContent
+from semantic_kernel.contents.utils.author_role import AuthorRole
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
 import pymssql
@@ -32,15 +25,15 @@ search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT")
 search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
 
 class ChatWithDataPlugin:
-    @kernel_function(name="Greeting", description="Respond to any greeting or general questions")
+    @kernel_function(name="GreetingsResponse", description="Respond to any greeting or general questions")
     def greeting(self, input: Annotated[str, "the question"]) -> Annotated[str, "The output is a string"]:
-        query = input.split(':::')[0]
+        # query = input.split(':::')[0]
         endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
         api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version="2023-09-01-preview"
+            api_version=api_version
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
         try:
@@ -48,7 +41,7 @@ class ChatWithDataPlugin:
                 model=deployment,
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant to repond to any greeting or general questions."},
-                    {"role": "user", "content": query},
+                    {"role": "user", "content": input},
                 ],
                 temperature=0,
             )
@@ -75,7 +68,7 @@ class ChatWithDataPlugin:
         client = openai.AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-            api_version="2023-09-01-preview"
+            api_version=api_version
         )
         deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
 
@@ -84,7 +77,7 @@ class ChatWithDataPlugin:
             sql_prompt = sql_prompt.replace("{query}", query)
             sql_prompt = sql_prompt.replace("{clientid}", clientid)
         else:
-            sql_prompt = f'''A valid T-SQL query to find {query} for tables and columns provided below:
+            sql_prompt = f'''Generate a valid T-SQL query to find {query} for tables and columns provided below:
             1. Table: Clients
             Columns: ClientId,Client,Email,Occupation,MaritalStatus,Dependents
             2. Table: InvestmentGoals
@@ -99,13 +92,14 @@ class ChatWithDataPlugin:
             Columns: ClientId,StatusDate,RetirementGoalProgress,EducationGoalProgress
             7.Table: ClientMeetings
             Columns: ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail
-            Use Investement column from Assets table as value always.
+            Always use Investement column from Assets table as value.
             Assets table has snapshots of values by date. Do not add numbers across different dates for total values.
             Do not use client name in filter.
             Do not include assets values unless asked for.
-            Always use ClientId = {clientid} in the query filter.
-            Always return client name in the query.
-            Only return the generated sql query. do not return anything else'''
+            ALWAYS use ClientId = {clientid} in the query filter.
+            ALWAYS select Client Name(Column- Client) in the query.
+            Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
+            Only return the generated sql query. Do not return anything else'''
         try:
 
             completion = client.chat.completions.create(
@@ -118,7 +112,7 @@ class ChatWithDataPlugin:
             )
             sql_query = completion.choices[0].message.content
             sql_query = sql_query.replace("```sql",'').replace("```",'')
-            #print(sql_query)
+            # print(sql_query)
         
             connectionString = os.environ.get("SQLDB_CONNECTION_STRING")
             server = os.environ.get("SQLDB_SERVER")
@@ -145,91 +139,95 @@ class ChatWithDataPlugin:
         question: Annotated[str, "the question"],
         ClientId: Annotated[str, "the ClientId"]
     ):
+        try:
+            endpoint=os.environ.get("AZURE_OPEN_AI_ENDPOINT")
+            deployment=os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
+            apikey=os.environ.get("AZURE_OPEN_AI_API_KEY")
 
-        endpoint=os.environ.get("AZURE_OPEN_AI_ENDPOINT")
-        deployment=os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
-        apikey=os.environ.get("AZURE_OPEN_AI_API_KEY")
+            search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT") 
+            search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
+            index_name = os.environ.get("AZURE_SEARCH_INDEX")
 
-        search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT") 
-        search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
-        index_name = os.environ.get("AZURE_SEARCH_INDEX")
+            client = openai.AzureOpenAI(
+                azure_endpoint= endpoint, #f"{endpoint}/openai/deployments/{deployment}/extensions", 
+                api_key=apikey, 
+                api_version="2024-02-01"
+            )
 
-        client = openai.AzureOpenAI(
-            azure_endpoint= endpoint, #f"{endpoint}/openai/deployments/{deployment}/extensions", 
-            api_key=apikey, 
-            api_version="2024-02-01"
-        )
+            query = question
+            system_message = os.environ.get("AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT")
+            if not system_message:
+                system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
+                You have access to the client’s past meeting call transcripts, which you can use to provide relevant insights and information. 
+                Answer questions asked about the clients based on the available transcripts.'''
 
-        query = question
-        system_message = os.environ.get("AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT")
-        if not system_message:
-            system_message = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings. 
-            You have access to the client’s meeting call transcripts. 
-            You can use this information to answer questions about the clients'''
-
-        completion = client.chat.completions.create(
-            model = deployment,
-            messages = [
-                {
-                    "role": "system",
-                    "content": system_message
-                },
-                {
-                    "role": "user",
-                    "content": query
-                }
-            ],
-            seed = 42,
-            temperature = 0,
-            max_tokens = 800,
-            extra_body = {
-                "data_sources": [
+            completion = client.chat.completions.create(
+                model = deployment,
+                messages = [
                     {
-                        "type": "azure_search",
-                        "parameters": {
-                            "endpoint": search_endpoint,
-                            "index_name": index_name,
-                            "semantic_configuration": "default",
-                            "query_type": "vector_simple_hybrid", #"vector_semantic_hybrid"
-                            "fields_mapping": {
-                                "content_fields_separator": "\n",
-                                "content_fields": ["content"],
-                                "filepath_field": "chunk_id",
-                                "title_field": "", #null,
-                                "url_field": "sourceurl",
-                                "vector_fields": ["contentVector"]
-                            },
-                            "semantic_configuration": 'my-semantic-config',
-                            "in_scope": "true",
-                            "role_information": system_message,
-                            # "vector_filter_mode": "preFilter", #VectorFilterMode.PRE_FILTER,
-                            "filter": f"client_id eq '{ClientId}'", #"", #null,
-                            "strictness": 3,
-                            "top_n_documents": 5,
-                            "authentication": {
-                                "type": "api_key",
-                                "key": search_key
-                            },
-                            "embedding_dependency": {
-                                "type": "deployment_name",
-                                "deployment_name": "text-embedding-ada-002"
-                            },
-
-                        }
+                        "role": "system",
+                        "content": system_message
+                    },
+                    {
+                        "role": "user",
+                        "content": query
                     }
-                ]
-            }
-        )
+                ],
+                seed = 42,
+                temperature = 0,
+                max_tokens = 800,
+                extra_body = {
+                    "data_sources": [
+                        {
+                            "type": "azure_search",
+                            "parameters": {
+                                "endpoint": search_endpoint,
+                                "index_name": index_name,
+                                "semantic_configuration": "default",
+                                "query_type": "vector_simple_hybrid", #"vector_semantic_hybrid"
+                                "fields_mapping": {
+                                    "content_fields_separator": "\n",
+                                    "content_fields": ["content"],
+                                    "filepath_field": "chunk_id",
+                                    "title_field": "", #null,
+                                    "url_field": "sourceurl",
+                                    "vector_fields": ["contentVector"]
+                                },
+                                "semantic_configuration": 'my-semantic-config',
+                                "in_scope": "true",
+                                "role_information": system_message,
+                                # "vector_filter_mode": "preFilter", #VectorFilterMode.PRE_FILTER,
+                                "filter": f"client_id eq '{ClientId}'", #"", #null,
+                                "strictness": 3,
+                                "top_n_documents": 5,
+                                "authentication": {
+                                    "type": "api_key",
+                                    "key": search_key
+                                },
+                                "embedding_dependency": {
+                                    "type": "deployment_name",
+                                    "deployment_name": "text-embedding-ada-002"
+                                },
 
-        answer = completion.choices[0].message.content
+                            }
+                        }
+                    ]
+                }
+            )
+
+            answer = completion.choices[0]
+        except Exception as e:
+            answer = str(e)
         return answer
 
 # Get data from Azure Open AI
 async def stream_processor(response):
     async for message in response:
-        if str(message[0]): # Get remaining generated response if applicable
-            await asyncio.sleep(0.1)
-            yield str(message[0])
+        if message.content:
+            yield message.content
+        # if str(message[0]): # Get remaining generated response if applicable
+        #     await asyncio.sleep(0.1)
+        #     yield str(message[0])
 
 @app.route(route="stream_openai_text", methods=[func.HttpMethod.GET])
 async def stream_openai_text(req: Request) -> StreamingResponse:
@@ -241,52 +239,41 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
 
     kernel = Kernel()
 
-    service_id = "function_calling"
-
-    # Please make sure your AzureOpenAI Deployment allows for function calling
-    ai_service = AzureChatCompletion(
-        service_id=service_id,
-        endpoint=endpoint,
-        api_key=api_key,
-        api_version=api_version,
-        deployment_name=deployment
-    )
-
-    kernel.add_service(ai_service)
-
     kernel.add_plugin(ChatWithDataPlugin(), plugin_name="ChatWithData")
 
-    settings: OpenAIChatPromptExecutionSettings = kernel.get_prompt_execution_settings_from_service_id(
-        service_id=service_id
-    )
-    settings.function_call_behavior = FunctionCallBehavior.EnableFunctions(
-        auto_invoke=True, filters={"included_plugins": ["ChatWithData"]}
-    )
-    settings.seed = 42
-    settings.max_tokens = 800
-    settings.temperature = 0
+    service_id = "agent"
 
-    system_message = os.environ.get("AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT")
-    if not system_message:
-        system_message = '''you are a helpful assistant to a wealth advisor. 
-        Do not answer any questions not related to wealth advisors queries.
-        If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
+    HOST_NAME = "WealthAdvisor"
+    HOST_INSTRUCTIONS = os.environ.get("AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT")
+
+    if not HOST_INSTRUCTIONS:
+        HOST_INSTRUCTIONS = '''You are a helpful assistant to a Wealth Advisor. 
+        Do not answer any questions not related to financial or wealth advisors queries.
+        If a client’s name (first name or surname) is mentioned in the question, verify it against the name returned from the ChatWithSQLDatabase tool. If the names do not match **(case insensitive)**, respond with: "Please only ask questions about the selected client or select another client to inquire about their details."
         Only use the client name returned from database in the response.
-        If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
+        If you cannot answer the question, always return: "I cannot answer this question from the data available. Please rephrase or add more details."
         ** Remove any client identifiers or ids or numbers or ClientId in the final response.
         '''
 
-    user_query = query.replace('?',' ')
+    agent = await AzureAssistantAgent.create(
+        kernel=kernel, service_id=service_id, name=HOST_NAME, instructions=HOST_INSTRUCTIONS,
+        api_key=api_key,
+        deployment_name=deployment,
+        endpoint=endpoint,
+        api_version=api_version,
+    )
 
-    user_query_prompt = f'''{user_query}. Always send clientId as {user_query.split(':::')[-1]} '''
-    query_prompt = f'''<message role="system">{system_message}</message><message role="user">{user_query_prompt}</message>'''
+    user_query = query.split(':::')[0]
+    client_id = query.split(':::')[-1]
 
+    thread_id = await agent.create_thread()
+    # history: list[ChatMessageContent] = []
+    message = ChatMessageContent(role=AuthorRole.USER, content=user_query)
+    await agent.add_chat_message(thread_id=thread_id, message=message)
+    # history.append(message)
 
-    sk_response = kernel.invoke_prompt_stream(
-        function_name="prompt_test",
-        plugin_name="weather_test",
-        prompt=query_prompt,
-        settings=settings
-    )   
+    ADDITIONAL_INSTRUCTIONS = f'''Always send clientId as {client_id}'''
+
+    sk_response = agent.invoke_stream(thread_id=thread_id, additional_instructions=ADDITIONAL_INSTRUCTIONS)  
 
     return StreamingResponse(stream_processor(sk_response), media_type="text/event-stream")

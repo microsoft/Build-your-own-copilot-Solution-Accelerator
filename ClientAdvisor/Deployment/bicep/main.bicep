@@ -12,6 +12,11 @@ param cosmosLocation string
 // @description('Fabric Workspace Id if you have one, else leave it empty. ')
 // param fabricWorkspaceId string
 
+//restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
+@allowed(['eastus', 'eastus2', 'westus', 'westus3', 'swedencentral'])
+@description('Azure OpenAI Location')
+param AzureOpenAILocation string
+
 var resourceGroupLocation = resourceGroup().location
 // var subscriptionId  = subscription().subscriptionId
 
@@ -19,7 +24,7 @@ var solutionLocation = resourceGroupLocation
 var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/'
 var appversion = 'latest'
 
-var functionAppSqlPrompt = '''A valid T-SQL query to find {query} for tables and columns provided below:
+var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for tables and columns provided below:
     1. Table: Clients
     Columns: ClientId,Client,Email,Occupation,MaritalStatus,Dependents
     2. Table: InvestmentGoals
@@ -34,23 +39,24 @@ var functionAppSqlPrompt = '''A valid T-SQL query to find {query} for tables and
     Columns: ClientId,StatusDate,RetirementGoalProgress,EducationGoalProgress
     7.Table: ClientMeetings
     Columns: ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail
-    Use Investement column from Assets table as value always.
+    Always use Investement column from Assets table as value.
     Assets table has snapshots of values by date. Do not add numbers across different dates for total values.
-    Do not use client name in filter.
+    Do not use client name in filters.
     Do not include assets values unless asked for.
-    Always use ClientId = {clientid} in the query filter.
-    Always return client name in the query.
-    Only return the generated sql query. do not return anything else'''
+    ALWAYS use ClientId = {clientid} in the query filter.
+    ALWAYS select Client Name(Column- Client) in the query.
+    Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
+    Only return the generated sql query. Do not return anything else'''
 
 var functionAppCallTranscriptSystemPrompt = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings.
-  You have access to the client’s meeting call transcripts.
-  You can use this information to answer questions about the clients'''
+  You have access to the client’s past meeting call transcripts, which you can use to provide relevant insights and information.
+  Answer questions asked about the clients based on the available transcripts.'''
 
-var functionAppStreamTextSystemPrompt = '''You are a helpful assistant to a wealth advisor.
-  Do not answer any questions not related to wealth advisors queries.
-  If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
+var functionAppStreamTextSystemPrompt = '''You are a helpful assistant to a Wealth Advisor.
+  Do not answer any questions not related to financial or wealth advisors queries.
+  If a client’s name (first name or surname) is mentioned in the question, verify it against the name returned from the ChatWithSQLDatabase tool. If the names do not match **(case insensitive)**, respond with: "Please only ask questions about the selected client or select another client to inquire about their details."
   Only use the client name returned from database in the response.
-  If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
+  If you cannot answer the question, always return: "I cannot answer this question from the data available. Please rephrase or add more details."
   ** Remove any client identifiers or ids or numbers or ClientId in the final response.'''
 
 // ========== Managed Identity ========== //
@@ -118,7 +124,7 @@ module azOpenAI 'deploy_azure_open_ai.bicep' = {
   name: 'deploy_azure_open_ai'
   params: {
     solutionName: solutionPrefix
-    solutionLocation: resourceGroupLocation
+    solutionLocation: AzureOpenAILocation
   }
 }
 
@@ -241,9 +247,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchUrlColumn:'sourceurl'
     AzureOpenAIResource:azOpenAI.outputs.openAIOutput.openAPIEndpoint
     AzureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
-    AzureOpenAIModel:'gpt-4'
+    AzureOpenAIModel:'gpt-4o-mini'
     AzureOpenAIKey:azOpenAI.outputs.openAIOutput.openAPIKey
-    AzureOpenAIModelName:'gpt-4'
+    AzureOpenAIModelName:'gpt-4o-mini'
     AzureOpenAITemperature:'0'
     AzureOpenAITopP:'1'
     AzureOpenAIMaxTokens:'1000'
