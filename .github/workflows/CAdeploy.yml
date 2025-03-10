@@ -2,12 +2,20 @@ name: Validate Deployment - Client Advisor
 
 on:
   push:
-    branches:
-      - main
+    branches: [main, dev, demo]
     paths:
-      - 'ClientAdvisor/**'
-  # schedule:
-  #   - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
+      - ClientAdvisor/**
+  pull_request:
+    branches: [main, dev, demo]
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+    paths:
+      - ClientAdvisor/**
+  merge_group:
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -35,11 +43,12 @@ jobs:
           export AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           export GPT_MIN_CAPACITY="130"
           export TEXT_EMBEDDING_MIN_CAPACITY="30"
+          export AZURE_REGIONS="${{ vars.AZURE_REGIONS_CA }}"
 
-          chmod +x Deployment/scripts/checkquota.sh
-          if ! Deployment/scripts/checkquota.sh; then
+          chmod +x ClientAdvisor/Deployment/scripts/checkquota.sh
+          if ! ClientAdvisor/Deployment/scripts/checkquota.sh; then
             # If quota check fails due to insufficient quota, set the flag
-            if grep -q "No region with sufficient quota found" Deployment/scripts/checkquota.sh; then
+            if grep -q "No region with sufficient quota found" ClientAdvisor/Deployment/scripts/checkquota.sh; then
               echo "QUOTA_FAILED=true" >> $GITHUB_ENV
             fi
             exit 1  # Fail the pipeline if any other failure occurs
