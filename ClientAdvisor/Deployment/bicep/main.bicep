@@ -12,6 +12,11 @@ param cosmosLocation string
 // @description('Fabric Workspace Id if you have one, else leave it empty. ')
 // param fabricWorkspaceId string
 
+//restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
+@allowed(['eastus', 'eastus2', 'westus', 'westus3', 'swedencentral'])
+@description('Azure OpenAI Location')
+param AzureOpenAILocation string
+
 var resourceGroupLocation = resourceGroup().location
 // var subscriptionId  = subscription().subscriptionId
 
@@ -19,39 +24,11 @@ var solutionLocation = resourceGroupLocation
 var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/'
 var appversion = 'latest'
 
-var functionAppSqlPrompt = '''A valid T-SQL query to find {query} for tables and columns provided below:
-    1. Table: Clients
-    Columns: ClientId,Client,Email,Occupation,MaritalStatus,Dependents
-    2. Table: InvestmentGoals
-    Columns: ClientId,InvestmentGoal
-    3. Table: Assets
-    Columns: ClientId,AssetDate,Investment,ROI,Revenue,AssetType
-    4. Table: ClientSummaries
-    Columns: ClientId,ClientSummary
-    5. Table: InvestmentGoalsDetails
-    Columns: ClientId,InvestmentGoal,TargetAmount,Contribution
-    6. Table: Retirement
-    Columns: ClientId,StatusDate,RetirementGoalProgress,EducationGoalProgress
-    7.Table: ClientMeetings
-    Columns: ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail
-    Use Investement column from Assets table as value always.
-    Assets table has snapshots of values by date. Do not add numbers across different dates for total values.
-    Do not use client name in filter.
-    Do not include assets values unless asked for.
-    Always use ClientId = {clientid} in the query filter.
-    Always return client name in the query.
-    Only return the generated sql query. do not return anything else'''
+var functionAppSqlPrompt = '''Genereate a valid T-SQL query to find {query} for tables and columns provided below:\r\n    1. Table: Clients\r\n    Columns: ClientId,Client,Email,Occupation,MaritalStatus,Dependents\r\n    2. Table: InvestmentGoals\r\n    Columns: ClientId,InvestmentGoal\r\n    3. Table: Assets\r\n    Columns: ClientId,AssetDate,Investment,ROI,Revenue,AssetType\r\n    4. Table: ClientSummaries\r\n    Columns: ClientId,ClientSummary\r\n    5. Table: InvestmentGoalsDetails\r\n    Columns: ClientId,InvestmentGoal,TargetAmount,Contribution\r\n    6. Table: Retirement\r\n    Columns: ClientId,StatusDate,RetirementGoalProgress,EducationGoalProgress\r\n    7.Table: ClientMeetings\r\n    Columns: ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail\r\n    Always use Investement column from Assets table as the value.\r\n    Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n    Do not use client name in filters.\r\n    Do not include assets values unless asked for.\r\n    ALWAYS use ClientId = {clientid} in the query filter.\r\n    ALWAYS select Client Name(Column- Client) in the query.\r\n    Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n    Only return the generated sql query. Do not return anything else'''
 
-var functionAppCallTranscriptSystemPrompt = '''You are an assistant who provides wealth advisors with helpful information to prepare for client meetings.
-  You have access to the client’s meeting call transcripts.
-  You can use this information to answer questions about the clients'''
+var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports wealth advisors in preparing for client meetings.\r\nYou have access to the client’s past meeting call transcripts, which you can use to provide relevant insights and information.\r\nAnswer questions asked about the clients based on the available transcripts.'''
 
-var functionAppStreamTextSystemPrompt = '''You are a helpful assistant to a wealth advisor.
-  Do not answer any questions not related to wealth advisors queries.
-  If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.
-  Only use the client name returned from database in the response.
-  If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.
-  ** Remove any client identifiers or ids or numbers or ClientId in the final response.'''
+var functionAppStreamTextSystemPrompt = '''You are a helpful assistant to a Wealth Advisor. For any query provided, produce a detailed answer based solely on available client data from the SQL database or call transcripts. If no data is found for that query or client, respond with 'No data found for that client.' Remove any client identifiers from the final response.'''
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
@@ -118,7 +95,7 @@ module azOpenAI 'deploy_azure_open_ai.bicep' = {
   name: 'deploy_azure_open_ai'
   params: {
     solutionName: solutionPrefix
-    solutionLocation: resourceGroupLocation
+    solutionLocation: AzureOpenAILocation
   }
 }
 
@@ -241,9 +218,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchUrlColumn:'sourceurl'
     AzureOpenAIResource:azOpenAI.outputs.openAIOutput.openAPIEndpoint
     AzureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
-    AzureOpenAIModel:'gpt-4'
+    AzureOpenAIModel:'gpt-4o-mini'
     AzureOpenAIKey:azOpenAI.outputs.openAIOutput.openAPIKey
-    AzureOpenAIModelName:'gpt-4'
+    AzureOpenAIModelName:'gpt-4o-mini'
     AzureOpenAITemperature:'0'
     AzureOpenAITopP:'1'
     AzureOpenAIMaxTokens:'1000'
