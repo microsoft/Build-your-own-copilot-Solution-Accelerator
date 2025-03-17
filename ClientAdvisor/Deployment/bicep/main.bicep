@@ -27,25 +27,18 @@ var appversion = 'latest'
 var functionAppSqlPrompt = '''Genereate a valid T-SQL query to find {query} for tables and columns provided below:
     1. Table: Clients  
     Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents  
-
     2. Table: InvestmentGoals  
     Columns: ClientId, InvestmentGoal  
-
     3. Table: Assets  
     Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType  
-
     4. Table: ClientSummaries  
     Columns: ClientId, ClientSummary  
-
     5. Table: InvestmentGoalsDetails  
     Columns: ClientId, InvestmentGoal, TargetAmount, Contribution  
-
     6. Table: Retirement  
     Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress  
-
     7. Table: ClientMeetings  
     Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail  
-
     Always use Investment column from Assets table as the value.  
     Assets table has snapshots of values by date. Do not add numbers across different dates for total values.  
     Do not use client name in filters.  
@@ -54,8 +47,7 @@ var functionAppSqlPrompt = '''Genereate a valid T-SQL query to find {query} for 
     ALWAYS select Client Name (Column - Client) in the query.  
     Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.  
     Only return the generated SQL query. Do not return anything else.'''
-
-
+   
 var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports wealth advisors in preparing for client meetings.  
   You have access to the client’s past meeting call transcripts, which you can use to provide relevant insights and information.  
   Answer questions asked about the clients based on the available transcripts.'''
