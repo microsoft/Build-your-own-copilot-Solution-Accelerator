@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.32.4.45862",
-      "templateHash": "8614046715488453239"
+      "version": "0.31.34.60546",
+      "templateHash": "6219139587077614045"
     }
   },
   "parameters": {
@@ -29,9 +29,9 @@
     "solutionLocation": "[variables('resourceGroupLocation')]",
     "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/",
     "appversion": "latest",
-    "functionAppSqlPrompt": "A valid T-SQL query to find {query} for tables and columns provided below:\r\n    1. Table: Clients\r\n    Columns: ClientId,Client,Email,Occupation,MaritalStatus,Dependents\r\n    2. Table: InvestmentGoals\r\n    Columns: ClientId,InvestmentGoal\r\n    3. Table: Assets\r\n    Columns: ClientId,AssetDate,Investment,ROI,Revenue,AssetType\r\n    4. Table: ClientSummaries\r\n    Columns: ClientId,ClientSummary\r\n    5. Table: InvestmentGoalsDetails\r\n    Columns: ClientId,InvestmentGoal,TargetAmount,Contribution\r\n    6. Table: Retirement\r\n    Columns: ClientId,StatusDate,RetirementGoalProgress,EducationGoalProgress\r\n    7.Table: ClientMeetings\r\n    Columns: ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail\r\n    Use Investement column from Assets table as value always.\r\n    Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n    Do not use client name in filter.\r\n    Do not include assets values unless asked for.\r\n    Always use ClientId = {clientid} in the query filter.\r\n    Always return client name in the query.\r\n    Only return the generated sql query. do not return anything else",
-    "functionAppCallTranscriptSystemPrompt": "You are an assistant who provides wealth advisors with helpful information to prepare for client meetings.\r\n  You have access to the client’s meeting call transcripts.\r\n  You can use this information to answer questions about the clients",
-    "functionAppStreamTextSystemPrompt": "You are a helpful assistant to a wealth advisor.\r\n  Do not answer any questions not related to wealth advisors queries.\r\n  If the client name and client id do not match, only return - Please only ask questions about the selected client or select another client to inquire about their details. do not return any other information.\r\n  Only use the client name returned from database in the response.\r\n  If you cannot answer the question, always return - I cannot answer this question from the data available. Please rephrase or add more details.\r\n  ** Remove any client identifiers or ids or numbers or ClientId in the final response."
+    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\r\n   1. Table: Clients\r\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\r\n   2. Table: InvestmentGoals\r\n   Columns: ClientId, InvestmentGoal\r\n   3. Table: Assets\r\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\r\n   4. Table: ClientSummaries\r\n   Columns: ClientId, ClientSummary\r\n   5. Table: InvestmentGoalsDetails\r\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\r\n   6. Table: Retirement\r\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\r\n   7. Table: ClientMeetings\r\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\r\n   Always use the Investment column from the Assets table as the value.\r\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n   Do not use client name in filters.\r\n   Do not include assets values unless asked for.\r\n   ALWAYS use ClientId = {clientid} in the query filter.\r\n   ALWAYS select Client Name (Column: Client) in the query.\r\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n   If the result might return more than 100 rows, include TOP 100 to limit the row count.\r\n   Only return the generated SQL query. Do not return anything else.",
+    "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \r\n  You have access to the client’s past meeting call transcripts. \r\n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \r\n  If no data is available, state 'No relevant data found for previous meetings.",
+    "functionAppStreamTextSystemPrompt": "You are a helpful assistant to a Wealth Advisor. \r\n  The currently selected client's name is '{SelectedClientName}' (in any variation: ignoring punctuation, apostrophes, and case). \r\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'. \r\n  If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts. \r\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
   },
   "resources": [
     {
@@ -58,8 +58,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "9540019694218374629"
+              "version": "0.31.34.60546",
+              "templateHash": "12508267066278938117"
             }
           },
           "parameters": {
@@ -147,8 +147,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "12718237112242025023"
+              "version": "0.31.34.60546",
+              "templateHash": "11828480827139544665"
             }
           },
           "parameters": {
@@ -310,8 +310,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "13214455762521164459"
+              "version": "0.31.34.60546",
+              "templateHash": "3549774837624453156"
             }
           },
           "parameters": {
@@ -406,8 +406,7 @@
                 "publicAccess": "None"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('saName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]"
               ]
             },
             {
@@ -469,8 +468,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "12781397079288954316"
+              "version": "0.31.34.60546",
+              "templateHash": "12627712322898660298"
             }
           },
           "parameters": {
@@ -627,8 +626,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "6507317467445174187"
+              "version": "0.31.34.60546",
+              "templateHash": "17239529093958196867"
             }
           },
           "parameters": {
@@ -709,8 +708,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "13153152178869896502"
+              "version": "0.31.34.60546",
+              "templateHash": "5720304969592308179"
             }
           },
           "parameters": {
@@ -797,8 +796,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "10512077094934475379"
+              "version": "0.31.34.60546",
+              "templateHash": "2043450591502080061"
             }
           },
           "parameters": {
@@ -928,8 +927,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11104800647186344148"
+              "version": "0.31.34.60546",
+              "templateHash": "6087269027573253102"
             }
           },
           "parameters": {
@@ -1047,8 +1046,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11955391860946221428"
+              "version": "0.31.34.60546",
+              "templateHash": "14800771134914877555"
             }
           },
           "parameters": {
@@ -1307,8 +1306,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11501780755841251697"
+              "version": "0.31.34.60546",
+              "templateHash": "14069568468347897481"
             }
           },
           "parameters": {
@@ -1421,8 +1420,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "16538647807599840496"
+              "version": "0.31.34.60546",
+              "templateHash": "5271454688668874284"
             }
           },
           "parameters": {
@@ -1913,8 +1912,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "9968723784632879247"
+              "version": "0.31.34.60546",
+              "templateHash": "17388889661434191538"
             }
           },
           "parameters": {
@@ -2111,8 +2110,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "4502112701228496974"
+              "version": "0.31.34.60546",
+              "templateHash": "16594210839276135691"
             }
           },
           "parameters": {
@@ -2756,8 +2755,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.32.4.45862",
-                      "templateHash": "2813064152180428298"
+                      "version": "0.31.34.60546",
+                      "templateHash": "8033637033572984239"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },
