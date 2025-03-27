@@ -24,3 +24,5 @@ isort==6.0.0
 pytest>=8.2,<9  # Compatible version for pytest-asyncio
 pytest-asyncio==0.25.3
 pytest-cov==6.0.0
+
+pyodbc==5.2.0

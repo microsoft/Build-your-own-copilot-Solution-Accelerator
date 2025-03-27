@@ -122,16 +122,34 @@ module azOpenAI 'deploy_azure_open_ai.bicep' = {
   }
 }
 
-module uploadFiles 'deploy_upload_files_script.bicep' = {
-  name : 'deploy_upload_files_script'
+//========== Deployment script to upload sample data ========== //
+module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
+  name : 'deploy_post_deployment_scripts'
   params:{
-    storageAccountName:storageAccountModule.outputs.storageAccountOutput.name
-    solutionLocation: solutionLocation
-    containerName:storageAccountModule.outputs.storageAccountOutput.dataContainer
-    identity:managedIdentityModule.outputs.managedIdentityOutput.id
-    baseUrl:baseUrl
+    solutionName: solutionPrefix
+    solutionLocation: resourceGroupLocation
+    baseUrl: baseUrl
+    storageAccountName: storageAccountModule.outputs.storageAccountOutput.storageAccountName
+    containerName: storageAccountModule.outputs.storageAccountOutput.containerName
+    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.id
+    managedIdentityClientId:managedIdentityModule.outputs.managedIdentityOutput.clientId
+    keyVaultName:keyvaultModule.outputs.keyvaultOutput.name
+    logAnalyticsWorkspaceResourceName: azureFunctions.outputs.logAnalyticsWorkspaceName
+    sqlServerName: sqlDBModule.outputs.sqlDbOutput.sqlServerName
+    sqlDbName: sqlDBModule.outputs.sqlDbOutput.sqlDbName
+    sqlUsers: [
+      {
+        principalId: managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId  // Replace with actual Principal ID
+        principalName: managedIdentityModule.outputs.managedIdentityFnAppOutput.name    // Replace with actual user email or name
+        databaseRoles: ['db_datareader']
+      }
+      {
+        principalId: managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId  // Replace with actual Principal ID
+        principalName: managedIdentityModule.outputs.managedIdentityWebAppOutput.name    // Replace with actual user email or name
+        databaseRoles: ['db_datareader']
+      }
+    ]
   }
-  dependsOn:[storageAccountModule]
 }
 
 module azureFunctions 'deploy_azure_function.bicep' = {

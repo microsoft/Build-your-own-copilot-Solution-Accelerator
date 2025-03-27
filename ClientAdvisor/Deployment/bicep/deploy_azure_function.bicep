@@ -165,3 +165,5 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
     }
   }
 }
+
+output logAnalyticsWorkspaceName string = logAnalyticsWorkspace.name

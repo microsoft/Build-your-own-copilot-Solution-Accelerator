@@ -24,6 +24,7 @@ from backend.utils import (convert_to_pf_format, format_as_ndjson,
                            format_stream_response, generateFilterString,
                            parse_multi_columns)
 from db import get_connection
+from db import dict_cursor
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
@@ -55,7 +56,8 @@ def create_app():
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
-    return app
+    #return app
+    app.run()
 
 
 @bp.route("/")
@@ -1582,8 +1584,10 @@ def get_users():
         WHERE NextMeeting IS NOT NULL
         ORDER BY NextMeeting ASC;
         """
+        #print("SQL Statement:", sql_stmt)
         cursor.execute(sql_stmt)
-        rows = cursor.fetchall()
+        #rows = cursor.fetchall()
+        rows = dict_cursor(cursor)
 
         if len(rows) <= 6:
             # update ClientMeetings,Assets,Retirement tables sample data to current date
@@ -1618,7 +1622,7 @@ def get_users():
                 FROM DaysDifference
                 """
             cursor.execute(combined_stmt)
-            date_diff_rows = cursor.fetchall()
+            date_diff_rows = dict_cursor(cursor)
 
             client_days = (
                 date_diff_rows[0]["ClientMeetingDaysDifference"]

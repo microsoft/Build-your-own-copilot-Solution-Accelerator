@@ -36,6 +36,24 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
+resource managedIdentityFnApp 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${solutionName}-charts-fn-mi'
+  location: solutionLocation
+  tags: {
+    app: solutionName
+    location: solutionLocation
+  }
+}
+
+resource managedIdentityWebApp 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${solutionName}-rag-fn-mi'
+  location: solutionLocation
+  tags: {
+    app: solutionName
+    location: solutionLocation
+  }
+}
+
 // @description('Array of actions for the roleDefinition')
 // param actions array = [
 //   'Microsoft.Synapse/workspaces/write'
@@ -84,4 +102,16 @@ output managedIdentityOutput object = {
   id: managedIdentity.id
   objectId: managedIdentity.properties.principalId
   name: miName
+}
+
+output managedIdentityFnAppOutput object = {
+  id: managedIdentityFnApp.id
+  objectId: managedIdentityFnApp.properties.principalId
+  name: managedIdentityFnApp.name
+}
+
+output managedIdentityWebAppOutput object = {
+  id: managedIdentityWebApp.id
+  objectId: managedIdentityWebApp.properties.principalId
+  name: managedIdentityWebApp.name
 }
