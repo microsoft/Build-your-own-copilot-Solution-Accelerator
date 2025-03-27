@@ -216,16 +216,16 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
   dependsOn:[storageAccountModule,azOpenAI,azSearchService,sqlDBModule]
 }
 
-module createIndex 'deploy_index_scripts.bicep' = {
-  name : 'deploy_index_scripts'
-  params:{
-    solutionLocation: solutionLocation
-    identity:managedIdentityModule.outputs.managedIdentityOutput.id
-    baseUrl:baseUrl
-    keyVaultName:keyvaultModule.outputs.keyvaultOutput.name
-  }
-  dependsOn:[keyvaultModule]
-}
+// module createIndex 'deploy_index_scripts.bicep' = {
+//   name : 'deploy_index_scripts'
+//   params:{
+//     solutionLocation: solutionLocation
+//     identity:managedIdentityModule.outputs.managedIdentityOutput.id
+//     baseUrl:baseUrl
+//     keyVaultName:keyvaultModule.outputs.keyvaultOutput.name
+//   }
+//   dependsOn:[keyvaultModule]
+// }
 
 // module createaihub 'deploy_aihub_scripts.bicep' = {
 //   name : 'deploy_aihub_scripts'
