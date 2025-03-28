@@ -1,6 +1,7 @@
 # Get Azure Key Vault Client
 key_vault_name = 'kv_to-be-replaced'
 
+import time
 from azure.ai.ml import MLClient
 from azure.ai.ml.entities import (
     Hub,
@@ -73,7 +74,10 @@ ml_client = MLClient(
 # construct a hub
 my_hub = Hub(name=aihub_name, location=solutionLocation, display_name=aihub_name)
 
-created_hub = ml_client.workspaces.begin_create(my_hub).result()
+created_hub = ml_client.workspaces.begin_create(my_hub)  
+   
+time.sleep(60) # wait for hub to be created
+created_hub = ml_client.workspaces.get(name=aihub_name)
 
 # construct the project
 my_project = Project(
@@ -83,7 +87,9 @@ my_project = Project(
     hub_id=created_hub.id,
 )
 
-created_project = ml_client.workspaces.begin_create(workspace=my_project).result()
+created_project = ml_client.workspaces.begin_create(workspace=my_project)
+ 
+time.sleep(30) # wait for hub to be created
 
 open_ai_connection = AzureOpenAIConnection(
     name="Azure_OpenAI",
