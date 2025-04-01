@@ -23,7 +23,7 @@
     "lodash-es": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-markdown": "^9.0.3",
+    "react-markdown": "^10.1.0",
     "react-modal": "^3.16.3",
     "react-router-dom": "^7.1.5",
     "react-uuid": "^2.0.0",
