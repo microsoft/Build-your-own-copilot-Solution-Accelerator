@@ -25,6 +25,7 @@ jobs:
           export AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           export GPT_MIN_CAPACITY="30"
           export TEXT_EMBEDDING_MIN_CAPACITY="45"
+          export AZURE_REGIONS="${{ vars.AZURE_REGIONS_RA }}"
 
           chmod +x ResearchAssistant/Deployment/scripts/checkquota.sh
           if ! ResearchAssistant/Deployment/scripts/checkquota.sh; then
