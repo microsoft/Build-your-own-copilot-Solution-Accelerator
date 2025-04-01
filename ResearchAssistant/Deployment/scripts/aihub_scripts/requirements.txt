@@ -1,7 +1,7 @@
 azure-identity
 azure-keyvault-secrets
 azure-ai-resources
-azure-ai-ml==1.24.0
+azure-ai-ml==1.26.1
 msal[broker]==1.24.0b1
 azure-mgmt-resource==23.1.0b2
 azure-mgmt-cognitiveservices
