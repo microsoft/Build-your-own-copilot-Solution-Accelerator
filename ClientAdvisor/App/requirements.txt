@@ -23,4 +23,4 @@ isort==6.0.0
 # Testing tools
 pytest>=8.2,<9  # Compatible version for pytest-asyncio
 pytest-asyncio==0.25.3
-pytest-cov==6.0.0
+pytest-cov==6.1.0
