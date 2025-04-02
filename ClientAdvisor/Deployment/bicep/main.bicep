@@ -130,7 +130,7 @@ module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
     solutionLocation: resourceGroupLocation
     baseUrl: baseUrl
     storageAccountName: storageAccountModule.outputs.storageAccountOutput.storageAccountName
-    containerName: storageAccountModule.outputs.storageAccountOutput.containerName
+    containerName: storageAccountModule.outputs.storageAccountOutput.dataContainer
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.id
     managedIdentityClientId:managedIdentityModule.outputs.managedIdentityOutput.clientId
     keyVaultName:keyvaultModule.outputs.keyvaultOutput.name
