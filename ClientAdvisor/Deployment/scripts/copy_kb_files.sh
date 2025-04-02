@@ -19,8 +19,8 @@ mkdir -p "/mnt/azscripts/azscriptinput/$extractedFolder1"
 mkdir -p "/mnt/azscripts/azscriptinput/$extractedFolder2"
 
 # Download the zip file
-curl --output "$zipFileName1" "$zipUrl1"
-curl --output "$zipFileName2" "$zipUrl2"
+curl --output /mnt/azscripts/azscriptinput/"$zipFileName1" "$zipUrl1"
+curl --output /mnt/azscripts/azscriptinput/"$zipFileName2" "$zipUrl2"
 
 # Extract the zip file
 unzip /mnt/azscripts/azscriptinput/"$zipFileName1" -d /mnt/azscripts/azscriptinput/"$extractedFolder1"
