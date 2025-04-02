@@ -18,6 +18,10 @@ zipUrl2=${baseUrl}"Deployment/data/clienttranscripts.zip"
 curl --output "$zipFileName1" "$zipUrl1"
 curl --output "$zipFileName2" "$zipUrl2"
 
+# Create folders if they do not exist
+mkdir -p "/mnt/azscripts/azscriptinput/$extractedFolder1"
+mkdir -p "/mnt/azscripts/azscriptinput/$extractedFolder2"
+
 # Extract the zip file
 unzip /mnt/azscripts/azscriptinput/"$zipFileName1" -d /mnt/azscripts/azscriptinput/"$extractedFolder1"
 unzip /mnt/azscripts/azscriptinput/"$zipFileName2" -d /mnt/azscripts/azscriptinput/"$extractedFolder2"

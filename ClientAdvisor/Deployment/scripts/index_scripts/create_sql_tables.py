@@ -1,4 +1,5 @@
 key_vault_name = 'kv_to-be-replaced'
+managed_identity_client_id = 'mici_to-be-replaced'
 
 import pandas as pd
 import pymssql
@@ -10,7 +11,7 @@ from azure.identity import DefaultAzureCredential
 
 def get_secrets_from_kv(kv_name, secret_name):
     key_vault_name = kv_name  # Set the name of the Azure Key Vault  
-    credential = DefaultAzureCredential()
+    credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
     secret_client = SecretClient(vault_url=f"https://{key_vault_name}.vault.azure.net/", credential=credential)  # Create a secret client object using the credential and Key Vault name  
     return(secret_client.get_secret(secret_name).value) # Retrieve the secret value  
 
@@ -27,7 +28,7 @@ from azure.storage.filedatalake import (
 )
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-credential = DefaultAzureCredential()
+credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 
