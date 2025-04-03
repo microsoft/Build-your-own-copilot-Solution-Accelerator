@@ -150,7 +150,7 @@ module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
         databaseRoles: ['db_datareader']
       }
       {
-        principalId: managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId  // Replace with actual Principal ID
+        principalId: managedIdentityModule.outputs.managedIdentityIndexScriptOutput.clientId  // Replace with actual Principal ID
         principalName: managedIdentityModule.outputs.managedIdentityIndexScriptOutput.name    // Replace with actual user email or name
         databaseRoles: ['db_datareader', 'db_datawriter']
       }
