@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "15038877110427283631"
+      "templateHash": "12045302776992564832"
     }
   },
   "parameters": {
@@ -1004,7 +1004,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "8354788367709886583"
+              "templateHash": "17609114920482295599"
             }
           },
           "parameters": {
@@ -1054,7 +1054,7 @@
             },
             "setupCreateIndexScriptsUrl": {
               "type": "string",
-              "defaultValue": "[format('{0}Deployment/bicep/deploy_index_scripts.bicep', parameters('baseUrl'))]"
+              "defaultValue": "[format('{0}Deployment/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]"
             },
             "createSqlUserAndRoleScriptsUrl": {
               "type": "string",
@@ -1371,7 +1371,7 @@
               "properties": {
                 "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', format('{0}env', parameters('solutionName')))]",
                 "siteConfig": {
-                  "linuxFxVersion": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-fn:', parameters('functionAppVersion'))]",
+                  "linuxFxVersion": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-fn:{0}', parameters('functionAppVersion'))]",
                   "appSettings": [
                     {
                       "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
