@@ -10,7 +10,7 @@ import struct
 
 load_dotenv()
 
-driver = "{ODBC Driver 17 for SQL Server}"
+driver = "{ODBC Driver 18 for SQL Server}"
 server = os.environ.get("SQLDB_SERVER")
 database = os.environ.get("SQLDB_DATABASE")
 username = os.environ.get("SQLDB_USERNAME")
