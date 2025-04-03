@@ -22,11 +22,11 @@ server = get_secrets_from_kv(key_vault_name,"SQLDB-SERVER")
 database = get_secrets_from_kv(key_vault_name,"SQLDB-DATABASE")
 username = get_secrets_from_kv(key_vault_name,"SQLDB-USERNAME")
 password = get_secrets_from_kv(key_vault_name,"SQLDB-PASSWORD")
-driver = "{ODBC Driver 17 for SQL Server}"
-mid_id = os.environ.get("SQLDB_USER_MID")
+driver = "{ODBC Driver 18 for SQL Server}"
+
 
 #conn = pymssql.connect(server, username, password, database)
-credential = DefaultAzureCredential(managed_identity_client_id=mid_id)
+credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
 
 token_bytes = credential.get_token(
             "https://database.windows.net/.default"
