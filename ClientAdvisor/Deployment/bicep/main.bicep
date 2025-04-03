@@ -91,6 +91,7 @@ module sqlDBModule 'deploy_sql_db.bicep' = {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+    managedIdentityName:managedIdentityModule.outputs.managedIdentityOutput.name
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -148,6 +149,11 @@ module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
         principalName: managedIdentityModule.outputs.managedIdentityWebAppOutput.name    // Replace with actual user email or name
         databaseRoles: ['db_datareader']
       }
+      {
+        principalId: managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId  // Replace with actual Principal ID
+        principalName: managedIdentityModule.outputs.managedIdentityIndexScriptOutput.name    // Replace with actual user email or name
+        databaseRoles: ['db_datareader', 'db_datawriter']
+      }
     ]
   }
 }
@@ -167,10 +173,12 @@ module azureFunctions 'deploy_azure_function.bicep' = {
     sqlDbName:sqlDBModule.outputs.sqlDbOutput.sqlDbName
     sqlDbUser:sqlDBModule.outputs.sqlDbOutput.sqlDbUser
     sqlDbPwd:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
-    functionAppVersion: appversion
+    functionAppVersion: appversion  
     sqlSystemPrompt: functionAppSqlPrompt
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
+    userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId
+    userassignedIdentityId:managedIdentityModule.outputs.managedIdentityFnAppOutput.id
   }
   dependsOn:[storageAccountModule]
 }
@@ -288,6 +296,8 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AZURE_COSMOSDB_ENABLE_FEEDBACK: 'True'
     VITE_POWERBI_EMBED_URL: 'TBD'
     Appversion: appversion
+    userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
+    userassignedIdentityId:managedIdentityModule.outputs.managedIdentityWebAppOutput.id
   }
   scope: resourceGroup(resourceGroup().name)
   dependsOn:[azOpenAI,azAIMultiServiceAccount,azSearchService,sqlDBModule,azureFunctionURL,cosmosDBModule]
