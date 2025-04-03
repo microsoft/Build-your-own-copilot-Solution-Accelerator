@@ -56,8 +56,7 @@ def create_app():
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
-    #return app
-    app.run()
+    return app
 
 
 @bp.route("/")
