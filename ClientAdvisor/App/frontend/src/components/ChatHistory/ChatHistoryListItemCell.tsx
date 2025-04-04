@@ -7,6 +7,7 @@ import {
   DialogType,
   IconButton,
   ITextField,
+  ITooltipHostStyles,
   List,
   PrimaryButton,
   Separator,
@@ -14,7 +15,9 @@ import {
   SpinnerSize,
   Stack,
   Text,
-  TextField
+  TextField,
+  TooltipHost,
+  DirectionalHint,
 } from '@fluentui/react'
 import { useBoolean } from '@fluentui/react-hooks'
 
@@ -107,7 +110,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
     appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: item })
   }
 
-  const truncatedTitle = item?.title?.length > 28 ? `${item.title.substring(0, 28)} ...` : item.title
+  const truncatedTitle = item?.title?.length > 24 ? `${item.title.substring(0, 24)} ...` : item.title
 
   const handleSaveEdit = async (e: any) => {
     e.preventDefault()
@@ -236,8 +239,15 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
         </>
       ) : (
         <>
-          <Stack horizontal verticalAlign={'center'} style={{ width: '100%' }}>
-            <div className={styles.chatTitle}>{truncatedTitle}</div>
+          <Stack horizontal verticalAlign={'center'} style={{ width: '100%' }}>            
+            <Stack.Item grow>
+              <TooltipHost
+                content={item.title}
+                directionalHint={DirectionalHint.bottomCenter}
+              >
+                <div className={styles.chatTitle}>{truncatedTitle}</div>
+              </TooltipHost>
+            </Stack.Item>
             {(isSelected || isHovered) && (
               <Stack horizontal horizontalAlign="end">
                 <IconButton
