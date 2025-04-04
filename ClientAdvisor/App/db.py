@@ -57,4 +57,4 @@ def get_connection():
             timeout=5
         )
         logging.info("Connected using Username & Password")
-        return conn  
+        return conn
