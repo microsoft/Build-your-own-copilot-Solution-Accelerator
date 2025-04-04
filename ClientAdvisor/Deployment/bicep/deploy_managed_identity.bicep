@@ -36,6 +36,33 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
+resource managedIdentityFnApp 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${solutionName}-fn-mi'
+  location: solutionLocation
+  tags: {
+    app: solutionName
+    location: solutionLocation
+  }
+}
+
+resource managedIdentityWebApp 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${solutionName}-webapp-mi'
+  location: solutionLocation
+  tags: {
+    app: solutionName
+    location: solutionLocation
+  }
+}
+
+resource managedIdentityIndexScript 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${solutionName}-indexscript-mi'
+  location: solutionLocation
+  tags: {
+    app: solutionName
+    location: solutionLocation
+  }
+}
+
 // @description('Array of actions for the roleDefinition')
 // param actions array = [
 //   'Microsoft.Synapse/workspaces/write'
@@ -83,5 +110,27 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 output managedIdentityOutput object = {
   id: managedIdentity.id
   objectId: managedIdentity.properties.principalId
+  clientId: managedIdentity.properties.clientId
   name: miName
+}
+
+output managedIdentityFnAppOutput object = {
+  id: managedIdentityFnApp.id
+  objectId: managedIdentityFnApp.properties.principalId
+  clientId: managedIdentityFnApp.properties.clientId
+  name: managedIdentityFnApp.name
+}
+
+output managedIdentityWebAppOutput object = {
+  id: managedIdentityWebApp.id
+  objectId: managedIdentityWebApp.properties.principalId
+  clientId: managedIdentityWebApp.properties.clientId
+  name: managedIdentityWebApp.name
+}
+
+output managedIdentityIndexScriptOutput object = {
+  id: managedIdentityIndexScript.id
+  objectId: managedIdentityIndexScript.properties.principalId
+  clientId: managedIdentityIndexScript.properties.clientId
+  name: managedIdentityIndexScript.name
 }

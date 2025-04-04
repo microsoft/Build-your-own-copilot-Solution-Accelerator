@@ -165,6 +165,9 @@ param VITE_POWERBI_EMBED_URL string = ''
 
 param Appversion string
 
+param userassignedIdentityId string
+param userassignedIdentityClientId string
+
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
 // var WebAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
@@ -188,7 +191,10 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
   name: WebsiteName
   location: resourceGroup().location
   identity: {
-    type: 'SystemAssigned'
+    type: 'SystemAssigned, UserAssigned'
+    userAssignedIdentities: {
+      '${userassignedIdentityId}': {}
+    }
   }
   properties: {
     serverFarmId: HostingPlanName
@@ -380,6 +386,10 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'UWSGI_THREADS'
           value: '2'
+        }
+        {
+          name: 'SQLDB_USER_MID'
+          value: userassignedIdentityClientId
         }
       ]
       linuxFxVersion: WebAppImageName

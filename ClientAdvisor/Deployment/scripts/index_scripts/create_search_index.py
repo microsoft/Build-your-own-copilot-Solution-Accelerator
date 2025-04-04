@@ -1,5 +1,6 @@
 #Get Azure Key Vault Client
 key_vault_name = 'kv_to-be-replaced' #'nc6262-kv-2fpeafsylfd2e' 
+managed_identity_client_id = 'mici_to-be-replaced'
 
 index_name = "transcripts_index"
 
@@ -14,7 +15,7 @@ def get_secrets_from_kv(kv_name, secret_name):
     
   # Set the name of the Azure Key Vault  
   key_vault_name = kv_name 
-  credential = DefaultAzureCredential()
+  credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
 
   # Create a secret client object using the credential and Key Vault name  
   secret_client = SecretClient(vault_url=f"https://{key_vault_name}.vault.azure.net/", credential=credential)  
@@ -179,7 +180,7 @@ from azure.storage.filedatalake import (
 )
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-credential = DefaultAzureCredential()
+credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 

@@ -21,6 +21,8 @@ param sqlSystemPrompt string
 param callTranscriptSystemPrompt string
 @description('Azure Function App Stream Text System Prompt')
 param streamTextSystemPrompt string
+param userassignedIdentityId string
+param userassignedIdentityClientId string
 
 var functionAppName = '${solutionName}fn'
 var azureOpenAIDeploymentModel = 'gpt-4'
@@ -78,7 +80,10 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   location: solutionLocation
   kind: 'functionapp'
   identity: {
-    type: 'SystemAssigned'
+    type: 'SystemAssigned, UserAssigned'
+    userAssignedIdentities: {
+      '${userassignedIdentityId}': {}
+    }
   }
   properties: {
     managedEnvironmentId: containerAppEnv.id
@@ -161,7 +166,13 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT'
           value: streamTextSystemPrompt
         }
+        {
+          name: 'SQLDB_USER_MID'
+          value: userassignedIdentityClientId
+        }
       ]
     }
   }
 }
+
+output logAnalyticsWorkspaceName string = logAnalyticsWorkspace.name
