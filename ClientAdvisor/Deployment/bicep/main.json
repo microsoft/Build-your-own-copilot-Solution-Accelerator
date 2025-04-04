@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "3128059734579269654"
+      "templateHash": "17002063487270783803"
     }
   },
   "parameters": {
@@ -1025,7 +1025,7 @@
                 ]
               },
               {
-                "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.clientId]",
+                "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityIndexScriptOutput.value.clientId]",
                 "principalName": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityIndexScriptOutput.value.name]",
                 "databaseRoles": [
                   "db_datareader",
@@ -1042,13 +1042,12 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "13916170342248301598"
+              "templateHash": "4389498739493809096"
             }
           },
           "parameters": {
             "solutionName": {
               "type": "string",
-              "defaultValue": "abdmuji",
               "metadata": {
                 "description": "Solution Name"
               }

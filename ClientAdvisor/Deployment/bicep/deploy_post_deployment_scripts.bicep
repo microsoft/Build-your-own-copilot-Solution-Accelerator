@@ -1,24 +1,24 @@
 @description('Solution Name')
-param solutionName string = 'abdmuji'
+param solutionName string
 @description('Specifies the location for resources.')
-param solutionLocation string //= 'northcentralus'
-param baseUrl string //='https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/'
-param managedIdentityObjectId string //= '/subscriptions/1d5876cd-7603-407a-96d2-ae5ca9a9c5f3/resourcegroups/rg-psl-ab-sfisql2/providers/Microsoft.ManagedIdentity/userAssignedIdentities/abd02-managed-identity'
-param managedIdentityClientId string //= '0e317066-685b-40bf-973b-9b5e19aad440'
-param storageAccountName string //='abd02storageaccount'
-param containerName string //='data'
+param solutionLocation string
+param baseUrl string
+param managedIdentityObjectId string
+param managedIdentityClientId string
+param storageAccountName string
+param containerName string
 param containerAppName string = '${ solutionName }containerapp'
 param environmentName string = '${ solutionName }containerappenv'
 param imageName string = 'python:3.11-alpine'
 param setupCopyKbFiles string = '${baseUrl}Deployment/scripts/copy_kb_files.sh'
 param setupCreateIndexScriptsUrl string = '${baseUrl}Deployment/scripts/run_create_index_scripts.sh'
-param createSqlUserAndRoleScriptsUrl string = '${baseUrl}Deployment/scripts/add_user_scripts/create-sql-user-and-role.ps1'
-param keyVaultName string //='abd02-kv-ne7y2sapfmnic'
-param sqlServerName string //='abd02-sql-server'
-param sqlDbName string //= 'abd02-sql-db'
+param createSqlUserAndRoleScriptsUrl string = '${baseUrl}Deployment/scripts/add_user_scripts/create-sql-user-and-role.ps1' 
+param keyVaultName string
+param sqlServerName string
+param sqlDbName string
 param sqlUsers array = [
 ]
-param logAnalyticsWorkspaceResourceName string //='workspace-abd02'
+param logAnalyticsWorkspaceResourceName string
 var resourceGroupName = resourceGroup().name
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2020-10-01' existing = {

@@ -27,8 +27,6 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   location: location
   kind:'v12.0'
   properties: {
-      // administratorLogin: administratorLogin
-      // administratorLoginPassword: administratorLoginPassword
       publicNetworkAccess: 'Enabled'
       version: '12.0'
       restrictOutboundNetworkAccess: 'Disabled'

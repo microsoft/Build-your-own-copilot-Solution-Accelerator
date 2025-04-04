@@ -18,14 +18,20 @@ password = os.environ.get("SQLDB_PASSWORD")
 mid_id = os.environ.get("SQLDB_USER_MID")
 
 def dict_cursor(cursor):
+    """
+    Converts rows fetched by the cursor into a list of dictionaries.
+
+    Args:
+        cursor: A database cursor object.
+
+    Returns:
+        A list of dictionaries representing rows.
+    """
     columns = [column[0] for column in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 def get_connection():
 
-    # conn = pymssql.connect(
-    #     server=server, user=username, password=password, database=database, as_dict=True
-    # )
     credential = DefaultAzureCredential(managed_identity_client_id=mid_id)
 
     token_bytes = credential.get_token(

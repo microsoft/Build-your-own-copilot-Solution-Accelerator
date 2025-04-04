@@ -1583,9 +1583,8 @@ def get_users():
         WHERE NextMeeting IS NOT NULL
         ORDER BY NextMeeting ASC;
         """
-        #print("SQL Statement:", sql_stmt)
         cursor.execute(sql_stmt)
-        #rows = cursor.fetchall()
+        ## Since pyodbc returns query results as a list of tuples, using `dict_cursor` function to convert these tuples into a list of dictionaries
         rows = dict_cursor(cursor)
 
         if len(rows) <= 6:
@@ -1621,6 +1620,7 @@ def get_users():
                 FROM DaysDifference
                 """
             cursor.execute(combined_stmt)
+            ## Since pyodbc returns query results as a list of tuples, using `dict_cursor` function to convert these tuples into a list of dictionaries
             date_diff_rows = dict_cursor(cursor)
 
             client_days = (

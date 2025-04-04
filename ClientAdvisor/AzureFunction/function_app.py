@@ -17,7 +17,6 @@ from semantic_kernel.core_plugins.time_plugin import TimePlugin
 from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
-import pymssql
 from azure.identity import DefaultAzureCredential
 import pyodbc
 import struct
@@ -131,7 +130,6 @@ class ChatWithDataPlugin:
             password = os.environ.get("SQLDB_PASSWORD")
             mid_id = os.environ.get("SQLDB_USER_MID")
 
-            #conn = pymssql.connect(server, username, password, database)
             credential = DefaultAzureCredential(managed_identity_client_id=mid_id)
 
             token_bytes = credential.get_token(
