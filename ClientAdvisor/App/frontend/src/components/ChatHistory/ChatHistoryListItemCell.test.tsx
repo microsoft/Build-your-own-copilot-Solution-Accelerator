@@ -38,8 +38,8 @@ describe('ChatHistoryListItemCell', () => {
   test('renders the chat history item', () => {
     renderWithContext(<ChatHistoryListItemCell item={conversation} onSelect={mockOnSelect} />, mockAppState)
 
-    const titleElement = screen.getByText(/Test Chat/i)
-    expect(titleElement).toBeInTheDocument()
+    const titleElement = screen.getAllByText(/Test Chat/i)
+    expect(titleElement.length).toBeGreaterThan(1)
   })
 
   test('truncates long title', () => {
@@ -50,7 +50,7 @@ describe('ChatHistoryListItemCell', () => {
 
     renderWithContext(<ChatHistoryListItemCell item={longTitleConversation} onSelect={mockOnSelect} />, mockAppState)
 
-    const truncatedTitle = screen.getByText(/A very long title that shoul .../i)
+    const truncatedTitle = screen.getByText(/A very long title that s .../i)
     expect(truncatedTitle).toBeInTheDocument()
   })
 
