@@ -147,11 +147,6 @@ module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
       {
         principalId: managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId  // Replace with actual Principal ID
         principalName: managedIdentityModule.outputs.managedIdentityWebAppOutput.name    // Replace with actual user email or name
-        databaseRoles: ['db_datareader']
-      }
-      {
-        principalId: managedIdentityModule.outputs.managedIdentityIndexScriptOutput.clientId  // Replace with actual Principal ID
-        principalName: managedIdentityModule.outputs.managedIdentityIndexScriptOutput.name    // Replace with actual user email or name
         databaseRoles: ['db_datareader', 'db_datawriter']
       }
     ]

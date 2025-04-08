@@ -54,14 +54,6 @@ resource managedIdentityWebApp 'Microsoft.ManagedIdentity/userAssignedIdentities
   }
 }
 
-resource managedIdentityIndexScript 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${solutionName}-indexscript-mi'
-  location: solutionLocation
-  tags: {
-    app: solutionName
-    location: solutionLocation
-  }
-}
 
 // @description('Array of actions for the roleDefinition')
 // param actions array = [
@@ -126,11 +118,4 @@ output managedIdentityWebAppOutput object = {
   objectId: managedIdentityWebApp.properties.principalId
   clientId: managedIdentityWebApp.properties.clientId
   name: managedIdentityWebApp.name
-}
-
-output managedIdentityIndexScriptOutput object = {
-  id: managedIdentityIndexScript.id
-  objectId: managedIdentityIndexScript.properties.principalId
-  clientId: managedIdentityIndexScript.properties.clientId
-  name: managedIdentityIndexScript.name
 }
