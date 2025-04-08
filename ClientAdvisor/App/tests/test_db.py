@@ -12,6 +12,7 @@ db.database = "mock_database"
 db.driver = "mock_driver"
 db.mid_id = "mock_mid_id"  # Managed identity client ID if needed
 
+
 @patch("db.pyodbc.connect")  # Mock pyodbc.connect
 @patch("db.DefaultAzureCredential")  # Mock DefaultAzureCredential
 def test_get_connection(mock_credential_class, mock_connect):
@@ -21,7 +22,6 @@ def test_get_connection(mock_credential_class, mock_connect):
     mock_token = MagicMock()
     mock_token.token = "mock_token"
     mock_credential.get_token.return_value = mock_token
-    
     # Create a mock connection object
     mock_conn = MagicMock()
     mock_connect.return_value = mock_conn
@@ -74,6 +74,7 @@ def test_get_connection_token_failure(mock_credential_class, mock_connect):
 
     # Assert that the connection returned is the mock connection
     assert conn == mock_conn
+
 
 def test_dict_cursor():
     # Create a mock cursor

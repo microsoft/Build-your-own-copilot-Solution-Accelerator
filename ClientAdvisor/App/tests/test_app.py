@@ -255,6 +255,7 @@ async def test_get_users_success(mock_dict_cursor, mock_get_connection, client):
         }
     ]
 
+
 @pytest.mark.asyncio
 async def test_get_users_no_users(client):
     mock_conn = MagicMock()
