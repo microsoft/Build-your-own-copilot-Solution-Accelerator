@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.31.34.60546",
-      "templateHash": "6219139587077614045"
+      "version": "0.34.44.8038",
+      "templateHash": "17625279579136842476"
     }
   },
   "parameters": {
@@ -21,6 +21,19 @@
       "type": "string",
       "metadata": {
         "description": "CosmosDB Location"
+      }
+    },
+    "AzureOpenAILocation": {
+      "type": "string",
+      "allowedValues": [
+        "eastus",
+        "eastus2",
+        "westus",
+        "westus3",
+        "swedencentral"
+      ],
+      "metadata": {
+        "description": "Azure OpenAI Location"
       }
     }
   },
@@ -58,8 +71,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "12508267066278938117"
+              "version": "0.34.44.8038",
+              "templateHash": "5972897122066966206"
             }
           },
           "parameters": {
@@ -147,8 +160,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "11828480827139544665"
+              "version": "0.34.44.8038",
+              "templateHash": "4003838080878788531"
             }
           },
           "parameters": {
@@ -205,7 +218,7 @@
           "resources": [
             {
               "copy": {
-                "name": "list",
+                "name": "database::list",
                 "count": "[length(parameters('containers'))]"
               },
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
@@ -310,8 +323,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "3549774837624453156"
+              "version": "0.34.44.8038",
+              "templateHash": "11698875401555850644"
             }
           },
           "parameters": {
@@ -406,7 +419,8 @@
                 "publicAccess": "None"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]"
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('saName'))]"
               ]
             },
             {
@@ -468,8 +482,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "12627712322898660298"
+              "version": "0.34.44.8038",
+              "templateHash": "8069555369079242532"
             }
           },
           "parameters": {
@@ -626,8 +640,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "17239529093958196867"
+              "version": "0.34.44.8038",
+              "templateHash": "4680446175273955277"
             }
           },
           "parameters": {
@@ -708,8 +722,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "5720304969592308179"
+              "version": "0.34.44.8038",
+              "templateHash": "4948070379347901160"
             }
           },
           "parameters": {
@@ -787,7 +801,7 @@
             "value": "[parameters('solutionPrefix')]"
           },
           "solutionLocation": {
-            "value": "[variables('resourceGroupLocation')]"
+            "value": "[parameters('AzureOpenAILocation')]"
           }
         },
         "template": {
@@ -796,8 +810,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "2043450591502080061"
+              "version": "0.34.44.8038",
+              "templateHash": "10554105993586383363"
             }
           },
           "parameters": {
@@ -840,16 +854,16 @@
             {
               "type": "Microsoft.CognitiveServices/accounts/deployments",
               "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('accounts_byc_openai_name'), 'gpt-4')]",
+              "name": "[format('{0}/{1}', parameters('accounts_byc_openai_name'), 'gpt-4o-mini')]",
               "sku": {
                 "name": "Standard",
-                "capacity": 10
+                "capacity": 45
               },
               "properties": {
                 "model": {
                   "format": "OpenAI",
-                  "name": "gpt-4",
-                  "version": "0125-Preview"
+                  "name": "gpt-4o-mini",
+                  "version": "2024-07-18"
                 },
                 "versionUpgradeOption": "OnceCurrentVersionExpired",
                 "raiPolicyName": "Microsoft.Default"
@@ -876,7 +890,7 @@
                 "raiPolicyName": "Microsoft.Default"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('accounts_byc_openai_name'), 'gpt-4')]",
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('accounts_byc_openai_name'), 'gpt-4o-mini')]",
                 "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_byc_openai_name'))]"
               ]
             }
@@ -927,8 +941,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "6087269027573253102"
+              "version": "0.34.44.8038",
+              "templateHash": "602617827311602993"
             }
           },
           "parameters": {
@@ -1046,8 +1060,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "14800771134914877555"
+              "version": "0.34.44.8038",
+              "templateHash": "7068574784490912924"
             }
           },
           "parameters": {
@@ -1114,7 +1128,7 @@
           },
           "variables": {
             "functionAppName": "[format('{0}fn', parameters('solutionName'))]",
-            "azureOpenAIDeploymentModel": "gpt-4",
+            "azureOpenAIDeploymentModel": "gpt-4o-mini",
             "azureOpenAIEmbeddingDeployment": "text-embedding-ada-002",
             "valueOne": "1"
           },
@@ -1306,8 +1320,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "14069568468347897481"
+              "version": "0.34.44.8038",
+              "templateHash": "12214749843316064247"
             }
           },
           "parameters": {
@@ -1420,8 +1434,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "5271454688668874284"
+              "version": "0.34.44.8038",
+              "templateHash": "9249647694914976345"
             }
           },
           "parameters": {
@@ -1912,8 +1926,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "17388889661434191538"
+              "version": "0.34.44.8038",
+              "templateHash": "16320906341880340387"
             }
           },
           "parameters": {
@@ -2017,13 +2031,13 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai'), '2022-09-01').outputs.openAIOutput.value.openAPIEndpoint]"
           },
           "AzureOpenAIModel": {
-            "value": "gpt-4"
+            "value": "gpt-4o-mini"
           },
           "AzureOpenAIKey": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai'), '2022-09-01').outputs.openAIOutput.value.openAPIKey]"
           },
           "AzureOpenAIModelName": {
-            "value": "gpt-4"
+            "value": "gpt-4o-mini"
           },
           "AzureOpenAITemperature": {
             "value": "0"
@@ -2110,8 +2124,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "16594210839276135691"
+              "version": "0.34.44.8038",
+              "templateHash": "360801008169638667"
             }
           },
           "parameters": {
@@ -2264,7 +2278,7 @@
             },
             "AzureOpenAIModelName": {
               "type": "string",
-              "defaultValue": "gpt-4",
+              "defaultValue": "gpt-4o-mini",
               "metadata": {
                 "description": "Azure OpenAI Model Name"
               }
@@ -2755,8 +2769,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "8033637033572984239"
+                      "version": "0.34.44.8038",
+                      "templateHash": "14262313259972528331"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },
