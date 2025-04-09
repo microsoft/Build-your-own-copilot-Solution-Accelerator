@@ -40,7 +40,7 @@ def get_client_name_from_db(client_id: str) -> str:
     conn = get_connection()
     cursor = conn.cursor()
     
-    sql = "SELECT Client FROM Clients WHERE ClientId = %s"
+    sql = "SELECT Client FROM Clients WHERE ClientId = ?"
     cursor.execute(sql, (client_id,))
     row = cursor.fetchone()
     conn.close()
