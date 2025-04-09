@@ -8,6 +8,7 @@ on:
       - 'ResearchAssistant/**'
   schedule:
     - cron: '0 7,19 * * *'  # Runs at 7:00 AM and 7:00 PM GMT
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -26,7 +27,6 @@ jobs:
           export GPT_MIN_CAPACITY="30"
           export TEXT_EMBEDDING_MIN_CAPACITY="45"
           export AZURE_REGIONS="${{ vars.AZURE_REGIONS_RA }}"
-
           chmod +x ResearchAssistant/Deployment/scripts/checkquota.sh
           if ! ResearchAssistant/Deployment/scripts/checkquota.sh; then
             # If quota check fails due to insufficient quota, set the flag
@@ -47,11 +47,9 @@ jobs:
           }
           EOF
           )
-
           curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \
             -d "$EMAIL_BODY" || echo "Failed to send notification"
-
       - name: Fail Pipeline if Quota Check Fails
         if: env.QUOTA_FAILED == 'true'
         run: exit 1  
@@ -60,11 +58,9 @@ jobs:
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
           az --version  # Verify installation
-
       - name: Login to Azure
         run: |
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
-
       - name: Install Bicep CLI
         run: az bicep install
 
@@ -72,16 +68,15 @@ jobs:
         run: |
           echo "Selected Region: $VALID_REGION"
           echo "AZURE_LOCATION=$VALID_REGION" >> $GITHUB_ENV
-
       - name: Generate Resource Group Name
         id: generate_rg_name
         run: |
           echo "Generating a unique resource group name..."
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          COMMON_PART="pslautomationRes"
-          UNIQUE_RG_NAME="${COMMON_PART}${TIMESTAMP}"
+          ACCL_NAME="rabyoc"  # Account name as specified
+          SHORT_UUID=$(uuidgen | cut -d'-' -f1)
+          UNIQUE_RG_NAME="arg-${ACCL_NAME}-${SHORT_UUID}"
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
-          echo "Generated Resource_GROUP_PREFIX: ${UNIQUE_RG_NAME}" 
+          echo "Generated RESOURCE_GROUP_NAME: ${UNIQUE_RG_NAME}"
       
       - name: Check and Create Resource Group
         id: check_create_rg
@@ -95,7 +90,6 @@ jobs:
           else
             echo "Resource group already exists."
           fi
-
       - name: Generate Unique Solution Prefix
         id: generate_solution_prefix
         run: |
@@ -106,7 +100,6 @@ jobs:
           UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
           echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
           echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}" 
-
       - name: Deploy Bicep Template
         id: deploy
         run: |
@@ -115,23 +108,19 @@ jobs:
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file ResearchAssistant/Deployment/bicep/main.bicep \
             --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
-
       - name: List KeyVaults and Store in Array
         id: list_keyvaults
         run: |
-
           set -e
           echo "Listing all KeyVaults in the resource group ${RESOURCE_GROUP_NAME}..."
           
           # Get the list of KeyVaults in the specified resource group
           keyvaults=$(az resource list --resource-group ${{ env.RESOURCE_GROUP_NAME }} --query "[?type=='Microsoft.KeyVault/vaults'].name" -o tsv)
-
           if [ -z "$keyvaults" ]; then
             echo "No KeyVaults found in resource group ${RESOURCE_GROUP_NAME}."
             echo "KEYVAULTS=[]" >> $GITHUB_ENV  # If no KeyVaults found, set an empty array
           else
             echo "KeyVaults found: $keyvaults"
-
             # Format the list into an array with proper formatting (no trailing comma)
             keyvault_array="["
             first=true
@@ -144,101 +133,97 @@ jobs:
               fi
             done
             keyvault_array="$keyvault_array]"
-
             # Output the formatted array and save it to the environment variable
             echo "KEYVAULTS=$keyvault_array" >> $GITHUB_ENV
           fi
           
       - name: Delete Bicep Deployment
-        if: success()
+        if: always()
         run: |
           set -e  
           echo "Checking if resource group exists..."
           rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
           if [ "$rg_exists" = "true" ]; then
-            echo "Resource group exist. Cleaning..."
-            az group delete \
-                --name ${{ env.RESOURCE_GROUP_NAME }} \
-                --yes \
-                --no-wait
-            echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
+            echo "Resource group exists. Cleaning..."
+            az group delete --name ${{ env.RESOURCE_GROUP_NAME }} --yes --no-wait
+            echo "Initiated deletion of resource group: ${{ env.RESOURCE_GROUP_NAME }}"
+            echo "Waiting for resource group deletion to complete..."
+            az group wait --deleted --name ${{ env.RESOURCE_GROUP_NAME }}
+            echo "Resource group deletion completed: ${{ env.RESOURCE_GROUP_NAME }}"
           else
-            echo "Resource group does not exists."
+            echo "Resource group does not exist."
           fi
-
+  
       - name: Wait for resource deletion to complete
         run: |
-
-          # List of keyvaults 
-          KEYVAULTS="${{ env.KEYVAULTS }}"
-
-          # Remove the surrounding square brackets, if they exist
-          stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g')
-          
-          # Convert the comma-separated string into an array
-          IFS=',' read -r -a resources_to_check <<< "$stripped_keyvaults"
-          
-          # Append new resources to the array
-          resources_to_check+=("${{ env.SOLUTION_PREFIX }}-openai" "${{ env.SOLUTION_PREFIX }}-cogser")
-
-          echo "List of resources to check: ${resources_to_check[@]}"
-         
-          # Get the list of resources in YAML format
-          resource_list=$(az resource list --resource-group ${{ env.RESOURCE_GROUP_NAME }} --output yaml)
-
-          # Maximum number of retries
-          max_retries=3
-
-          # Retry intervals in seconds (30, 60, 120)
-          retry_intervals=(30 60 120)
-
-          # Retry mechanism to check resources
-          retries=0
-          while true; do
-            resource_found=false
-
-            # Iterate through the resources to check
-            for resource in "${resources_to_check[@]}"; do
-              echo "Checking resource: $resource"
-              if echo "$resource_list" | grep -q "name: $resource"; then
-                echo "Resource '$resource' exists in the resource group."
-                resource_found=true
+          echo "Verifying if resource group '${{ env.RESOURCE_GROUP_NAME }}' still exists..."
+          if az group exists --name ${{ env.RESOURCE_GROUP_NAME }} | grep -q "true"; then
+            echo "Resource group exists. Proceeding with resource checks..."
+            # List of keyvaults 
+            KEYVAULTS="${{ env.KEYVAULTS }}"
+            # Remove the surrounding square brackets, if they exist
+            stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g')
+            
+            # Convert the comma-separated string into an array
+            IFS=',' read -r -a resources_to_check <<< "$stripped_keyvaults"
+            
+            # Append new resources to the array
+            resources_to_check+=("${{ env.SOLUTION_PREFIX }}-openai" "${{ env.SOLUTION_PREFIX }}-cogser")
+            echo "List of resources to check: ${resources_to_check[@]}"
+           
+            # Get the list of resources in YAML format
+            resource_list=$(az resource list --resource-group ${{ env.RESOURCE_GROUP_NAME }} --output yaml)
+            
+            # Maximum number of retries
+            max_retries=3
+            # Retry intervals in seconds (30, 60, 120)
+            retry_intervals=(30 60 120)
+            
+            # Retry mechanism to check resources
+            retries=0
+            while true; do
+              resource_found=false
+              # Iterate through the resources to check
+              for resource in "${resources_to_check[@]}"; do
+                echo "Checking resource: $resource"
+                if echo "$resource_list" | grep -q "name: $resource"; then
+                  echo "Resource '$resource' exists in the resource group."
+                  resource_found=true
+                else
+                  echo "Resource '$resource' does not exist in the resource group."
+                fi
+              done
+              
+              # If any resource exists, retry
+              if [ "$resource_found" = true ]; then
+                retries=$((retries + 1))
+                if [ "$retries" -ge "$max_retries" ]; then
+                  echo "Maximum retry attempts reached. Exiting."
+                  break
+                else
+                  # Wait for the appropriate interval for the current retry
+                  echo "Waiting for ${retry_intervals[$retries-1]} seconds before retrying..."
+                  sleep ${retry_intervals[$retries-1]}
+                fi
               else
-                echo "Resource '$resource' does not exist in the resource group."
+                echo "No resources found. Exiting."
+                break
               fi
             done
-
-            # If any resource exists, retry
-            if [ "$resource_found" = true ]; then
-              retries=$((retries + 1))
-              if [ "$retries" -ge "$max_retries" ]; then
-                echo "Maximum retry attempts reached. Exiting."
-                break
-              else
-                # Wait for the appropriate interval for the current retry
-                echo "Waiting for ${retry_intervals[$retries-1]} seconds before retrying..."
-                sleep ${retry_intervals[$retries-1]}
-              fi
-            else
-              echo "No resources found. Exiting."
-              break
-            fi
-          done
-
+          else
+            echo "Resource group '${{ env.RESOURCE_GROUP_NAME }}' does not exist. Skipping resource listing."
+          fi
       - name: Purging the Resources
-        if: success()
+        if: always()
         run: |
-
           set -e 
           # Define variables
           OPENAI_COMMON_PART="-openai"
           openai_name="${{ env.SOLUTION_PREFIX }}${OPENAI_COMMON_PART}"
           echo "Azure OpenAI: $openai_name"
-
           MULTISERVICE_COMMON_PART="-cogser"
           multiservice_account_name="${{ env.SOLUTION_PREFIX }}${MULTISERVICE_COMMON_PART}"
           echo "Azure MultiService Account: $multiservice_account_name"
-
           # Purge OpenAI Resource
           echo "Purging the OpenAI Resource..."
           if ! az resource delete --ids /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.CognitiveServices/locations/eastus2/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/deletedAccounts/$openai_name --verbose; then
