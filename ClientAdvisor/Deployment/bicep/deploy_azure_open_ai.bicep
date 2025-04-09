@@ -47,7 +47,7 @@ resource accounts_byc_openai_name_gpt_4 'Microsoft.CognitiveServices/accounts/de
   parent: accounts_byc_openai_name_resource
   name: 'gpt-4o-mini'
   sku: {
-    name: 'Standard'
+    name: 'GlobalStandard'
     capacity: 45
   }
   properties: {

@@ -13,9 +13,9 @@ param cosmosLocation string
 // param fabricWorkspaceId string
 
 //restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
-@allowed(['eastus', 'eastus2', 'westus', 'westus3', 'swedencentral'])
-@description('Azure OpenAI Location')
-param AzureOpenAILocation string
+// @allowed(['eastus', 'eastus2', 'westus', 'westus3', 'swedencentral'])
+// @description('Azure OpenAI Location')
+// param AzureOpenAILocation string
 
 var resourceGroupLocation = resourceGroup().location
 // var subscriptionId  = subscription().subscriptionId
@@ -126,7 +126,7 @@ module azOpenAI 'deploy_azure_open_ai.bicep' = {
   name: 'deploy_azure_open_ai'
   params: {
     solutionName: solutionPrefix
-    solutionLocation: AzureOpenAILocation
+    solutionLocation: resourceGroupLocation
   }
 }
 
