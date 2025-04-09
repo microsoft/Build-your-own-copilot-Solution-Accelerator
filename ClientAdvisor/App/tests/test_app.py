@@ -200,50 +200,60 @@ async def test_ensure_cosmos_generic_exception(mock_init_cosmosdb_client, client
 
 
 @pytest.mark.asyncio
-async def test_get_users_success(client):
+@patch("app.get_connection")
+@patch("app.dict_cursor")
+async def test_get_users_success(mock_dict_cursor, mock_get_connection, client):
+    # Mock database connection and cursor
     mock_conn = MagicMock()
     mock_cursor = MagicMock()
+    mock_get_connection.return_value = mock_conn
     mock_conn.cursor.return_value = mock_cursor
-    mock_cursor.fetchall.return_value = [
-        {
-            "ClientId": 1,
-            "ndays": 10,
-            "ClientMeetingDaysDifference": 1,
-            "AssetMonthsDifference": 1,
-            "StatusMonthsDifference": 1,
-            "DaysDifference": 1,
-            "Client": "Client A",
-            "Email": "clienta@example.com",
-            "AssetValue": "1,000,000",
-            "ClientSummary": "Summary A",
-            "LastMeetingDateFormatted": "Monday January 1, 2023",
-            "LastMeetingStartTime": "10:00 AM",
-            "LastMeetingEndTime": "10:30 AM",
-            "NextMeetingFormatted": "Monday January 8, 2023",
-            "NextMeetingStartTime": "11:00 AM",
-            "NextMeetingEndTime": "11:30 AM",
-        }
-    ]
 
-    with patch("app.get_connection", return_value=mock_conn):
-        response = await client.get("/api/users")
-        assert response.status_code == 200
-        res_text = await response.get_data(as_text=True)
-        assert json.loads(res_text) == [
+    # Mock query results
+    mock_dict_cursor.side_effect = [
+        [  # First call (client data)
             {
                 "ClientId": 1,
-                "ClientName": "Client A",
-                "ClientEmail": "clienta@example.com",
+                "Client": "Client A",
+                "Email": "clienta@example.com",
                 "AssetValue": "1,000,000",
-                "NextMeeting": "Monday January 8, 2023",
-                "NextMeetingTime": "11:00 AM",
-                "NextMeetingEndTime": "11:30 AM",
-                "LastMeeting": "Monday January 1, 2023",
+                "ClientSummary": "Summary A",
+                "LastMeetingDateFormatted": "Monday January 1, 2023",
                 "LastMeetingStartTime": "10:00 AM",
                 "LastMeetingEndTime": "10:30 AM",
-                "ClientSummary": "Summary A",
+                "NextMeetingFormatted": "Monday January 8, 2023",
+                "NextMeetingStartTime": "11:00 AM",
+                "NextMeetingEndTime": "11:30 AM",
+            }
+        ],
+        [  # Second call (date difference query)
+            {
+                "ClientMeetingDaysDifference": 5,
+                "AssetMonthsDifference": 1,
+                "StatusMonthsDifference": 1
             }
         ]
+    ]
+
+    # Call the function
+    response = await client.get("/api/users")
+    assert response.status_code == 200
+    res_text = await response.get_data(as_text=True)
+    assert json.loads(res_text) == [
+        {
+            "ClientId": 1,
+            "ClientName": "Client A",
+            "ClientEmail": "clienta@example.com",
+            "AssetValue": "1,000,000",
+            "NextMeeting": "Monday January 8, 2023",
+            "NextMeetingTime": "11:00 AM",
+            "NextMeetingEndTime": "11:30 AM",
+            "LastMeeting": "Monday January 1, 2023",
+            "LastMeetingStartTime": "10:00 AM",
+            "LastMeetingEndTime": "10:30 AM",
+            "ClientSummary": "Summary A",
+        }
+    ]
 
 
 @pytest.mark.asyncio

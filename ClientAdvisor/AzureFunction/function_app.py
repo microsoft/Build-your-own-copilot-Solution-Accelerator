@@ -9,7 +9,10 @@ from semantic_kernel.contents.chat_message_content import ChatMessageContent
 from semantic_kernel.contents.utils.author_role import AuthorRole
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.kernel import Kernel
-import pymssql
+from azure.identity import DefaultAzureCredential
+import pyodbc
+import struct
+import logging
 
 # --------------------------
 # Azure Function App setup
@@ -33,12 +36,8 @@ def get_client_name_from_db(client_id: str) -> str:
     """
     Connects to your SQL database and returns the client name for the given client_id.
     """
-    server = os.environ.get("SQLDB_SERVER")
-    database = os.environ.get("SQLDB_DATABASE")
-    username = os.environ.get("SQLDB_USERNAME")
-    password = os.environ.get("SQLDB_PASSWORD")
 
-    conn = pymssql.connect(server, username, password, database)
+    conn = get_connection()
     cursor = conn.cursor()
     
     sql = "SELECT Client FROM Clients WHERE ClientId = %s"
@@ -151,18 +150,14 @@ class ChatWithDataPlugin:
             )
 
             sql_query = completion.choices[0].message.content
+
             # Remove any triple backticks if present
             sql_query = sql_query.replace("```sql", "").replace("```", "")
 
             print("Generated SQL:", sql_query)
-
-            # Connect to SQL Server
-            server = os.environ.get("SQLDB_SERVER")
-            database = os.environ.get("SQLDB_DATABASE")
-            username = os.environ.get("SQLDB_USERNAME")
-            password = os.environ.get("SQLDB_PASSWORD")
-
-            conn = pymssql.connect(server, username, password, database)
+        
+            conn = get_connection()
+            # conn = pyodbc.connect(connectionString)
             cursor = conn.cursor()
             cursor.execute(sql_query)
 
@@ -263,6 +258,42 @@ class ChatWithDataPlugin:
 
         except Exception as e:
             return f"Error retrieving data from call transcripts: {str(e)}"
+
+
+def get_connection():
+    driver = "{ODBC Driver 18 for SQL Server}"
+    server = os.environ.get("SQLDB_SERVER")
+    database = os.environ.get("SQLDB_DATABASE")
+    username = os.environ.get("SQLDB_USERNAME")
+    password = os.environ.get("SQLDB_PASSWORD")
+    mid_id = os.environ.get("SQLDB_USER_MID")
+    try :
+        credential = DefaultAzureCredential(managed_identity_client_id=mid_id)
+
+        token_bytes = credential.get_token(
+        "https://database.windows.net/.default"
+        ).token.encode("utf-16-LE")
+        token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
+        SQL_COPT_SS_ACCESS_TOKEN = (
+        1256  # This connection option is defined by microsoft in msodbcsql.h
+        )
+
+        # Set up the connection
+        connection_string = f"DRIVER={driver};SERVER={server};DATABASE={database};"
+        conn = pyodbc.connect(
+        connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+        )
+        return conn
+    
+    except pyodbc.Error as e:
+        logging.error(f"Failed with Default Credential: {str(e)}")
+        conn = pyodbc.connect(
+            f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}",
+            timeout=5
+        )
+        logging.info("Connected using Username & Password")
+        return conn
+    
 
 
 # --------------------------

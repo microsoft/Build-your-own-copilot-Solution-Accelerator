@@ -121,6 +121,26 @@
               "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('miName'))]"
               ]
+            },
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2023-01-31",
+              "name": "[format('{0}-fn-mi', parameters('solutionName'))]",
+              "location": "[parameters('solutionLocation')]",
+              "tags": {
+                "app": "[parameters('solutionName')]",
+                "location": "[parameters('solutionLocation')]"
+              }
+            },
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2023-01-31",
+              "name": "[format('{0}-webapp-mi', parameters('solutionName'))]",
+              "location": "[parameters('solutionLocation')]",
+              "tags": {
+                "app": "[parameters('solutionName')]",
+                "location": "[parameters('solutionLocation')]"
+              }
             }
           ],
           "outputs": {
@@ -129,7 +149,26 @@
               "value": {
                 "id": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('miName'))]",
                 "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('miName')), '2023-01-31').principalId]",
+                "clientId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('miName')), '2023-01-31').clientId]",
                 "name": "[parameters('miName')]"
+              }
+            },
+            "managedIdentityFnAppOutput": {
+              "type": "object",
+              "value": {
+                "id": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-fn-mi', parameters('solutionName')))]",
+                "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-fn-mi', parameters('solutionName'))), '2023-01-31').principalId]",
+                "clientId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-fn-mi', parameters('solutionName'))), '2023-01-31').clientId]",
+                "name": "[format('{0}-fn-mi', parameters('solutionName'))]"
+              }
+            },
+            "managedIdentityWebAppOutput": {
+              "type": "object",
+              "value": {
+                "id": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-webapp-mi', parameters('solutionName')))]",
+                "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-webapp-mi', parameters('solutionName'))), '2023-01-31').principalId]",
+                "clientId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-webapp-mi', parameters('solutionName'))), '2023-01-31').clientId]",
+                "name": "[format('{0}-webapp-mi', parameters('solutionName'))]"
               }
             }
           }
@@ -474,6 +513,9 @@
           },
           "managedIdentityObjectId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.objectId]"
+          },
+          "managedIdentityName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.name]"
           }
         },
         "template": {
@@ -499,6 +541,9 @@
               "type": "string"
             },
             "managedIdentityObjectId": {
+              "type": "string"
+            },
+            "managedIdentityName": {
               "type": "string"
             },
             "serverName": {
@@ -545,11 +590,16 @@
               "location": "[parameters('location')]",
               "kind": "v12.0",
               "properties": {
-                "administratorLogin": "[parameters('administratorLogin')]",
-                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
                 "publicNetworkAccess": "Enabled",
                 "version": "12.0",
-                "restrictOutboundNetworkAccess": "Disabled"
+                "restrictOutboundNetworkAccess": "Disabled",
+                "administrators": {
+                  "login": "[parameters('managedIdentityName')]",
+                  "sid": "[parameters('managedIdentityObjectId')]",
+                  "tenantId": "[subscription().tenantId]",
+                  "administratorType": "ActiveDirectory",
+                  "azureADOnlyAuthentication": true
+                }
               }
             },
             {
@@ -912,27 +962,64 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "deploy_upload_files_script",
+      "name": "deploy_post_deployment_scripts",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
         },
         "mode": "Incremental",
         "parameters": {
-          "storageAccountName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageAccountOutput.value.name]"
+          "solutionName": {
+            "value": "[parameters('solutionPrefix')]"
           },
           "solutionLocation": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[variables('resourceGroupLocation')]"
+          },
+          "baseUrl": {
+            "value": "[variables('baseUrl')]"
+          },
+          "storageAccountName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageAccountOutput.value.storageAccountName]"
           },
           "containerName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageAccountOutput.value.dataContainer]"
           },
-          "identity": {
+          "managedIdentityObjectId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.id]"
           },
-          "baseUrl": {
-            "value": "[variables('baseUrl')]"
+          "managedIdentityClientId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.clientId]"
+          },
+          "keyVaultName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_keyvault'), '2022-09-01').outputs.keyvaultOutput.value.name]"
+          },
+          "logAnalyticsWorkspaceResourceName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_function'), '2022-09-01').outputs.logAnalyticsWorkspaceName.value]"
+          },
+          "sqlServerName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbOutput.value.sqlServerName]"
+          },
+          "sqlDbName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbOutput.value.sqlDbName]"
+          },
+          "sqlUsers": {
+            "value": [
+              {
+                "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.clientId]",
+                "principalName": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.name]",
+                "databaseRoles": [
+                  "db_datareader"
+                ]
+              },
+              {
+                "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.clientId]",
+                "principalName": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.name]",
+                "databaseRoles": [
+                  "db_datareader",
+                  "db_datawriter"
+                ]
+              }
+            ]
           }
         },
         "template": {
@@ -946,11 +1033,26 @@
             }
           },
           "parameters": {
+            "solutionName": {
+              "type": "string",
+              "metadata": {
+                "description": "Solution Name"
+              }
+            },
             "solutionLocation": {
               "type": "string",
               "metadata": {
                 "description": "Specifies the location for resources."
               }
+            },
+            "baseUrl": {
+              "type": "string"
+            },
+            "managedIdentityObjectId": {
+              "type": "string"
+            },
+            "managedIdentityClientId": {
+              "type": "string"
             },
             "storageAccountName": {
               "type": "string"
@@ -958,40 +1060,132 @@
             "containerName": {
               "type": "string"
             },
-            "identity": {
+            "containerAppName": {
+              "type": "string",
+              "defaultValue": "[format('{0}containerapp', parameters('solutionName'))]"
+            },
+            "environmentName": {
+              "type": "string",
+              "defaultValue": "[format('{0}containerappenv', parameters('solutionName'))]"
+            },
+            "imageName": {
+              "type": "string",
+              "defaultValue": "python:3.11-alpine"
+            },
+            "setupCopyKbFiles": {
+              "type": "string",
+              "defaultValue": "[format('{0}Deployment/scripts/copy_kb_files.sh', parameters('baseUrl'))]"
+            },
+            "setupCreateIndexScriptsUrl": {
+              "type": "string",
+              "defaultValue": "[format('{0}Deployment/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]"
+            },
+            "createSqlUserAndRoleScriptsUrl": {
+              "type": "string",
+              "defaultValue": "[format('{0}Deployment/scripts/add_user_scripts/create-sql-user-and-role.ps1', parameters('baseUrl'))]"
+            },
+            "keyVaultName": {
               "type": "string"
             },
-            "baseUrl": {
+            "sqlServerName": {
+              "type": "string"
+            },
+            "sqlDbName": {
+              "type": "string"
+            },
+            "sqlUsers": {
+              "type": "array",
+              "defaultValue": []
+            },
+            "logAnalyticsWorkspaceResourceName": {
               "type": "string"
             }
           },
+          "variables": {
+            "resourceGroupName": "[resourceGroup().name]"
+          },
           "resources": [
             {
-              "type": "Microsoft.Resources/deploymentScripts",
-              "apiVersion": "2020-10-01",
-              "name": "copy_demo_Data",
-              "kind": "AzureCLI",
+              "type": "Microsoft.App/managedEnvironments",
+              "apiVersion": "2022-03-01",
+              "name": "[parameters('environmentName')]",
+              "location": "[parameters('solutionLocation')]",
+              "properties": {
+                "zoneRedundant": false,
+                "appLogsConfiguration": {
+                  "destination": "log-analytics",
+                  "logAnalyticsConfiguration": {
+                    "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceResourceName')), '2020-10-01').customerId]",
+                    "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceResourceName')), '2020-10-01').primarySharedKey]"
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2022-03-01",
+              "name": "[parameters('containerAppName')]",
               "location": "[parameters('solutionLocation')]",
               "identity": {
                 "type": "UserAssigned",
                 "userAssignedIdentities": {
-                  "[format('{0}', parameters('identity'))]": {}
+                  "[format('{0}', parameters('managedIdentityObjectId'))]": {}
                 }
               },
               "properties": {
-                "azCliVersion": "2.50.0",
-                "primaryScriptUri": "[format('{0}Deployment/scripts/copy_kb_files.sh', parameters('baseUrl'))]",
-                "arguments": "[format('{0} {1} {2}', parameters('storageAccountName'), parameters('containerName'), parameters('baseUrl'))]",
-                "timeout": "PT1H",
-                "retentionInterval": "PT1H",
-                "cleanupPreference": "OnSuccess"
-              }
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+                "configuration": {
+                  "ingress": null,
+                  "activeRevisionsMode": "Single"
+                },
+                "template": {
+                  "scale": {
+                    "minReplicas": 1,
+                    "maxReplicas": 1
+                  },
+                  "containers": [
+                    {
+                      "name": "[parameters('containerAppName')]",
+                      "image": "[parameters('imageName')]",
+                      "resources": {
+                        "cpu": 2,
+                        "memory": "4.0Gi"
+                      },
+                      "command": [
+                        "/bin/sh",
+                        "-c",
+                        "[format('mkdir -p /scripts && apk add --no-cache curl bash jq py3-pip gcc musl-dev libffi-dev openssl-dev python3-dev && pip install --upgrade azure-cli && apk add --no-cache --virtual .build-deps build-base unixodbc-dev && curl -s -o msodbcsql18_18.4.1.1-1_amd64.apk https://download.microsoft.com/download/7/6/d/76de322a-d860-4894-9945-f0cc5d6a45f8/msodbcsql18_18.4.1.1-1_amd64.apk && curl -s -o mssql-tools18_18.4.1.1-1_amd64.apk https://download.microsoft.com/download/7/6/d/76de322a-d860-4894-9945-f0cc5d6a45f8/mssql-tools18_18.4.1.1-1_amd64.apk && apk add --allow-untrusted msodbcsql18_18.4.1.1-1_amd64.apk && apk add --allow-untrusted mssql-tools18_18.4.1.1-1_amd64.apk && curl -s -o /scripts/copy_kb_files.sh {0} && chmod +x /scripts/copy_kb_files.sh && sh -x /scripts/copy_kb_files.sh {1} {2} {3} {4} && curl -s -o /scripts/run_create_index_scripts.sh {5} && chmod +x /scripts/run_create_index_scripts.sh && sh -x /scripts/run_create_index_scripts.sh {6} {7} {8} && apk add --no-cache ca-certificates less ncurses-terminfo-base krb5-libs libgcc libintl libssl3 libstdc++ tzdata userspace-rcu zlib icu-libs curl && apk -X https://dl-cdn.alpinelinux.org/alpine/edge/main add --no-cache lttng-ust openssh-client && curl -L https://github.com/PowerShell/PowerShell/releases/download/v7.5.0/powershell-7.5.0-linux-musl-x64.tar.gz -o /tmp/powershell.tar.gz && mkdir -p /opt/microsoft/powershell/7 && tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7 && chmod +x /opt/microsoft/powershell/7/pwsh && ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh && curl -s -o /scripts/create-sql-user-and-role.ps1 {9} && chmod +x /scripts/create-sql-user-and-role.ps1 && pwsh -File /scripts/create-sql-user-and-role.ps1 -SqlServerName {10} -SqlDatabaseName {11} -ClientId {12} -DisplayName {13} -ManagedIdentityClientId {14} -DatabaseRole {15} && pwsh -File /scripts/create-sql-user-and-role.ps1 -SqlServerName {16} -SqlDatabaseName {17} -ClientId {18} -DisplayName {19} -ManagedIdentityClientId {20} -DatabaseRole {21} && pwsh -File /scripts/create-sql-user-and-role.ps1 -SqlServerName {22} -SqlDatabaseName {23} -ClientId {24} -DisplayName {25} -ManagedIdentityClientId {26} -DatabaseRole {27} && az login --identity --client-id {28} && az containerapp update --name {29} --resource-group {30} --min-replicas 0 --cpu 0.25 --memory 0.5Gi && az containerapp revision deactivate -g {31} --revision $(az containerapp revision list -n {32} -g {33} --query \"[0].name\" -o tsv) && echo \"Container app setup completed successfully.\"', parameters('setupCopyKbFiles'), parameters('storageAccountName'), parameters('containerName'), parameters('baseUrl'), parameters('managedIdentityClientId'), parameters('setupCreateIndexScriptsUrl'), parameters('baseUrl'), parameters('keyVaultName'), parameters('managedIdentityClientId'), parameters('createSqlUserAndRoleScriptsUrl'), parameters('sqlServerName'), parameters('sqlDbName'), parameters('sqlUsers')[0].principalId, parameters('sqlUsers')[0].principalName, parameters('managedIdentityClientId'), parameters('sqlUsers')[0].databaseRoles[0], parameters('sqlServerName'), parameters('sqlDbName'), parameters('sqlUsers')[1].principalId, parameters('sqlUsers')[1].principalName, parameters('managedIdentityClientId'), parameters('sqlUsers')[1].databaseRoles[0], parameters('sqlServerName'), parameters('sqlDbName'), parameters('sqlUsers')[1].principalId, parameters('sqlUsers')[1].principalName, parameters('managedIdentityClientId'), parameters('sqlUsers')[1].databaseRoles[1], parameters('managedIdentityClientId'), parameters('containerAppName'), variables('resourceGroupName'), variables('resourceGroupName'), parameters('containerAppName'), variables('resourceGroupName'))]"
+                      ],
+                      "env": [
+                        {
+                          "name": "STORAGE_ACCOUNT_NAME",
+                          "value": "[parameters('storageAccountName')]"
+                        },
+                        {
+                          "name": "CONTAINER_NAME",
+                          "value": "[parameters('containerName')]"
+                        },
+                        {
+                          "name": "APPSETTING_WEBSITE_SITE_NAME",
+                          "value": "DUMMY"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]"
+              ]
             }
           ]
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'deploy_azure_function')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_keyvault')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account')]"
       ]
     },
@@ -1052,6 +1246,12 @@
           },
           "streamTextSystemPrompt": {
             "value": "[variables('functionAppStreamTextSystemPrompt')]"
+          },
+          "userassignedIdentityClientId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.clientId]"
+          },
+          "userassignedIdentityId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.id]"
           }
         },
         "template": {
@@ -1124,6 +1324,12 @@
               "metadata": {
                 "description": "Azure Function App Stream Text System Prompt"
               }
+            },
+            "userassignedIdentityId": {
+              "type": "string"
+            },
+            "userassignedIdentityClientId": {
+              "type": "string"
             }
           },
           "variables": {
@@ -1196,7 +1402,10 @@
               "location": "[parameters('solutionLocation')]",
               "kind": "functionapp",
               "identity": {
-                "type": "SystemAssigned"
+                "type": "SystemAssigned, UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', parameters('userassignedIdentityId'))]": {}
+                }
               },
               "properties": {
                 "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', format('{0}env', parameters('solutionName')))]",
@@ -1278,6 +1487,10 @@
                     {
                       "name": "AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT",
                       "value": "[parameters('streamTextSystemPrompt')]"
+                    },
+                    {
+                      "name": "SQLDB_USER_MID",
+                      "value": "[parameters('userassignedIdentityClientId')]"
                     }
                   ]
                 }
@@ -1287,12 +1500,19 @@
                 "[resourceId('Microsoft.App/managedEnvironments', format('{0}env', parameters('solutionName')))]"
               ]
             }
-          ]
+          ],
+          "outputs": {
+            "logAnalyticsWorkspaceName": {
+              "type": "string",
+              "value": "[format('workspace-{0}', parameters('solutionName'))]"
+            }
+          }
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'deploy_azure_open_ai')]",
         "[resourceId('Microsoft.Resources/deployments', 'deploy_ai_search_service')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account')]"
       ]
@@ -1900,86 +2120,6 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "deploy_index_scripts",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "solutionLocation": {
-            "value": "[variables('solutionLocation')]"
-          },
-          "identity": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.id]"
-          },
-          "baseUrl": {
-            "value": "[variables('baseUrl')]"
-          },
-          "keyVaultName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_keyvault'), '2022-09-01').outputs.keyvaultOutput.value.name]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "16320906341880340387"
-            }
-          },
-          "parameters": {
-            "solutionLocation": {
-              "type": "string",
-              "metadata": {
-                "description": "Specifies the location for resources."
-              }
-            },
-            "baseUrl": {
-              "type": "string"
-            },
-            "keyVaultName": {
-              "type": "string"
-            },
-            "identity": {
-              "type": "string"
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Resources/deploymentScripts",
-              "apiVersion": "2020-10-01",
-              "name": "create_search_indexes",
-              "kind": "AzureCLI",
-              "location": "[parameters('solutionLocation')]",
-              "identity": {
-                "type": "UserAssigned",
-                "userAssignedIdentities": {
-                  "[format('{0}', parameters('identity'))]": {}
-                }
-              },
-              "properties": {
-                "azCliVersion": "2.52.0",
-                "primaryScriptUri": "[format('{0}Deployment/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]",
-                "arguments": "[format('{0} {1}', parameters('baseUrl'), parameters('keyVaultName'))]",
-                "timeout": "PT1H",
-                "retentionInterval": "PT1H",
-                "cleanupPreference": "OnSuccess"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_keyvault')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
       "name": "deploy_app_service",
       "resourceGroup": "[resourceGroup().name]",
       "properties": {
@@ -2116,6 +2256,12 @@
           },
           "Appversion": {
             "value": "[variables('appversion')]"
+          },
+          "userassignedIdentityClientId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.clientId]"
+          },
+          "userassignedIdentityId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.id]"
           }
         },
         "template": {
@@ -2501,6 +2647,12 @@
             },
             "Appversion": {
               "type": "string"
+            },
+            "userassignedIdentityId": {
+              "type": "string"
+            },
+            "userassignedIdentityClientId": {
+              "type": "string"
             }
           },
           "variables": {
@@ -2527,7 +2679,10 @@
               "name": "[parameters('WebsiteName')]",
               "location": "[resourceGroup().location]",
               "identity": {
-                "type": "SystemAssigned"
+                "type": "SystemAssigned, UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', parameters('userassignedIdentityId'))]": {}
+                }
               },
               "properties": {
                 "serverFarmId": "[parameters('HostingPlanName')]",
@@ -2720,6 +2875,10 @@
                     {
                       "name": "UWSGI_THREADS",
                       "value": "2"
+                    },
+                    {
+                      "name": "SQLDB_USER_MID",
+                      "value": "[parameters('userassignedIdentityClientId')]"
                     }
                   ],
                   "linuxFxVersion": "[variables('WebAppImageName')]"
@@ -2813,6 +2972,7 @@
         "[resourceId('Microsoft.Resources/deployments', 'deploy_ai_search_service')]",
         "[resourceId('Microsoft.Resources/deployments', 'deploy_azure_function_script_url')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db')]"
       ]
     }
