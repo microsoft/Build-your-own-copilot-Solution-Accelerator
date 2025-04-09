@@ -21,7 +21,8 @@ RUN apk add --no-cache --virtual .build-deps \
     && pip install --no-cache-dir uwsgi  
   
 COPY ./ResearchAssistant/App/requirements.txt /usr/src/app/  
-RUN pip install --no-cache-dir -r /usr/src/app/requirements.txt \  
+RUN pip install --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -r /usr/src/app/requirements.txt \  
     && rm -rf /root/.cache  
   
 COPY ./ResearchAssistant/App/ /usr/src/app/
