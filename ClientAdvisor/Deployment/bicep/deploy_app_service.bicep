@@ -67,7 +67,7 @@ param AzureOpenAIResource string
 param AzureOpenAIModel string
 
 @description('Azure OpenAI Model Name')
-param AzureOpenAIModelName string = 'gpt-4'
+param AzureOpenAIModelName string = 'gpt-4o-mini'
 
 @description('Azure Open AI Endpoint')
 param AzureOpenAIEndpoint string = ''

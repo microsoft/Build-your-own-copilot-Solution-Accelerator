@@ -26,7 +26,9 @@ RUN apk add --no-cache --virtual .build-deps \
     && rm msodbcsql18_18.4.1.1-1_amd64.apk 
 
 COPY ./ClientAdvisor/App/requirements.txt /usr/src/app/  
-RUN pip install --no-cache-dir -r /usr/src/app/requirements.txt \  
+
+RUN pip install --upgrade pip setuptools wheel \  
+    && pip install --no-cache-dir -r /usr/src/app/requirements.txt \  
     && rm -rf /root/.cache  
 
 COPY ./ClientAdvisor/App/ /usr/src/app/  
