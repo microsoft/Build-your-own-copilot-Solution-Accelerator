@@ -22,7 +22,8 @@ RUN apk add --no-cache --virtual .build-deps \
     libpq 
 
 COPY ./ClientAdvisor/App/requirements.txt /usr/src/app/  
-RUN pip install --no-cache-dir -r /usr/src/app/requirements.txt \  
+RUN pip install --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -r /usr/src/app/requirements.txt \  
     && rm -rf /root/.cache  
 
 COPY ./ClientAdvisor/App/ /usr/src/app/  
