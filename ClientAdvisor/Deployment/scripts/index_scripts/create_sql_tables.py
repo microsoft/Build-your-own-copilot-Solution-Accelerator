@@ -1,4 +1,5 @@
 key_vault_name = 'kv_to-be-replaced'
+managed_identity_client_id = 'mici_to-be-replaced'
 
 import pandas as pd
 import pymssql
@@ -7,10 +8,13 @@ from datetime import datetime
 
 from azure.keyvault.secrets import SecretClient  
 from azure.identity import DefaultAzureCredential 
+from azure.identity import DefaultAzureCredential
+import pyodbc
+import struct
 
 def get_secrets_from_kv(kv_name, secret_name):
     key_vault_name = kv_name  # Set the name of the Azure Key Vault  
-    credential = DefaultAzureCredential()
+    credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
     secret_client = SecretClient(vault_url=f"https://{key_vault_name}.vault.azure.net/", credential=credential)  # Create a secret client object using the credential and Key Vault name  
     return(secret_client.get_secret(secret_name).value) # Retrieve the secret value  
 
@@ -18,8 +22,25 @@ server = get_secrets_from_kv(key_vault_name,"SQLDB-SERVER")
 database = get_secrets_from_kv(key_vault_name,"SQLDB-DATABASE")
 username = get_secrets_from_kv(key_vault_name,"SQLDB-USERNAME")
 password = get_secrets_from_kv(key_vault_name,"SQLDB-PASSWORD")
+driver = "{ODBC Driver 18 for SQL Server}"
 
-conn = pymssql.connect(server, username, password, database)
+
+#conn = pymssql.connect(server, username, password, database)
+credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
+
+token_bytes = credential.get_token(
+            "https://database.windows.net/.default"
+            ).token.encode("utf-16-LE")
+token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
+SQL_COPT_SS_ACCESS_TOKEN = (
+1256  # This connection option is defined by microsoft in msodbcsql.h
+)
+
+# Set up the connection
+connection_string = f"DRIVER={driver};SERVER={server};DATABASE={database};"
+conn = pyodbc.connect(
+    connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+)
 cursor = conn.cursor()
 
 from azure.storage.filedatalake import (
@@ -27,7 +48,7 @@ from azure.storage.filedatalake import (
 )
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-credential = DefaultAzureCredential()
+credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 
@@ -62,7 +83,7 @@ csv_file = file_client.download_file()
 df = pd.read_csv(csv_file, encoding='utf-8')
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO Clients (ClientId,Client, Email, Occupation, MaritalStatus, Dependents) VALUES (%s,%s,%s,%s,%s,%s)", (item.ClientId, item.Client, item.Email, item.Occupation, item.MaritalStatus, item.Dependents))
+    cursor.execute(f"INSERT INTO Clients (ClientId,Client, Email, Occupation, MaritalStatus, Dependents) VALUES (?,?,?,?,?,?)", (item.ClientId, item.Client, item.Email, item.Occupation, item.MaritalStatus, item.Dependents))
 conn.commit()
 
 
@@ -91,7 +112,7 @@ cursor = conn.cursor()
 # df = pd.read_csv(csv_file, encoding='utf-8')
 
 # for index, item in df.iterrows():    
-#     cursor.execute(f"INSERT INTO ClientInvestmentPortfolio (ClientId, AssetDate, AssetType, Investment, ROI, RevenueWithoutStrategy) VALUES (%s,%s, %s,%s, %s, %s)", (item.ClientId, item.AssetDate, item.AssetType, item.Investment, item.ROI, item.RevenueWithoutStrategy))
+#     cursor.execute(f"INSERT INTO ClientInvestmentPortfolio (ClientId, AssetDate, AssetType, Investment, ROI, RevenueWithoutStrategy) VALUES (?,?, ?,?, ?, ?)", (item.ClientId, item.AssetDate, item.AssetType, item.Investment, item.ROI, item.RevenueWithoutStrategy))
     
 # conn.commit()
 
@@ -135,7 +156,7 @@ df['Revenue'] = df['Revenue'].astype(float)
 
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO Assets (ClientId,AssetDate, Investment, ROI, Revenue, AssetType) VALUES (%s,%s,%s,%s,%s,%s)", (item.ClientId, item.AssetDate, item.Investment, item.ROI, item.Revenue, item.AssetType))
+    cursor.execute(f"INSERT INTO Assets (ClientId,AssetDate, Investment, ROI, Revenue, AssetType) VALUES (?,?,?,?,?,?)", (item.ClientId, item.AssetDate, item.Investment, item.ROI, item.Revenue, item.AssetType))
 conn.commit()
 
 
@@ -159,7 +180,7 @@ df = pd.read_csv(csv_file, encoding='utf-8')
 df['ClientId'] = df['ClientId'].astype(int)
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO InvestmentGoals (ClientId,InvestmentGoal) VALUES (%s,%s)", (item.ClientId, item.InvestmentGoal))
+    cursor.execute(f"INSERT INTO InvestmentGoals (ClientId,InvestmentGoal) VALUES (?,?)", (item.ClientId, item.InvestmentGoal))
 conn.commit()
 
 
@@ -184,7 +205,7 @@ df = pd.read_csv(csv_file, encoding='utf-8')
 df['ClientId'] = df['ClientId'].astype(int)
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO InvestmentGoalsDetails (ClientId,InvestmentGoal, TargetAmount, Contribution) VALUES (%s,%s,%s,%s)", (item.ClientId, item.InvestmentGoal, item.TargetAmount, item.Contribution))
+    cursor.execute(f"INSERT INTO InvestmentGoalsDetails (ClientId,InvestmentGoal, TargetAmount, Contribution) VALUES (?,?,?,?)", (item.ClientId, item.InvestmentGoal, item.TargetAmount, item.Contribution))
 conn.commit()
 
 #ClientSummaries
@@ -207,7 +228,7 @@ df = pd.read_csv(csv_file, encoding='utf-8')
 df['ClientId'] = df['ClientId'].astype(int)
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO ClientSummaries (ClientId,ClientSummary) VALUES (%s,%s)", (item.ClientId, item.ClientSummary))
+    cursor.execute(f"INSERT INTO ClientSummaries (ClientId,ClientSummary) VALUES (?,?)", (item.ClientId, item.ClientSummary))
 conn.commit()
 
 # Retirement
@@ -241,7 +262,7 @@ df['StatusDate'] = df['StatusDate'] + pd.DateOffset(months=months_difference)
 df['StatusDate'] = pd.to_datetime(df['StatusDate']).dt.date
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO Retirement (ClientId,StatusDate, RetirementGoalProgress, EducationGoalProgress) VALUES (%s,%s,%s,%s)", (item.ClientId, item.StatusDate, item.RetirementGoalProgress, item.EducationGoalProgress))
+    cursor.execute(f"INSERT INTO Retirement (ClientId,StatusDate, RetirementGoalProgress, EducationGoalProgress) VALUES (?,?,?,?)", (item.ClientId, item.StatusDate, item.RetirementGoalProgress, item.EducationGoalProgress))
 conn.commit()
 
 
@@ -282,7 +303,7 @@ df['EndTime'] = df['EndTime'] + pd.Timedelta(days=days_difference)
 
 for index, item in df.iterrows():
     
-    cursor.execute(f"INSERT INTO ClientMeetings (ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail) VALUES (%s,%s,%s,%s,%s,%s,%s)", (item.ClientId, item.ConversationId, item.Title, item.StartTime, item.EndTime, item.Advisor, item.ClientEmail))
+    cursor.execute(f"INSERT INTO ClientMeetings (ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail) VALUES (?,?,?,?,?,?,?)", (item.ClientId, item.ConversationId, item.Title, item.StartTime, item.EndTime, item.Advisor, item.ClientEmail))
 conn.commit()
 
 
@@ -303,5 +324,5 @@ df['ClientId'] = df['ClientId'].astype(int)
 df['ConversationId'] = ''
 
 for index, item in df.iterrows():
-    cursor.execute(f"INSERT INTO ClientMeetings (ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail) VALUES (%s,%s,%s,%s,%s,%s,%s)", (item.ClientId, item.ConversationId, item.Title, item.StartTime, item.EndTime, item.Advisor, item.ClientEmail))
+    cursor.execute(f"INSERT INTO ClientMeetings (ClientId,ConversationId,Title,StartTime,EndTime,Advisor,ClientEmail) VALUES (?,?,?,?,?,?,?)", (item.ClientId, item.ConversationId, item.Title, item.StartTime, item.EndTime, item.Advisor, item.ClientEmail))
 conn.commit()

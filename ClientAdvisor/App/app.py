@@ -24,6 +24,7 @@ from backend.utils import (convert_to_pf_format, format_as_ndjson,
                            format_stream_response, generateFilterString,
                            parse_multi_columns)
 from db import get_connection
+from db import dict_cursor
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
@@ -1583,7 +1584,8 @@ def get_users():
         ORDER BY NextMeeting ASC;
         """
         cursor.execute(sql_stmt)
-        rows = cursor.fetchall()
+        # Since pyodbc returns query results as a list of tuples, using `dict_cursor` function to convert these tuples into a list of dictionaries
+        rows = dict_cursor(cursor)
 
         if len(rows) <= 6:
             # update ClientMeetings,Assets,Retirement tables sample data to current date
@@ -1618,7 +1620,8 @@ def get_users():
                 FROM DaysDifference
                 """
             cursor.execute(combined_stmt)
-            date_diff_rows = cursor.fetchall()
+            # Since pyodbc returns query results as a list of tuples, using `dict_cursor` function to convert these tuples into a list of dictionaries
+            date_diff_rows = dict_cursor(cursor)
 
             client_days = (
                 date_diff_rows[0]["ClientMeetingDaysDifference"]
