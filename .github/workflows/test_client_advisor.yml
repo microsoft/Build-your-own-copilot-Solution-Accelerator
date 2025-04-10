@@ -42,7 +42,7 @@ jobs:
           name: client-advisor-frontend-coverage
           path: |
             src/App/frontend/coverage/
-            src/App/frontend/coverag/lcov-report/
+            src/App/frontend/coverage/lcov-report/
             src/App/htmlcov/
       - name: Install Backend Dependencies
         run: |
