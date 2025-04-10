@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'ClientAdvisor/**'
   schedule:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
@@ -28,10 +26,10 @@ jobs:
           export TEXT_EMBEDDING_MIN_CAPACITY="45"
           export AZURE_REGIONS="${{ vars.AZURE_REGIONS_CA }}"
 
-          chmod +x ClientAdvisor/Deployment/scripts/checkquota.sh
-          if ! ClientAdvisor/Deployment/scripts/checkquota.sh; then
+          chmod +x scripts/checkquota.sh
+          if ! scripts/checkquota.sh; then
             # If quota check fails due to insufficient quota, set the flag
-            if grep -q "No region with sufficient quota found" ClientAdvisor/Deployment/scripts/checkquota.sh; then
+            if grep -q "No region with sufficient quota found" scripts/checkquota.sh; then
               echo "QUOTA_FAILED=true" >> $GITHUB_ENV
             fi
             exit 1  # Fail the pipeline if any other failure occurs
@@ -116,7 +114,7 @@ jobs:
           set -e
           az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --template-file ClientAdvisor/Deployment/bicep/main.bicep \
+            --template-file infra/main.bicep \
             --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} cosmosLocation=${{ env.AZURE_LOCATION }}
 
       - name: List KeyVaults and Store in Array

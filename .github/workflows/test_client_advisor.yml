@@ -4,8 +4,6 @@ on:
   push:
     branches: [main, dev]
     # Trigger on changes in these specific paths
-    paths:
-      - 'ClientAdvisor/**'
   pull_request:
     branches: [main, dev]
     types:
@@ -13,8 +11,6 @@ on:
       - ready_for_review
       - reopened
       - synchronize
-    paths:
-      - 'ClientAdvisor/**'
 
 jobs:
   test_client_advisor:
@@ -45,22 +41,22 @@ jobs:
         with:
           name: client-advisor-frontend-coverage
           path: |
-            ClientAdvisor/App/frontend/coverage/
-            ClientAdvisor/App/frontend/coverage/lcov-report/
-            ClientAdvisor/App/htmlcov/
+            src/app/frontend/coverage/
+            src/app/frontend/coverag/lcov-report/
+            src/app/htmlcov/
       - name: Install Backend Dependencies
         run: |
-          cd ClientAdvisor/App
+          cd src/app
           python -m pip install -r requirements.txt
           python -m pip install coverage pytest-cov
       - name: Run Backend Tests with Coverage
         run: |
-          cd ClientAdvisor/App
+          cd src/app
           python -m pytest -vv --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=80 --junitxml=coverage-junit.xml
       - uses: actions/upload-artifact@v4
         with:
           name: client-advisor-coverage
           path: |
-            ClientAdvisor/App/coverage.xml
-            ClientAdvisor/App/coverage-junit.xml
-            ClientAdvisor/App/htmlcov/
+            src/app/coverage.xml
+            src/app/coverage-junit.xml
+            src/app/htmlcov/
