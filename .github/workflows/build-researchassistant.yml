@@ -2,18 +2,14 @@ name: Build Docker and Optional Push - Researcher
 
 on:
   push:
-    branches: [main, dev, demo]
-    paths:
-      - ResearchAssistant/**
+    branches: [byoc-researcher]
   pull_request:
-    branches: [main, dev, demo]
+    branches: [byoc-researcher]
     types:
       - opened
       - ready_for_review
       - reopened
       - synchronize
-    paths:
-      - ResearchAssistant/**
   merge_group:
   workflow_dispatch:
 
@@ -23,7 +19,7 @@ jobs:
       matrix:
         include:
           - app_name: byoaia-app
-            dockerfile: ResearchAssistant/App/WebApp.Dockerfile
+            dockerfile: src/WebApp.Dockerfile
             password_secret: DOCKER_PASSWORD_RESEARCHASSISTANT
 
     uses: ./.github/workflows/build-docker.yml
@@ -33,5 +29,5 @@ jobs:
       password_secret: ${{ matrix.password_secret }}
       app_name: ${{ matrix.app_name }}
       dockerfile: ${{ matrix.dockerfile }}
-      push: ${{ github.ref_name == 'main' || github.ref_name == 'dev' || github.ref_name == 'demo' || github.ref_name == 'dependabotchanges' }} 
+      push: ${{ github.ref_name == 'byoc-researcher' || github.ref_name == 'dependabotchanges' }} 
     secrets: inherit
