@@ -17,7 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r src/app/requirements.txt
+        pip install -r src/App/requirements.txt
     - name: Run flake8 and pylint
       run: |
-        flake8 --config=src/app/.flake8 src/app
+        flake8 --config=src/App/.flake8 src/App

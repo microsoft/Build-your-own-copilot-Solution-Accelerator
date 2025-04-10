@@ -19,7 +19,7 @@ jobs:
       matrix:
         include:
           - app_name: byc-wa-app
-            dockerfile: src/app/WebApp.Dockerfile
+            dockerfile: src/App/WebApp.Dockerfile
             password_secret: DOCKER_PASSWORD
           - app_name: byc-wa-fn
             dockerfile: src/azurefunction/Dockerfile

@@ -31,32 +31,32 @@ jobs:
           node-version: '20'
       - name: Install Frontend Dependencies
         run: |
-          cd src/app/frontend
+          cd src/App/frontend
           npm install
       - name: Run Frontend Tests with Coverage
         run: |
-          cd src/app/frontend
+          cd src/App/frontend
           npm run test -- --coverage
       - uses: actions/upload-artifact@v4
         with:
           name: client-advisor-frontend-coverage
           path: |
-            src/app/frontend/coverage/
-            src/app/frontend/coverag/lcov-report/
-            src/app/htmlcov/
+            src/App/frontend/coverage/
+            src/App/frontend/coverag/lcov-report/
+            src/App/htmlcov/
       - name: Install Backend Dependencies
         run: |
-          cd src/app
+          cd src/App
           python -m pip install -r requirements.txt
           python -m pip install coverage pytest-cov
       - name: Run Backend Tests with Coverage
         run: |
-          cd src/app
+          cd src/App
           python -m pytest -vv --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=80 --junitxml=coverage-junit.xml
       - uses: actions/upload-artifact@v4
         with:
           name: client-advisor-coverage
           path: |
-            src/app/coverage.xml
-            src/app/coverage-junit.xml
-            src/app/htmlcov/
+            src/App/coverage.xml
+            src/App/coverage-junit.xml
+            src/App/htmlcov/

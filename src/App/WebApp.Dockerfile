@@ -6,8 +6,8 @@ WORKDIR /home/node/app
 COPY ./ClientAdvisor/App/frontend/package*.json ./  
 USER node
 RUN npm ci
-COPY --chown=node:node ./ClientAdvisor/App/frontend/ ./frontend  
-COPY --chown=node:node ./ClientAdvisor/App/static/ ./static  
+COPY --chown=node:node ./src/App/frontend/ ./frontend  
+COPY --chown=node:node ./src/App/static/ ./static  
 WORKDIR /home/node/app/frontend
 RUN npm install --save-dev @types/jest && npm run build
 
@@ -25,13 +25,13 @@ RUN apk add --no-cache --virtual .build-deps \
     && apk add --allow-untrusted msodbcsql18_18.4.1.1-1_amd64.apk \
     && rm msodbcsql18_18.4.1.1-1_amd64.apk 
 
-COPY ./ClientAdvisor/App/requirements.txt /usr/src/app/  
+COPY ./src/App/requirements.txt /usr/src/app/  
 
 RUN pip install --upgrade pip setuptools wheel \  
     && pip install --no-cache-dir -r /usr/src/app/requirements.txt \  
     && rm -rf /root/.cache  
 
-COPY ./ClientAdvisor/App/ /usr/src/app/  
+COPY ./src/App/ /usr/src/app/  
 COPY --from=frontend /home/node/app/static  /usr/src/app/static/
 WORKDIR /usr/src/app  
 EXPOSE 80  
