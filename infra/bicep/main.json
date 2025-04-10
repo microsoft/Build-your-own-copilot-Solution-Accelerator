@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.34.44.8038",
-      "templateHash": "18080438795589533850"
+      "version": "0.31.34.60546",
+      "templateHash": "7088012715674378353"
     }
   },
   "parameters": {
@@ -58,8 +58,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "4201070185547993881"
+              "version": "0.31.34.60546",
+              "templateHash": "9997154131460713724"
             }
           },
           "parameters": {
@@ -186,8 +186,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "4003838080878788531"
+              "version": "0.31.34.60546",
+              "templateHash": "11828480827139544665"
             }
           },
           "parameters": {
@@ -244,7 +244,7 @@
           "resources": [
             {
               "copy": {
-                "name": "database::list",
+                "name": "list",
                 "count": "[length(parameters('containers'))]"
               },
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
@@ -349,8 +349,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "11698875401555850644"
+              "version": "0.31.34.60546",
+              "templateHash": "3549774837624453156"
             }
           },
           "parameters": {
@@ -445,8 +445,7 @@
                 "publicAccess": "None"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('saName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]"
               ]
             },
             {
@@ -511,8 +510,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "17273043613283621136"
+              "version": "0.31.34.60546",
+              "templateHash": "13321340469658749428"
             }
           },
           "parameters": {
@@ -677,8 +676,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "4680446175273955277"
+              "version": "0.31.34.60546",
+              "templateHash": "17239529093958196867"
             }
           },
           "parameters": {
@@ -759,8 +758,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "4948070379347901160"
+              "version": "0.31.34.60546",
+              "templateHash": "5720304969592308179"
             }
           },
           "parameters": {
@@ -847,8 +846,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "15880203484874305929"
+              "version": "0.31.34.60546",
+              "templateHash": "4421730497955960069"
             }
           },
           "parameters": {
@@ -1015,8 +1014,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "5018000626328317665"
+              "version": "0.31.34.60546",
+              "templateHash": "11222654507296254380"
             }
           },
           "parameters": {
@@ -1247,8 +1246,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "14133672307118323245"
+              "version": "0.31.34.60546",
+              "templateHash": "11981524301425552946"
             }
           },
           "parameters": {
@@ -1527,8 +1526,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "12214749843316064247"
+              "version": "0.31.34.60546",
+              "templateHash": "14069568468347897481"
             }
           },
           "parameters": {
@@ -1641,8 +1640,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "9249647694914976345"
+              "version": "0.31.34.60546",
+              "templateHash": "5271454688668874284"
             }
           },
           "parameters": {
@@ -2238,9 +2237,6 @@
           "AZURE_COSMOSDB_ENABLE_FEEDBACK": {
             "value": "True"
           },
-          "VITE_POWERBI_EMBED_URL": {
-            "value": "TBD"
-          },
           "Appversion": {
             "value": "[variables('appversion')]"
           },
@@ -2257,8 +2253,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "16559957349527009263"
+              "version": "0.31.34.60546",
+              "templateHash": "81696949044297266"
             }
           },
           "parameters": {
@@ -2625,13 +2621,6 @@
                 "description": "Enable feedback in Cosmos DB"
               }
             },
-            "VITE_POWERBI_EMBED_URL": {
-              "type": "string",
-              "defaultValue": "",
-              "metadata": {
-                "description": "Power BI Embed URL"
-              }
-            },
             "Appversion": {
               "type": "string"
             },
@@ -2848,10 +2837,6 @@
                       "value": "[parameters('AZURE_COSMOSDB_ENABLE_FEEDBACK')]"
                     },
                     {
-                      "name": "VITE_POWERBI_EMBED_URL",
-                      "value": "[parameters('VITE_POWERBI_EMBED_URL')]"
-                    },
-                    {
                       "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
                       "value": "true"
                     },
@@ -2915,8 +2900,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.34.44.8038",
-                      "templateHash": "14262313259972528331"
+                      "version": "0.31.34.60546",
+                      "templateHash": "8033637033572984239"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },

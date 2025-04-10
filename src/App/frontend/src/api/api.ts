@@ -31,15 +31,15 @@ export async function getUserInfo(): Promise<UserInfo[]> {
 }
 
 export const getpbi = async (): Promise<string> => {
-  const response = await fetch('/api/pbi')
-  if (!response.ok) {
-    console.log('No PowerBI url found. Client 360 cannot be displayed')
-    return ''
-  }
+//  const response = await fetch('/api/pbi')
+//  if (!response.ok) {
+//    console.log('No PowerBI url found. Client 360 cannot be displayed')
+//    return ''
+//  }
 
-  const payload = await response.text()
+//  const payload = await response.text()
   // console.log('PowerBI URL:', payload)
-  return payload
+  return '';
 }
 
 export const getUsers = async (): Promise<User[]> => {

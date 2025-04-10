@@ -19,7 +19,7 @@ interface UserCardProps {
   isNextMeeting: boolean;
   LastMeetingStartTime: string;
   LastMeetingEndTime: string;
-  chartUrl: string;
+  //chartUrl: string;
 }
 
 export const UserCard: React.FC<UserCardProps> = ({ 
@@ -36,7 +36,7 @@ export const UserCard: React.FC<UserCardProps> = ({
   onCardClick,
   isSelected,
   isNextMeeting,
-  chartUrl,
+  //chartUrl,
 }) => {
     const [showMore, setShowMore] = useState(false);
 

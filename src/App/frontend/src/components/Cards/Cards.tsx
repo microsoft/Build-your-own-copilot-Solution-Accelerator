@@ -87,7 +87,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
                 LastMeetingEndTime={user.LastMeetingEndTime}
                 ClientSummary={user.ClientSummary}
                 onCardClick={() => handleCardClick(user)}
-                chartUrl={user.chartUrl}
+                //chartUrl={user.chartUrl}
                 isSelected={selectedClientId === user.ClientId?.toString()}
                 isNextMeeting={false}
               />
@@ -117,7 +117,7 @@ const Cards: React.FC<CardsProps> = ({ onCardClick }) => {
                 LastMeetingEndTime={user.LastMeetingEndTime}
                 ClientSummary={user.ClientSummary}
                 onCardClick={() => handleCardClick(user)}
-                chartUrl={user.chartUrl}
+                //chartUrl={user.chartUrl}
                 isSelected={selectedClientId === user.ClientId?.toString()}
                 isNextMeeting={false}
               />
