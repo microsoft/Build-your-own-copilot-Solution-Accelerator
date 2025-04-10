@@ -1527,8 +1527,8 @@ async def generate_title(conversation_messages):
         return messages[-2]["content"]
 
 
-#@bp.route("/api/pbi", methods=["GET"])
-#def get_pbiurl():
+# @bp.route("/api/pbi", methods=["GET"])
+# def get_pbiurl():
 #    return VITE_POWERBI_EMBED_URL
 
 
