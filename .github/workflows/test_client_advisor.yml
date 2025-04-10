@@ -31,11 +31,11 @@ jobs:
           node-version: '20'
       - name: Install Frontend Dependencies
         run: |
-          cd ClientAdvisor/App/frontend
+          cd src/app/frontend
           npm install
       - name: Run Frontend Tests with Coverage
         run: |
-          cd ClientAdvisor/App/frontend
+          cd src/app/frontend
           npm run test -- --coverage
       - uses: actions/upload-artifact@v4
         with:
