@@ -1016,7 +1016,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "5018000626328317665"
+              "templateHash": "1035304206493927023"
             }
           },
           "parameters": {
@@ -1061,15 +1061,15 @@
             },
             "setupCopyKbFiles": {
               "type": "string",
-              "defaultValue": "[format('{0}Deployment/scripts/copy_kb_files.sh', parameters('baseUrl'))]"
+              "defaultValue": "[format('{0}infra/scripts/copy_kb_files.sh', parameters('baseUrl'))]"
             },
             "setupCreateIndexScriptsUrl": {
               "type": "string",
-              "defaultValue": "[format('{0}Deployment/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]"
+              "defaultValue": "[format('{0}infra/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]"
             },
             "createSqlUserAndRoleScriptsUrl": {
               "type": "string",
-              "defaultValue": "[format('{0}Deployment/scripts/add_user_scripts/create-sql-user-and-role.ps1', parameters('baseUrl'))]"
+              "defaultValue": "[format('{0}infra/scripts/add_user_scripts/create-sql-user-and-role.ps1', parameters('baseUrl'))]"
             },
             "keyVaultName": {
               "type": "string"

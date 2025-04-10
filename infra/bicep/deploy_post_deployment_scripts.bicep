@@ -10,9 +10,9 @@ param containerName string
 param containerAppName string = '${ solutionName }containerapp'
 param environmentName string = '${ solutionName }containerappenv'
 param imageName string = 'python:3.11-alpine'
-param setupCopyKbFiles string = '${baseUrl}Deployment/scripts/copy_kb_files.sh'
-param setupCreateIndexScriptsUrl string = '${baseUrl}Deployment/scripts/run_create_index_scripts.sh'
-param createSqlUserAndRoleScriptsUrl string = '${baseUrl}Deployment/scripts/add_user_scripts/create-sql-user-and-role.ps1' 
+param setupCopyKbFiles string = '${baseUrl}infra/scripts/copy_kb_files.sh'
+param setupCreateIndexScriptsUrl string = '${baseUrl}infra/scripts/run_create_index_scripts.sh'
+param createSqlUserAndRoleScriptsUrl string = '${baseUrl}infra/scripts/add_user_scripts/create-sql-user-and-role.ps1' 
 param keyVaultName string
 param sqlServerName string
 param sqlDbName string
