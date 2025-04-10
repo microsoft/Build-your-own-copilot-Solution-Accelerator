@@ -14,9 +14,6 @@ param utc string = utcNow()
 @description('Name')
 param kvName string = '${ solutionName }-kv-${uniqueString(utc)}'
 
-@description('Object Id. The object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault.')
-param objectId string
-
 @description('Create Mode')
 param createMode string = 'default'
 
@@ -29,14 +26,8 @@ param enableForDiskEncryption bool = true
 @description('Enabled For Template Deployment. Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault.')
 param enableForTemplateDeployment bool = true
 
-@description('Enable Purge Protection. Property specifying whether protection against purge is enabled for this vault.')
-param enablePurgeProtection bool = true
-
 @description('Enable RBAC Authorization. Property that controls how data actions are authorized.')
 param enableRBACAuthorization bool = true
-
-@description('Enable Soft Delete. Property to specify whether the "soft delete" functionality is enabled for this key vault.')
-param enableSoftDelete bool = false
 
 @description('Soft Delete Retention in Days. softDelete data retention days. It accepts >=7 and <=90.')
 param softDeleteRetentionInDays int = 30
@@ -55,9 +46,6 @@ param publicNetworkAccess string = 'enabled'
 ])
 param sku string = 'standard'
 
-@description('Tenant Id')
-param tenantId string
-
 @description('Vault URI. The URI of the vault for performing operations on keys and secrets.')
 var vaultUri = 'https://${ kvName }.vault.azure.net/'
 
@@ -69,24 +57,6 @@ param managedIdentityObjectId string
 // param environmentUrl string
 // param environmentId string
 param adlsAccountName string
-@secure()
-param azureOpenAIApiKey string
-param azureOpenAIApiVersion string
-param azureOpenAIEndpoint string
-@secure()
-param azureSearchAdminKey string
-param azureSearchServiceEndpoint string
-param azureSearchServiceName string
-param azureSearchIndex string
-param cogServiceEndpoint string
-@secure()
-param cogServiceKey string
-param cogServiceName string
-param sqlServerName string
-param sqlDbName string
-param sqlDbUser string
-@secure()
-param sqlDbPwd string
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: kvName
@@ -98,7 +68,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   properties: {
     accessPolicies: [
       {        
-        objectId: objectId        
+        objectId: managedIdentityObjectId        
         permissions: {
           certificates: [
             'all'
@@ -113,16 +83,14 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
             'all'
           ]
         }
-        tenantId: tenantId
+        tenantId: subscription().tenantId
       }
     ]
     createMode: createMode
     enabledForDeployment: enableForDeployment
     enabledForDiskEncryption: enableForDiskEncryption
     enabledForTemplateDeployment: enableForTemplateDeployment
-    enablePurgeProtection: enablePurgeProtection
     enableRbacAuthorization: enableRBACAuthorization
-    enableSoftDelete: enableSoftDelete
     softDeleteRetentionInDays: softDeleteRetentionInDays
     provisioningState: 'RegisteringDns'
     publicNetworkAccess: publicNetworkAccess
@@ -130,7 +98,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
       family: 'A'
       name: sku
     }    
-    tenantId: tenantId
+    tenantId: subscription().tenantId
     vaultUri: vaultUri
   }
 }
@@ -183,14 +151,6 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 //   }
 // }
 
-resource tenantIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'TENANT-ID'
-  properties: {
-    value: tenantId
-  }
-}
-
 resource adlsAccountNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
   name: 'ADLS-ACCOUNT-NAME'
@@ -199,145 +159,7 @@ resource adlsAccountNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-prev
   }
 }
 
-resource azureOpenAIApiKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-OPENAI-KEY'
-  properties: {
-    value: azureOpenAIApiKey
-  }
-}
 
-resource azureOpenAIApiVersionEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
-  properties: {
-    value: azureOpenAIApiVersion
-  }
-}
+output keyvaultName string = keyVault.name
+output keyvaultId string = keyVault.id
 
-resource azureOpenAIEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-OPENAI-ENDPOINT'
-  properties: {
-    value: azureOpenAIEndpoint
-  }
-}
-
-resource azureSearchAdminKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-SEARCH-KEY'
-  properties: {
-    value: azureSearchAdminKey
-  }
-}
-
-resource azureSearchServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-SEARCH-ENDPOINT'
-  properties: {
-    value: azureSearchServiceEndpoint
-  }
-}
-
-resource azureSearchServiceEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-SEARCH-SERVICE'
-  properties: {
-    value: azureSearchServiceName
-  }
-}
-
-resource azureSearchIndexEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-SEARCH-INDEX'
-  properties: {
-    value: azureSearchIndex
-  }
-}
-
-resource cogServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'COG-SERVICES-ENDPOINT'
-  properties: {
-    value: cogServiceEndpoint
-  }
-}
-
-resource cogServiceKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'COG-SERVICES-KEY'
-  properties: {
-    value: cogServiceKey
-  }
-}
-
-resource cogServiceNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'COG-SERVICES-NAME'
-  properties: {
-    value: cogServiceName
-  }
-}
-
-resource azureSubscriptionIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-SUBSCRIPTION-ID'
-  properties: {
-    value: subscription().subscriptionId
-  }
-}
-
-resource resourceGroupNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-RESOURCE-GROUP'
-  properties: {
-    value: resourceGroup().name
-  }
-}
-
-resource azureLocatioEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-LOCATION'
-  properties: {
-    value: solutionLocation
-  }
-}
-
-resource sqldbServerEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'SQLDB-SERVER'
-  properties: {
-    value: sqlServerName
-  }
-}
-
-resource sqldbDatabaseEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'SQLDB-DATABASE'
-  properties: {
-    value: sqlDbName
-  }
-}
-
-resource sqldbDatabaseUsername 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'SQLDB-USERNAME'
-  properties: {
-    value: sqlDbUser
-  }
-}
-
-resource sqldbDatabasePwd 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'SQLDB-PASSWORD'
-  properties: {
-    value: sqlDbPwd
-  }
-}
-
-output keyvaultOutput object = {
-  id: keyVault.id
-  name: kvName
-  uri: vaultUri
-  resource:keyVault
-}

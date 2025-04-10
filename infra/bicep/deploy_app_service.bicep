@@ -117,6 +117,7 @@ param AzureSearchStrictness string = '3'
 param AzureOpenAIEmbeddingName string = ''
 
 @description('Azure Open AI Embedding Key')
+@secure()
 param AzureOpenAIEmbeddingkey string = ''
 
 @description('Azure Open AI Embedding Endpoint')
