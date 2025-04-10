@@ -2,18 +2,14 @@ name: Test Workflow with Coverage - Researcher
 
 on:
   push:
-    branches: [main, dev]
-    paths:
-      - 'ResearchAssistant/**'
+    branches: [byoc-researcher]
   pull_request:
-    branches: [main, dev]
+    branches: [byoc-researcher]
     types:
       - opened
       - ready_for_review
       - reopened
       - synchronize
-    paths:
-      - 'ResearchAssistant/**'
 
 jobs:
   test_research_assistant:
@@ -30,19 +26,19 @@ jobs:
 
       - name: Install Backend Dependencies
         run: |
-          cd ResearchAssistant/App
+          cd src
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install coverage pytest pytest-cov pytest-asyncio
 
       - name: Run Backend Tests with Coverage
         run: |
-          cd ResearchAssistant/App
+          cd src
           python -m pytest -vv --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=80 --junitxml=coverage-junit.xml
       - uses: actions/upload-artifact@v4
         with:
           name: research-assistant-coverage
           path: |
-            ResearchAssistant/App/coverage.xml
-            ResearchAssistant/App/coverage-junit.xml
-            ResearchAssistant/App/htmlcov/
+            src/coverage.xml
+            src/coverage-junit.xml
+            src/htmlcov/
