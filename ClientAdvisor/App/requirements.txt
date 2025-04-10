@@ -22,7 +22,7 @@ isort==6.0.0
 
 # Testing tools
 pytest>=8.2,<9  # Compatible version for pytest-asyncio
-pytest-asyncio==0.25.3
-pytest-cov==6.0.0
+pytest-asyncio==0.24.0
+pytest-cov==5.0.0
 
 pyodbc==5.2.0
