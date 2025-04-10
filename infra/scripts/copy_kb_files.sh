@@ -8,11 +8,11 @@ managedIdentityClientId="$4"
 
 zipFileName1="clientdata.zip"
 extractedFolder1="clientdata"
-zipUrl1=${baseUrl}"Deployment/data/clientdata.zip"
+zipUrl1=${baseUrl}"infra/data/clientdata.zip"
 
 zipFileName2="clienttranscripts.zip"
 extractedFolder2="clienttranscripts"
-zipUrl2=${baseUrl}"Deployment/data/clienttranscripts.zip"
+zipUrl2=${baseUrl}"infra/data/clienttranscripts.zip"
 
 # Create folders if they do not exist
 mkdir -p "/mnt/azscripts/azscriptinput/$extractedFolder1"
