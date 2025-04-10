@@ -3,9 +3,7 @@ name: Validate Deployment - Researcher
 on:
   push:
     branches:
-      - main
-    paths:
-      - 'ResearchAssistant/**'
+      - byoc-researcher
   schedule:
     - cron: '0 7,19 * * *'  # Runs at 7:00 AM and 7:00 PM GMT
 
@@ -26,10 +24,10 @@ jobs:
           export GPT_MIN_CAPACITY="30"
           export TEXT_EMBEDDING_MIN_CAPACITY="45"
           export AZURE_REGIONS="${{ vars.AZURE_REGIONS_RA }}"
-          chmod +x ResearchAssistant/Deployment/scripts/checkquota.sh
-          if ! ResearchAssistant/Deployment/scripts/checkquota.sh; then
+          chmod +x infra/scripts/checkquota.sh
+          if ! infra/scripts/checkquota.sh; then
             # If quota check fails due to insufficient quota, set the flag
-            if grep -q "No region with sufficient quota found" ResearchAssistant/Deployment/scripts/checkquota.sh; then
+            if grep -q "No region with sufficient quota found" infra/scripts/checkquota.sh; then
               echo "QUOTA_FAILED=true" >> $GITHUB_ENV
             fi
             exit 1  # Fail the pipeline if any other failure occurs
@@ -105,7 +103,7 @@ jobs:
           set -e
           az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --template-file ResearchAssistant/Deployment/bicep/main.bicep \
+            --template-file infra/bicep/main.bicep \
             --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
       - name: List KeyVaults and Store in Array
         id: list_keyvaults
