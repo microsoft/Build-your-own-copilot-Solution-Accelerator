@@ -6,13 +6,13 @@ baseUrl="$1"
 keyvaultName="$2"
 managedIdentityClientId="$3"
 requirementFile="requirements.txt"
-requirementFileUrl=${baseUrl}"Deployment/scripts/index_scripts/requirements.txt"
+requirementFileUrl=${baseUrl}"infra/scripts/index_scripts/requirements.txt"
 
 echo "Script Started"
 
 # Download the create_index and create table python files
-curl --output "create_search_index.py" ${baseUrl}"Deployment/scripts/index_scripts/create_search_index.py"
-curl --output "create_sql_tables.py" ${baseUrl}"Deployment/scripts/index_scripts/create_sql_tables.py"
+curl --output "create_search_index.py" ${baseUrl}"infra/scripts/index_scripts/create_search_index.py"
+curl --output "create_sql_tables.py" ${baseUrl}"infra/scripts/index_scripts/create_sql_tables.py"
 
 # RUN apt-get update
 # RUN apt-get install python3 python3-dev g++ unixodbc-dev unixodbc libpq-dev
