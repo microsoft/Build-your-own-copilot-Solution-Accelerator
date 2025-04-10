@@ -4,7 +4,7 @@ MENU: [**USER STORY**](#user-story) \| [**QUICK DEPLOY**](#quick-deploy)  \| [**
 [**CUSTOMER TRUTH**](#customer-truth)
 
 
-<h2><img src="Deployment/images/readMe/userStory.png" width="64">
+<h2><img src="docs/images/readMe/userStory.png" width="64">
 <br/>
 User story
 </h2>
@@ -28,16 +28,16 @@ The sample data used in this repository is synthetic and generated using Azure O
 
 **Key features**
 
-![Key Features](Deployment/images/readMe/keyfeatures.png)
+![Key Features](docs/images/readMe/keyfeatures.png)
 
 <br/>
 
 **Below is an image of the solution accelerator.**
 
-![Landing Page](Deployment/images/readMe/landing_page.png)
+![Landing Page](docs/images/readMe/landing_page.png)
 
 
-<h2><img src="Deployment/images/readMe/quickDeploy.png" width="64">
+<h2><img src="docs/images/readMe/quickDeploy.png" width="64">
 <br/>
 Quick deploy
 </h2>
@@ -56,7 +56,7 @@ For additional training and support, please see:
 6. [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/)
 
 ### Solution accelerator architecture
-![image](Deployment/images/readMe/architecture.png)
+![image](docs/images/readMe/architecture.png)
 
 
  > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
@@ -69,20 +69,20 @@ https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-regi
 
 2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
 
-   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fmain%2FClientAdvisor%2FDeployment%2Fbicep%2Fmain.json)
+   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fmain%2Finfra%2Fbicep%2Fmain.json)
 
 3. You will need to select an Azure Subscription, create/select a Resource group, Region, a unique Solution Prefix and an Azure location for Cosmos DB.
 
-   ![image](Deployment/images/readMe/armDeployment.png)
+   ![image](docs/images/readMe/armDeployment.png)
 
-4. When deployment is complete, Follow steps in [Fabric Deployment guide](./Deployment/FabricDeployment.md) to set up the data processing pipelines and Power BI report in Fabric.
+4. When deployment is complete, Follow steps in [Fabric Deployment guide](./docs/FabricDeployment.md) to set up the data processing pipelines and Power BI report in Fabric.
 
-5. Optionally, follow steps in [Teams Tab App guide](./Deployment/TeamsAppDeployment.md) to add the Client Advisor app to Microsoft Teams.
+5. Optionally, follow steps in [Teams Tab App guide](./docs/TeamsAppDeployment.md) to add the Client Advisor app to Microsoft Teams.
 
 
 <br/>
 <br>
-<h2><img src="./Deployment/images/readMe/supportingDocuments.png" width="64">
+<h2><img src="./docs/images/readMe/supportingDocuments.png" width="64">
 <br/>
 Supporting documents
 </h2>
@@ -91,7 +91,7 @@ Supporting documents coming soon.
 
 
 <br>
-<h2><img src="./Deployment/images/readMe/customerTruth.png" width="64">
+<h2><img src="./docs/images/readMe/customerTruth.png" width="64">
 </br>
 Customer truth
 </h2>
