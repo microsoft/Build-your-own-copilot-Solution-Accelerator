@@ -6,7 +6,7 @@ MENU: [**USER STORY**](#user-story) \| [**QUICK DEPLOY**](#quick-deploy)  \| [**
 [**CUSTOMER TRUTH**](#customer-truth)
 
 
-<h2><img src="Deployment/images/readMe/userStory.png" width="64">
+<h2><img src="docs/images/readMe/userStory.png" width="64">
 <br/>
 User story
 </h2>
@@ -29,16 +29,16 @@ The sample data is sourced from a select set of research published on [PubMed](h
 
 **Key features**
 
-![Key Features](Deployment/images/readMe/keyfeatures.png)
+![Key Features](docs/images/readMe/keyfeatures.png)
 
 <br/>
 
 **Below is an image of the solution accelerator.**
 
-![Landing Page](Deployment/images/readMe/landing_page.png)
+![Landing Page](docs/images/readMe/landing_page.png)
 
 
-<h2><img src="Deployment/images/readMe/quickDeploy.png" width="64">
+<h2><img src="docs/images/readMe/quickDeploy.png" width="64">
 <br/>
 quick deploy
 </h2>
@@ -55,7 +55,7 @@ For additional training and support, please see:
 4. [Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-studio/) 
 
 ### Solution accelerator architecture
-![image](Deployment/images/readMe/architecture.png)
+![image](docs/images/readMe/architecture.png)
 
 
  > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
@@ -68,28 +68,28 @@ https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-regi
 
 2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
 
-   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fmain%2FResearchAssistant%2FDeployment%2Fbicep%2Fmain.json)
+   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fbyoc-researcher%2Finfra%2Fbicep%2Fmain.json)
 
 3. You will need to select an Azure Subscription, create/select a Resource group, Region, and a unique Solution Prefix.
 
-   ![image](Deployment/images/readMe/armDeployment.png)
+   ![image](docs/images/readMe/armDeployment.png)
 
-4. When Deployment is complete, follow steps in [AI Foundry Deployment guide](./Deployment/AIFoundryDeployment.md) to configure the grant draft proposal endpoint.
+4. When Deployment is complete, follow steps in [AI Foundry Deployment guide](./docs/AIFoundryDeployment.md) to configure the grant draft proposal endpoint.
 
 5. When AI Foundry deployment is complete, launch the application by navigating to your Azure resource group, choosing the app service resource, and clicking on the default domain. You should bookmark this URL to have quick access to your deployed application.
 
 The next steps are optional for additional learning. Not required to deploy the solution and run the Grant Writer Assistant.
 
-6. Optional - Follow steps in [Fabric Deployment guide](./Deployment/FabricDeployment.md) to set up the data processing pipelines in Fabric.
+6. Optional - Follow steps in [Fabric Deployment guide](./docs/FabricDeployment.md) to set up the data processing pipelines in Fabric.
 
-7. Optional - Follow steps in [Promptflow Evaluation guide](./Deployment/PromptFlowEvaluation.md) to set up the evaluation flows.
+7. Optional - Follow steps in [Promptflow Evaluation guide](./docs/PromptFlowEvaluation.md) to set up the evaluation flows.
 
-8. Optional - Follow steps in [Promptflow Safety Evaluation guide](./Deployment/PromptFlowSafetyEvaluation.md) to set up the safety evaluation flows.
+8. Optional - Follow steps in [Promptflow Safety Evaluation guide](./docs/PromptFlowSafetyEvaluation.md) to set up the safety evaluation flows.
 
 
 <br/>
 <br>
-<h2><img src="./Deployment/images/readMe/supportingDocuments.png" width="64">
+<h2><img src="./docs/images/readMe/supportingDocuments.png" width="64">
 <br/>
 Supporting documents
 </h2>
@@ -98,7 +98,7 @@ Supporting documents coming soon.
 
 
 <br>
-<h2><img src="./Deployment/images/readMe/customerTruth.png" width="64">
+<h2><img src="./docs/images/readMe/customerTruth.png" width="64">
 </br>
 Customer truth
 </h2>
