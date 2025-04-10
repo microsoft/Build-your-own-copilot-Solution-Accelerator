@@ -35,14 +35,3 @@
 //};
 
 //export default PowerBIChart;
-
-import React from 'react';
-
-interface PowerBIChartProps {
-  chartUrl: string;
-}
-
-const PowerBIChart: React.FC<PowerBIChartProps> = ({ chartUrl }) => {
-  // Component is disabled; we're not using the chartUrl.
-  return null;
-};
