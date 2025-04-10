@@ -51,19 +51,11 @@ jobs:
     - name: Determine Tag Name Based on Branch
       id: determine_tag
       run: |
-        if [[ "${{ github.ref_name }}" == "main" ]]; then
+        if [[ "${{ github.ref_name }}" == "byoc-researcher" ]]; then
           echo "tagname=latest" >> $GITHUB_OUTPUT
-        elif [[ "${{ github.ref_name }}" == "dev" ]]; then
-          echo "tagname=dev" >> $GITHUB_OUTPUT
-        elif [[ "${{ github.ref_name }}" == "demo" ]]; then
-          echo "tagname=demo" >> $GITHUB_OUTPUT
-        elif [[ "${{ github.ref_name }}" == "dependabotchanges" ]]; then
-          echo "tagname=dependabotchanges" >> $GITHUB_OUTPUT
         else
           echo "tagname=default" >> $GITHUB_OUTPUT
-      
         fi
-
 
     - name: Build Docker Image and optionally push
       uses: docker/build-push-action@v6
