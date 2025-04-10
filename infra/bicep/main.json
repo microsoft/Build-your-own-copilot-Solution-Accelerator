@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.31.34.60546",
-      "templateHash": "7088012715674378353"
+      "version": "0.34.44.8038",
+      "templateHash": "5239538454029417087"
     }
   },
   "parameters": {
@@ -58,8 +58,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "9997154131460713724"
+              "version": "0.34.44.8038",
+              "templateHash": "4201070185547993881"
             }
           },
           "parameters": {
@@ -186,8 +186,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "11828480827139544665"
+              "version": "0.34.44.8038",
+              "templateHash": "4003838080878788531"
             }
           },
           "parameters": {
@@ -244,7 +244,7 @@
           "resources": [
             {
               "copy": {
-                "name": "list",
+                "name": "database::list",
                 "count": "[length(parameters('containers'))]"
               },
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
@@ -349,8 +349,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "3549774837624453156"
+              "version": "0.34.44.8038",
+              "templateHash": "11698875401555850644"
             }
           },
           "parameters": {
@@ -445,7 +445,8 @@
                 "publicAccess": "None"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]"
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('saName'))]"
               ]
             },
             {
@@ -510,8 +511,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "13321340469658749428"
+              "version": "0.34.44.8038",
+              "templateHash": "17273043613283621136"
             }
           },
           "parameters": {
@@ -676,8 +677,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "17239529093958196867"
+              "version": "0.34.44.8038",
+              "templateHash": "4680446175273955277"
             }
           },
           "parameters": {
@@ -758,8 +759,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "5720304969592308179"
+              "version": "0.34.44.8038",
+              "templateHash": "4948070379347901160"
             }
           },
           "parameters": {
@@ -846,8 +847,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "4421730497955960069"
+              "version": "0.34.44.8038",
+              "templateHash": "15880203484874305929"
             }
           },
           "parameters": {
@@ -1014,8 +1015,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "11222654507296254380"
+              "version": "0.34.44.8038",
+              "templateHash": "5018000626328317665"
             }
           },
           "parameters": {
@@ -1246,8 +1247,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "11981524301425552946"
+              "version": "0.34.44.8038",
+              "templateHash": "14133672307118323245"
             }
           },
           "parameters": {
@@ -1526,8 +1527,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "14069568468347897481"
+              "version": "0.34.44.8038",
+              "templateHash": "12214749843316064247"
             }
           },
           "parameters": {
@@ -1640,8 +1641,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "5271454688668874284"
+              "version": "0.34.44.8038",
+              "templateHash": "9249647694914976345"
             }
           },
           "parameters": {
@@ -2253,8 +2254,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "81696949044297266"
+              "version": "0.34.44.8038",
+              "templateHash": "793384865517520139"
             }
           },
           "parameters": {
@@ -2900,8 +2901,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "8033637033572984239"
+                      "version": "0.34.44.8038",
+                      "templateHash": "14262313259972528331"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },
