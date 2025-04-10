@@ -35,3 +35,5 @@
 //};
 
 //export default PowerBIChart;
+
+export {};
