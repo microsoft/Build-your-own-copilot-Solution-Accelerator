@@ -40,7 +40,6 @@ jest.mock('../chat/Chat', () => {
 })
 
 jest.mock('../../api/api', () => ({
-  getpbi: jest.fn(),
   getUsers: jest.fn(),
   getUserInfo: jest.fn()
 }))
@@ -80,7 +79,6 @@ describe('Layout Component', () => {
   // Test--Start //
 
   test('renders layout with welcome message', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {
@@ -107,7 +105,6 @@ describe('Layout Component', () => {
   })
 
   test('fetches user info', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {
@@ -127,7 +124,6 @@ describe('Layout Component', () => {
 
     renderComponent(appState)
 
-    expect(getpbi).toHaveBeenCalledTimes(1)
     expect(getUserInfo).toHaveBeenCalledTimes(1)
   })
 
@@ -244,7 +240,6 @@ describe('Layout Component', () => {
   })
 
   test('check the Loader', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {
@@ -268,7 +263,6 @@ describe('Layout Component', () => {
   })
 
   test('copies the URL when Share button is clicked', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {
@@ -299,38 +293,6 @@ describe('Layout Component', () => {
       expect(mockClipboard.writeText).toHaveBeenCalledWith(window.location.href)
       expect(mockClipboard.writeText).toHaveBeenCalledTimes(1)
     })
-  })
-
-  test('should log error when getpbi fails', async () => {
-    ;(getpbi as jest.Mock).mockRejectedValueOnce(new Error('API Error'))
-    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {})
-
-    const appState = {
-      isChatHistoryOpen: false,
-      frontendSettings: {
-        ui: { logo: 'test-logo.svg', title: 'Test App', show_share_button: true }
-      },
-      isCosmosDBAvailable: { status: 'Available' },
-      isLoader: false,
-      chatHistoryLoadingState: 'idle',
-      chatHistory: [],
-      filteredChatHistory: [],
-      currentChat: null,
-      error: null,
-      activeUserId: null
-    }
-
-    renderComponent(appState)
-
-    await waitFor(() => {
-      expect(getpbi).toHaveBeenCalled()
-    })
-
-    const mockError = new Error('API Error')
-
-    expect(console.error).toHaveBeenCalledWith('Error fetching PBI url:', mockError)
-
-    consoleErrorMock.mockRestore()
   })
 
   test('should log error when getUderInfo fails', async () => {
@@ -367,7 +329,6 @@ describe('Layout Component', () => {
   })
 
   test('handles card click and updates context with selected user', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {
@@ -397,7 +358,6 @@ describe('Layout Component', () => {
   })
 
   test('test Dialog', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {
@@ -430,7 +390,6 @@ describe('Layout Component', () => {
   })
 
   test('test History button', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {
@@ -460,7 +419,6 @@ describe('Layout Component', () => {
   })
 
   test('test Copy button', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {
@@ -492,7 +450,6 @@ describe('Layout Component', () => {
   })
 
   test('test logo', () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {
@@ -518,7 +475,6 @@ describe('Layout Component', () => {
   })
 
   test('test getUserInfo', () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'nameinfo', val: 'Test User' }] }])
 
     const appState = {
@@ -543,7 +499,6 @@ describe('Layout Component', () => {
   })
 
   test('test Spinner', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appStatetrue = {
@@ -586,7 +541,6 @@ describe('Layout Component', () => {
   })
 
   test('test Span', async () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
     const appState = {
       isChatHistoryOpen: false,
@@ -613,7 +567,6 @@ describe('Layout Component', () => {
   })
 
   test('test Copy button Condication', () => {
-    ;(getpbi as jest.Mock).mockResolvedValue('https://mock-pbi-url.com')
     ;(getUserInfo as jest.Mock).mockResolvedValue([{ user_claims: [{ typ: 'name', val: 'Test User' }] }])
 
     const appState = {

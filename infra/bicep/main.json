@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.34.44.8038",
-      "templateHash": "818411632498647289"
+      "templateHash": "5239538454029417087"
     }
   },
   "parameters": {
@@ -2238,9 +2238,6 @@
           "AZURE_COSMOSDB_ENABLE_FEEDBACK": {
             "value": "True"
           },
-          "VITE_POWERBI_EMBED_URL": {
-            "value": "TBD"
-          },
           "Appversion": {
             "value": "[variables('appversion')]"
           },
@@ -2258,7 +2255,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "16559957349527009263"
+              "templateHash": "793384865517520139"
             }
           },
           "parameters": {
@@ -2625,13 +2622,6 @@
                 "description": "Enable feedback in Cosmos DB"
               }
             },
-            "VITE_POWERBI_EMBED_URL": {
-              "type": "string",
-              "defaultValue": "",
-              "metadata": {
-                "description": "Power BI Embed URL"
-              }
-            },
             "Appversion": {
               "type": "string"
             },
@@ -2846,10 +2836,6 @@
                     {
                       "name": "AZURE_COSMOSDB_ENABLE_FEEDBACK",
                       "value": "[parameters('AZURE_COSMOSDB_ENABLE_FEEDBACK')]"
-                    },
-                    {
-                      "name": "VITE_POWERBI_EMBED_URL",
-                      "value": "[parameters('VITE_POWERBI_EMBED_URL')]"
                     },
                     {
                       "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
