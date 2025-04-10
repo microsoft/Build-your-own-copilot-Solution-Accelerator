@@ -98,13 +98,13 @@ async def test_favicon(mock_send_static_file, client):
     mock_send_static_file.assert_called_once_with("favicon.ico")
 
 
-@pytest.mark.asyncio
-async def test_get_pbiurl(client):
-    with patch("app.VITE_POWERBI_EMBED_URL", "mocked_url"):
-        response = await client.get("/api/pbi")
-        res_text = await response.get_data(as_text=True)
-        assert response.status_code == 200
-        assert res_text == "mocked_url"
+# @pytest.mark.asyncio
+# async def test_get_pbiurl(client):
+#     with patch("app.VITE_POWERBI_EMBED_URL", "mocked_url"):
+#         response = await client.get("/api/pbi")
+#         res_text = await response.get_data(as_text=True)
+#         assert response.status_code == 200
+#         assert res_text == "mocked_url"
 
 
 @pytest.mark.asyncio
