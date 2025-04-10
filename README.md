@@ -1,75 +1,124 @@
+>Legal Notice: This is a pre-release and preview solution and therefore may not work correctly. Certain features may be missing or disabled. Microsoft may change or update this pre-release and preview solution at any time.
+
 # Build your own copilot Solution Accelerator
 
-MENU: [**USER STORY**](#user-story) \| [**SCENARIOS**](#scenarios)  \| [**SUPPORTING DOCUMENTS**](#supporting-documents) \|
+MENU: [**USER STORY**](#user-story) \| [**QUICK DEPLOY**](#quick-deploy)  \| [**SUPPORTING DOCUMENTS**](#supporting-documents) \|
 [**CUSTOMER TRUTH**](#customer-truth)
 
 
-<h2><img src="ClientAdvisor/Deployment/images/readMe/userStory.png" width="64">
+<h2><img src="Deployment/images/readMe/userStory.png" width="64">
 <br/>
 User story
 </h2>
 
 **Solution accelerator overview**
 
-This solution accelerator is a powerful tool that helps you create your own copilots. The accelerator can be used by any customer looking for reusable architecture and code snippets to build custom copilots with their own enterprise data. 
+This solution accelerator is a powerful tool that helps you create your own AI assistants. The accelerator can be used by any customer looking for reusable architecture and code snippets to build AI assistants with their own enterprise data. 
 
-It leverages Azure OpenAI Service, Azure AI Search and Microsoft Fabric, to create custom copilot solutions. 
+It leverages Azure OpenAI Service, Azure AI Search and Microsoft Fabric, to identify relevant documents, summarize and categorize vast amounts of unstructured information, and accelerate the overall document review and content generation process. 
 
-<h2>
-Scenarios
+**Scenario**
+
+This example focuses on a researcher who wants to explore leading flu vaccine studies and relevant grants to accelerate submission of a grant proposal. 
+
+The assistant helps the researchers find relevant articles and grants available for their research topic easily using a conversational assistant. Researcher can generate different sections of a grant application with a simple button click, then they can refine the prompts and regenerate individual sections to add more details as needed. Finally, the generated grant application can be exported as a PDF or a Microsoft Word document for further processing.
+
+The sample data is sourced from a select set of research published on [PubMed](https://pubmed.ncbi.nlm.nih.gov/), select [NIH](https://www.nih.gov/grants-funding) grant announcements and sample grant applications. The documents are intended for use as sample data only.
+
+<br/>
+
+**Key features**
+
+![Key Features](Deployment/images/readMe/keyfeatures.png)
+
+<br/>
+
+**Below is an image of the solution accelerator.**
+
+![Landing Page](Deployment/images/readMe/landing_page.png)
+
+
+<h2><img src="Deployment/images/readMe/quickDeploy.png" width="64">
+<br/>
+quick deploy
 </h2>
 
+### Prerequisites
 
-### [Client Advsior](ClientAdvisor/README.md)
+To use this solution accelerator, you will need access to an [Azure subscription](https://azure.microsoft.com/free/) with permission to create resource groups and resources. While not required, a prior understanding of Azure OpenAI, Azure AI Search and Microsoft Fabric will be helpful.
 
-This copilot helps client advisors to save time and prepare relevant discussion topics for scheduled meetings. It provides an overview of daily client meetings with seamless navigation between viewing client profiles and chatting with structured data. Altogether, these features streamline meeting preparation for the advisors and result in more productive conversations with clients.
+For additional training and support, please see:
 
-Please navigate to [Client Advisor](ClientAdvisor/README.md) to learn more about the solution and to deploy the solution to your Azure subscription. 
+1. [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
+2. [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
+3. [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/) 
+4. [Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-studio/) 
+
+### Solution accelerator architecture
+![image](Deployment/images/readMe/architecture.png)
 
 
-### [Research Assistant](ResearchAssistant/README.md)
-
-This copilot helps the researchers find relevant articles and grants available for their research topic easily using a conversational assistant. Researcher can generate different sections of a grant application with a simple button click, then they can refine the prompts and regenerate individual sections to add more details as needed. Finally, the generated grant application can be exported as a PDF or a Microsoft Word document for further processing.
-
-Please navigate to [Research Assistant](ResearchAssistant/README.md) to learn more about the solution and to deploy the solution to your Azure subscription. 
+ > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
 
 
-<h2><img src="ClientAdvisor/Deployment/images/readMe/supportingDocuments.png" width="64">
+### **How to install/deploy**
+
+1. Please check the link [Azure Products by Region](
+https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) and choose a region where Azure AI Search, Semantic Ranker, Azure OpenAI Service, and Azure AI Foundry are available. 
+
+2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
+
+   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fmain%2FResearchAssistant%2FDeployment%2Fbicep%2Fmain.json)
+
+3. You will need to select an Azure Subscription, create/select a Resource group, Region, and a unique Solution Prefix.
+
+   ![image](Deployment/images/readMe/armDeployment.png)
+
+4. When Deployment is complete, follow steps in [AI Foundry Deployment guide](./Deployment/AIFoundryDeployment.md) to configure the grant draft proposal endpoint.
+
+5. When AI Foundry deployment is complete, launch the application by navigating to your Azure resource group, choosing the app service resource, and clicking on the default domain. You should bookmark this URL to have quick access to your deployed application.
+
+The next steps are optional for additional learning. Not required to deploy the solution and run the Grant Writer Assistant.
+
+6. Optional - Follow steps in [Fabric Deployment guide](./Deployment/FabricDeployment.md) to set up the data processing pipelines in Fabric.
+
+7. Optional - Follow steps in [Promptflow Evaluation guide](./Deployment/PromptFlowEvaluation.md) to set up the evaluation flows.
+
+8. Optional - Follow steps in [Promptflow Safety Evaluation guide](./Deployment/PromptFlowSafetyEvaluation.md) to set up the safety evaluation flows.
+
+
+<br/>
+<br>
+<h2><img src="./Deployment/images/readMe/supportingDocuments.png" width="64">
 <br/>
 Supporting documents
 </h2>
 
 Supporting documents coming soon.
 
+
 <br>
-<h2><img src="ClientAdvisor/Deployment/images/readMe/customerTruth.png" width="64">
+<h2><img src="./Deployment/images/readMe/customerTruth.png" width="64">
 </br>
 Customer truth
 </h2>
 Customer stories coming soon.
+
+<br/>
+
 
 <h2>
 </br>
 Responsible AI Transparency FAQ 
 </h2>
 
-Please refer to [Transarency FAQ](./TRANSPARENCY_FAQ.md) for responsible AI transparency details of this solution accelerator.
+Please refer to [Transarency FAQ](../TRANSPARENCY_FAQ.md) for responsible AI transparency details of this solution accelerator.
 
 <br/>
 <br/>
 ---
 
 ## Disclaimers
-
-This release is an artificial intelligence (AI) system that generates text based on user input. The text generated by this system may include ungrounded content, meaning that it is not verified by any reliable source or based on any factual data. The data included in this release is synthetic, meaning that it is artificially created by the system and may contain factual errors or inconsistencies. Users of this release are responsible for determining the accuracy, validity, and suitability of any content generated by the system for their intended purposes. Users should not rely on the system output as a source of truth or as a substitute for human judgment or expertise. 
-
-This release only supports English language input and output. Users should not attempt to use the system with any other language or format. The system output may not be compatible with any translation tools or services, and may lose its meaning or coherence if translated. 
-
-This release does not reflect the opinions, views, or values of Microsoft Corporation or any of its affiliates, subsidiaries, or partners. The system output is solely based on the system's own logic and algorithms, and does not represent any endorsement, recommendation, or advice from Microsoft or any other entity. Microsoft disclaims any liability or responsibility for any damages, losses, or harms arising from the use of this release or its output by any user or third party. 
-
-This release does not provide any financial advice, and is not designed to replace the role of qualified client advisors in appropriately advising clients. Users should not use the system output for any financial decisions or transactions, and should consult with a professional financial advisor before taking any action based on the system output. Microsoft is not a financial institution or a fiduciary, and does not offer any financial products or services through this release or its output. 
-
-This release is intended as a proof of concept only, and is not a finished or polished product. It is not intended for commercial use or distribution, and is subject to change or discontinuation without notice. Any planned deployment of this release or its output should include comprehensive testing and evaluation to ensure it is fit for purpose and meets the user's requirements and expectations. Microsoft does not guarantee the quality, performance, reliability, or availability of this release or its output, and does not provide any warranty or support for it. 
 
 This Software requires the use of third-party components which are governed by separate proprietary or open-source licenses as identified below, and you must comply with the terms of each applicable license in order to use the Software. You acknowledge and agree that this license does not grant you a license or other right to use any such third-party proprietary or open-source components.  
 
@@ -82,5 +131,3 @@ You acknowledge that the Software and Microsoft Products and Services (1) are no
 You acknowledge the Software is not subject to SOC 1 and SOC 2 compliance audits. No Microsoft technology, nor any of its component technologies, including the Software, is intended or made available as a substitute for the professional advice, opinion, or judgement of a certified financial services professional. Do not use the Software to replace, substitute, or provide professional financial advice or judgment.  
 
 BY ACCESSING OR USING THE SOFTWARE, YOU ACKNOWLEDGE THAT THE SOFTWARE IS NOT DESIGNED OR INTENDED TO SUPPORT ANY USE IN WHICH A SERVICE INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE COULD RESULT IN THE DEATH OR SERIOUS BODILY INJURY OF ANY PERSON OR IN PHYSICAL OR ENVIRONMENTAL DAMAGE (COLLECTIVELY, “HIGH-RISK USE”), AND THAT YOU WILL ENSURE THAT, IN THE EVENT OF ANY INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE, THE SAFETY OF PEOPLE, PROPERTY, AND THE ENVIRONMENT ARE NOT REDUCED BELOW A LEVEL THAT IS REASONABLY, APPROPRIATE, AND LEGAL, WHETHER IN GENERAL OR IN A SPECIFIC INDUSTRY. BY ACCESSING THE SOFTWARE, YOU FURTHER ACKNOWLEDGE THAT YOUR HIGH-RISK USE OF THE SOFTWARE IS AT YOUR OWN RISK.  
-
-
