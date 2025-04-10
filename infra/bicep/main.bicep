@@ -21,7 +21,7 @@ var resourceGroupLocation = resourceGroup().location
 // var subscriptionId  = subscription().subscriptionId
 
 var solutionLocation = resourceGroupLocation
-var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/ClientAdvisor/'
+var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/'
 var appversion = 'latest'
 
 var functionAppSqlPrompt ='''Generate a valid T-SQL query to find {query} for tables and columns provided below:

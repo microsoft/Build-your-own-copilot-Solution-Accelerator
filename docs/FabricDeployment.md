@@ -16,7 +16,7 @@
       - ```az login``` 
       - ```rm -rf Build-your-own-copilot-Solution-Accelerator```
       - ```git clone https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator```
-      - ```cd ./Build-your-own-copilot-Solution-Accelerator/ClientAdvisor/Deployment/scripts/fabric_scripts```
+      - ```cd ./Build-your-own-copilot-Solution-Accelerator/src/infra/scripts/fabric_scripts```
       - ```sh ./run_fabric_items_scripts.sh keyvault_param workspaceid_param solutionprefix_param```  
          1. keyvault_param - the name of the keyvault that was created in Step 1
          2. workspaceid_param - the workspaceid created in Step 2

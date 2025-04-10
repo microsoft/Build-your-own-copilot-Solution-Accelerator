@@ -3,7 +3,7 @@ FROM node:20-alpine AS frontend
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
 WORKDIR /home/node/app 
-COPY ./ClientAdvisor/App/frontend/package*.json ./  
+COPY ./src/App/frontend/package*.json ./  
 USER node
 RUN npm ci
 COPY --chown=node:node ./src/App/frontend/ ./frontend  
