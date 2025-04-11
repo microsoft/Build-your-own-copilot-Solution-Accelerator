@@ -339,7 +339,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
             "If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts."
             "If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
         )
-
+    HOST_INSTRUCTIONS = HOST_INSTRUCTIONS.replace("{SelectedClientName}", selected_client_name)
     #Create the agent using the Semantic Kernel Assistant Agent
     kernel = Kernel()
     kernel.add_plugin(ChatWithDataPlugin(), plugin_name="ChatWithData")
