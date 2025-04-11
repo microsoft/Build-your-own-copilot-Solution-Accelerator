@@ -25,7 +25,7 @@ param deploymentType string = 'GlobalStandard'
 ])
 param gptModelName string = 'gpt-4o-mini'
 
-param azureOpenaiAPIVersion string = '2024-07-18'
+param azureOpenaiAPIVersion string = '2025-01-01-preview'
 
 @minValue(10)
 @description('Capacity of the GPT deployment:')
@@ -127,7 +127,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     keyVaultName: keyvaultModule.outputs.keyvaultName
     deploymentType: deploymentType
     gptModelName: gptModelName
-    gptModelVersion: azureOpenaiAPIVersion
+    azureOpenaiAPIVersion: azureOpenaiAPIVersion
     gptDeploymentCapacity: gptDeploymentCapacity
     embeddingModel: embeddingModel
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
@@ -315,6 +315,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     Appversion: appversion
     userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityWebAppOutput.id
+    applicationInsightsId: aifoundry.outputs.applicationInsightsId
   }
   scope: resourceGroup(resourceGroup().name)
 }

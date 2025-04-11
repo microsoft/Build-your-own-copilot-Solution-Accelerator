@@ -29,17 +29,17 @@ var azureOpenAIDeploymentModel = 'gpt-4o-mini'
 var azureOpenAIEmbeddingDeployment = 'text-embedding-ada-002'
 var valueOne = '1'
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
-  name: '${solutionName}fnstorage'
-  location: solutionLocation
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    allowSharedKeyAccess: false
-  }
-}
+// resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
+//   name: '${solutionName}fnstorage'
+//   location: solutionLocation
+//   sku: {
+//     name: 'Standard_LRS'
+//   }
+//   kind: 'StorageV2'
+//   properties: {
+//     allowSharedKeyAccess: false
+//   }
+// }
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: 'workspace-${solutionName}'
