@@ -3,7 +3,6 @@ import openai
 from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import os
 from typing import Annotated
-from dotenv import load_dotenv
 
 from semantic_kernel.agents.open_ai import AzureAssistantAgent
 from semantic_kernel.contents.chat_message_content import ChatMessageContent
@@ -19,7 +18,7 @@ import logging
 # Azure Function App setup
 # --------------------------
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
-load_dotenv()
+
 # Retrieve required environment variables
 endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
 api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
