@@ -2,12 +2,12 @@
 param solutionName string
 param solutionLocation string
 param keyVaultName string
-param deploymentType string
+param deploymentType string 
 param gptModelName string
 param gptModelVersion string
 param gptDeploymentCapacity int
 param embeddingModel string
-param embeddingDeploymentCapacity int
+param embeddingDeploymentCapacity int 
 param managedIdentityObjectId string
 
 var storageName = 'st${solutionName}hub'
@@ -17,7 +17,7 @@ var aiServicesName = 'ais-${solutionName}'
 // var location_m = solutionLocation
 var applicationInsightsName = 'appi-${solutionName}'
 var containerRegistryName = 'cr-${solutionName}'
-var keyvaultName = 'kv-${solutionName}'
+var keyvaultName = keyVaultName
 var location = solutionLocation //'eastus2'
 var aiHubName = 'hub-${solutionName}'
 var aiHubFriendlyName = aiHubName
