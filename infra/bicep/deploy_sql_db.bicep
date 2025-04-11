@@ -3,6 +3,7 @@
 @description('Solution Name')
 param solutionName string
 param solutionLocation string
+param keyVaultName string
 param managedIdentityObjectId string
 param managedIdentityName string
 
@@ -78,9 +79,42 @@ resource sqlDB 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
   }
 }
 
-output sqlDbOutput object = {
-  sqlServerName: '${serverName}.database.windows.net' 
-  sqlDbName: sqlDBName
-  sqlDbUser: administratorLogin
-  sqlDbPwd: administratorLoginPassword
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: keyVaultName
 }
+
+resource sqldbServerEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'SQLDB-SERVER'
+  properties: {
+    value: '${serverName}.database.windows.net'
+  }
+}
+
+resource sqldbDatabaseEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'SQLDB-DATABASE'
+  properties: {
+    value: sqlDBName
+  }
+}
+
+resource sqldbDatabaseUsername 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'SQLDB-USERNAME'
+  properties: {
+    value: administratorLogin
+  }
+}
+
+resource sqldbDatabasePwd 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'SQLDB-PASSWORD'
+  properties: {
+    value: administratorLoginPassword
+  }
+}
+
+output sqlServerName string = '${serverName}.database.windows.net'
+output sqlDbName string = sqlDBName
+output sqlDbUser string = administratorLogin

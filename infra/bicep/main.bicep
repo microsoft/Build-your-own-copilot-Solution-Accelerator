@@ -9,6 +9,43 @@ param solutionPrefix string
 @description('CosmosDB Location')
 param cosmosLocation string
 
+@minLength(1)
+@description('GPT model deployment type:')
+@allowed([
+  'Standard'
+  'GlobalStandard'
+])
+param deploymentType string = 'GlobalStandard'
+
+@minLength(1)
+@description('Name of the GPT model to deploy:')
+@allowed([
+  'gpt-4o-mini'
+  'gpt-4o'
+  'gpt-4'
+])
+param gptModelName string = 'gpt-4o-mini'
+
+param azureOpenaiAPIVersion string = '2025-01-01-preview'
+
+@minValue(10)
+@description('Capacity of the GPT deployment:')
+// You can increase this, but capacity is limited per model/region, so you will get errors if you go over
+// https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits
+param gptDeploymentCapacity int = 30
+
+@minLength(1)
+@description('Name of the Text Embedding model to deploy:')
+@allowed([
+  'text-embedding-ada-002'
+])
+param embeddingModel string = 'text-embedding-ada-002'
+
+
+@minValue(10)
+@description('Capacity of the Embedding Model deployment')
+param embeddingDeploymentCapacity int = 80
+
 // @description('Fabric Workspace Id if you have one, else leave it empty. ')
 // param fabricWorkspaceId string
 
@@ -16,6 +53,9 @@ param cosmosLocation string
 // @allowed(['eastus', 'eastus2', 'westus', 'westus3', 'swedencentral'])
 // @description('Azure OpenAI Location')
 // param AzureOpenAILocation string
+
+var ApplicationInsightsName = 'appi-${solutionPrefix}'
+var WorkspaceName = 'log-${solutionPrefix}'
 
 var resourceGroupLocation = resourceGroup().location
 // var subscriptionId  = subscription().subscriptionId
@@ -70,6 +110,36 @@ module managedIdentityModule 'deploy_managed_identity.bicep' = {
   scope: resourceGroup(resourceGroup().name)
 }
 
+// ========== Key Vault ========== //
+module keyvaultModule 'deploy_keyvault.bicep' = {
+  name: 'deploy_keyvault'
+  params: {
+    solutionName: solutionPrefix
+    solutionLocation: solutionLocation
+    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+    adlsAccountName:storageAccountModule.outputs.storageAccountOutput.storageAccountName
+  }
+  scope: resourceGroup(resourceGroup().name)
+}
+
+// ==========AI Foundry and related resources ========== //
+module aifoundry 'deploy_ai_foundry.bicep' = {
+  name: 'deploy_ai_foundry'
+  params: {
+    solutionName: solutionPrefix
+    solutionLocation: resourceGroupLocation
+    keyVaultName: keyvaultModule.outputs.keyvaultName
+    deploymentType: deploymentType
+    gptModelName: gptModelName
+    azureOpenaiAPIVersion: azureOpenaiAPIVersion
+    gptDeploymentCapacity: gptDeploymentCapacity
+    embeddingModel: embeddingModel
+    embeddingDeploymentCapacity: embeddingDeploymentCapacity
+    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+  }
+  scope: resourceGroup(resourceGroup().name)
+}
+
 module cosmosDBModule 'core/database/cosmos/deploy_cosmos_db.bicep' = {
   name: 'deploy_cosmos_db'
   params: {
@@ -97,37 +167,17 @@ module sqlDBModule 'deploy_sql_db.bicep' = {
   params: {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
+    keyVaultName:keyvaultModule.outputs.keyvaultName
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
     managedIdentityName:managedIdentityModule.outputs.managedIdentityOutput.name
   }
   scope: resourceGroup(resourceGroup().name)
 }
 
-// ========== Azure AI services multi-service account ========== //
-module azAIMultiServiceAccount 'deploy_azure_ai_service.bicep' = {
-  name: 'deploy_azure_ai_service'
-  params: {
-    solutionName: solutionPrefix
-    solutionLocation: solutionLocation
-  }
-} 
-
-// ========== Search service ========== //
-module azSearchService 'deploy_ai_search_service.bicep' = {
-  name: 'deploy_ai_search_service'
-  params: {
-    solutionName: solutionPrefix
-    solutionLocation: solutionLocation
-  }
-} 
-
-// ========== Azure OpenAI ========== //
-module azOpenAI 'deploy_azure_open_ai.bicep' = {
-  name: 'deploy_azure_open_ai'
-  params: {
-    solutionName: solutionPrefix
-    solutionLocation: resourceGroupLocation
-  }
+//========== Updates to Key Vault ========== //
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: aifoundry.outputs.keyvaultName
+  scope: resourceGroup(resourceGroup().name)
 }
 
 //========== Deployment script to upload sample data ========== //
@@ -141,10 +191,10 @@ module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
     containerName: storageAccountModule.outputs.storageAccountOutput.dataContainer
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.id
     managedIdentityClientId:managedIdentityModule.outputs.managedIdentityOutput.clientId
-    keyVaultName:keyvaultModule.outputs.keyvaultOutput.name
-    logAnalyticsWorkspaceResourceName: azureFunctions.outputs.logAnalyticsWorkspaceName
-    sqlServerName: sqlDBModule.outputs.sqlDbOutput.sqlServerName
-    sqlDbName: sqlDBModule.outputs.sqlDbOutput.sqlDbName
+    keyVaultName:aifoundry.outputs.keyvaultName
+    logAnalyticsWorkspaceResourceName: aifoundry.outputs.logAnalyticsWorkspaceResourceName
+    sqlServerName: sqlDBModule.outputs.sqlServerName
+    sqlDbName: sqlDBModule.outputs.sqlDbName
     sqlUsers: [
       {
         principalId: managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId  // Replace with actual Principal ID
@@ -160,29 +210,55 @@ module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
   }
 }
 
+resource Workspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = {
+  name: WorkspaceName
+  location: resourceGroup().location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+  }
+}
+
+resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: ApplicationInsightsName
+  location: resourceGroup().location
+  tags: {
+    'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
+  }
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: Workspace.id
+  }
+  kind: 'web'
+}
+
 module azureFunctions 'deploy_azure_function.bicep' = {
   name : 'deploy_azure_function'
   params:{
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
-    azureOpenAIApiKey:azOpenAI.outputs.openAIOutput.openAPIKey
-    azureOpenAIApiVersion:'2024-02-15-preview'
-    azureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
-    azureSearchAdminKey:azSearchService.outputs.searchServiceOutput.searchServiceAdminKey
-    azureSearchServiceEndpoint:azSearchService.outputs.searchServiceOutput.searchServiceEndpoint
+    azureOpenAIApiKey:keyVault.getSecret('AZURE-OPENAI-KEY')
+    azureOpenAIApiVersion:azureOpenaiAPIVersion
+    azureOpenAIEndpoint:aifoundry.outputs.aiServicesTarget
+    azureSearchAdminKey:keyVault.getSecret('AZURE-SEARCH-KEY')
+    azureSearchServiceEndpoint:aifoundry.outputs.aiSearchTarget
     azureSearchIndex:'transcripts_index'
-    sqlServerName:sqlDBModule.outputs.sqlDbOutput.sqlServerName
-    sqlDbName:sqlDBModule.outputs.sqlDbOutput.sqlDbName
-    sqlDbUser:sqlDBModule.outputs.sqlDbOutput.sqlDbUser
-    sqlDbPwd:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
+    sqlServerName:sqlDBModule.outputs.sqlServerName
+    sqlDbName:sqlDBModule.outputs.sqlDbName
+    sqlDbUser:sqlDBModule.outputs.sqlDbUser
+    sqlDbPwd:keyVault.getSecret('SQLDB-PASSWORD')
     functionAppVersion: appversion  
     sqlSystemPrompt: functionAppSqlPrompt
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
     userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId
     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityFnAppOutput.id
+    applicationInsightsId: aifoundry.outputs.applicationInsightsId
+    storageAccountName:aifoundry.outputs.storageAccountName
   }
-  dependsOn:[storageAccountModule]
+  dependsOn:[keyVault]
 }
 
 module azureFunctionURL 'deploy_azure_function_script_url.bicep' = {
@@ -194,37 +270,6 @@ module azureFunctionURL 'deploy_azure_function_script_url.bicep' = {
   dependsOn:[azureFunctions]
 }
 
-
-// ========== Key Vault ========== //
-
-module keyvaultModule 'deploy_keyvault.bicep' = {
-  name: 'deploy_keyvault'
-  params: {
-    solutionName: solutionPrefix
-    solutionLocation: solutionLocation
-    objectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
-    tenantId: subscription().tenantId
-    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
-    adlsAccountName:storageAccountModule.outputs.storageAccountOutput.storageAccountName
-    azureOpenAIApiKey:azOpenAI.outputs.openAIOutput.openAPIKey
-    azureOpenAIApiVersion:'2024-02-15-preview'
-    azureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
-    azureSearchAdminKey:azSearchService.outputs.searchServiceOutput.searchServiceAdminKey
-    azureSearchServiceEndpoint:azSearchService.outputs.searchServiceOutput.searchServiceEndpoint
-    azureSearchServiceName:azSearchService.outputs.searchServiceOutput.searchServiceName
-    azureSearchIndex:'transcripts_index'
-    cogServiceEndpoint:azAIMultiServiceAccount.outputs.cogSearchOutput.cogServiceEndpoint
-    cogServiceName:azAIMultiServiceAccount.outputs.cogSearchOutput.cogServiceName
-    cogServiceKey:azAIMultiServiceAccount.outputs.cogSearchOutput.cogServiceKey
-    sqlServerName:sqlDBModule.outputs.sqlDbOutput.sqlServerName
-    sqlDbName:sqlDBModule.outputs.sqlDbOutput.sqlDbName
-    sqlDbUser:sqlDBModule.outputs.sqlDbOutput.sqlDbUser
-    sqlDbPwd:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
-    enableSoftDelete:false
-  }
-  scope: resourceGroup(resourceGroup().name)
-  dependsOn:[storageAccountModule,azOpenAI,azSearchService,sqlDBModule]
-}
 
 // module createIndex 'deploy_index_scripts.bicep' = {
 //   name : 'deploy_index_scripts'
@@ -256,9 +301,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
   name: 'deploy_app_service'
   params: {
     solutionName: solutionPrefix
-    AzureSearchService:azSearchService.outputs.searchServiceOutput.searchServiceName
+    AzureSearchService:aifoundry.outputs.aiSearchService
     AzureSearchIndex:'transcripts_index'
-    AzureSearchKey:azSearchService.outputs.searchServiceOutput.searchServiceAdminKey
+    AzureSearchKey:keyVault.getSecret('AZURE-SEARCH-KEY')
     AzureSearchUseSemanticSearch:'True'
     AzureSearchSemanticSearchConfig:'my-semantic-config'
     AzureSearchIndexIsPrechunked:'False'
@@ -267,31 +312,31 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchFilenameColumn:'chunk_id'
     AzureSearchTitleColumn:'client_id'
     AzureSearchUrlColumn:'sourceurl'
-    AzureOpenAIResource:azOpenAI.outputs.openAIOutput.openAPIEndpoint
-    AzureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
-    AzureOpenAIModel:'gpt-4o-mini'
-    AzureOpenAIKey:azOpenAI.outputs.openAIOutput.openAPIKey
-    AzureOpenAIModelName:'gpt-4o-mini'
+    AzureOpenAIResource:aifoundry.outputs.aiServicesTarget
+    AzureOpenAIEndpoint:aifoundry.outputs.aiServicesTarget
+    AzureOpenAIModel:gptModelName
+    AzureOpenAIKey:keyVault.getSecret('AZURE-OPENAI-KEY')
+    AzureOpenAIModelName:gptModelName
     AzureOpenAITemperature:'0'
     AzureOpenAITopP:'1'
     AzureOpenAIMaxTokens:'1000'
     AzureOpenAIStopSequence:''
     AzureOpenAISystemMessage:'''You are a helpful Wealth Advisor assistant''' 
-    AzureOpenAIApiVersion:'2024-02-15-preview'
+    AzureOpenAIApiVersion:azureOpenaiAPIVersion
     AzureOpenAIStream:'True'
     AzureSearchQueryType:'simple'
     AzureSearchVectorFields:'contentVector'
     AzureSearchPermittedGroupsField:''
     AzureSearchStrictness:'3'
-    AzureOpenAIEmbeddingName:'text-embedding-ada-002'
-    AzureOpenAIEmbeddingkey:azOpenAI.outputs.openAIOutput.openAPIKey
-    AzureOpenAIEmbeddingEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
+    AzureOpenAIEmbeddingName:embeddingModel
+    AzureOpenAIEmbeddingkey:keyVault.getSecret('AZURE-OPENAI-KEY')
+    AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aiServicesTarget
     USE_AZUREFUNCTION:'True'
     STREAMING_AZUREFUNCTION_ENDPOINT: azureFunctionURL.outputs.functionAppUrl
-    SQLDB_SERVER:sqlDBModule.outputs.sqlDbOutput.sqlServerName
-    SQLDB_DATABASE:sqlDBModule.outputs.sqlDbOutput.sqlDbName
-    SQLDB_USERNAME:sqlDBModule.outputs.sqlDbOutput.sqlDbUser
-    SQLDB_PASSWORD:sqlDBModule.outputs.sqlDbOutput.sqlDbPwd
+    SQLDB_SERVER:sqlDBModule.outputs.sqlServerName
+    SQLDB_DATABASE:sqlDBModule.outputs.sqlDbName
+    SQLDB_USERNAME:sqlDBModule.outputs.sqlDbUser
+    SQLDB_PASSWORD:keyVault.getSecret('SQLDB-PASSWORD')
     AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosOutput.cosmosAccountName
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosOutput.cosmosContainerName
     AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosOutput.cosmosDatabaseName
@@ -300,7 +345,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     Appversion: appversion
     userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityWebAppOutput.id
+    applicationInsightsId: aifoundry.outputs.applicationInsightsId
   }
   scope: resourceGroup(resourceGroup().name)
-  dependsOn:[azOpenAI,azAIMultiServiceAccount,azSearchService,sqlDBModule,azureFunctionURL,cosmosDBModule]
 }

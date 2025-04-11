@@ -15,13 +15,13 @@ param HostingPlanName string = '${ solutionName }-app-service-plan'
 )
 // param HostingPlanSku string = 'B1'
 
-param HostingPlanSku string = 'P0v3'
+param HostingPlanSku string = 'B2'
 
 @description('Name of Web App')
 param WebsiteName string = '${ solutionName }-app-service'
 
-@description('Name of Application Insights')
-param ApplicationInsightsName string = '${ solutionName }-app-insights'
+// @description('Name of Application Insights')
+// param ApplicationInsightsName string = '${ solutionName }-app-insights'
 
 @description('Name of Azure Search Service')
 param AzureSearchService string = ''
@@ -117,6 +117,7 @@ param AzureSearchStrictness string = '3'
 param AzureOpenAIEmbeddingName string = ''
 
 @description('Azure Open AI Embedding Key')
+@secure()
 param AzureOpenAIEmbeddingkey string = ''
 
 @description('Azure Open AI Embedding Endpoint')
@@ -147,9 +148,9 @@ param SQLDB_PASSWORD string = ''
 @description('Azure Cosmos DB Account')
 param AZURE_COSMOSDB_ACCOUNT string = ''
 
-@description('Azure Cosmos DB Account Key')
-@secure()
-param AZURE_COSMOSDB_ACCOUNT_KEY string = ''
+// @description('Azure Cosmos DB Account Key')
+// @secure()
+// param AZURE_COSMOSDB_ACCOUNT_KEY string = ''
 
 @description('Azure Cosmos DB Conversations Container')
 param AZURE_COSMOSDB_CONVERSATIONS_CONTAINER string = ''
@@ -167,6 +168,7 @@ param Appversion string
 
 param userassignedIdentityId string
 param userassignedIdentityClientId string
+param applicationInsightsId string
 
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
@@ -202,7 +204,7 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
       appSettings: [
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: reference(ApplicationInsights.id, '2015-05-01').InstrumentationKey
+          value: reference(applicationInsightsId, '2015-05-01').InstrumentationKey
         }
         {
           name: 'AZURE_SEARCH_SERVICE'
@@ -398,17 +400,17 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
   dependsOn: [HostingPlan]
 }
 
-resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: ApplicationInsightsName
-  location: resourceGroup().location
-  tags: {
-    'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
-  }
-  properties: {
-    Application_Type: 'web'
-  }
-  kind: 'web'
-}
+// resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+//   name: ApplicationInsightsName
+//   location: resourceGroup().location
+//   tags: {
+//     'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
+//   }
+//   properties: {
+//     Application_Type: 'web'
+//   }
+//   kind: 'web'
+// }
 
 resource contributorRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2024-05-15' existing = {
   name: '${AZURE_COSMOSDB_ACCOUNT}/00000000-0000-0000-0000-000000000002'
