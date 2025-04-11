@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "12548659740706579060"
+      "templateHash": "10427343899742596691"
     }
   },
   "parameters": {
@@ -40,6 +40,7 @@
       "defaultValue": "gpt-4o-mini",
       "allowedValues": [
         "gpt-4o-mini",
+        "gpt-4o",
         "gpt-4"
       ],
       "minLength": 1,
@@ -49,7 +50,7 @@
     },
     "azureOpenaiAPIVersion": {
       "type": "string",
-      "defaultValue": "2024-07-18"
+      "defaultValue": "2025-01-01-preview"
     },
     "gptDeploymentCapacity": {
       "type": "int",
@@ -80,6 +81,8 @@
     }
   },
   "variables": {
+    "ApplicationInsightsName": "[format('appi-{0}', parameters('solutionPrefix'))]",
+    "WorkspaceName": "[format('log-{0}', parameters('solutionPrefix'))]",
     "resourceGroupLocation": "[resourceGroup().location]",
     "solutionLocation": "[variables('resourceGroupLocation')]",
     "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/",
@@ -89,6 +92,35 @@
     "functionAppStreamTextSystemPrompt": "You are a helpful assistant to a Wealth Advisor. \r\n  The currently selected client's name is '{SelectedClientName}' (in any variation: ignoring punctuation, apostrophes, and case). \r\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'. \r\n  If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts. \r\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
   },
   "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2020-08-01",
+      "name": "[variables('WorkspaceName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('ApplicationInsightsName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "[format('hidden-link:{0}', resourceId('Microsoft.Web/sites', variables('ApplicationInsightsName')))]": "Resource"
+      },
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('WorkspaceName'))]"
+      },
+      "kind": "web",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('WorkspaceName'))]"
+      ]
+    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
@@ -248,7 +280,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "7911888935615052193"
+              "templateHash": "8870150496667867009"
             }
           },
           "parameters": {
@@ -314,7 +346,7 @@
             },
             "softDeleteRetentionInDays": {
               "type": "int",
-              "defaultValue": 30,
+              "defaultValue": 7,
               "metadata": {
                 "description": "Soft Delete Retention in Days. softDelete data retention days. It accepts >=7 and <=90."
               }
@@ -463,7 +495,7 @@
           "gptModelName": {
             "value": "[parameters('gptModelName')]"
           },
-          "gptModelVersion": {
+          "azureOpenaiAPIVersion": {
             "value": "[parameters('azureOpenaiAPIVersion')]"
           },
           "gptDeploymentCapacity": {
@@ -486,7 +518,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "210118639384183744"
+              "templateHash": "15153358914908906093"
             }
           },
           "parameters": {
@@ -505,7 +537,7 @@
             "gptModelName": {
               "type": "string"
             },
-            "gptModelVersion": {
+            "azureOpenaiAPIVersion": {
               "type": "string"
             },
             "gptDeploymentCapacity": {
@@ -871,7 +903,7 @@
               "apiVersion": "2021-11-01-preview",
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'AZURE-OPENAI-PREVIEW-API-VERSION')]",
               "properties": {
-                "value": "[parameters('gptModelVersion')]"
+                "value": "[parameters('azureOpenaiAPIVersion')]"
               }
             },
             {
@@ -1657,7 +1689,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "15270810356586719318"
+              "templateHash": "11357772246268975763"
             }
           },
           "parameters": {
@@ -1894,6 +1926,12 @@
           },
           "userassignedIdentityId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.id]"
+          },
+          "applicationInsightsId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.applicationInsightsId.value]"
+          },
+          "storageAccountName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.storageAccountName.value]"
           }
         },
         "template": {
@@ -1903,7 +1941,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "1972964117122513299"
+              "templateHash": "4263315486701048820"
             }
           },
           "parameters": {
@@ -1972,6 +2010,12 @@
             },
             "userassignedIdentityClientId": {
               "type": "string"
+            },
+            "storageAccountName": {
+              "type": "string"
+            },
+            "applicationInsightsId": {
+              "type": "string"
             }
           },
           "variables": {
@@ -1982,41 +2026,6 @@
           },
           "resources": [
             {
-              "type": "Microsoft.Storage/storageAccounts",
-              "apiVersion": "2021-04-01",
-              "name": "[format('{0}fnstorage', parameters('solutionName'))]",
-              "location": "[parameters('solutionLocation')]",
-              "sku": {
-                "name": "Standard_LRS"
-              },
-              "kind": "StorageV2",
-              "properties": {
-                "allowSharedKeyAccess": false
-              }
-            },
-            {
-              "type": "Microsoft.OperationalInsights/workspaces",
-              "apiVersion": "2022-10-01",
-              "name": "[format('workspace-{0}', parameters('solutionName'))]",
-              "location": "[parameters('solutionLocation')]"
-            },
-            {
-              "type": "Microsoft.Insights/components",
-              "apiVersion": "2020-02-02",
-              "name": "[variables('functionAppName')]",
-              "location": "[parameters('solutionLocation')]",
-              "kind": "web",
-              "properties": {
-                "Application_Type": "web",
-                "publicNetworkAccessForIngestion": "Enabled",
-                "publicNetworkAccessForQuery": "Enabled",
-                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName')))]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName')))]"
-              ]
-            },
-            {
               "type": "Microsoft.App/managedEnvironments",
               "apiVersion": "2022-06-01-preview",
               "name": "[format('{0}env', parameters('solutionName'))]",
@@ -2024,18 +2033,7 @@
               "sku": {
                 "name": "Consumption"
               },
-              "properties": {
-                "appLogsConfiguration": {
-                  "destination": "log-analytics",
-                  "logAnalyticsConfiguration": {
-                    "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName'))), '2022-10-01').customerId]",
-                    "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName'))), '2022-10-01').primarySharedKey]"
-                  }
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', format('workspace-{0}', parameters('solutionName')))]"
-              ]
+              "properties": {}
             },
             {
               "type": "Microsoft.Web/sites",
@@ -2055,8 +2053,12 @@
                   "linuxFxVersion": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-fn:{0}', parameters('functionAppVersion'))]",
                   "appSettings": [
                     {
+                      "name": "AzureWebJobsStorage__accountname",
+                      "value": "[parameters('storageAccountName')]"
+                    },
+                    {
                       "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                      "value": "[reference(resourceId('Microsoft.Insights/components', variables('functionAppName')), '2015-05-01').InstrumentationKey]"
+                      "value": "[reference(parameters('applicationInsightsId'), '2015-05-01').InstrumentationKey]"
                     },
                     {
                       "name": "AZURE_OPEN_AI_API_KEY",
@@ -2138,17 +2140,10 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Insights/components', variables('functionAppName'))]",
                 "[resourceId('Microsoft.App/managedEnvironments', format('{0}env', parameters('solutionName')))]"
               ]
             }
-          ],
-          "outputs": {
-            "logAnalyticsWorkspaceName": {
-              "type": "string",
-              "value": "[format('workspace-{0}', parameters('solutionName'))]"
-            }
-          }
+          ]
         }
       },
       "dependsOn": [
@@ -2375,6 +2370,9 @@
           },
           "userassignedIdentityId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.id]"
+          },
+          "applicationInsightsId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.applicationInsightsId.value]"
           }
         },
         "template": {
@@ -2384,7 +2382,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "14076324696332295334"
+              "templateHash": "1619077604515279084"
             }
           },
           "parameters": {
@@ -2405,7 +2403,7 @@
             },
             "HostingPlanSku": {
               "type": "string",
-              "defaultValue": "P0v3",
+              "defaultValue": "B2",
               "allowedValues": [
                 "F1",
                 "D1",
@@ -2430,13 +2428,6 @@
               "defaultValue": "[format('{0}-app-service', parameters('solutionName'))]",
               "metadata": {
                 "description": "Name of Web App"
-              }
-            },
-            "ApplicationInsightsName": {
-              "type": "string",
-              "defaultValue": "[format('{0}-app-insights', parameters('solutionName'))]",
-              "metadata": {
-                "description": "Name of Application Insights"
               }
             },
             "AzureSearchService": {
@@ -2723,13 +2714,6 @@
                 "description": "Azure Cosmos DB Account"
               }
             },
-            "AZURE_COSMOSDB_ACCOUNT_KEY": {
-              "type": "securestring",
-              "defaultValue": "",
-              "metadata": {
-                "description": "Azure Cosmos DB Account Key"
-              }
-            },
             "AZURE_COSMOSDB_CONVERSATIONS_CONTAINER": {
               "type": "string",
               "defaultValue": "",
@@ -2758,6 +2742,9 @@
               "type": "string"
             },
             "userassignedIdentityClientId": {
+              "type": "string"
+            },
+            "applicationInsightsId": {
               "type": "string"
             }
           },
@@ -2796,7 +2783,7 @@
                   "appSettings": [
                     {
                       "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                      "value": "[reference(resourceId('Microsoft.Insights/components', parameters('ApplicationInsightsName')), '2015-05-01').InstrumentationKey]"
+                      "value": "[reference(parameters('applicationInsightsId'), '2015-05-01').InstrumentationKey]"
                     },
                     {
                       "name": "AZURE_SEARCH_SERVICE",
@@ -2987,22 +2974,8 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Insights/components', parameters('ApplicationInsightsName'))]",
                 "[resourceId('Microsoft.Web/serverfarms', parameters('HostingPlanName'))]"
               ]
-            },
-            {
-              "type": "Microsoft.Insights/components",
-              "apiVersion": "2020-02-02",
-              "name": "[parameters('ApplicationInsightsName')]",
-              "location": "[resourceGroup().location]",
-              "tags": {
-                "[format('hidden-link:{0}', resourceId('Microsoft.Web/sites', parameters('ApplicationInsightsName')))]": "Resource"
-              },
-              "properties": {
-                "Application_Type": "web"
-              },
-              "kind": "web"
             },
             {
               "type": "Microsoft.Resources/deployments",

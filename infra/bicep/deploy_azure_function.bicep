@@ -23,6 +23,8 @@ param callTranscriptSystemPrompt string
 param streamTextSystemPrompt string
 param userassignedIdentityId string
 param userassignedIdentityClientId string
+param storageAccountName string
+param applicationInsightsId string
 
 var functionAppName = '${solutionName}fn'
 var azureOpenAIDeploymentModel = 'gpt-4o-mini'
@@ -41,22 +43,22 @@ var valueOne = '1'
 //   }
 // }
 
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
-  name: 'workspace-${solutionName}'
-  location: solutionLocation
-}
+// resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+//   name: 'workspace-${solutionName}'
+//   location: solutionLocation
+// }
 
-resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: functionAppName
-  location: solutionLocation
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
-    WorkspaceResourceId: logAnalyticsWorkspace.id
-  }
-}
+// resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+//   name: functionAppName
+//   location: solutionLocation
+//   kind: 'web'
+//   properties: {
+//     Application_Type: 'web'
+//     publicNetworkAccessForIngestion: 'Enabled'
+//     publicNetworkAccessForQuery: 'Enabled'
+//     WorkspaceResourceId: logAnalyticsWorkspace.id
+//   }
+// }
 
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2022-06-01-preview' = {
   name: '${solutionName}env'
@@ -65,13 +67,13 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2022-06-01-preview' 
     name: 'Consumption'
   }
   properties: {
-    appLogsConfiguration: {
-      destination: 'log-analytics'
-      logAnalyticsConfiguration: {
-        customerId: logAnalyticsWorkspace.properties.customerId
-        sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
-      }
-    }
+    // appLogsConfiguration: {
+    //   destination: 'log-analytics'
+    //   logAnalyticsConfiguration: {
+    //     customerId: logAnalyticsWorkspace.properties.customerId
+    //     sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
+    //   }
+    // }
   }
 }
 
@@ -91,8 +93,12 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
       linuxFxVersion: 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-fn:${functionAppVersion}'
       appSettings: [
         {
+          name: 'AzureWebJobsStorage__accountname'
+          value: storageAccountName
+        }
+        {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: reference(ApplicationInsights.id, '2015-05-01').InstrumentationKey
+          value: reference(applicationInsightsId, '2015-05-01').InstrumentationKey
         }
         {
           name: 'AZURE_OPEN_AI_API_KEY'
@@ -174,5 +180,3 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
     }
   }
 }
-
-output logAnalyticsWorkspaceName string = logAnalyticsWorkspace.name

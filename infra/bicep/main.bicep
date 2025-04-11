@@ -21,6 +21,7 @@ param deploymentType string = 'GlobalStandard'
 @description('Name of the GPT model to deploy:')
 @allowed([
   'gpt-4o-mini'
+  'gpt-4o'
   'gpt-4'
 ])
 param gptModelName string = 'gpt-4o-mini'
@@ -52,6 +53,9 @@ param embeddingDeploymentCapacity int = 80
 // @allowed(['eastus', 'eastus2', 'westus', 'westus3', 'swedencentral'])
 // @description('Azure OpenAI Location')
 // param AzureOpenAILocation string
+
+var ApplicationInsightsName = 'appi-${solutionPrefix}'
+var WorkspaceName = 'log-${solutionPrefix}'
 
 var resourceGroupLocation = resourceGroup().location
 // var subscriptionId  = subscription().subscriptionId
@@ -206,6 +210,30 @@ module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
   }
 }
 
+resource Workspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = {
+  name: WorkspaceName
+  location: resourceGroup().location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+  }
+}
+
+resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: ApplicationInsightsName
+  location: resourceGroup().location
+  tags: {
+    'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
+  }
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: Workspace.id
+  }
+  kind: 'web'
+}
+
 module azureFunctions 'deploy_azure_function.bicep' = {
   name : 'deploy_azure_function'
   params:{
@@ -227,6 +255,8 @@ module azureFunctions 'deploy_azure_function.bicep' = {
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
     userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId
     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityFnAppOutput.id
+    applicationInsightsId: aifoundry.outputs.applicationInsightsId
+    storageAccountName:aifoundry.outputs.storageAccountName
   }
   dependsOn:[keyVault]
 }

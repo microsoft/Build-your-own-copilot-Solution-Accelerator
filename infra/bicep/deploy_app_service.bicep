@@ -15,13 +15,13 @@ param HostingPlanName string = '${ solutionName }-app-service-plan'
 )
 // param HostingPlanSku string = 'B1'
 
-param HostingPlanSku string = 'B1'
+param HostingPlanSku string = 'B2'
 
 @description('Name of Web App')
 param WebsiteName string = '${ solutionName }-app-service'
 
-@description('Name of Application Insights')
-param ApplicationInsightsName string = '${ solutionName }-app-insights'
+// @description('Name of Application Insights')
+// param ApplicationInsightsName string = '${ solutionName }-app-insights'
 
 @description('Name of Azure Search Service')
 param AzureSearchService string = ''

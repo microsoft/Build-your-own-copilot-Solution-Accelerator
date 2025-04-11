@@ -30,7 +30,7 @@ param enableForTemplateDeployment bool = true
 param enableRBACAuthorization bool = true
 
 @description('Soft Delete Retention in Days. softDelete data retention days. It accepts >=7 and <=90.')
-param softDeleteRetentionInDays int = 30
+param softDeleteRetentionInDays int = 7
 
 @description('Public Network Access, Property to specify whether the vault will accept traffic from public internet.')
 @allowed([

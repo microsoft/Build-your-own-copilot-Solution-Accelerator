@@ -225,7 +225,7 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
         }
       }
     }
-    isHnsEnabled: true
+    isHnsEnabled: false
     isNfsV3Enabled: false
     keyPolicy: {
       keyExpirationPeriodInDays: 7
