@@ -3,6 +3,7 @@ import openai
 from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import os
 from typing import Annotated
+from dotenv import load_dotenv
 
 from semantic_kernel.agents.open_ai import AzureAssistantAgent
 from semantic_kernel.contents.chat_message_content import ChatMessageContent
@@ -18,7 +19,7 @@ import logging
 # Azure Function App setup
 # --------------------------
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
-
+load_dotenv()
 # Retrieve required environment variables
 endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
 api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
@@ -339,7 +340,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
             "If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts."
             "If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
         )
-
+    HOST_INSTRUCTIONS = HOST_INSTRUCTIONS.replace("{SelectedClientName}", selected_client_name)
     #Create the agent using the Semantic Kernel Assistant Agent
     kernel = Kernel()
     kernel.add_plugin(ChatWithDataPlugin(), plugin_name="ChatWithData")
