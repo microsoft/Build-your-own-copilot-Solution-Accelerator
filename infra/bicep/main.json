@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.32.4.45862",
-      "templateHash": "10427343899742596691"
+      "version": "0.34.44.8038",
+      "templateHash": "4469896728404746358"
     }
   },
   "parameters": {
@@ -145,8 +145,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "15881215835798073178"
+              "version": "0.34.44.8038",
+              "templateHash": "4201070185547993881"
             }
           },
           "parameters": {
@@ -279,8 +279,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "8870150496667867009"
+              "version": "0.34.44.8038",
+              "templateHash": "6222524942316554709"
             }
           },
           "parameters": {
@@ -517,8 +517,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "15153358914908906093"
+              "version": "0.34.44.8038",
+              "templateHash": "17996005771372242301"
             }
           },
           "parameters": {
@@ -1109,8 +1109,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "12718237112242025023"
+              "version": "0.34.44.8038",
+              "templateHash": "4003838080878788531"
             }
           },
           "parameters": {
@@ -1167,7 +1167,7 @@
           "resources": [
             {
               "copy": {
-                "name": "list",
+                "name": "database::list",
                 "count": "[length(parameters('containers'))]"
               },
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
@@ -1272,8 +1272,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "13214455762521164459"
+              "version": "0.34.44.8038",
+              "templateHash": "11698875401555850644"
             }
           },
           "parameters": {
@@ -1437,8 +1437,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "15411576456908390381"
+              "version": "0.34.44.8038",
+              "templateHash": "14804642426325957238"
             }
           },
           "parameters": {
@@ -1688,8 +1688,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11357772246268975763"
+              "version": "0.34.44.8038",
+              "templateHash": "1035304206493927023"
             }
           },
           "parameters": {
@@ -1940,8 +1940,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "4263315486701048820"
+              "version": "0.34.44.8038",
+              "templateHash": "10145274868556510486"
             }
           },
           "parameters": {
@@ -2175,8 +2175,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11501780755841251697"
+              "version": "0.34.44.8038",
+              "templateHash": "12214749843316064247"
             }
           },
           "parameters": {
@@ -2381,8 +2381,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "1619077604515279084"
+              "version": "0.34.44.8038",
+              "templateHash": "12602038934270166131"
             }
           },
           "parameters": {
@@ -3003,8 +3003,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.32.4.45862",
-                      "templateHash": "2813064152180428298"
+                      "version": "0.34.44.8038",
+                      "templateHash": "14262313259972528331"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },
