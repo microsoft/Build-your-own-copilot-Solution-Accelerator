@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "15593468820989199659"
+      "templateHash": "12548659740706579060"
     }
   },
   "parameters": {
@@ -486,7 +486,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "9938076973902074772"
+              "templateHash": "210118639384183744"
             }
           },
           "parameters": {
@@ -527,7 +527,7 @@
             "aiServicesName": "[format('ais-{0}', parameters('solutionName'))]",
             "applicationInsightsName": "[format('appi-{0}', parameters('solutionName'))]",
             "containerRegistryName": "[format('cr-{0}', parameters('solutionName'))]",
-            "keyvaultName": "[format('kv-{0}', parameters('solutionName'))]",
+            "keyvaultName": "[parameters('keyVaultName')]",
             "location": "[parameters('solutionLocation')]",
             "aiHubName": "[format('hub-{0}', parameters('solutionName'))]",
             "aiHubFriendlyName": "[variables('aiHubName')]",
