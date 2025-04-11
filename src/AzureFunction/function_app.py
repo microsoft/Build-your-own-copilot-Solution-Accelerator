@@ -188,7 +188,7 @@ class ChatWithDataPlugin:
             client = openai.AzureOpenAI(
                 azure_endpoint=endpoint,
                 api_key=api_key,
-                api_version="2024-02-01"
+                api_version=api_version
             )
 
             system_message = os.environ.get("AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT")

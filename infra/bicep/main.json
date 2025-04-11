@@ -1702,15 +1702,15 @@
             },
             "setupCopyKbFiles": {
               "type": "string",
-              "defaultValue": "[format('{0}Deployment/scripts/copy_kb_files.sh', parameters('baseUrl'))]"
+              "defaultValue": "[format('{0}infra/scripts/copy_kb_files.sh', parameters('baseUrl'))]"
             },
             "setupCreateIndexScriptsUrl": {
               "type": "string",
-              "defaultValue": "[format('{0}Deployment/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]"
+              "defaultValue": "[format('{0}infra/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]"
             },
             "createSqlUserAndRoleScriptsUrl": {
               "type": "string",
-              "defaultValue": "[format('{0}Deployment/scripts/add_user_scripts/create-sql-user-and-role.ps1', parameters('baseUrl'))]"
+              "defaultValue": "[format('{0}infra/scripts/add_user_scripts/create-sql-user-and-role.ps1', parameters('baseUrl'))]"
             },
             "keyVaultName": {
               "type": "string"
@@ -2367,9 +2367,6 @@
           "AZURE_COSMOSDB_ENABLE_FEEDBACK": {
             "value": "True"
           },
-          "VITE_POWERBI_EMBED_URL": {
-            "value": "TBD"
-          },
           "Appversion": {
             "value": "[variables('appversion')]"
           },
@@ -2754,13 +2751,6 @@
                 "description": "Enable feedback in Cosmos DB"
               }
             },
-            "VITE_POWERBI_EMBED_URL": {
-              "type": "string",
-              "defaultValue": "",
-              "metadata": {
-                "description": "Power BI Embed URL"
-              }
-            },
             "Appversion": {
               "type": "string"
             },
@@ -2975,10 +2965,6 @@
                     {
                       "name": "AZURE_COSMOSDB_ENABLE_FEEDBACK",
                       "value": "[parameters('AZURE_COSMOSDB_ENABLE_FEEDBACK')]"
-                    },
-                    {
-                      "name": "VITE_POWERBI_EMBED_URL",
-                      "value": "[parameters('VITE_POWERBI_EMBED_URL')]"
                     },
                     {
                       "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",

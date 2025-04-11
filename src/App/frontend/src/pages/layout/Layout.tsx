@@ -1,142 +1,140 @@
-import { useContext, useEffect, useState } from 'react'
-import { Link, Outlet } from 'react-router-dom'
-import { Dialog, Stack, TextField, Pivot, PivotItem } from '@fluentui/react'
-import { CopyRegular } from '@fluentui/react-icons'
-import { CosmosDBStatus } from '../../api'
-import TeamAvatar from '../../assets/TeamAvatar.svg'
-import Illustration from '../../assets/Illustration.svg'
-import { HistoryButton, ShareButton } from '../../components/common/Button'
-import Cards from '../../components/Cards/Cards'
-import PowerBIChart from '../../components/PowerBIChart/PowerBIChart'
-import Chat from '../chat/Chat' // Import the Chat component
-import { AppStateContext } from '../../state/AppProvider'
-import { getUserInfo, getpbi } from '../../api'
-import { User } from '../../types/User'
-import TickIcon from '../../assets/TickIcon.svg'
-import DismissIcon from '../../assets/Dismiss.svg'
-import welcomeIcon from '../../assets/welcomeIcon.png'
-import styles from './Layout.module.css'
-import { SpinnerComponent } from '../../components/Spinner/SpinnerComponent'
+import { useContext, useEffect, useState } from 'react';
+import { Link, Outlet } from 'react-router-dom';
+import { Dialog, Stack, TextField, Pivot, PivotItem } from '@fluentui/react';
+import { CopyRegular } from '@fluentui/react-icons';
+import { CosmosDBStatus } from '../../api';
+import TeamAvatar from '../../assets/TeamAvatar.svg';
+import Illustration from '../../assets/Illustration.svg';
+import { HistoryButton, ShareButton } from '../../components/common/Button';
+import Cards from '../../components/Cards/Cards';
+// Removed PowerBIChart import as it will no longer be used
+// import PowerBIChart from '../../components/PowerBIChart/PowerBIChart';
+import Chat from '../chat/Chat'; // Import the Chat component
+import { AppStateContext } from '../../state/AppProvider';
+import { getUserInfo } from '../../api';
+import { User } from '../../types/User';
+import TickIcon from '../../assets/TickIcon.svg';
+import DismissIcon from '../../assets/Dismiss.svg';
+import welcomeIcon from '../../assets/welcomeIcon.png';
+import styles from './Layout.module.css';
+import { SpinnerComponent } from '../../components/Spinner/SpinnerComponent';
 
 const Layout = () => {
-  // const [contentType, setContentType] = useState<string | null>(null);
-  // const [contentUrl, setContentUrl] = useState<string | null>(null);
-  const [isChatDialogOpen, setIsChatDialogOpen] = useState<boolean>(false)
-  const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false)
-  const [copyClicked, setCopyClicked] = useState<boolean>(false)
-  const [copyText, setCopyText] = useState<string>('Copy URL')
-  const [shareLabel, setShareLabel] = useState<string | undefined>('Share')
-  const [hideHistoryLabel, setHideHistoryLabel] = useState<string>('Hide chat history')
-  const [showHistoryLabel, setShowHistoryLabel] = useState<string>('Show chat history')
-  const appStateContext = useContext(AppStateContext)
-  const ui = appStateContext?.state.frontendSettings?.ui
+  const [isChatDialogOpen, setIsChatDialogOpen] = useState<boolean>(false);
+  const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false);
+  const [copyClicked, setCopyClicked] = useState<boolean>(false);
+  const [copyText, setCopyText] = useState<string>('Copy URL');
+  const [shareLabel, setShareLabel] = useState<string | undefined>('Share');
+  const [hideHistoryLabel, setHideHistoryLabel] = useState<string>('Hide chat history');
+  const [showHistoryLabel, setShowHistoryLabel] = useState<string>('Show chat history');
+  const appStateContext = useContext(AppStateContext);
+  const ui = appStateContext?.state.frontendSettings?.ui;
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [showWelcomeCard, setShowWelcomeCard] = useState<boolean>(true);
+  const [name, setName] = useState<string>('');
+  
+  // Removed PowerBI related state and effects
+  // const [pbiurl, setPbiUrl] = useState<string>('');
+  // useEffect(() => {
+  //   const fetchpbi = async () => {
+  //     try {
+  //       const pbiurl = await getpbi();
+  //       setPbiUrl(pbiurl); // Set the power bi url
+  //     } catch (error) {
+  //       console.error('Error fetching PBI url:', error);
+  //     }
+  //   }
+  //   fetchpbi();
+  // }, []);
 
-  const [selectedUser, setSelectedUser] = useState<any | null>(null)
-  const [showWelcomeCard, setShowWelcomeCard] = useState<boolean>(true)
-  const [name, setName] = useState<string>('')
-
-  const [pbiurl, setPbiUrl] = useState<string>('')
-  const [isVisible, setIsVisible] = useState(false)
-  useEffect(() => {
-    const fetchpbi = async () => {
-      try {
-        const pbiurl = await getpbi()
-        setPbiUrl(pbiurl) // Set the power bi url
-      } catch (error) {
-        console.error('Error fetching PBI url:', error)
-      }
-    }
-
-    fetchpbi()
-  }, [])
-
-
-  const resetClientId= ()=>{
+  const resetClientId = () => {
     appStateContext?.dispatch({ type: 'RESET_CLIENT_ID' });
     setSelectedUser(null);
     setShowWelcomeCard(true);
-  }
+  };
 
   const closePopup = () => {
-    setIsVisible(!isVisible)
-  }
+    setIsVisible(!isVisible);
+  };
+
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (isVisible) {
       const timer = setTimeout(() => {
-        setIsVisible(false)
-      }, 4000) // Popup will disappear after 3 seconds
-
-      return () => clearTimeout(timer) // Cleanup the timer on component unmount
+        setIsVisible(false);
+      }, 4000); // Popup will disappear after 4 seconds
+      return () => clearTimeout(timer); // Cleanup the timer on component unmount
     }
-  }, [isVisible])
+  }, [isVisible]);
 
   const handleCardClick = (user: User) => {
-    setSelectedUser(user)
-    setShowWelcomeCard(false)
-  }
+    setSelectedUser(user);
+    setShowWelcomeCard(false);
+  };
 
   const handleShareClick = () => {
-    setIsSharePanelOpen(true)
-  }
+    setIsSharePanelOpen(true);
+  };
 
   const handleSharePanelDismiss = () => {
-    setIsSharePanelOpen(false)
-    setCopyClicked(false)
-    setCopyText('Copy URL')
-  }
+    setIsSharePanelOpen(false);
+    setCopyClicked(false);
+    setCopyText('Copy URL');
+  };
 
   const handleCopyClick = () => {
-    navigator.clipboard.writeText(window.location.href)
-    setCopyClicked(true)
-  }
+    navigator.clipboard.writeText(window.location.href);
+    setCopyClicked(true);
+  };
 
   const handleHistoryClick = () => {
-    appStateContext?.dispatch({ type: 'TOGGLE_CHAT_HISTORY' })
-  }
+    appStateContext?.dispatch({ type: 'TOGGLE_CHAT_HISTORY' });
+  };
 
   useEffect(() => {
     if (copyClicked) {
-      setCopyText('Copied URL')
+      setCopyText('Copied URL');
     }
-  }, [copyClicked])
+  }, [copyClicked]);
 
-  useEffect(() => {}, [appStateContext?.state.isCosmosDBAvailable.status])
+  useEffect(() => {}, [appStateContext?.state.isCosmosDBAvailable.status]);
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 480) {
-        setShareLabel(undefined)
-        setHideHistoryLabel('Hide history')
-        setShowHistoryLabel('Show history')
+        setShareLabel(undefined);
+        setHideHistoryLabel('Hide history');
+        setShowHistoryLabel('Show history');
       } else {
-        setShareLabel('Share')
-        setHideHistoryLabel('Hide chat history')
-        setShowHistoryLabel('Show chat history')
+        setShareLabel('Share');
+        setHideHistoryLabel('Hide chat history');
+        setShowHistoryLabel('Show chat history');
       }
-    }
+    };
 
-    window.addEventListener('resize', handleResize)
-    handleResize()
+    window.addEventListener('resize', handleResize);
+    handleResize();
 
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     getUserInfo()
       .then(res => {
-        const name: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? ''
-        setName(name)
+        const name: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? '';
+        setName(name);
       })
       .catch(err => {
-        console.error('Error fetching user info: ', err)
-      })
-  }, [])
+        console.error('Error fetching user info: ', err);
+      });
+  }, []);
 
-  const calculateChartUrl = (user: User) => {
-    const filter = `&filter=clients/Email eq '${user.ClientEmail}'&navContentPaneEnabled=false`
-    return `${pbiurl}${filter}`
-  }
+  // Removed calculateChartUrl function since it's only used for PowerBI
+  // const calculateChartUrl = (user: User) => {
+  //   const filter = `&filter=clients/Email eq '${user.ClientEmail}'&navContentPaneEnabled=false`;
+  //   return `${pbiurl}${filter}`;
+  // };
 
   return (
     <div className={styles.layout}>
@@ -166,7 +164,6 @@ const Layout = () => {
         <div className={styles.selectClientHeading}>
           <h2 className={styles.meeting}>Upcoming meetings</h2>
         </div>
-
         <Cards onCardClick={handleCardClick} />
       </div>
       <div className={styles.ContentContainer}>
@@ -174,8 +171,15 @@ const Layout = () => {
           <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
             <Stack horizontal verticalAlign="center">
               <img src={ui?.logo ? ui.logo : TeamAvatar} className={styles.headerIcon} aria-hidden="true" alt="" />
-              <div className={styles.headerTitleContainer} onClick={resetClientId} onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? resetClientId() : null)} tabIndex={-1}>
-                <h2 className={styles.headerTitle} tabIndex={0}>{ui?.title}</h2>
+              <div
+                className={styles.headerTitleContainer}
+                onClick={resetClientId}
+                onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? resetClientId() : null)}
+                tabIndex={-1}
+              >
+                <h2 className={styles.headerTitle} tabIndex={0}>
+                  {ui?.title}
+                </h2>
               </div>
             </Stack>
             <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
@@ -219,19 +223,21 @@ const Layout = () => {
                   <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span>
                 </div>
               )}
-              <Pivot defaultSelectedKey="chat" className='tabContainer' style={{ paddingTop : 10 }}>
+              <Pivot defaultSelectedKey="chat" className="tabContainer" style={{ paddingTop: 10 }}>
                 <PivotItem headerText="Chat" itemKey="chat">
                   <Chat setIsVisible={setIsVisible} />
                 </PivotItem>
+                {/*
+                // Removed the PivotItem for "Client 360 Profile" which loaded the PowerBIChart.
                 <PivotItem headerText="Client 360 Profile" itemKey="profile">
                   <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
                 </PivotItem>
+                */}
               </Pivot>
             </div>
           )}
         </div>
       </div>
-
       <Dialog
         onDismiss={handleSharePanelDismiss}
         hidden={!isSharePanelOpen}
@@ -254,7 +260,8 @@ const Layout = () => {
         dialogContentProps={{
           title: 'Share the web app',
           showCloseButton: true
-        }}>
+        }}
+      >
         <Stack horizontal verticalAlign="center" style={{ gap: '8px' }}>
           <TextField className={styles.urlTextBox} defaultValue={window.location.href} readOnly />
           <div
@@ -263,14 +270,15 @@ const Layout = () => {
             tabIndex={0}
             aria-label="Copy"
             onClick={handleCopyClick}
-            onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? handleCopyClick() : null)}>
+            onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? handleCopyClick() : null)}
+          >
             <CopyRegular className={styles.copyButton} />
             <span className={styles.copyButtonText}>{copyText}</span>
           </div>
         </Stack>
       </Dialog>
     </div>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

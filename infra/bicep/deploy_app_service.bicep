@@ -161,8 +161,8 @@ param AZURE_COSMOSDB_DATABASE string = ''
 @description('Enable feedback in Cosmos DB')
 param AZURE_COSMOSDB_ENABLE_FEEDBACK string = 'True'
 
-@description('Power BI Embed URL')
-param VITE_POWERBI_EMBED_URL string = ''
+//@description('Power BI Embed URL')
+//param VITE_POWERBI_EMBED_URL string = ''
 
 param Appversion string
 
@@ -373,9 +373,9 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {name: 'AZURE_COSMOSDB_ENABLE_FEEDBACK'
           value: AZURE_COSMOSDB_ENABLE_FEEDBACK
         }
-        {name: 'VITE_POWERBI_EMBED_URL'
-          value: VITE_POWERBI_EMBED_URL
-        }
+        //{name: 'VITE_POWERBI_EMBED_URL'
+        //  value: VITE_POWERBI_EMBED_URL
+        //}
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
           value: 'true'
