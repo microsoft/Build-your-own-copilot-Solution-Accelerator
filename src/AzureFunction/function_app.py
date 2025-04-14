@@ -86,7 +86,7 @@ class ChatWithDataPlugin:
             answer = f"Error retrieving greeting response: {str(e)}"
         return answer
 
-    @kernel_function(name="ChatWithSQLDatabase", description="Generate and run a T-SQL query based on the provided question and client id")
+    @kernel_function(name="ChatWithSQLDatabase", description="Given a query about client assets, investements and meeting dates or times, get details from the database based on the provided question and client id")
     def get_SQL_Response(
         self,
         input: Annotated[str, "the question"],
@@ -134,7 +134,6 @@ class ChatWithDataPlugin:
             ALWAYS use ClientId = {clientid} in the query filter.
             ALWAYS select Client Name (Column: Client) in the query.
             Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
-            If the result might return more than 100 rows, include TOP 100 to limit the row count.
             Only return the generated SQL query. Do not return anything else.'''
 
         try:
@@ -175,7 +174,7 @@ class ChatWithDataPlugin:
             answer = f"Error retrieving data from SQL: {str(e)}"
         return answer
 
-    @kernel_function(name="ChatWithCallTranscripts", description="Retrieve answers from call transcript search for a given client")
+    @kernel_function(name="ChatWithCallTranscripts", description="given a query about meetings summary or actions or notes, get answer from search index for a given ClientId")
     def get_answers_from_calltranscripts(
         self,
         question: Annotated[str, "the question"],
@@ -230,7 +229,7 @@ class ChatWithDataPlugin:
                                 },
                                 "semantic_configuration": 'my-semantic-config',
                                 "in_scope": "true",
-                                "role_information": system_message,
+                                # "role_information": system_message,
                                 "filter": f"client_id eq '{ClientId}'",
                                 "strictness": 3,
                                 "top_n_documents": 5,
@@ -334,7 +333,7 @@ async def stream_openai_text(req: Request) -> StreamingResponse:
         # Insert the name in the prompt:
         HOST_INSTRUCTIONS = (
             "You are a helpful assistant to a Wealth Advisor."
-            "The currently selected client's name is '{SelectedClientName}' (in any variation: ignoring punctuation, apostrophes, and case)."
+            "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client."
             "If the user mentions no name, assume they are asking about '{SelectedClientName}'."
             "If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts."
             "If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
