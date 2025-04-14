@@ -127,10 +127,15 @@ else
     python3 -m venv $pythonScriptPath"scriptenv"
 fi
 
-# handling virtual environment activation for different OS
-activate_env_output=$(source $pythonScriptPath"scriptenv/bin/activate" 2>&1)
-if [ -n "$activate_env_output" ]; then
+# Activate the virtual environment
+if [ -f $pythonScriptPath"scriptenv/bin/activate" ]; then
+    echo "Activating virtual environment (Linux/macOS)"
+    source $pythonScriptPath"scriptenv/bin/activate"
+elif [ -f $pythonScriptPath"scriptenv/Scripts/activate" ]; then
+    echo "Activating virtual environment (Windows)"
     source $pythonScriptPath"scriptenv/Scripts/activate"
+else
+    echo "Error activating virtual environment. Requirements may be installed globally."
 fi
 
 # Install the requirements
