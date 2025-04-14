@@ -74,8 +74,8 @@ if !([ -z "$baseUrl" ] && [ -z "$managedIdentityClientId" ]); then
     extractionPath2="/mnt/azscripts/azscriptinput/$extractedFolder2"
 
     # Create the folders if they do not exist
-    mkdir -p "$extractionsPath1"
-    mkdir -p "$extractionsPath2"
+    mkdir -p "$extractionPath1"
+    mkdir -p "$extractionPath2"
 
     # Download the zip file
     curl --output /mnt/azscripts/azscriptinput/"$zipFileName1" "$zipUrl1"
