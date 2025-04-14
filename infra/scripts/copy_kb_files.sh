@@ -70,8 +70,8 @@ extractionPath2=""
 
 # Check if running in Azure Container App
 if !([ -z "$baseUrl" ] && [ -z "$managedIdentityClientId" ]); then
-    $extractionPath1="/mnt/azscripts/azscriptinput/$extractedFolder1"
-    $extractionPath2="/mnt/azscripts/azscriptinput/$extractedFolder2"
+    extractionPath1="/mnt/azscripts/azscriptinput/$extractedFolder1"
+    extractionPath2="/mnt/azscripts/azscriptinput/$extractedFolder2"
 
     # Create the folders if they do not exist
     mkdir -p $extractionsPath1
