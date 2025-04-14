@@ -24,26 +24,31 @@ else
     echo "Not authenticated with Azure. Attempting to authenticate..."
 fi
 
-echo "Getting signed in user id"
-signed_user_id=$(az ad signed-in-user show --query id -o tsv)
-
-echo "Getting storage account resource id"
-storage_account_resource_id=$(az storage account show --name $storageAccount --query id --output tsv)
-
-#check if user has the Storage Blob Data Contributor role, add it if not
-echo "Checking if user has the Storage Blob Data Contributor role"
-role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
-if [ -z "$role_assignment" ]; then
-    echo "User does not have the Storage Blob Data Contributor role. Assigning the role."
-    MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --output none
-    if [ $? -eq 0 ]; then
-        echo "Role assignment completed successfully."
-    else
-        echo "Error: Role assignment failed."
-        exit 1
-    fi
+# if using managed identity, skip role assignments as its already provided via bicep
+if [ -n "$managedIdentityClientId" ]; then
+    echo "Skipping role assignments as managed identity is used"
 else
-    echo "User already has the Storage Blob Data Contributor role."
+    echo "Getting signed in user id"
+    signed_user_id=$(az ad signed-in-user show --query id -o tsv)
+
+    echo "Getting storage account resource id"
+    storage_account_resource_id=$(az storage account show --name $storageAccount --query id --output tsv)
+
+    #check if user has the Storage Blob Data Contributor role, add it if not
+    echo "Checking if user has the Storage Blob Data Contributor role"
+    role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
+    if [ -z "$role_assignment" ]; then
+        echo "User does not have the Storage Blob Data Contributor role. Assigning the role."
+        MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --output none
+        if [ $? -eq 0 ]; then
+            echo "Role assignment completed successfully."
+        else
+            echo "Error: Role assignment failed."
+            exit 1
+        fi
+    else
+        echo "User already has the Storage Blob Data Contributor role."
+    fi
 fi
 
 zipFileName1="clientdata.zip"
