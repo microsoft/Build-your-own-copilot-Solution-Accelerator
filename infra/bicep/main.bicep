@@ -86,7 +86,6 @@ var functionAppSqlPrompt ='''Generate a valid T-SQL query to find {query} for ta
    ALWAYS use ClientId = {clientid} in the query filter.
    ALWAYS select Client Name (Column: Client) in the query.
    Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
-   If the result might return more than 100 rows, include TOP 100 to limit the row count.
    Only return the generated SQL query. Do not return anything else.'''
    
 var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports wealth advisors in preparing for client meetings. 
@@ -95,7 +94,7 @@ var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports
   If no data is available, state 'No relevant data found for previous meetings.'''
 
 var functionAppStreamTextSystemPrompt = '''You are a helpful assistant to a Wealth Advisor. 
-  The currently selected client's name is '{SelectedClientName}' (in any variation: ignoring punctuation, apostrophes, and case). 
+  The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client. 
   If the user mentions no name, assume they are asking about '{SelectedClientName}'. 
   If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts. 
   If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.'''
