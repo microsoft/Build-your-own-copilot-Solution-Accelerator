@@ -42,6 +42,23 @@ else
         MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --output none
         if [ $? -eq 0 ]; then
             echo "Role assignment completed successfully."
+            retries=3
+            while [ $retries -gt 0 ]; do
+                # Check if the role assignment was successful
+                role_assignment_check=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
+                if [ -n "$role_assignment_check" ]; then
+                    echo "Role assignment verified successfully."
+                    break
+                else
+                    echo "Role assignment not found, retrying..."
+                    ((retries--))
+                    sleep 10
+                fi
+            done
+            if [ $retries -eq 0 ]; then
+                echo "Error: Role assignment verification failed after multiple attempts. Try rerunning the script."
+                exit 1
+            fi
         else
             echo "Error: Role assignment failed."
             exit 1
