@@ -82,9 +82,9 @@ EOF
 # EOF
 # )
 
-# Output the SQL query for debugging
-echo "SQL Query:"
-echo "$SQL_QUERY_FINAL"
+# # Output the SQL query for debugging
+# echo "SQL Query:"
+# echo "$SQL_QUERY_FINAL"
 
 # Check if OS is Windows
 OS=$(uname | tr '[:upper:]' '[:lower:]')
@@ -109,12 +109,18 @@ else
         echo "Failed to retrieve access token."
         exit 1
     fi
+    errorFlag=false
     # Execute the SQL query
     echo "Executing SQL query..."
     sqlcmd -S "$SqlServerName" -d "$SqlDatabaseName" -G -P usersql/tokenFile -Q "$SQL_QUERY_FINAL" || {
         echo "Failed to execute SQL query."
-        exit 1
+        errorFlag=true
     }
+    #delete the usersql directory
+    rm -rf usersql
+    if [ "$errorFlag" = true ]; then
+        exit 1
+    fi
 fi
 
 

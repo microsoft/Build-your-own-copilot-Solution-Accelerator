@@ -1,45 +1,34 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-name: sample-app-aoai-chatgpt
+name: build-your-own-copilot-solution-accelerator
+
 metadata:
-  template: sample-app-aoai-chatgpt@0.0.1-beta
-services:
-  backend:
-    project: .
-    language: py
-    host: appservice
-    hooks:
-      prepackage:
-        windows:
-          shell: pwsh
-          run:  cd ./frontend;npm install;npm run build
-          interactive: true
-          continueOnError: false
-        posix:
-          shell: sh
-          run:  cd ./frontend;npm install;npm run build
-          interactive: true
-          continueOnError: false
+  template: build-your-own-copilot-solution-accelerator@1.0
+  name: build-your-own-copilot-solution-accelerator@1.0
+
+infra:
+  provider: bicep
+  path: infra/bicep
+  module: main
+
 hooks:
-    preprovision:
-      windows:
-        shell: pwsh
-        run: ./scripts/auth_init.ps1
-        interactive: true
-        continueOnError: false
-      posix:
-        shell: sh
-        run: ./scripts/auth_init.sh
-        interactive: true
-        continueOnError: false
-    postprovision:
-      windows:
-        shell: pwsh
-        run: ./scripts/auth_update.ps1;./scripts/prepdocs.ps1;
-        interactive: true
-        continueOnError: false
-      posix:
-        shell: sh
-        run: ./scripts/auth_update.sh;./scripts/prepdocs.sh;
-        interactive: true
-        continueOnError: false
+  postprovision:
+    windows:
+      run: |
+        Write-Host "Web app URL: "
+        Write-Host "$env:WEB_APP_URL" -ForegroundColor Cyan
+        Write-Host "`nRun the following command in your Bash terminal. It will grant the necessary permissions between resources and your user account, and also process and load the sample data into the application."
+        Write-Host "bash ./infra/scripts/process_sample_data.sh" -ForegroundColor Cyan
+      shell: pwsh
+      continueOnError: false
+      interactive: true
+    posix:
+      run: |
+        echo "Web app URL: "
+        echo $WEB_APP_URL
+        echo ""
+        echo "Run the following command in your Bash terminal. It will grant the necessary permissions between resources and your user account, and also process and load the sample data into the application."
+        echo "bash ./infra/scripts/process_sample_data.sh"
+      shell: sh
+      continueOnError: false
+      interactive: true
