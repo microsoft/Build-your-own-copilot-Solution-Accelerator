@@ -15,7 +15,8 @@
 		},
 		"ghcr.io/azure/azure-dev/azd:0": {
 			"version": "stable"
-		}
+		},
+		"ghcr.io/devcontainers/features/node:1": {}
 	},
 	"customizations": {
 		"vscode": {
@@ -23,11 +24,12 @@
 				"ms-python.python",
 				"ms-azuretools.vscode-azcli",
 				"ms-azuretools.vscode-bicep",
-				"ms-azuretools.azure-dev"
+				"ms-azuretools.azure-dev",
+				"ms-azuretools.vscode-azurefunctions"
 			]
 		}
 	},
-	"postCreateCommand": "chmod +x ./.devcontainer/setup_env.sh && bash ./.devcontainer/setup_env.sh",
+	"postCreateCommand": "bash ./.devcontainer/setup_env.sh",
 	"remoteUser": "vscode",
 	"hostRequirements": {
 		"memory": "4gb"
