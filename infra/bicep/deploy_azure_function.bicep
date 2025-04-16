@@ -1,5 +1,3 @@
-@description('Specifies the location for resources.')
-param solutionName string 
 param solutionLocation string
 @secure()
 param azureOpenAIApiKey string
@@ -14,7 +12,7 @@ param sqlDbName string
 param sqlDbUser string
 @secure()
 param sqlDbPwd string
-param functionAppVersion string
+param imageTag string
 @description('Azure Function App SQL System Prompt')
 param sqlSystemPrompt string
 @description('Azure Function App CallTranscript System Prompt')
@@ -25,11 +23,19 @@ param userassignedIdentityId string
 param userassignedIdentityClientId string
 param storageAccountName string
 param applicationInsightsId string
+param functionAppName string
+param containerAppEnvame string
+param logAnalyticsWorkspaceName string
 
-var functionAppName = '${solutionName}fn'
 var azureOpenAIDeploymentModel = 'gpt-4o-mini'
 var azureOpenAIEmbeddingDeployment = 'text-embedding-ada-002'
 var valueOne = '1'
+
+var FnAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-fn:${imageTag}'
+
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+  name: logAnalyticsWorkspaceName
+}
 
 // resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
 //   name: '${solutionName}fnstorage'
@@ -61,19 +67,19 @@ var valueOne = '1'
 // }
 
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2022-06-01-preview' = {
-  name: '${solutionName}env'
+  name: containerAppEnvame
   location: solutionLocation
   sku: {
     name: 'Consumption'
   }
   properties: {
-    // appLogsConfiguration: {
-    //   destination: 'log-analytics'
-    //   logAnalyticsConfiguration: {
-    //     customerId: logAnalyticsWorkspace.properties.customerId
-    //     sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
-    //   }
-    // }
+    appLogsConfiguration: {
+      destination: 'log-analytics'
+      logAnalyticsConfiguration: {
+        customerId: logAnalyticsWorkspace.properties.customerId
+        sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
+      }
+    }
   }
 }
 
@@ -90,7 +96,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   properties: {
     managedEnvironmentId: containerAppEnv.id
     siteConfig: {
-      linuxFxVersion: 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-fn:${functionAppVersion}'
+      linuxFxVersion: FnAppImageName
       appSettings: [
         {
           name: 'AzureWebJobsStorage__accountname'
@@ -180,3 +186,5 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
     }
   }
 }
+
+output functionAppName string = functionApp.name

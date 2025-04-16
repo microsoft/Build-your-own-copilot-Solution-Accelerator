@@ -1,17 +1,13 @@
-@minLength(3)
-@maxLength(15)
-@description('Solution Name')
-param solutionName string
 param solutionLocation string
 param keyVaultName string
 param managedIdentityObjectId string
 param managedIdentityName string
 
 @description('The name of the SQL logical server.')
-param serverName string = '${ solutionName }-sql-server'
+param serverName string
 
 @description('The name of the SQL Database.')
-param sqlDBName string = '${ solutionName }-sql-db'
+param sqlDBName string
 
 @description('Location for all resources.')
 param location string = solutionLocation
@@ -23,21 +19,24 @@ param administratorLogin string = 'sqladmin'
 @secure()
 param administratorLoginPassword string = 'TestPassword_1234'
 
+
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   name: serverName
   location: location
   kind:'v12.0'
   properties: {
+      administratorLogin: administratorLogin
+      administratorLoginPassword: administratorLoginPassword
       publicNetworkAccess: 'Enabled'
       version: '12.0'
       restrictOutboundNetworkAccess: 'Disabled'
-      administrators: {
-        login: managedIdentityName
-        sid: managedIdentityObjectId
-        tenantId: subscription().tenantId
-        administratorType: 'ActiveDirectory'
-        azureADOnlyAuthentication: true
-      }
+      // administrators: {
+      //   login: managedIdentityName
+      //   sid: managedIdentityObjectId
+      //   tenantId: subscription().tenantId
+      //   administratorType: 'ActiveDirectory'
+      //   azureADOnlyAuthentication: true
+      // }
     }
 }
 

@@ -1,18 +1,14 @@
 // ========== Storage Account ========== //
 targetScope = 'resourceGroup'
 
-@minLength(3)
-@maxLength(15)
-@description('Solution Name')
-param solutionName string
-
 @description('Solution Location')
 param solutionLocation string
 
 @description('Name')
-param saName string = '${ solutionName }storageaccount'
+param saName string
 
 param managedIdentityObjectId string
+param keyVaultName string
 
 resource storageAccounts_resource 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: saName
@@ -96,15 +92,35 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 
 
 var storageAccountKeys = listKeys(storageAccounts_resource.id, '2021-04-01')
-var storageAccountString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccounts_resource.name};AccountKey=${storageAccounts_resource.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+//var storageAccountString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccounts_resource.name};AccountKey=${storageAccounts_resource.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
 
-output storageAccountOutput object = {
-  id: storageAccounts_resource.id
-  name: saName
-  uri: storageAccounts_resource.properties.primaryEndpoints.web  
-  dfs: storageAccounts_resource.properties.primaryEndpoints.dfs
-  storageAccountName:saName
-  key:storageAccountKeys.keys[0].value
-  connectionString:storageAccountString
-  dataContainer:storageAccounts_default_power_platform_dataflows.name
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: keyVaultName
 }
+
+resource adlsAccountNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'ADLS-ACCOUNT-NAME'
+  properties: {
+    value: saName
+  }
+}
+
+resource adlsAccountContainerEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'ADLS-ACCOUNT-CONTAINER'
+  properties: {
+    value: 'data'
+  }
+}
+
+resource adlsAccountKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'ADLS-ACCOUNT-KEY'
+  properties: {
+    value: storageAccountKeys.keys[0].value
+  }
+}
+
+output storageName string = saName
+output storageContainer string = 'data'
