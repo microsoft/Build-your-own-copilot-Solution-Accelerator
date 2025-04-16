@@ -5,14 +5,14 @@ echo "started the script"
 baseUrl="$1"
 keyvaultName="$2"
 requirementFile="requirements.txt"
-requirementFileUrl=${baseUrl}"ResearchAssistant/Deployment/scripts/index_scripts/requirements.txt"
+requirementFileUrl=${baseUrl}"infra/scripts/index_scripts/requirements.txt"
 
 echo "Download Started"
 
 # Download the create_index python files
-curl --output "create_articles_index.py" ${baseUrl}"ResearchAssistant/Deployment/scripts/index_scripts/create_articles_index.py"
-curl --output "create_grants_index.py" ${baseUrl}"ResearchAssistant/Deployment/scripts/index_scripts/create_grants_index.py"
-curl --output "create_drafts_index.py" ${baseUrl}"ResearchAssistant/Deployment/scripts/index_scripts/create_drafts_index.py"
+curl --output "create_articles_index.py" ${baseUrl}"infra/scripts/index_scripts/create_articles_index.py"
+curl --output "create_grants_index.py" ${baseUrl}"infra/scripts/index_scripts/create_grants_index.py"
+curl --output "create_drafts_index.py" ${baseUrl}"infra/scripts/index_scripts/create_drafts_index.py"
 
 # Download the requirement file
 curl --output "$requirementFile" "$requirementFileUrl"

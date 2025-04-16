@@ -6,16 +6,16 @@ baseUrl="$1"
 keyvaultName="$2"
 fabricWorkspaceId="$3"
 requirementFile="requirements.txt"
-requirementFileUrl=${baseUrl}"ResearchAssistant/Deployment/scripts/fabric_scripts/requirements.txt"
+requirementFileUrl=${baseUrl}"infra/scripts/fabric_scripts/requirements.txt"
 
 echo "Download Started"
 
 # Download the create_fabric python files
-curl --output "create_fabric_items.py" ${baseUrl}"ResearchAssistant/Deployment/scripts/fabric_scripts/create_fabric_items.py"
+curl --output "create_fabric_items.py" ${baseUrl}"infra/scripts/fabric_scripts/create_fabric_items.py"
 
-curl --output "create_articles_index.ipynb" ${baseUrl}"ResearchAssistant/Deployment/scripts/fabric_scripts/create_articles_index.ipynb"
-curl --output "create_grants_index.ipynb" ${baseUrl}"ResearchAssistant/Deployment/scripts/fabric_scripts/create_grants_index.ipynb"
-curl --output "create_drafts_index.ipynb" ${baseUrl}"ResearchAssistant/Deployment/scripts/fabric_scripts/create_drafts_index.ipynb"
+curl --output "create_articles_index.ipynb" ${baseUrl}"infra/scripts/fabric_scripts/create_articles_index.ipynb"
+curl --output "create_grants_index.ipynb" ${baseUrl}"infra/scripts/fabric_scripts/create_grants_index.ipynb"
+curl --output "create_drafts_index.ipynb" ${baseUrl}"infra/scripts/fabric_scripts/create_drafts_index.ipynb"
 
 # Download the requirement file
 curl --output "$requirementFile" "$requirementFileUrl"
