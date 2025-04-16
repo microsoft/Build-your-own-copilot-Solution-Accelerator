@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Restoring backend python packages
+echo ""
+echo "Restoring backend python packages"
+echo ""
+python3 -m pip install -r requirements.txt
+if [ $? -ne 0 ]; then
+    echo "Failed to restore backend python packages"
+    exit $?
+fi
+
+# Restoring frontend npm packages
 echo ""
 echo "Restoring frontend npm packages"
 echo ""
@@ -10,6 +21,7 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
+# Building frontend
 echo ""
 echo "Building frontend"
 echo ""
@@ -19,13 +31,12 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
-cd ..
-. ./scripts/loadenv.sh
-
+# Starting backend
 echo ""
 echo "Starting backend"
 echo ""
-./.venv/bin/python -m quart run --port=50505 --host=127.0.0.1 --reload
+cd ..
+python3 -m uvicorn app:app --port 50505 --reload
 if [ $? -ne 0 ]; then
     echo "Failed to start backend"
     exit $?
