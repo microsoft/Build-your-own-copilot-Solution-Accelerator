@@ -1,0 +1,16 @@
+azure-storage-file-datalake
+# langchain
+openai
+pypdf
+# pyodbc
+# tiktoken
+msal[broker]==1.31.1
+azure-identity
+azure-ai-textanalytics
+azure-search-documents==11.6.0b9
+azure-keyvault-secrets
+pandas
+pymssql
+datetime
+
+pyodbc==5.2.0
