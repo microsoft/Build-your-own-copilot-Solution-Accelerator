@@ -45,6 +45,6 @@ sed -i "s/workspaceId_to-be-replaced/${fabricWorkspaceId}/g" "create_fabric_item
 
 sed -i "s/kv_to-be-replaced/${keyvaultName}/g" "notebooks/01_process_data.ipynb"
 
-pip install -r requirements.txt --quiet
+pip install -r requirements.txt --user --quiet
 
 python create_fabric_items.py
