@@ -1,14 +1,6 @@
 // ========== Key Vault ========== //
 targetScope = 'resourceGroup'
 
-@minLength(3)
-@maxLength(15)
-@description('Solution Name')
-param solutionName string
-
-@description('Name of App Service plan')
-param HostingPlanName string = '${ solutionName }-app-service-plan'
-
 @description('The pricing tier for the App Service plan')
 @allowed(
   ['F1', 'D1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P4','P0v3']
@@ -17,8 +9,8 @@ param HostingPlanName string = '${ solutionName }-app-service-plan'
 
 param HostingPlanSku string = 'B2'
 
-@description('Name of Web App')
-param WebsiteName string = '${ solutionName }-app-service'
+param HostingPlanName string
+param WebsiteName string
 
 // @description('Name of Application Insights')
 // param ApplicationInsightsName string = '${ solutionName }-app-insights'
@@ -164,7 +156,7 @@ param AZURE_COSMOSDB_ENABLE_FEEDBACK string = 'True'
 //@description('Power BI Embed URL')
 //param VITE_POWERBI_EMBED_URL string = ''
 
-param Appversion string
+param imageTag string
 
 param userassignedIdentityId string
 param userassignedIdentityClientId string
@@ -174,7 +166,7 @@ param applicationInsightsId string
 
 // var WebAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
 
-var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${Appversion}'
+var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${imageTag}'
 
 resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: HostingPlanName
@@ -428,3 +420,5 @@ module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
     Website
   ]
 }
+
+output webAppUrl string = 'https://${WebsiteName}.azurewebsites.net'

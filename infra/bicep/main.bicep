@@ -2,9 +2,9 @@
 targetScope = 'resourceGroup'
 
 @minLength(3)
-@maxLength(6)
-@description('Prefix Name')
-param solutionPrefix string
+@maxLength(20)
+@description('A unique prefix for all resources in this deployment. This should be 3-20 characters long:')
+param environmentName string
 
 @description('CosmosDB Location')
 param cosmosLocation string
@@ -46,23 +46,20 @@ param embeddingModel string = 'text-embedding-ada-002'
 @description('Capacity of the Embedding Model deployment')
 param embeddingDeploymentCapacity int = 80
 
-// @description('Fabric Workspace Id if you have one, else leave it empty. ')
-// param fabricWorkspaceId string
+param imageTag string = 'latest'
 
-//restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
-// @allowed(['eastus', 'eastus2', 'westus', 'westus3', 'swedencentral'])
-// @description('Azure OpenAI Location')
-// param AzureOpenAILocation string
+var uniqueId = toLower(uniqueString(environmentName, subscription().id, resourceGroup().location))
+var solutionPrefix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
 
-var ApplicationInsightsName = 'appi-${solutionPrefix}'
-var WorkspaceName = 'log-${solutionPrefix}'
+// Load the abbrevations file required to name the azure resources.
+var abbrs = loadJsonContent('./abbreviations.json')
+
+// var ApplicationInsightsName = '${abbrs.managementGovernance.applicationInsights}${solutionPrefix}-main'
+// var WorkspaceName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${solutionPrefix}-main'
 
 var resourceGroupLocation = resourceGroup().location
-// var subscriptionId  = subscription().subscriptionId
-
 var solutionLocation = resourceGroupLocation
-var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/'
-var appversion = 'latest'
+// var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/'
 
 var functionAppSqlPrompt ='''Generate a valid T-SQL query to find {query} for tables and columns provided below:
    1. Table: Clients
@@ -106,6 +103,7 @@ module managedIdentityModule 'deploy_managed_identity.bicep' = {
   params: {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
+    miName: '${abbrs.security.managedIdentity}${solutionPrefix}'
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -117,7 +115,7 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
-    adlsAccountName:storageAccountModule.outputs.storageAccountOutput.storageAccountName
+    kvName: '${abbrs.security.keyVault}${solutionPrefix}'
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -140,11 +138,13 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
   scope: resourceGroup(resourceGroup().name)
 }
 
-module cosmosDBModule 'core/database/cosmos/deploy_cosmos_db.bicep' = {
+// ========== CosmosDB ========== //
+module cosmosDBModule 'deploy_cosmos_db.bicep' = {
   name: 'deploy_cosmos_db'
   params: {
-    solutionName: solutionPrefix
     solutionLocation: cosmosLocation
+    cosmosDBName:'${abbrs.databases.cosmosDBDatabase}${solutionPrefix}'
+    kvName: keyvaultModule.outputs.keyvaultName
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -154,9 +154,10 @@ module cosmosDBModule 'core/database/cosmos/deploy_cosmos_db.bicep' = {
 module storageAccountModule 'deploy_storage_account.bicep' = {
   name: 'deploy_storage_account'
   params: {
-    solutionName: solutionPrefix
     solutionLocation: solutionLocation
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+    saName: '${abbrs.storage.storageAccount}${solutionPrefix}'
+    keyVaultName:keyvaultModule.outputs.keyvaultName
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -165,11 +166,12 @@ module storageAccountModule 'deploy_storage_account.bicep' = {
 module sqlDBModule 'deploy_sql_db.bicep' = {
   name: 'deploy_sql_db'
   params: {
-    solutionName: solutionPrefix
     solutionLocation: solutionLocation
     keyVaultName:keyvaultModule.outputs.keyvaultName
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
     managedIdentityName:managedIdentityModule.outputs.managedIdentityOutput.name
+    serverName: '${abbrs.databases.sqlDatabaseServer}${solutionPrefix}'
+    sqlDBName: '${abbrs.databases.sqlDatabase}${solutionPrefix}'
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -181,64 +183,66 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
 }
 
 //========== Deployment script to upload sample data ========== //
-module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
-  name : 'deploy_post_deployment_scripts'
-  params:{
-    solutionName: solutionPrefix
-    solutionLocation: resourceGroupLocation
-    baseUrl: baseUrl
-    storageAccountName: storageAccountModule.outputs.storageAccountOutput.storageAccountName
-    containerName: storageAccountModule.outputs.storageAccountOutput.dataContainer
-    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.id
-    managedIdentityClientId:managedIdentityModule.outputs.managedIdentityOutput.clientId
-    keyVaultName:aifoundry.outputs.keyvaultName
-    logAnalyticsWorkspaceResourceName: aifoundry.outputs.logAnalyticsWorkspaceResourceName
-    sqlServerName: sqlDBModule.outputs.sqlServerName
-    sqlDbName: sqlDBModule.outputs.sqlDbName
-    sqlUsers: [
-      {
-        principalId: managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId  // Replace with actual Principal ID
-        principalName: managedIdentityModule.outputs.managedIdentityFnAppOutput.name    // Replace with actual user email or name
-        databaseRoles: ['db_datareader']
-      }
-      {
-        principalId: managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId  // Replace with actual Principal ID
-        principalName: managedIdentityModule.outputs.managedIdentityWebAppOutput.name    // Replace with actual user email or name
-        databaseRoles: ['db_datareader', 'db_datawriter']
-      }
-    ]
-  }
-}
+// module uploadFiles 'deploy_post_deployment_scripts.bicep' = {
+//   name : 'deploy_post_deployment_scripts'
+//   params:{
+//     solutionName: solutionPrefix
+//     solutionLocation: resourceGroupLocation
+//     baseUrl: baseUrl
+//     storageAccountName: storageAccountModule.outputs.storageName
+//     containerName: storageAccountModule.outputs.storageContainer
+//     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.id
+//     managedIdentityClientId:managedIdentityModule.outputs.managedIdentityOutput.clientId
+//     keyVaultName:aifoundry.outputs.keyvaultName
+//     logAnalyticsWorkspaceResourceName: aifoundry.outputs.logAnalyticsWorkspaceResourceName
+//     sqlServerName: sqlDBModule.outputs.sqlServerName
+//     sqlDbName: sqlDBModule.outputs.sqlDbName
+//     sqlUsers: [
+//       {
+//         principalId: managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId  // Replace with actual Principal ID
+//         principalName: managedIdentityModule.outputs.managedIdentityFnAppOutput.name    // Replace with actual user email or name
+//         databaseRoles: ['db_datareader']
+//       }
+//       {
+//         principalId: managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId  // Replace with actual Principal ID
+//         principalName: managedIdentityModule.outputs.managedIdentityWebAppOutput.name    // Replace with actual user email or name
+//         databaseRoles: ['db_datareader', 'db_datawriter']
+//       }
+//     ]
+//   }
+// }
 
-resource Workspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = {
-  name: WorkspaceName
-  location: resourceGroup().location
-  properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-    retentionInDays: 30
-  }
-}
+// resource Workspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = {
+//   name: WorkspaceName
+//   location: resourceGroup().location
+//   properties: {
+//     sku: {
+//       name: 'PerGB2018'
+//     }
+//     retentionInDays: 30
+//   }
+// }
 
-resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: ApplicationInsightsName
-  location: resourceGroup().location
-  tags: {
-    'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
-  }
-  properties: {
-    Application_Type: 'web'
-    WorkspaceResourceId: Workspace.id
-  }
-  kind: 'web'
-}
+// resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+//   name: ApplicationInsightsName
+//   location: resourceGroup().location
+//   tags: {
+//     'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
+//   }
+//   properties: {
+//     Application_Type: 'web'
+//     WorkspaceResourceId: Workspace.id
+//   }
+//   kind: 'web'
+// }
 
+// ========== Azure Functions Module ========== //
 module azureFunctions 'deploy_azure_function.bicep' = {
   name : 'deploy_azure_function'
   params:{
-    solutionName: solutionPrefix
     solutionLocation: solutionLocation
+    functionAppName:'${abbrs.compute.functionApp}${solutionPrefix}'
+    containerAppEnvame:'${abbrs.containers.containerAppsEnvironment}${solutionPrefix}'
     azureOpenAIApiKey:keyVault.getSecret('AZURE-OPENAI-KEY')
     azureOpenAIApiVersion:azureOpenaiAPIVersion
     azureOpenAIEndpoint:aifoundry.outputs.aiServicesTarget
@@ -249,7 +253,7 @@ module azureFunctions 'deploy_azure_function.bicep' = {
     sqlDbName:sqlDBModule.outputs.sqlDbName
     sqlDbUser:sqlDBModule.outputs.sqlDbUser
     sqlDbPwd:keyVault.getSecret('SQLDB-PASSWORD')
-    functionAppVersion: appversion  
+    imageTag: imageTag  
     sqlSystemPrompt: functionAppSqlPrompt
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
@@ -257,6 +261,7 @@ module azureFunctions 'deploy_azure_function.bicep' = {
     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityFnAppOutput.id
     applicationInsightsId: aifoundry.outputs.applicationInsightsId
     storageAccountName:aifoundry.outputs.storageAccountName
+    logAnalyticsWorkspaceName: aifoundry.outputs.logAnalyticsWorkspaceResourceName
   }
   dependsOn:[keyVault]
 }
@@ -264,43 +269,16 @@ module azureFunctions 'deploy_azure_function.bicep' = {
 module azureFunctionURL 'deploy_azure_function_script_url.bicep' = {
   name : 'deploy_azure_function_script_url'
   params:{
-    solutionName: solutionPrefix
-    identity:managedIdentityModule.outputs.managedIdentityOutput.id
+    functionAppName: azureFunctions.outputs.functionAppName
   }
-  dependsOn:[azureFunctions]
 }
 
-
-// module createIndex 'deploy_index_scripts.bicep' = {
-//   name : 'deploy_index_scripts'
-//   params:{
-//     solutionLocation: solutionLocation
-//     identity:managedIdentityModule.outputs.managedIdentityOutput.id
-//     baseUrl:baseUrl
-//     keyVaultName:keyvaultModule.outputs.keyvaultOutput.name
-//   }
-//   dependsOn:[keyvaultModule]
-// }
-
-// module createaihub 'deploy_aihub_scripts.bicep' = {
-//   name : 'deploy_aihub_scripts'
-//   params:{
-//     solutionLocation: solutionLocation
-//     identity:managedIdentityModule.outputs.managedIdentityOutput.id
-//     baseUrl:baseUrl
-//     keyVaultName:keyvaultModule.outputs.keyvaultOutput.name
-//     solutionName: solutionPrefix
-//     resourceGroupName:resourceGroupName
-//     subscriptionId:subscriptionId
-//   }
-//   dependsOn:[keyvaultModule]
-// }
-
-
+// ========== App Service Module ========== //
 module appserviceModule 'deploy_app_service.bicep' = {
   name: 'deploy_app_service'
   params: {
-    solutionName: solutionPrefix
+    HostingPlanName: '${abbrs.compute.appServicePlan}${solutionPrefix}'
+    WebsiteName: '${abbrs.compute.webApp}${solutionPrefix}'
     AzureSearchService:aifoundry.outputs.aiSearchService
     AzureSearchIndex:'transcripts_index'
     AzureSearchKey:keyVault.getSecret('AZURE-SEARCH-KEY')
@@ -337,15 +315,28 @@ module appserviceModule 'deploy_app_service.bicep' = {
     SQLDB_DATABASE:sqlDBModule.outputs.sqlDbName
     SQLDB_USERNAME:sqlDBModule.outputs.sqlDbUser
     SQLDB_PASSWORD:keyVault.getSecret('SQLDB-PASSWORD')
-    AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosOutput.cosmosAccountName
-    AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosOutput.cosmosContainerName
-    AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosOutput.cosmosDatabaseName
+    AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosAccountName
+    AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosContainerName
+    AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosDatabaseName
     AZURE_COSMOSDB_ENABLE_FEEDBACK: 'True'
     //VITE_POWERBI_EMBED_URL: 'TBD'
-    Appversion: appversion
+    imageTag: imageTag
     userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityWebAppOutput.id
     applicationInsightsId: aifoundry.outputs.applicationInsightsId
   }
   scope: resourceGroup(resourceGroup().name)
 }
+
+output WEB_APP_URL string = appserviceModule.outputs.webAppUrl
+output STORAGE_ACCOUNT_NAME string = storageAccountModule.outputs.storageName
+output STORAGE_CONTAINER_NAME string = storageAccountModule.outputs.storageContainer
+output KEY_VAULT_NAME string = keyvaultModule.outputs.keyvaultName
+output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
+output RESOURCE_GROUP_NAME string = resourceGroup().name
+output SQLDB_SERVER string = sqlDBModule.outputs.sqlServerName
+output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
+output MANAGEDINDENTITY_FNAPP_NAME string = managedIdentityModule.outputs.managedIdentityFnAppOutput.name
+output MANAGEDINDENTITY_FNAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId
+output MANAGEDINDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
+output MANAGEDINDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId

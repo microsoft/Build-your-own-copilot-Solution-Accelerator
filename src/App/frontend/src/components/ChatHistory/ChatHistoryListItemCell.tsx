@@ -206,7 +206,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
                     <Stack aria-label="action button group" horizontal verticalAlign={'center'}>
                       <IconButton
                         role="button"
-                        disabled={errorRename !== undefined}
+                        disabled={errorRename !== undefined || editTitle == item.title}
                         onKeyDown={e => (e.key === ' ' || e.key === 'Enter' ? handleSaveEdit(e) : null)}
                         onClick={e => handleSaveEdit(e)}
                         aria-label="confirm new title"
