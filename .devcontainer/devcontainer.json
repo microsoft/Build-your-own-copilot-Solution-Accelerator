@@ -27,7 +27,7 @@
 			]
 		}
 	},
-	"postStartCommand": "git pull origin main && chmod +x ./infra/scripts/quota_check_params.sh && bash .devcontainer/sqlcmd_setup.sh",
+	"postCreateCommand": "chmod +x ./.devcontainer/setup_env.sh && bash ./.devcontainer/setup_env.sh",
 	"remoteUser": "vscode",
 	"hostRequirements": {
 		"memory": "4gb"
