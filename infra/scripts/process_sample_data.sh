@@ -13,23 +13,55 @@ webAppDisplayName="$9"
 functionAppManagedIdentityClientId="${10}"
 functionAppDisplayName="${11}"
 
-# get parameters from azd env
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
-# resourceGroupName=$(azd env get-value )
+# get parameters from azd env, if not provided
+if [ -z "$resourceGroupName" ]; then
+    resourceGroupName=$(azd env get-value RESOURCE_GROUP_NAME)
+fi
+
+if [ -z "$cosmosDbAccountName" ]; then
+    cosmosDbAccountName=$(azd env get-value COSMOSDB_ACCOUNT_NAME)
+fi
+
+if [ -z "$storageAccount" ]; then
+    storageAccount=$(azd env get-value STORAGE_ACCOUNT_NAME)
+fi
+
+if [ -z "$fileSystem" ]; then
+    fileSystem=$(azd env get-value STORAGE_CONTAINER_NAME)
+fi
+
+if [ -z "$keyvaultName" ]; then
+    keyvaultName=$(azd env get-value KEY_VAULT_NAME)
+fi
+
+if [ -z "$sqlServerName" ]; then
+    sqlServerName=$(azd env get-value SQLDB_SERVER)
+fi
+
+if [ -z "$SqlDatabaseName" ]; then
+    SqlDatabaseName=$(azd env get-value SQLDB_DATABASE)
+fi
+
+if [ -z "$webAppManagedIdentityClientId" ]; then
+    webAppManagedIdentityClientId=$(azd env get-value MANAGEDINDENTITY_WEBAPP_CLIENTID)
+fi
+
+if [ -z "$webAppDisplayName" ]; then
+    webAppDisplayName=$(azd env get-value MANAGEDINDENTITY_WEBAPP_NAME)
+fi
+
+if [ -z "$functionAppManagedIdentityClientId" ]; then
+    functionAppManagedIdentityClientId=$(azd env get-value MANAGEDINDENTITY_FNAPP_CLIENTID)
+fi
+
+if [ -z "$functionAppDisplayName" ]; then
+    functionAppDisplayName=$(azd env get-value MANAGEDINDENTITY_FNAPP_NAME)
+fi
 
 
 # Check if all required arguments are provided
-if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$webAppManagedIdentityClientId" ] || [ -z "$webAppManagedIdentityClientId" ]; then
-    echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <fileSystem> <keyvaultName> <sqlServerName> <webAppManagedIdentityClientId> <functionAppManagedIdentityClientId>"
+if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$webAppManagedIdentityClientId" ] || [ -z "$webAppDisplayName" ] || [ -z "$functionAppManagedIdentityClientId" ] || [ -z "$functionAppDisplayName" ]; then
+    echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <fileSystem> <keyvaultName> <sqlServerName> <webAppManagedIdentityClientId> <webAppDisplayName> <functionAppManagedIdentityClientId> <functionAppDisplayName>"
     exit 1
 fi
 
