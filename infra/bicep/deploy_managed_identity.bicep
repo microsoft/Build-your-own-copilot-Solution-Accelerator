@@ -10,7 +10,7 @@ param solutionName string
 param solutionLocation string
 
 @description('Name')
-param miName string = '${ solutionName }-managed-identity'
+param miName string
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: miName
@@ -37,7 +37,7 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 resource managedIdentityFnApp 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${solutionName}-fn-mi'
+  name: '${miName}-fn'
   location: solutionLocation
   tags: {
     app: solutionName
@@ -46,7 +46,7 @@ resource managedIdentityFnApp 'Microsoft.ManagedIdentity/userAssignedIdentities@
 }
 
 resource managedIdentityWebApp 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${solutionName}-webapp-mi'
+  name: '${miName}-webapp'
   location: solutionLocation
   tags: {
     app: solutionName
