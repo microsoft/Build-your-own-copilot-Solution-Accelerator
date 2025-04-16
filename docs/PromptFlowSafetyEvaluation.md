@@ -1,7 +1,7 @@
 # Safety Evaluation Flow Guide 
 Please follow the steps below to generate Adversarial data and set up the evaluation flow. 
 
-1. Open the notebook `simulate_and_evaluate_flow.ipynb` in path `<Your Download Folder Path>/ResearchAssistant/Deployment/scripts/evaluation_scripts/` in Visual Studio Code or your choice of notebook editor.
+1. Open the notebook `simulate_and_evaluate_flow.ipynb` in path `<Your Download Folder Path>//infra/scripts/evaluation_scripts/` in Visual Studio Code or your choice of notebook editor.
 
 2. Update the parameters like Key Vault Name, AI Studio Project Name and AI Studio Deployment URL, Key and Name parameters and run all the cells in the notebook.
 
@@ -11,7 +11,7 @@ Please follow the steps below to generate Adversarial data and set up the evalua
 
 5. Click on the flow created from the notebook to see the results.
 
-    ![Evaluation Results](/ResearchAssistant/Deployment/images/evaluation/safety_evaluation.png)
+    ![Evaluation Results](/docs/images/evaluation/safety_evaluation.png)
 
 
 

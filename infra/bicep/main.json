@@ -634,7 +634,7 @@
               },
               "properties": {
                 "azCliVersion": "2.50.0",
-                "primaryScriptUri": "[format('{0}ResearchAssistant/Deployment/scripts/copy_kb_files.sh', parameters('baseUrl'))]",
+                "primaryScriptUri": "[format('{0}infra/scripts/copy_kb_files.sh', parameters('baseUrl'))]",
                 "arguments": "[format('{0} {1} {2}', parameters('storageAccountName'), parameters('containerName'), parameters('baseUrl'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
@@ -1223,7 +1223,7 @@
               },
               "properties": {
                 "azCliVersion": "2.52.0",
-                "primaryScriptUri": "[format('{0}ResearchAssistant/Deployment/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]",
+                "primaryScriptUri": "[format('{0}infra/scripts/run_create_index_scripts.sh', parameters('baseUrl'))]",
                 "arguments": "[format('{0} {1}', parameters('baseUrl'), parameters('keyVaultName'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
@@ -1321,7 +1321,7 @@
               },
               "properties": {
                 "azCliVersion": "2.52.0",
-                "primaryScriptUri": "[format('{0}ResearchAssistant/Deployment/scripts/run_create_aihub_scripts.sh', parameters('baseUrl'))]",
+                "primaryScriptUri": "[format('{0}infra/scripts/run_create_aihub_scripts.sh', parameters('baseUrl'))]",
                 "arguments": "[format('{0} {1} {2} {3} {4} {5}', parameters('baseUrl'), parameters('keyVaultName'), parameters('solutionName'), parameters('resourceGroupName'), parameters('subscriptionId'), parameters('solutionLocation'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
