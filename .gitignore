@@ -398,7 +398,6 @@ FodyWeavers.xsd
 *.sln.iml
 
 .venv
-.vscode
 
 scriptenv
 .azure
