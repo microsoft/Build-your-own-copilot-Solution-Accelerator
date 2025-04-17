@@ -36,8 +36,6 @@ The sample data used in this repository is synthetic and generated using Azure O
 
 ![Landing Page](docs/images/readMe/landing_page.png)
 
- > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
-
 ### Solution accelerator architecture
 ![image](docs/images/readMe/architecture.png)
 
