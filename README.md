@@ -145,8 +145,8 @@ To change the azd parameters from the default values, follow the steps [here](./
 
 3. Alternatively, you can use the following button to open the project in a dev container using GitHub Codespaces:
 
-   [![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?repo=microsoft/Build-your-own-copilot-Solution-Accelerator&ref=dev)
-   [![Open in Dev Container](https://img.shields.io/badge/Open%20in%20Dev%20Container-blue?logo=visualstudiocode)](https://vscode.dev/github/microsoft/Build-your-own-copilot-Solution-Accelerator?branch=ca-bk-readme-deployment-updates)
+   | [![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?repo=microsoft/Build-your-own-copilot-Solution-Accelerator&ref=dev) | [![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/github/microsoft/Build-your-own-copilot-Solution-Accelerator?branch=ca-bk-readme-deployment-updates) | 
+   }|---|---|
 
 4. To use a local dev container, ensure you have Docker and Visual Studio Code installed. Then, create a `.devcontainer` folder in the root of the project and include the necessary configuration files. You can refer to the [Dev Containers documentation](https://code.visualstudio.com/docs/devcontainers/containers) for guidance.
 
