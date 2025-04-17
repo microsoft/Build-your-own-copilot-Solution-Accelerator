@@ -15,7 +15,9 @@ This solution accelerator is a powerful tool that helps you create your own copi
 
 It leverages Azure OpenAI Service, Azure AI Search and Microsoft Fabric, to streamline daily tasks and customer meeting preparation for customer-facing roles. As a result, this helps to improve client retention and customer satisfaction. By increasing employee productivity and improving customer conversations, our solution enables organizations to serve more customers and drive increased revenue for the entire company. 
 
- 
+> Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
+
+
 **Scenario**
 
 A Woodgrove Bank Client Advisor is preparing for upcoming client meetings. He wants insight into his scheduled client meetings, access to portfolio information, a comprehensive understanding of previous meetings, and the ability to ask questions about client’s financial details and interests. 
@@ -36,31 +38,100 @@ The sample data used in this repository is synthetic and generated using Azure O
 
 ![Landing Page](docs/images/readMe/landing_page.png)
 
+### Solution accelerator architecture
+![image](docs/images/readMe/architecture.png)
 
 <h2><img src="docs/images/readMe/quickDeploy.png" width="64">
 <br/>
-Quick deploy
+QUICK DEPLOY
 </h2>
 
 ### Prerequisites
 
-To use this solution accelerator, you will need access to an [Azure subscription](https://azure.microsoft.com/free/) with permission to create resource groups and resources. While not required, a prior understanding of Azure OpenAI, Azure AI Search and Microsoft Fabric will be helpful.
+To deploy this solution accelerator, ensure you have access to an [Azure subscription](https://azure.microsoft.com/free/) with the necessary permissions to create **resource groups and resources**. Follow the steps in  [Azure Account Set Up](./docs/AzureAccountSetUp.md) 
 
-For additional training and support, please see:
+Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/table) page and select a **region** where the following services are available: 
 
-1. [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
-2. [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
-3. [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/)
-4. [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/)
-5. [Azure SQL Database](https://learn.microsoft.com/en-us/azure/azure-sql/)
-6. [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/)
+- [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
+- [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
+- [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/)
+- [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/)
+- [Azure SQL Database](https://learn.microsoft.com/en-us/azure/azure-sql/)
+- [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/)
+- [Azure Semantic Search](./docs/AzureSemanticSearchRegion.md)  
 
-### Solution accelerator architecture
-![image](docs/images/readMe/architecture.png)
+Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central.
+
+### ⚠️ Important: Check Azure OpenAI Quota Availability  
+
+➡️ To ensure sufficient quota is available in your subscription, please follow **[Quota check instructions guide](./docs/quota_check.md)** before you deploy the solution.
+
+<!-- Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central. -->
+<!-- 
+| [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fdocument-generation-solution-accelerator%2Fmain%2Finfra%2Fmain.json) |
+|---|
+-->
+<<<<< Placeholder for Codespace | Placeholder for Dev Container >>>>>
+
+### Configurable Deployment Settings
+
+When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](./docs/CustomizingAzdParameters.md):  
+
+| **Setting** | **Description** |  **Default value** |
+|------------|----------------|  ------------|
+| **Azure Region** | The region where resources will be created. | eastus | 
+| **Environment Name** | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources. |  byocatemplate |
+| **Secondary Location** | A **less busy** region for **CosmosDB**, useful in case of availability constraints. |  eastus2 |
+| **Deployment Type** | Select from a drop-down list. |  Global Standard |
+| **GPT Model** | OpenAI GPT model  | gpt-4o-mini |  
+| **GPT Model Deployment Capacity** | Configure capacity for **GPT models**. | 30k |
+| **Embedding Model** | OpenAI embedding model |  text-embedding-ada-002 |
+| **Embedding Model Capacity** | Set the capacity for **embedding models**. |  80k |
 
 
- > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
+### [Optional] Quota Recommendations  
+By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tokens**, so we recommend
 
+<!-- **For Global Standard | GPT-4o-mini - the capacity to at least 150k tokens post-deployment for optimal performance.** -->
+
+To adjust quota settings, follow these [steps](./docs/AzureGPTQuotaSettings.md)  
+
+### Deploying
+
+To change the azd parameters from the default values, follow the steps [here](./docs/CustomizingAzdParameters.md). 
+
+
+1. Login to Azure:
+
+    ```shell
+    azd auth login
+    ```
+
+    #### To authenticate with Azure Developer CLI (`azd`), use the following command with your **Tenant ID**:
+
+    ```sh
+    azd auth login --tenant-id <tenant-id>
+   ```
+
+2. Provision and deploy all the resources:
+
+    ```shell
+    azd up
+    ```
+
+3. Provide an `azd` environment name (like "byocaapp")
+4. Select a subscription from your Azure account, and select a location which has quota for all the resources. 
+    * This deployment will take *7-10 minutes* to provision the resources in your account and set up the solution with sample data. 
+    * If you get an error or timeout with deployment, changing the location can help, as there may be availability constraints for the resources.
+
+5. Once the deployment has completed successfully and you would like to use the sample data, run the bash command printed in the terminal. The bash command will look like the following: 
+    ```shell 
+    bash ./infra/scripts/process_sample_data.sh
+    ```
+
+6. Open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service and get the app URL from `Default domain`.
+
+6. You can now delete the resources by running `azd down`, if you are done trying out the application. 
 
 ### **How to install/deploy**
 
