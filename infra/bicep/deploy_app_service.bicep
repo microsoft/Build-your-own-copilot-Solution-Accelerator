@@ -1,12 +1,13 @@
 // ========== Key Vault ========== //
 targetScope = 'resourceGroup'
 
+@description('Solution Location')
+ param solutionLocation string
+
 @description('The pricing tier for the App Service plan')
 @allowed(
   ['F1', 'D1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P4','P0v3']
 )
-// param HostingPlanSku string = 'B1'
-
 param HostingPlanSku string = 'B2'
 
 param HostingPlanName string
@@ -170,7 +171,7 @@ var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${imageTag
 
 resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: HostingPlanName
-  location: resourceGroup().location
+  location: solutionLocation
   sku: {
     name: HostingPlanSku
   }
@@ -183,7 +184,7 @@ resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
 
 resource Website 'Microsoft.Web/sites@2020-06-01' = {
   name: WebsiteName
-  location: resourceGroup().location
+  location: solutionLocation
   identity: {
     type: 'SystemAssigned, UserAssigned'
     userAssignedIdentities: {

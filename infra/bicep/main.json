@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.34.44.8038",
-      "templateHash": "5725756876467977390"
+      "templateHash": "5995671308040328650"
     }
   },
   "parameters": {
@@ -40,8 +40,7 @@
       "defaultValue": "gpt-4o-mini",
       "allowedValues": [
         "gpt-4o-mini",
-        "gpt-4o",
-        "gpt-4"
+        "gpt-4o"
       ],
       "minLength": 1,
       "metadata": {
@@ -82,6 +81,33 @@
     "imageTag": {
       "type": "string",
       "defaultValue": "latest"
+    },
+    "AzureOpenAILocation": {
+      "type": "string",
+      "defaultValue": "eastus2",
+      "allowedValues": [
+        "australiaeast",
+        "eastus",
+        "eastus2",
+        "francecentral",
+        "japaneast",
+        "norwayeast",
+        "southindia",
+        "swedencentral",
+        "uksouth",
+        "westus",
+        "westus3"
+      ],
+      "metadata": {
+        "description": "Azure OpenAI Location"
+      }
+    },
+    "AZURE_LOCATION": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default."
+      }
     }
   },
   "variables": {
@@ -312,11 +338,10 @@
         "virtualDesktopScalingPlan": "vdscaling-"
       }
     },
-    "uniqueId": "[toLower(uniqueString(parameters('environmentName'), subscription().id, resourceGroup().location))]",
+    "solutionLocation": "[if(empty(parameters('AZURE_LOCATION')), resourceGroup().location, parameters('AZURE_LOCATION'))]",
+    "uniqueId": "[toLower(uniqueString(parameters('environmentName'), subscription().id, variables('solutionLocation')))]",
     "solutionPrefix": "[format('ca{0}', padLeft(take(variables('uniqueId'), 12), 12, '0'))]",
     "abbrs": "[variables('$fxv#0')]",
-    "resourceGroupLocation": "[resourceGroup().location]",
-    "solutionLocation": "[variables('resourceGroupLocation')]",
     "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\r\n   1. Table: Clients\r\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\r\n   2. Table: InvestmentGoals\r\n   Columns: ClientId, InvestmentGoal\r\n   3. Table: Assets\r\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\r\n   4. Table: ClientSummaries\r\n   Columns: ClientId, ClientSummary\r\n   5. Table: InvestmentGoalsDetails\r\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\r\n   6. Table: Retirement\r\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\r\n   7. Table: ClientMeetings\r\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\r\n   Always use the Investment column from the Assets table as the value.\r\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n   Do not use client name in filters.\r\n   Do not include assets values unless asked for.\r\n   ALWAYS use ClientId = {clientid} in the query filter.\r\n   ALWAYS select Client Name (Column: Client) in the query.\r\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n   Only return the generated SQL query. Do not return anything else.",
     "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \r\n  You have access to the client’s past meeting call transcripts. \r\n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \r\n  If no data is available, state 'No relevant data found for previous meetings.",
     "functionAppStreamTextSystemPrompt": "You are a helpful assistant to a Wealth Advisor. \r\n  The currently selected client's name is '{SelectedClientName}', and any case-insensitive or partial mention should be understood as referring to this client.\r\n  If no name is provided, assume the question is about '{SelectedClientName}'.\r\n  If the query references a different client or includes comparative terms like 'compare' or 'other client', please respond with: 'Please only ask questions about the selected client or select another client.'\r\n  Otherwise, provide thorough answers using only data from SQL or call transcripts. \r\n  If no data is found, please respond with 'No data found for that client.' Remove any client identifiers from the final response."
@@ -671,7 +696,7 @@
             "value": "[variables('solutionPrefix')]"
           },
           "solutionLocation": {
-            "value": "[variables('resourceGroupLocation')]"
+            "value": "[parameters('AzureOpenAILocation')]"
           },
           "keyVaultName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_keyvault'), '2022-09-01').outputs.keyvaultName.value]"
@@ -2475,6 +2500,9 @@
         },
         "mode": "Incremental",
         "parameters": {
+          "solutionLocation": {
+            "value": "[variables('solutionLocation')]"
+          },
           "HostingPlanName": {
             "value": "[format('{0}{1}', variables('abbrs').compute.appServicePlan, variables('solutionPrefix'))]"
           },
@@ -2641,10 +2669,16 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "160171358527496715"
+              "templateHash": "2369588288479285540"
             }
           },
           "parameters": {
+            "solutionLocation": {
+              "type": "string",
+              "metadata": {
+                "description": "Solution Location"
+              }
+            },
             "HostingPlanSku": {
               "type": "string",
               "defaultValue": "B2",
@@ -2999,7 +3033,7 @@
               "type": "Microsoft.Web/serverfarms",
               "apiVersion": "2020-06-01",
               "name": "[parameters('HostingPlanName')]",
-              "location": "[resourceGroup().location]",
+              "location": "[parameters('solutionLocation')]",
               "sku": {
                 "name": "[parameters('HostingPlanSku')]"
               },
@@ -3013,7 +3047,7 @@
               "type": "Microsoft.Web/sites",
               "apiVersion": "2020-06-01",
               "name": "[parameters('WebsiteName')]",
-              "location": "[resourceGroup().location]",
+              "location": "[parameters('solutionLocation')]",
               "identity": {
                 "type": "SystemAssigned, UserAssigned",
                 "userAssignedIdentities": {
