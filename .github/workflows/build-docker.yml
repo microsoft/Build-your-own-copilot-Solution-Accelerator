@@ -68,7 +68,7 @@ jobs:
     - name: Build Docker Image and optionally push
       uses: docker/build-push-action@v6
       with:
-        context: .
+        context: ./src
         file: ${{ inputs.dockerfile }}
         push: ${{ inputs.push }}
         cache-from: type=registry,ref=${{ inputs.registry }}/${{ inputs.app_name}}:${{ steps.determine_tag.outputs.tagname }}
