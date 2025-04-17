@@ -22,7 +22,6 @@ param deploymentType string = 'GlobalStandard'
 @allowed([
   'gpt-4o-mini'
   'gpt-4o'
-  'gpt-4'
 ])
 param gptModelName string = 'gpt-4o-mini'
 
@@ -46,9 +45,20 @@ param embeddingModel string = 'text-embedding-ada-002'
 @description('Capacity of the Embedding Model deployment')
 param embeddingDeploymentCapacity int = 80
 
+// @description('Fabric Workspace Id if you have one, else leave it empty. ')
+// param fabricWorkspaceId string
 param imageTag string = 'latest'
 
-var uniqueId = toLower(uniqueString(environmentName, subscription().id, resourceGroup().location))
+//restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
+@allowed(['australiaeast','eastus', 'eastus2','francecentral','japaneast','norwayeast','southindia', 'swedencentral','uksouth', 'westus', 'westus3'])
+@description('Azure OpenAI Location')
+param AzureOpenAILocation string = 'eastus2'
+
+@description('Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default.')
+param AZURE_LOCATION string=''
+var solutionLocation = empty(AZURE_LOCATION) ? resourceGroup().location : AZURE_LOCATION
+
+var uniqueId = toLower(uniqueString(environmentName, subscription().id, solutionLocation))
 var solutionPrefix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
 
 // Load the abbrevations file required to name the azure resources.
@@ -57,8 +67,8 @@ var abbrs = loadJsonContent('./abbreviations.json')
 // var ApplicationInsightsName = '${abbrs.managementGovernance.applicationInsights}${solutionPrefix}-main'
 // var WorkspaceName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${solutionPrefix}-main'
 
-var resourceGroupLocation = resourceGroup().location
-var solutionLocation = resourceGroupLocation
+//var resourceGroupLocation = resourceGroup().location
+//var solutionLocation = resourceGroupLocation
 // var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/'
 
 var functionAppSqlPrompt ='''Generate a valid T-SQL query to find {query} for tables and columns provided below:
@@ -125,7 +135,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
   name: 'deploy_ai_foundry'
   params: {
     solutionName: solutionPrefix
-    solutionLocation: resourceGroupLocation
+    solutionLocation: AzureOpenAILocation
     keyVaultName: keyvaultModule.outputs.keyvaultName
     deploymentType: deploymentType
     gptModelName: gptModelName
@@ -214,7 +224,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
 
 // resource Workspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = {
 //   name: WorkspaceName
-//   location: resourceGroup().location
+//   location: solutionLocation
 //   properties: {
 //     sku: {
 //       name: 'PerGB2018'
@@ -225,7 +235,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
 
 // resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
 //   name: ApplicationInsightsName
-//   location: resourceGroup().location
+//   location: solutionLocation
 //   tags: {
 //     'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
 //   }
@@ -277,6 +287,7 @@ module azureFunctionURL 'deploy_azure_function_script_url.bicep' = {
 module appserviceModule 'deploy_app_service.bicep' = {
   name: 'deploy_app_service'
   params: {
+    solutionLocation: solutionLocation
     HostingPlanName: '${abbrs.compute.appServicePlan}${solutionPrefix}'
     WebsiteName: '${abbrs.compute.webApp}${solutionPrefix}'
     AzureSearchService:aifoundry.outputs.aiSearchService

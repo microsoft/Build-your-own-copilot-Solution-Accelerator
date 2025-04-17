@@ -61,7 +61,7 @@ fi
 
 # Check if all required arguments are provided
 if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$webAppManagedIdentityClientId" ] || [ -z "$webAppDisplayName" ] || [ -z "$functionAppManagedIdentityClientId" ] || [ -z "$functionAppDisplayName" ]; then
-    echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <fileSystem> <keyvaultName> <sqlServerName> <webAppManagedIdentityClientId> <webAppDisplayName> <functionAppManagedIdentityClientId> <functionAppDisplayName>"
+    echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppManagedIdentityClientId> <webAppDisplayName> <functionAppManagedIdentityClientId> <functionAppDisplayName>"
     exit 1
 fi
 
