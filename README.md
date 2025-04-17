@@ -36,31 +36,65 @@ The sample data used in this repository is synthetic and generated using Azure O
 
 ![Landing Page](docs/images/readMe/landing_page.png)
 
-
-<h2><img src="docs/images/readMe/quickDeploy.png" width="64">
-<br/>
-Quick deploy
-</h2>
-
-### Prerequisites
-
-To use this solution accelerator, you will need access to an [Azure subscription](https://azure.microsoft.com/free/) with permission to create resource groups and resources. While not required, a prior understanding of Azure OpenAI, Azure AI Search and Microsoft Fabric will be helpful.
-
-For additional training and support, please see:
-
-1. [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
-2. [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
-3. [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/)
-4. [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/)
-5. [Azure SQL Database](https://learn.microsoft.com/en-us/azure/azure-sql/)
-6. [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/)
+ > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
 
 ### Solution accelerator architecture
 ![image](docs/images/readMe/architecture.png)
 
+<h2><img src="docs/images/readMe/quickDeploy.png" width="64">
+<br/>
+QUICK DEPLOY
+</h2>
 
- > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
+### Prerequisites
 
+To deploy this solution accelerator, ensure you have access to an [Azure subscription](https://azure.microsoft.com/free/) with the necessary permissions to create **resource groups and resources**. Follow the steps in  [Azure Account Set Up](./docs/AzureAccountSetUp.md) 
+
+Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/table) page and select a **region** where the following services are available: 
+
+- [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
+- [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
+- [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/)
+- [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/)
+- [Azure SQL Database](https://learn.microsoft.com/en-us/azure/azure-sql/)
+- [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/)
+- [Azure Semantic Search](./docs/AzureSemanticSearchRegion.md)  
+
+Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central.
+
+### ⚠️ Important: Check Azure OpenAI Quota Availability  
+
+➡️ To ensure sufficient quota is available in your subscription, please follow **[Quota check instructions guide](./docs/quota_check.md)** before you deploy the solution.
+
+<!-- Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central. -->
+<!-- 
+| [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fdocument-generation-solution-accelerator%2Fmain%2Finfra%2Fmain.json) |
+|---|
+-->
+<<<<< Placeholder for Codespace | Placeholder for Dev Container >>>>>
+
+### Configurable Deployment Settings
+
+When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](./docs/CustomizingAzdParameters.md):  
+
+| **Setting** | **Description** |  **Default value** |
+|------------|----------------|  ------------|
+| **Azure Region** | The region where resources will be created. | eastus | 
+| **Environment Name** | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources. |  byocatemplate |
+| **Secondary Location** | A **less busy** region for **CosmosDB**, useful in case of availability constraints. |  eastus2 |
+| **Deployment Type** | Select from a drop-down list. |  Global Standard |
+| **GPT Model** | OpenAI GPT model  | gpt-4o-mini |  
+| **GPT Model Deployment Capacity** | Configure capacity for **GPT models**. | 30k |
+| **Embedding Model** | OpenAI embedding model |  text-embedding-ada-002 |
+| **Embedding Model Capacity** | Set the capacity for **embedding models**. |  80k |
+
+
+### [Optional] Quota Recommendations  
+By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tokens**, so we recommend
+
+<!-- **For Global Standard | GPT-4o-mini - the capacity to at least 150k tokens post-deployment for optimal performance.** -->
+
+To adjust quota settings, follow these [steps](./docs/AzureGPTQuotaSettings.md)  
 
 ### **How to install/deploy**
 
