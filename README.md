@@ -96,6 +96,45 @@ By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tok
 
 To adjust quota settings, follow these [steps](./docs/AzureGPTQuotaSettings.md)  
 
+### Deploying
+
+Once you've opened the project in [Codespaces](#github-codespaces) or in [Dev Containers](#vs-code-dev-containers) or [locally](#local-environment), you can deploy it to Azure following the following steps. 
+
+To change the azd parameters from the default values, follow the steps [here](./docs/CustomizingAzdParameters.md). 
+
+
+1. Login to Azure:
+
+    ```shell
+    azd auth login
+    ```
+
+    #### To authenticate with Azure Developer CLI (`azd`), use the following command with your **Tenant ID**:
+
+    ```sh
+    azd auth login --tenant-id <tenant-id>
+   ```
+
+2. Provision and deploy all the resources:
+
+    ```shell
+    azd up
+    ```
+
+3. Provide an `azd` environment name (like "byocaapp")
+4. Select a subscription from your Azure account, and select a location which has quota for all the resources. 
+    * This deployment will take *7-10 minutes* to provision the resources in your account and set up the solution with sample data. 
+    * If you get an error or timeout with deployment, changing the location can help, as there may be availability constraints for the resources.
+
+5. Once the deployment has completed successfully and you would like to use the sample data, run the bash command printed in the terminal. The bash command will look like the following: 
+    ```shell 
+    bash ./infra/scripts/process_sample_data.sh
+    ```
+
+6. Open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service and get the app URL from `Default domain`.
+
+6. You can now delete the resources by running `azd down`, if you are done trying out the application. 
+
 ### **How to install/deploy**
 
 1. Please check the link [Azure Products by Region](
