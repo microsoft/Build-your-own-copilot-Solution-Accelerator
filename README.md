@@ -98,8 +98,6 @@ To adjust quota settings, follow these [steps](./docs/AzureGPTQuotaSettings.md)
 
 ### Deploying
 
-Once you've opened the project in [Codespaces](#github-codespaces) or in [Dev Containers](#vs-code-dev-containers) or [locally](#local-environment), you can deploy it to Azure following the following steps. 
-
 To change the azd parameters from the default values, follow the steps [here](./docs/CustomizingAzdParameters.md). 
 
 
