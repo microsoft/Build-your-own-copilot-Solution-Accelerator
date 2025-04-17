@@ -79,9 +79,9 @@ When you start the deployment, most parameters will have **default values**, but
 
 | **Setting** | **Description** |  **Default value** |
 |------------|----------------|  ------------|
-| **Azure Region** | The region where resources will be created. | eastus | 
+| **Azure OpenAI Location** | The region where OpenAI deploys | eastus2 | 
 | **Environment Name** | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources. |  byocatemplate |
-| **Secondary Location** | A **less busy** region for **CosmosDB**, useful in case of availability constraints. |  eastus2 |
+| **Cosmos Location** | A **less busy** region for **CosmosDB**, useful in case of availability constraints. |  eastus2 |
 | **Deployment Type** | Select from a drop-down list. |  Global Standard |
 | **GPT Model** | OpenAI GPT model  | gpt-4o-mini |  
 | **GPT Model Deployment Capacity** | Configure capacity for **GPT models**. | 30k |
