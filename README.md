@@ -17,6 +17,8 @@ It leverages Azure OpenAI Service, Azure AI Search and Microsoft Fabric, to stre
 
 > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
 
+>**Version history:**  
+>An updated version of the **Build Your Own Copilot** solution accelerator was published on **[MM/DD/YYYY]**. If you deployed the accelerator prior to that date, please see the “Version history” in the [Version History](#version-history) section for details.
 
 **Scenario**
 
@@ -135,20 +137,26 @@ To change the azd parameters from the default values, follow the steps [here](./
 
 ### **How to install/deploy**
 
-1. Please check the link [Azure Products by Region](
-https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) and choose a region where Azure AI Search, Semantic Ranker, Azure OpenAI Service, and Azure AI Foundry are available. 
+1. Please check the link [Azure Products by Region](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) and choose a region where Azure AI Search, Semantic Ranker, Azure OpenAI Service, and Azure AI Foundry are available. 
 
 2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
 
    [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fmain%2Finfra%2Fbicep%2Fmain.json)
 
-3. You will need to select an Azure Subscription, create/select a Resource group, Region, a unique Solution Prefix and an Azure location for Cosmos DB.
+3. Alternatively, you can use the following button to open the project in a dev container using GitHub Codespaces:
+
+   [![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?repo=microsoft/Build-your-own-copilot-Solution-Accelerator&ref=dev)
+   [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator&ref=dev)
+
+4. To use a local dev container, ensure you have Docker and Visual Studio Code installed. Then, create a `.devcontainer` folder in the root of the project and include the necessary configuration files. You can refer to the [Dev Containers documentation](https://code.visualstudio.com/docs/devcontainers/containers) for guidance.
+
+5. You will need to select an Azure Subscription, create/select a Resource group, Region, a unique Solution Prefix and an Azure location for Cosmos DB.
 
    ![image](docs/images/readMe/armDeployment.png)
 
-4. When deployment is complete, Follow steps in [Fabric Deployment guide](./docs/FabricDeployment.md) to set up the data processing pipelines and Power BI report in Fabric.
+6. When deployment is complete, Follow steps in [Fabric Deployment guide](./docs/FabricDeployment.md) to set up the data processing pipelines and Power BI report in Fabric.
 
-5. Optionally, follow steps in [Teams Tab App guide](./docs/TeamsAppDeployment.md) to add the Client Advisor app to Microsoft Teams.
+7. Optionally, follow steps in [Teams Tab App guide](./docs/TeamsAppDeployment.md) to add the Client Advisor app to Microsoft Teams.
 
 
 <br/>
@@ -169,6 +177,16 @@ Customer truth
 Customer stories coming soon.
 
 <br/>
+
+<h2>
+Version History
+</h2>
+An updated version of the **Build Your Own Copilot** solution accelerator was published on **[MM/DD/YYYY]**. If you deployed the accelerator prior to that date, please note the following changes:
+
+- The **Research Assistant** project has been moved to a separate branch. You can access it here: [**Research Assistant Branch**](#).
+- This repository now focuses exclusively on the **Client Advisor** solution scenario.
+- The previous folder structure containing both `research-assistant/` and `client-advisor/` directories has been removed.
+- The **Client Advisor** solution accelerator is now featured directly on the main landing page, with no additional folders associated.
 
 
 <h2>
@@ -204,4 +222,4 @@ You acknowledge that the Software and Microsoft Products and Services (1) are no
 
 You acknowledge the Software is not subject to SOC 1 and SOC 2 compliance audits. No Microsoft technology, nor any of its component technologies, including the Software, is intended or made available as a substitute for the professional advice, opinion, or judgement of a certified financial services professional. Do not use the Software to replace, substitute, or provide professional financial advice or judgment.  
 
-BY ACCESSING OR USING THE SOFTWARE, YOU ACKNOWLEDGE THAT THE SOFTWARE IS NOT DESIGNED OR INTENDED TO SUPPORT ANY USE IN WHICH A SERVICE INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE COULD RESULT IN THE DEATH OR SERIOUS BODILY INJURY OF ANY PERSON OR IN PHYSICAL OR ENVIRONMENTAL DAMAGE (COLLECTIVELY, “HIGH-RISK USE”), AND THAT YOU WILL ENSURE THAT, IN THE EVENT OF ANY INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE, THE SAFETY OF PEOPLE, PROPERTY, AND THE ENVIRONMENT ARE NOT REDUCED BELOW A LEVEL THAT IS REASONABLY, APPROPRIATE, AND LEGAL, WHETHER IN GENERAL OR IN A SPECIFIC INDUSTRY. BY ACCESSING THE SOFTWARE, YOU FURTHER ACKNOWLEDGE THAT YOUR HIGH-RISK USE OF THE SOFTWARE IS AT YOUR OWN RISK.  
+BY ACCESSING OR USING THE SOFTWARE, YOU ACKNOWLEDGE THAT THE SOFTWARE IS NOT DESIGNED OR INTENDED TO SUPPORT ANY USE IN WHICH A SERVICE INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE COULD RESULT IN THE DEATH OR SERIOUS BODILY INJURY OF ANY PERSON OR IN PHYSICAL OR ENVIRONMENTAL DAMAGE (COLLECTIVELY, “HIGH-RISK USE”), AND THAT YOU WILL ENSURE THAT, IN THE EVENT OF ANY INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE, THE SAFETY OF PEOPLE, PROPERTY, AND THE ENVIRONMENT ARE NOT REDUCED BELOW A LEVEL THAT IS REASONABLY, APPROPRIATE, AND LEGAL, WHETHER IN GENERAL OR IN A SPECIFIC INDUSTRY. BY ACCESSING THE SOFTWARE, YOU FURTHER ACKNOWLEDGE THAT YOUR HIGH-RISK USE OF THE SOFTWARE IS AT YOUR OWN RISK.
