@@ -1951,7 +1951,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "10479451396958857413"
+              "templateHash": "7638613638995120962"
             }
           },
           "parameters": {
@@ -2013,7 +2013,14 @@
                 "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
                 "publicNetworkAccess": "Enabled",
                 "version": "12.0",
-                "restrictOutboundNetworkAccess": "Disabled"
+                "restrictOutboundNetworkAccess": "Disabled",
+                "administrators": {
+                  "login": "[parameters('managedIdentityName')]",
+                  "sid": "[parameters('managedIdentityObjectId')]",
+                  "tenantId": "[subscription().tenantId]",
+                  "administratorType": "ActiveDirectory",
+                  "azureADOnlyAuthentication": true
+                }
               }
             },
             {

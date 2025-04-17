@@ -1,6 +1,6 @@
 using './main.bicep'
 
-param environmentName = readEnvironmentVariable('AZURE_ENV_NAME', 'env_name')
+param environmentName = readEnvironmentVariable('AZURE_ENV_NAME', 'byocatemplate')
 param cosmosLocation = readEnvironmentVariable('AZURE_ENV_COSMOS_LOCATION', 'eastus2')
 param deploymentType = readEnvironmentVariable('AZURE_ENV_MODEL_DEPLOYMENT_TYPE', 'GlobalStandard')
 param gptModelName = readEnvironmentVariable('AZURE_ENV_MODEL_NAME', 'gpt-4o-mini')

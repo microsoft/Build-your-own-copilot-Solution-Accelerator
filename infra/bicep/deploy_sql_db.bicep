@@ -30,13 +30,13 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
       publicNetworkAccess: 'Enabled'
       version: '12.0'
       restrictOutboundNetworkAccess: 'Disabled'
-      // administrators: {
-      //   login: managedIdentityName
-      //   sid: managedIdentityObjectId
-      //   tenantId: subscription().tenantId
-      //   administratorType: 'ActiveDirectory'
-      //   azureADOnlyAuthentication: true
-      // }
+      administrators: {
+        login: managedIdentityName
+        sid: managedIdentityObjectId
+        tenantId: subscription().tenantId
+        administratorType: 'ActiveDirectory'
+        azureADOnlyAuthentication: true
+      }
     }
 }
 
