@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.34.44.8038",
-      "templateHash": "5995671308040328650"
+      "templateHash": "5749110950649335177"
     }
   },
   "parameters": {
@@ -2214,6 +2214,14 @@
           },
           "logAnalyticsWorkspaceName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.logAnalyticsWorkspaceResourceName.value]"
+          },
+          "aiProjectConnectionString": {
+            "reference": {
+              "keyVault": {
+                "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.KeyVault/vaults', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.keyvaultName.value)]"
+              },
+              "secretName": "AZURE-AI-PROJECT-CONN-STRING"
+            }
           }
         },
         "template": {
@@ -2223,7 +2231,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "2778443846888822542"
+              "templateHash": "2915460189477392481"
             }
           },
           "parameters": {
@@ -2301,6 +2309,13 @@
             },
             "logAnalyticsWorkspaceName": {
               "type": "string"
+            },
+            "aiProjectConnectionString": {
+              "type": "securestring"
+            },
+            "useAIProjectClientFlag": {
+              "type": "string",
+              "defaultValue": "false"
             }
           },
           "variables": {
@@ -2428,6 +2443,14 @@
                     {
                       "name": "SQLDB_USER_MID",
                       "value": "[parameters('userassignedIdentityClientId')]"
+                    },
+                    {
+                      "name": "AZURE_AI_PROJECT_CONN_STRING",
+                      "value": "[parameters('aiProjectConnectionString')]"
+                    },
+                    {
+                      "name": "USE_AI_PROJECT_CLIENT",
+                      "value": "[parameters('useAIProjectClientFlag')]"
                     }
                   ]
                 }
