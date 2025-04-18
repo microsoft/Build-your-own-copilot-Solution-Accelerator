@@ -159,6 +159,14 @@ if [ $? -ne 0 ]; then
     error_flag=true
 fi
 
+# revert the key vault name and managed identity client id in the python files
+sed -i "s/${keyvaultName}/kv_to-be-replaced/g" ${pythonScriptPath}"create_search_index.py"
+sed -i "s/${keyvaultName}/kv_to-be-replaced/g" ${pythonScriptPath}"create_sql_tables.py"
+if [ -n "$managedIdentityClientId" ]; then
+    sed -i "s/${managedIdentityClientId}/mici_to-be-replaced/g" ${pythonScriptPath}"create_search_index.py"
+    sed -i "s/${managedIdentityClientId}/mici_to-be-replaced/g" ${pythonScriptPath}"create_sql_tables.py"
+fi
+
 if [ "$error_flag" = true ]; then
     echo "One or more errors occurred during the script execution."
     exit 1

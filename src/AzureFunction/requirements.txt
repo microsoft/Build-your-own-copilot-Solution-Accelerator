@@ -8,6 +8,8 @@ openai==1.64.0
 semantic_kernel==1.21.3
 pymssql==2.3.2
 azure-search-documents==11.6.0b9
+azure-ai-projects==1.0.0b9
+azure-ai-inference==1.0.0b9
 
 pyodbc==5.2.0
 azure-identity==1.20.0

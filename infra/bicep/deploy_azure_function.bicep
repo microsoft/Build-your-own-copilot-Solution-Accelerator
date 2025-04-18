@@ -26,6 +26,9 @@ param applicationInsightsId string
 param functionAppName string
 param containerAppEnvame string
 param logAnalyticsWorkspaceName string
+@secure()
+param aiProjectConnectionString string
+param useAIProjectClientFlag string = 'false'
 
 var azureOpenAIDeploymentModel = 'gpt-4o-mini'
 var azureOpenAIEmbeddingDeployment = 'text-embedding-ada-002'
@@ -181,6 +184,14 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         {
           name: 'SQLDB_USER_MID'
           value: userassignedIdentityClientId
+        }
+        {
+          name: 'AZURE_AI_PROJECT_CONN_STRING'
+          value: aiProjectConnectionString
+        }
+        {
+          name: 'USE_AI_PROJECT_CLIENT'
+          value: useAIProjectClientFlag
         }
       ]
     }

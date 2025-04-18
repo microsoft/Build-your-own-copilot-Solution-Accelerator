@@ -271,7 +271,8 @@ module azureFunctions 'deploy_azure_function.bicep' = {
     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityFnAppOutput.id
     applicationInsightsId: aifoundry.outputs.applicationInsightsId
     storageAccountName:aifoundry.outputs.storageAccountName
-    logAnalyticsWorkspaceName: aifoundry.outputs.logAnalyticsWorkspaceResourceName
+    logAnalyticsWorkspaceName:aifoundry.outputs.logAnalyticsWorkspaceResourceName
+    aiProjectConnectionString:keyVault.getSecret('AZURE-AI-PROJECT-CONN-STRING')
   }
   dependsOn:[keyVault]
 }
