@@ -14,5 +14,4 @@ To help you get started, here are some **Sample Prompts** you can ask after sele
 ![GenerateDraft](images/CA-GPQuestion.png)
 
 
-_This structured approach helps users quickly retrieve client-specific insights, track financial trends, and stay informed on client priorities for better decision-making and engagement.
-_
+_This structured approach helps users quickly retrieve client-specific insights, track financial trends, and stay informed on client priorities for better decision-making and engagement._
