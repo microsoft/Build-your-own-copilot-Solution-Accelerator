@@ -132,7 +132,7 @@ To change the azd parameters from the default values, follow the steps [here](./
     ```
 
 6. Open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service and get the app URL from `Default domain`.
-7. Test the app locally with the sample question: What is your return policy?. For more sample questions you can test in the application, see [Sample Questions](./docs/SampleQuestions.md) 
+7. Test the app locally with the sample question: What is your return policy?. For more sample questions you can test in the application, see [Sample Questions](./docs/SampleQuestions.md).
 8. You can now delete the resources by running `azd down`, if you are done trying out the application. 
 
 ### **How to install/deploy**
