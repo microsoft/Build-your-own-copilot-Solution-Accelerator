@@ -8,25 +8,35 @@ from types import SimpleNamespace
 
 import httpx
 import requests
-from azure.identity.aio import (DefaultAzureCredential,
-                                get_bearer_token_provider)
+from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider
 from dotenv import load_dotenv
+
 # from quart.sessions import SecureCookieSessionInterface
 from openai import AsyncAzureOpenAI
-from quart import (Blueprint, Quart, jsonify, make_response, render_template,
-                   request, send_from_directory, Response)
+from quart import (
+    Blueprint,
+    Quart,
+    jsonify,
+    render_template,
+    request,
+    send_from_directory,
+    Response
+)
 
-from backend.auth.auth_utils import (get_authenticated_user_details,
-                                     get_tenantid)
+from backend.auth.auth_utils import get_authenticated_user_details, get_tenantid
 from backend.history.cosmosdbservice import CosmosConversationClient
-from backend.utils import (convert_to_pf_format, format_as_ndjson,
-                           format_pf_non_streaming_response,
-                           format_stream_response, generateFilterString,
-                           parse_multi_columns)
+from backend.utils import (
+    convert_to_pf_format,
+    format_as_ndjson,
+    format_pf_non_streaming_response,
+    format_stream_response,
+    generateFilterString,
+    parse_multi_columns,
+)
 from db import get_connection
 from db import dict_cursor
 
-from chat_with_data_plugin import get_streaming_response_from_plugin
+from backend.chat_logic_handler import stream_response_from_wealth_assistant
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
@@ -959,7 +969,7 @@ async def complete_chat_request(request_body, request_headers):
 async def stream_chat_request(request_body, request_headers):
     if USE_AZUREFUNCTION:
         history_metadata = request_body.get("history_metadata", {})
-        function_url = STREAMING_AZUREFUNCTION_ENDPOINT
+        # function_url = STREAMING_AZUREFUNCTION_ENDPOINT
         apim_request_id = ""
 
         client_id = request_body.get("client_id")
@@ -967,10 +977,7 @@ async def stream_chat_request(request_body, request_headers):
             return jsonify({"error": "No client ID provided"}), 400
         query = request_body.get("messages")[-1].get("content")
 
-        print("Query:", query)
-        print("Client ID:", client_id)
-
-        sk_response = await get_streaming_response_from_plugin(query, client_id, request_headers, history_metadata)
+        sk_response = await stream_response_from_wealth_assistant(query, client_id)
 
         async def generate():
             chunk_id = str(uuid.uuid4())
@@ -981,25 +988,31 @@ async def stream_chat_request(request_body, request_headers):
                 deltaText = chunk
 
                 completionChunk = {
-                "id": chunk_id,
-                "model": AZURE_OPENAI_MODEL_NAME,
-                "created": created_time,
-                "object": "extensions.chat.completion.chunk",
-                "choices": [{
-                "messages": [{"role": "assistant", "content": deltaText}],
-                "delta": {"role": "assistant", "content": deltaText}
-                }],
-                "apim-request-id": request_headers.get("apim-request-id", ""),
-                "history_metadata": history_metadata,
+                    "id": chunk_id,
+                    "model": AZURE_OPENAI_MODEL_NAME,
+                    "created": created_time,
+                    "object": "extensions.chat.completion.chunk",
+                    "choices": [
+                        {
+                            "messages": [{"role": "assistant", "content": deltaText}],
+                            "delta": {"role": "assistant", "content": deltaText},
+                        }
+                    ],
+                    "apim-request-id": request_headers.get("apim-request-id", ""),
+                    "history_metadata": history_metadata,
                 }
 
                 completionChunk2 = json.loads(
-                json.dumps(completionChunk),
-                object_hook=lambda d: SimpleNamespace(**d)
+                    json.dumps(completionChunk),
+                    object_hook=lambda d: SimpleNamespace(**d),
                 )
 
                 yield json.dumps(
-                format_stream_response(completionChunk2, history_metadata, request_headers.get("apim-request-id", ""))
+                    format_stream_response(
+                        completionChunk2,
+                        history_metadata,
+                        request_headers.get("apim-request-id", ""),
+                    )
                 ) + "\n"
 
         return Response(generate(), content_type="application/json-lines")

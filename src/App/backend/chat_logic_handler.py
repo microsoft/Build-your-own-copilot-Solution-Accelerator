@@ -1,4 +1,3 @@
-import json
 import os
 import openai
 import struct
@@ -11,6 +10,7 @@ from semantic_kernel.contents.chat_message_content import ChatMessageContent
 from semantic_kernel.contents.utils.author_role import AuthorRole
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from typing import Annotated
+
 # --------------------------
 # Environment Variables
 # --------------------------
@@ -21,58 +21,11 @@ deployment = os.environ.get("AZURE_OPENAI_MODEL")
 search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT")
 search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
 
-
-# --------------------------
-# Get SQL Connection
-# --------------------------
-def get_connection():
-    driver = "{ODBC Driver 18 for SQL Server}"
-    server = os.environ.get("SQLDB_SERVER")
-    database = os.environ.get("SQLDB_DATABASE")
-    username = os.environ.get("SQLDB_USERNAME")
-    password = os.environ.get("SQLDB_PASSWORD")
-    mid_id = os.environ.get("SQLDB_USER_MID")
-
-    try:
-        credential = DefaultAzureCredential(managed_identity_client_id=mid_id)
-        token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("utf-16-LE")
-        token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
-        SQL_COPT_SS_ACCESS_TOKEN = 1256
-
-        connection_string = f"DRIVER={driver};SERVER={server};DATABASE={database};"
-        conn = pyodbc.connect(connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct})
-        return conn
-    except pyodbc.Error as e:
-        logging.error(f"Default Credential failed: {str(e)}")
-        conn = pyodbc.connect(
-            f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}",
-            timeout=5
-        )
-        return conn
-
-def get_client_name_from_db(client_id: str) -> str:
-    """
-    Connects to your SQL database and returns the client name for the given client_id.
-    """
-
-    conn = get_connection()
-    cursor = conn.cursor()
-    
-    sql = "SELECT Client FROM Clients WHERE ClientId = ?"
-    cursor.execute(sql, (client_id,))
-    row = cursor.fetchone()
-    conn.close()
-    
-    if row:
-        return row[0]  # The 'Client' column
-    else:
-        return ""
 # --------------------------
 # ChatWithDataPlugin Class
 # --------------------------
-# --------------------------
-# ChatWithDataPlugin Class
-# --------------------------
+
+
 class ChatWithDataPlugin:
     @kernel_function(name="GreetingsResponse", description="Respond to any greeting or general questions")
     def greeting(self, input: Annotated[str, "the question"]) -> Annotated[str, "The output is a string"]:
@@ -174,7 +127,7 @@ class ChatWithDataPlugin:
             sql_query = sql_query.replace("```sql", "").replace("```", "")
 
             print("Generated SQL:", sql_query)
-        
+
             conn = get_connection()
             # conn = pyodbc.connect(connectionString)
             cursor = conn.cursor()
@@ -281,19 +234,31 @@ class ChatWithDataPlugin:
 # --------------------------
 # Streaming Response Logic
 # --------------------------
-async def get_streaming_response_from_plugin(query: str, client_id: str, request_headers: dict, history_metadata: dict):
+
+
+async def stream_response_from_wealth_assistant(query: str, client_id: str):
+    """
+       Streams real-time chat response from the Wealth Assistant.
+       Uses Semantic Kernel agent with SQL and Azure Cognitive Search based on the client ID.
+    """
+
+    # Dynamically get the name from the database
     selected_client_name = get_client_name_from_db(client_id)  # Optionally fetch from DB
 
-    instructions = os.environ.get("AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT") or (
-       "You are a helpful assistant to a Wealth Advisor."
-        "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client."
-        "If the user mentions no name, assume they are asking about '{SelectedClientName}'."
-        "If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts."
-        "If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
-       
-    )
-    instructions = instructions.replace("{SelectedClientName}", selected_client_name)
+    # Prepare fallback instructions with the single-line prompt
+    host_instructions = os.environ.get("AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT")
+    if not host_instructions:
+        # Insert the name in the prompt:
+        host_instructions = (
+            "You are a helpful assistant to a Wealth Advisor."
+            "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client."
+            "If the user mentions no name, assume they are asking about '{SelectedClientName}'."
+            "If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts."
+            "If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
+        )
+    host_instructions = host_instructions.replace("{SelectedClientName}", selected_client_name)
 
+    # Create the agent using the Semantic Kernel Assistant Agent
     kernel = Kernel()
     kernel.add_plugin(ChatWithDataPlugin(), plugin_name="ChatWithData")
 
@@ -301,19 +266,21 @@ async def get_streaming_response_from_plugin(query: str, client_id: str, request
         kernel=kernel,
         service_id="agent",
         name="WealthAdvisor",
-        instructions=instructions,
+        instructions=host_instructions,
         api_key=api_key,
         deployment_name=deployment,
         endpoint=endpoint,
         api_version=api_version,
     )
 
+    # Create a conversation thread and add the user's message
     thread_id = await agent.create_thread()
     message = ChatMessageContent(role=AuthorRole.USER, content=query)
     await agent.add_chat_message(thread_id=thread_id, message=message)
 
-    additional = f"Always send clientId as {client_id}"
-    sk_response = agent.invoke_stream(thread_id=thread_id, additional_instructions=additional)
+    # Additional instructions: pass the clientId
+    additional_instructions = f"Always send clientId as {client_id}"
+    sk_response = agent.invoke_stream(thread_id=thread_id, additional_instructions=additional_instructions)
 
     async def generate():
         # yields deltaText strings one-by-one
@@ -323,3 +290,49 @@ async def get_streaming_response_from_plugin(query: str, client_id: str, request
             yield chunk.content  # just the deltaText
 
     return generate
+
+
+# --------------------------
+# Get SQL Connection
+# --------------------------
+def get_connection():
+    driver = "{ODBC Driver 18 for SQL Server}"
+    server = os.environ.get("SQLDB_SERVER")
+    database = os.environ.get("SQLDB_DATABASE")
+    username = os.environ.get("SQLDB_USERNAME")
+    password = os.environ.get("SQLDB_PASSWORD")
+    mid_id = os.environ.get("SQLDB_USER_MID")
+
+    try:
+        credential = DefaultAzureCredential(managed_identity_client_id=mid_id)
+        token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("utf-16-LE")
+        token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
+        SQL_COPT_SS_ACCESS_TOKEN = 1256
+
+        connection_string = f"DRIVER={driver};SERVER={server};DATABASE={database};"
+        conn = pyodbc.connect(connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct})
+        return conn
+    except pyodbc.Error as e:
+        logging.error(f"Default Credential failed: {str(e)}")
+        conn = pyodbc.connect(
+            f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}",
+            timeout=5
+        )
+        return conn
+
+
+def get_client_name_from_db(client_id: str) -> str:
+    """
+    Connects to your SQL database and returns the client name for the given client_id.
+    """
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "SELECT Client FROM Clients WHERE ClientId = ?"
+    cursor.execute(sql, (client_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return row[0]  # The 'Client' column
+    else:
+        return ""

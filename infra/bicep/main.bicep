@@ -247,41 +247,41 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
 // }
 
 // ========== Azure Functions Module ========== //
-module azureFunctions 'deploy_azure_function.bicep' = {
-  name : 'deploy_azure_function'
-  params:{
-    solutionLocation: solutionLocation
-    functionAppName:'${abbrs.compute.functionApp}${solutionPrefix}'
-    containerAppEnvame:'${abbrs.containers.containerAppsEnvironment}${solutionPrefix}'
-    azureOpenAIApiKey:keyVault.getSecret('AZURE-OPENAI-KEY')
-    azureOpenAIApiVersion:azureOpenaiAPIVersion
-    azureOpenAIEndpoint:aifoundry.outputs.aiServicesTarget
-    azureSearchAdminKey:keyVault.getSecret('AZURE-SEARCH-KEY')
-    azureSearchServiceEndpoint:aifoundry.outputs.aiSearchTarget
-    azureSearchIndex:'transcripts_index'
-    sqlServerName:sqlDBModule.outputs.sqlServerName
-    sqlDbName:sqlDBModule.outputs.sqlDbName
-    sqlDbUser:sqlDBModule.outputs.sqlDbUser
-    sqlDbPwd:keyVault.getSecret('SQLDB-PASSWORD')
-    imageTag: imageTag  
-    sqlSystemPrompt: functionAppSqlPrompt
-    callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
-    streamTextSystemPrompt: functionAppStreamTextSystemPrompt
-    userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId
-    userassignedIdentityId:managedIdentityModule.outputs.managedIdentityFnAppOutput.id
-    applicationInsightsId: aifoundry.outputs.applicationInsightsId
-    storageAccountName:aifoundry.outputs.storageAccountName
-    logAnalyticsWorkspaceName: aifoundry.outputs.logAnalyticsWorkspaceResourceName
-  }
-  dependsOn:[keyVault]
-}
+// module azureFunctions 'deploy_azure_function.bicep' = {
+//   name : 'deploy_azure_function'
+//   params:{
+//     solutionLocation: solutionLocation
+//     functionAppName:'${abbrs.compute.functionApp}${solutionPrefix}'
+//     containerAppEnvame:'${abbrs.containers.containerAppsEnvironment}${solutionPrefix}'
+//     azureOpenAIApiKey:keyVault.getSecret('AZURE-OPENAI-KEY')
+//     azureOpenAIApiVersion:azureOpenaiAPIVersion
+//     azureOpenAIEndpoint:aifoundry.outputs.aiServicesTarget
+//     azureSearchAdminKey:keyVault.getSecret('AZURE-SEARCH-KEY')
+//     azureSearchServiceEndpoint:aifoundry.outputs.aiSearchTarget
+//     azureSearchIndex:'transcripts_index'
+//     sqlServerName:sqlDBModule.outputs.sqlServerName
+//     sqlDbName:sqlDBModule.outputs.sqlDbName
+//     sqlDbUser:sqlDBModule.outputs.sqlDbUser
+//     sqlDbPwd:keyVault.getSecret('SQLDB-PASSWORD')
+//     imageTag: imageTag  
+//     sqlSystemPrompt: functionAppSqlPrompt
+//     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
+//     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
+//     userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId
+//     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityFnAppOutput.id
+//     applicationInsightsId: aifoundry.outputs.applicationInsightsId
+//     storageAccountName:aifoundry.outputs.storageAccountName
+//     logAnalyticsWorkspaceName: aifoundry.outputs.logAnalyticsWorkspaceResourceName
+//   }
+//   dependsOn:[keyVault]
+// }
 
-module azureFunctionURL 'deploy_azure_function_script_url.bicep' = {
-  name : 'deploy_azure_function_script_url'
-  params:{
-    functionAppName: azureFunctions.outputs.functionAppName
-  }
-}
+// module azureFunctionURL 'deploy_azure_function_script_url.bicep' = {
+//   name : 'deploy_azure_function_script_url'
+//   params:{
+//     functionAppName: azureFunctions.outputs.functionAppName
+//   }
+// }
 
 // ========== App Service Module ========== //
 module appserviceModule 'deploy_app_service.bicep' = {
@@ -320,8 +320,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureOpenAIEmbeddingName:embeddingModel
     AzureOpenAIEmbeddingkey:keyVault.getSecret('AZURE-OPENAI-KEY')
     AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aiServicesTarget
-    USE_AZUREFUNCTION:'True'
-    STREAMING_AZUREFUNCTION_ENDPOINT: azureFunctionURL.outputs.functionAppUrl
+    USE_INTERNAL_STREAM:'True'
     SQLDB_SERVER:sqlDBModule.outputs.sqlServerName
     SQLDB_DATABASE:sqlDBModule.outputs.sqlDbName
     SQLDB_USERNAME:sqlDBModule.outputs.sqlDbUser
@@ -352,7 +351,5 @@ output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
 output RESOURCE_GROUP_NAME string = resourceGroup().name
 output SQLDB_SERVER string = replace(sqlDBModule.outputs.sqlServerName, '.database.windows.net','')
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
-output MANAGEDINDENTITY_FNAPP_NAME string = managedIdentityModule.outputs.managedIdentityFnAppOutput.name
-output MANAGEDINDENTITY_FNAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityFnAppOutput.clientId
 output MANAGEDINDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
 output MANAGEDINDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId

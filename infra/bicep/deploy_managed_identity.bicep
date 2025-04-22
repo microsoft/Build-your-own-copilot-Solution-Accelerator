@@ -36,14 +36,14 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-resource managedIdentityFnApp 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${miName}-fn'
-  location: solutionLocation
-  tags: {
-    app: solutionName
-    location: solutionLocation
-  }
-}
+// resource managedIdentityFnApp 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+//   name: '${miName}-fn'
+//   location: solutionLocation
+//   tags: {
+//     app: solutionName
+//     location: solutionLocation
+//   }
+// }
 
 resource managedIdentityWebApp 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: '${miName}-webapp'
@@ -106,12 +106,12 @@ output managedIdentityOutput object = {
   name: miName
 }
 
-output managedIdentityFnAppOutput object = {
-  id: managedIdentityFnApp.id
-  objectId: managedIdentityFnApp.properties.principalId
-  clientId: managedIdentityFnApp.properties.clientId
-  name: managedIdentityFnApp.name
-}
+// output managedIdentityFnAppOutput object = {
+//   id: managedIdentityFnApp.id
+//   objectId: managedIdentityFnApp.properties.principalId
+//   clientId: managedIdentityFnApp.properties.clientId
+//   name: managedIdentityFnApp.name
+// }
 
 output managedIdentityWebAppOutput object = {
   id: managedIdentityWebApp.id

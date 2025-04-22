@@ -120,7 +120,7 @@ param AzureOpenAIEmbeddingEndpoint string = ''
 param WebAppEnableChatHistory string = 'False'
 
 @description('Use Azure Function')
-param USE_AZUREFUNCTION string = 'True'
+param USE_INTERNAL_STREAM string = 'True'
 
 @description('Azure Function Endpoint')
 param STREAMING_AZUREFUNCTION_ENDPOINT string = ''
@@ -358,8 +358,8 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           value: SQLDB_PASSWORD
         }
 
-        {name: 'USE_AZUREFUNCTION'
-          value: USE_AZUREFUNCTION
+        {name: 'USE_INTERNAL_STREAM'
+          value: USE_INTERNAL_STREAM
         }
 
         {name: 'STREAMING_AZUREFUNCTION_ENDPOINT'
