@@ -1337,7 +1337,7 @@ async def test_stream_chat_request_no_client_id():
     request_headers = {"apim-request-id": "test_id"}
 
     async with create_app().app_context():
-        with patch("app.USE_AZUREFUNCTION", True):
+        with patch("app.USE_INTERNAL_STREAM", True):
             response, status_code = await stream_chat_request(
                 request_body, request_headers
             )
@@ -1355,7 +1355,7 @@ async def test_stream_chat_request_without_azurefunction():
     }
     request_headers = {"apim-request-id": "test_id"}
 
-    with patch("app.USE_AZUREFUNCTION", False):
+    with patch("app.USE_INTERNAL_STREAM", False):
         with patch("app.send_chat_request", new_callable=AsyncMock) as mock_send:
             mock_send.return_value = (
                 async_generator(
