@@ -29,6 +29,7 @@ use_ai_project_client = os.environ.get("USE_AI_PROJECT_CLIENT", "false").lower()
 # --------------------------
 
 class ChatWithDataPlugin:
+    
     @kernel_function(name="GreetingsResponse", description="Respond to any greeting or general questions")
     def greeting(self, input: Annotated[str, "the question"]) -> Annotated[str, "The output is a string"]:
         """
