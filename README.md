@@ -17,8 +17,8 @@ It leverages Azure OpenAI Service, Azure AI Search and Microsoft Fabric, to stre
 
 > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
 
-<!-- >**Version history:**  
->An updated version of the **Build Your Own Copilot** solution accelerator was published on **[MM/DD/YYYY]**. If you deployed the accelerator prior to that date, please see the “Version history” in the [Version History](#version-history) section for details. -->
+>**Version history:**  
+>An updated version of the **Build Your Own Copilot** solution accelerator was published on **[MM/DD/YYYY]**. If you deployed the accelerator prior to that date, please see the “Version history” in the [Version History](#version-history) section for details.
 
 **Technical Key Features**
 
@@ -123,7 +123,7 @@ Version History
 </h2>
 An updated version of the **Build Your Own Copilot** solution accelerator was published on **[MM/DD/YYYY]**. If you deployed the accelerator prior to that date, please note the following changes:
 
-- The **Research Assistant** project has been moved to a separate branch. You can access it here: [**Research Assistant Branch**](#).
+- The **Research Assistant** project has been moved to a separate branch. You can access it here: [**Research Assistant Branch**](https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator/tree/byoc-researcher).
 - This repository now focuses exclusively on the **Client Advisor** solution scenario.
 - The previous folder structure containing both `research-assistant/` and `client-advisor/` directories has been removed.
 - The **Client Advisor** solution accelerator is now featured directly on the main landing page, with no additional folders associated.
