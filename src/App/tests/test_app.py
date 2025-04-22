@@ -1314,7 +1314,7 @@ async def test_stream_chat_request_with_azurefunction():
     request_body = {
         "history_metadata": {},
         "client_id": "test_client",
-        "messages": [{"content": "test query"}],
+        "messages": [{"content": "test query", "role": "user"}],
     }
     request_headers = {"apim-request-id": "test_id"}
 

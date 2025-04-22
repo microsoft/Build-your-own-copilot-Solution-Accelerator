@@ -173,6 +173,11 @@ param sqlSystemPrompt string
 param callTranscriptSystemPrompt string
 @description('Azure Function App Stream Text System Prompt')
 param streamTextSystemPrompt string
+
+@secure()
+param aiProjectConnectionString string
+param useAIProjectClientFlag string = 'false'
+
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
 // var WebAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
@@ -432,6 +437,14 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT'
           value: streamTextSystemPrompt
+        }
+        {
+          name: 'AZURE_AI_PROJECT_CONN_STRING'
+          value: aiProjectConnectionString
+        }
+        {
+          name: 'USE_AI_PROJECT_CLIENT'
+          value: useAIProjectClientFlag
         }
       ]
       linuxFxVersion: WebAppImageName

@@ -4,6 +4,7 @@ import struct
 import logging
 import pyodbc
 from azure.identity import DefaultAzureCredential
+from azure.ai.projects import AIProjectClient
 from semantic_kernel.agents.open_ai import AzureAssistantAgent
 from semantic_kernel.kernel import Kernel
 from semantic_kernel.contents.chat_message_content import ChatMessageContent
@@ -20,12 +21,12 @@ api_version = os.environ.get("OPENAI_API_VERSION")
 deployment = os.environ.get("AZURE_OPENAI_MODEL")
 search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT")
 search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
+project_connection_string = os.environ.get("AZURE_AI_PROJECT_CONN_STRING")
+use_ai_project_client = os.environ.get("USE_AI_PROJECT_CLIENT", "false").lower() == "true"
 
 # --------------------------
 # ChatWithDataPlugin Class
 # --------------------------
-
-
 class ChatWithDataPlugin:
     @kernel_function(name="GreetingsResponse", description="Respond to any greeting or general questions")
     def greeting(self, input: Annotated[str, "the question"]) -> Annotated[str, "The output is a string"]:
@@ -33,27 +34,50 @@ class ChatWithDataPlugin:
         Simple greeting handler using Azure OpenAI.
         """
         try:
-            client = openai.AzureOpenAI(
-                azure_endpoint=endpoint,
-                api_key=api_key,
-                api_version=api_version
-            )
-            completion = client.chat.completions.create(
-                model=deployment,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant to respond to greetings or general questions."
-                    },
-                    {
-                        "role": "user",
-                        "content": input
-                    },
-                ],
-                temperature=0,
-                top_p=1,
-                n=1
-            )
+            if self.use_ai_project_client:
+                project = AIProjectClient.from_connection_string(
+                    conn_str=self.azure_ai_project_conn_string,
+                    credential=DefaultAzureCredential()
+                )
+                client = project.inference.get_chat_completions_client()
+
+                completion = client.complete(
+                    model=self.azure_openai_deployment_model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a helpful assistant to respond to greetings or general questions."
+                        },
+                        {
+                            "role": "user",
+                            "content": input
+                        },
+                    ],
+                    temperature=0,
+                )
+            else:
+                client = openai.AzureOpenAI(
+                    azure_endpoint=endpoint,
+                    api_key=api_key,
+                    api_version=api_version
+                )
+                completion = client.chat.completions.create(
+                    model=deployment,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a helpful assistant to respond to greetings or general questions."
+                        },
+                        {
+                            "role": "user",
+                            "content": input
+                        },
+                    ],
+                    temperature=0,
+                    top_p=1,
+                    n=1
+                )
+
             answer = completion.choices[0].message.content
         except Exception as e:
             answer = f"Error retrieving greeting response: {str(e)}"
@@ -71,13 +95,6 @@ class ChatWithDataPlugin:
         """
         clientid = ClientId
         query = input
-
-        # Initialize the Azure OpenAI client
-        client = openai.AzureOpenAI(
-            azure_endpoint=endpoint,
-            api_key=api_key,
-            api_version=api_version
-        )
 
         # Retrieve the SQL prompt from environment variables (if available)
         sql_prompt = os.environ.get("AZURE_SQL_SYSTEM_PROMPT")
@@ -110,16 +127,38 @@ class ChatWithDataPlugin:
             Only return the generated SQL query. Do not return anything else.'''
 
         try:
-            completion = client.chat.completions.create(
-                model=deployment,
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": sql_prompt},
-                ],
-                temperature=0,
-                top_p=1,
-                n=1
-            )
+            if use_ai_project_client:
+                project = AIProjectClient.from_connection_string(
+                    conn_str=project_connection_string,
+                    credential=DefaultAzureCredential()
+                )
+                client = project.inference.get_chat_completions_client()
+                completion = client.complete(
+                    model=deployment,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": sql_prompt},
+                    ],
+                    temperature=0,
+                )
+
+            else:
+                # Initialize the Azure OpenAI client
+                client = openai.AzureOpenAI(
+                    azure_endpoint=endpoint,
+                    api_key=api_key,
+                    api_version=api_version
+                )
+                completion = client.chat.completions.create(
+                    model=deployment,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": sql_prompt},
+                    ],
+                    temperature=0,
+                    top_p=1,
+                    n=1
+                )
 
             sql_query = completion.choices[0].message.content
 
@@ -127,7 +166,7 @@ class ChatWithDataPlugin:
             sql_query = sql_query.replace("```sql", "").replace("```", "")
 
             print("Generated SQL:", sql_query)
-
+        
             conn = get_connection()
             # conn = pyodbc.connect(connectionString)
             cursor = conn.cursor()
@@ -190,7 +229,6 @@ class ChatWithDataPlugin:
                             "parameters": {
                                 "endpoint": search_endpoint,
                                 "index_name": os.environ.get("AZURE_SEARCH_INDEX"),
-                                "semantic_configuration": "default",
                                 "query_type": "vector_simple_hybrid",
                                 "fields_mapping": {
                                     "content_fields_separator": "\n",
@@ -230,6 +268,7 @@ class ChatWithDataPlugin:
 
         except Exception as e:
             return f"Error retrieving data from call transcripts: {str(e)}"
+
 
 # --------------------------
 # Streaming Response Logic

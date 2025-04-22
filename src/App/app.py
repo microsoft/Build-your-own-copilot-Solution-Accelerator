@@ -260,7 +260,7 @@ PROMPTFLOW_RESPONSE_FIELD_NAME = os.environ.get(
 PROMPTFLOW_CITATIONS_FIELD_NAME = os.environ.get(
     "PROMPTFLOW_CITATIONS_FIELD_NAME", "documents"
 )
-USE_AZUREFUNCTION = os.environ.get("USE_AZUREFUNCTION", "false").lower() == "true"
+USE_INTERNAL_STREAM = os.environ.get("USE_INTERNAL_STREAM", "false").lower() == "true"
 FUNCTIONAPP_RESPONSE_FIELD_NAME = os.environ.get(
     "FUNCTIONAPP_RESPONSE_FIELD_NAME", "reply"
 )
@@ -901,7 +901,7 @@ async def complete_chat_request(request_body, request_headers):
             PROMPTFLOW_RESPONSE_FIELD_NAME,
             PROMPTFLOW_CITATIONS_FIELD_NAME,
         )
-    elif USE_AZUREFUNCTION:
+    elif USE_INTERNAL_STREAM:
         request_body = await request.get_json()
         client_id = request_body.get("client_id")
         print(request_body)
@@ -967,7 +967,7 @@ async def complete_chat_request(request_body, request_headers):
 
 
 async def stream_chat_request(request_body, request_headers):
-    if USE_AZUREFUNCTION:
+    if USE_INTERNAL_STREAM:
         history_metadata = request_body.get("history_metadata", {})
         # function_url = STREAMING_AZUREFUNCTION_ENDPOINT
         apim_request_id = ""

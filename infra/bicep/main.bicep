@@ -339,6 +339,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     sqlSystemPrompt: functionAppSqlPrompt
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
+    aiProjectConnectionString:keyVault.getSecret('AZURE-AI-PROJECT-CONN-STRING')
   }
   scope: resourceGroup(resourceGroup().name)
 }
