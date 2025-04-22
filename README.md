@@ -48,135 +48,45 @@ The sample data used in this repository is synthetic and generated using Azure O
 QUICK DEPLOY
 </h2>
 
-### Prerequisites
+Follow the quick deploy steps on the deployment guide to deploy this solution to your own Azure subscription.
 
-To deploy this solution accelerator, ensure you have access to an [Azure subscription](https://azure.microsoft.com/free/) with the necessary permissions to create **resource groups and resources**. Follow the steps in  [Azure Account Set Up](./docs/AzureAccountSetUp.md) 
+[Click here to launch the deployment guide](./docs/DeploymentGuide.md)
 
-Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/table) page and select a **region** where the following services are available: 
 
-- [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
-- [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
-- [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/)
-- [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/)
-- [Azure SQL Database](https://learn.microsoft.com/en-us/azure/azure-sql/)
-- [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/)
-- [Azure Semantic Search](./docs/AzureSemanticSearchRegion.md)  
+| [![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?repo=microsoft/Build-your-own-copilot-Solution-Accelerator&ref=dev) | [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator&ref=dev) | 
+|---|---|
 
-Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central.
-
-### ⚠️ Important: Check Azure OpenAI Quota Availability  
-
-➡️ To ensure sufficient quota is available in your subscription, please follow **[Quota check instructions guide](./docs/quota_check.md)** before you deploy the solution.
+> ⚠️ **Important: Check Azure OpenAI Quota Availability** <br/>To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./docs/quota_check.md) before you deploy the solution.
 
 <!-- Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central. -->
 <!-- 
 | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fdocument-generation-solution-accelerator%2Fmain%2Finfra%2Fmain.json) |
 |---|
 -->
-<<<<< Placeholder for Codespace | Placeholder for Dev Container >>>>>
-
-### Configurable Deployment Settings
-
-When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](./docs/CustomizingAzdParameters.md):  
-
-| **Setting** | **Description** |  **Default value** |
-|------------|----------------|  ------------|
-| **Azure OpenAI Location** | The region where OpenAI deploys | eastus2 | 
-| **Environment Name** | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources. |  byocatemplate |
-| **Cosmos Location** | A **less busy** region for **CosmosDB**, useful in case of availability constraints. |  eastus2 |
-| **Deployment Type** | Select from a drop-down list. |  Global Standard |
-| **GPT Model** | OpenAI GPT model  | gpt-4o-mini |  
-| **GPT Model Deployment Capacity** | Configure capacity for **GPT models**. | 30k |
-| **Embedding Model** | OpenAI embedding model |  text-embedding-ada-002 |
-| **Embedding Model Capacity** | Set the capacity for **embedding models**. |  80k |
-
-
-### [Optional] Quota Recommendations  
-By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tokens**, so we recommend
-
-<!-- **For Global Standard | GPT-4o-mini - the capacity to at least 150k tokens post-deployment for optimal performance.** -->
-
-To adjust quota settings, follow these [steps](./docs/AzureGPTQuotaSettings.md)  
-
-### Deploying
-
-To change the azd parameters from the default values, follow the steps [here](./docs/CustomizingAzdParameters.md). 
-
-
-1. Login to Azure:
-
-    ```shell
-    azd auth login
-    ```
-
-    #### To authenticate with Azure Developer CLI (`azd`), use the following command with your **Tenant ID**:
-
-    ```sh
-    azd auth login --tenant-id <tenant-id>
-   ```
-
-2. Provision and deploy all the resources:
-
-    ```shell
-    azd up
-    ```
-
-3. Provide an `azd` environment name (like "byocaapp")
-4. Select a subscription from your Azure account, and select a location which has quota for all the resources. 
-    * This deployment will take *7-10 minutes* to provision the resources in your account and set up the solution with sample data. 
-    * If you get an error or timeout with deployment, changing the location can help, as there may be availability constraints for the resources.
-
-5. Once the deployment has completed successfully and you would like to use the sample data, run the bash command printed in the terminal. The bash command will look like the following: 
-    ```shell 
-    bash ./infra/scripts/process_sample_data.sh
-    ```
-
-6. Open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service and get the app URL from `Default domain`.
-7. Test the app locally with the sample question with any selected client: _Show latest asset value by asset type?_. For more sample questions you can test in the application, see [Sample Questions](./docs/SampleQuestions.md).
-8. You can now delete the resources by running `azd down`, if you are done trying out the application. 
-
-### **How to install/deploy**
-
-1. Please check the link [Azure Products by Region](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) and choose a region where Azure AI Search, Semantic Ranker, Azure OpenAI Service, and Azure AI Foundry are available. 
-
-2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
-
-   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fmain%2Finfra%2Fbicep%2Fmain.json)
-
-3. Alternatively, you can use the following button to open the project in a dev container using GitHub Codespaces:
-
-   [![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?repo=microsoft/Build-your-own-copilot-Solution-Accelerator&ref=dev)
-   [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator&ref=dev)
-
-4. To use a local dev container, ensure you have Docker and Visual Studio Code installed. Then, create a `.devcontainer` folder in the root of the project and include the necessary configuration files. You can refer to the [Dev Containers documentation](https://code.visualstudio.com/docs/devcontainers/containers) for guidance.
-
-5. You will need to select an Azure Subscription, create/select a Resource group, Region, a unique Solution Prefix and an Azure location for Cosmos DB.
-
-   ![image](docs/images/readMe/armDeployment.png)
-
-6. When deployment is complete, Follow steps in [Fabric Deployment guide](./docs/FabricDeployment.md) to set up the data processing pipelines and Power BI report in Fabric.
-
-7. Optionally, follow steps in [Teams Tab App guide](./docs/TeamsAppDeployment.md) to add the Client Advisor app to Microsoft Teams.
-
 
 <br/>
 <br>
 <h2><img src="./docs/images/readMe/supportingDocuments.png" width="64">
 <br/>
-Supporting documents
+Supporting Documentation
 </h2>
+
+### Costs
+
+
+### Security guidelines
 
 Supporting documents coming soon.
 
 
-<br>
+<!-- <br>
 <h2><img src="./docs/images/readMe/customerTruth.png" width="64">
 </br>
 Customer truth
 </h2>
 Customer stories coming soon.
 
-<br/>
+<br/> -->
 
 <h2>
 Version History
