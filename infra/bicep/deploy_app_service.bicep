@@ -163,9 +163,20 @@ param userassignedIdentityId string
 param userassignedIdentityClientId string
 param applicationInsightsId string
 
+@secure()
+param azureSearchAdminKey string
+param azureSearchServiceEndpoint string
+
+@description('Azure Function App SQL System Prompt')
+param sqlSystemPrompt string
+@description('Azure Function App CallTranscript System Prompt')
+param callTranscriptSystemPrompt string
+@description('Azure Function App Stream Text System Prompt')
+param streamTextSystemPrompt string
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
 // var WebAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
+var valueOne = '1'
 
 var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${imageTag}'
 
@@ -385,6 +396,42 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'SQLDB_USER_MID'
           value: userassignedIdentityClientId
+        }
+        {
+          name: 'OPENAI_API_VERSION'
+          value: AzureOpenAIApiVersion
+        }
+        {
+          name: 'AZURE_AI_SEARCH_API_KEY'
+          value: azureSearchAdminKey
+        }
+        {
+          name: 'AZURE_AI_SEARCH_ENDPOINT'
+          value: azureSearchServiceEndpoint
+        }
+        {
+          name: 'PYTHON_ENABLE_INIT_INDEXING'
+          value: valueOne
+        }
+        {
+          name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
+          value: valueOne
+        }
+        {
+          name: 'SQLDB_CONNECTION_STRING'
+          value: 'TBD'
+        }
+        {
+          name: 'AZURE_SQL_SYSTEM_PROMPT'
+          value: sqlSystemPrompt
+        }
+        {
+          name: 'AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT'
+          value: callTranscriptSystemPrompt
+        }
+        {
+          name: 'AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT'
+          value: streamTextSystemPrompt
         }
       ]
       linuxFxVersion: WebAppImageName

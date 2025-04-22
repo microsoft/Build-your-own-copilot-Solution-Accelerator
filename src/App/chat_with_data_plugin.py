@@ -14,10 +14,10 @@ from typing import Annotated
 # --------------------------
 # Environment Variables
 # --------------------------
-endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
-api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
+endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+api_key = os.environ.get("AZURE_OPENAI_KEY")
 api_version = os.environ.get("OPENAI_API_VERSION")
-deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
+deployment = os.environ.get("AZURE_OPENAI_MODEL")
 search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT")
 search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
 
@@ -283,7 +283,7 @@ class ChatWithDataPlugin:
 # --------------------------
 async def get_streaming_response_from_plugin(query: str, client_id: str, request_headers: dict, history_metadata: dict):
     selected_client_name = get_client_name_from_db(client_id)  # Optionally fetch from DB
-    
+
     instructions = os.environ.get("AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT") or (
        "You are a helpful assistant to a Wealth Advisor."
         "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client."

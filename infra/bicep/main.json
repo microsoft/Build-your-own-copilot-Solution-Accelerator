@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.34.44.8038",
-      "templateHash": "5995671308040328650"
+      "templateHash": "520713267511660944"
     }
   },
   "parameters": {
@@ -2667,6 +2667,26 @@
           },
           "applicationInsightsId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.applicationInsightsId.value]"
+          },
+          "azureSearchAdminKey": {
+            "reference": {
+              "keyVault": {
+                "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.KeyVault/vaults', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.keyvaultName.value)]"
+              },
+              "secretName": "AZURE-SEARCH-KEY"
+            }
+          },
+          "azureSearchServiceEndpoint": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchTarget.value]"
+          },
+          "sqlSystemPrompt": {
+            "value": "[variables('functionAppSqlPrompt')]"
+          },
+          "callTranscriptSystemPrompt": {
+            "value": "[variables('functionAppCallTranscriptSystemPrompt')]"
+          },
+          "streamTextSystemPrompt": {
+            "value": "[variables('functionAppStreamTextSystemPrompt')]"
           }
         },
         "template": {
@@ -2676,7 +2696,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "2369588288479285540"
+              "templateHash": "10309622026435315230"
             }
           },
           "parameters": {
@@ -3030,9 +3050,34 @@
             },
             "applicationInsightsId": {
               "type": "string"
+            },
+            "azureSearchAdminKey": {
+              "type": "securestring"
+            },
+            "azureSearchServiceEndpoint": {
+              "type": "string"
+            },
+            "sqlSystemPrompt": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Function App SQL System Prompt"
+              }
+            },
+            "callTranscriptSystemPrompt": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Function App CallTranscript System Prompt"
+              }
+            },
+            "streamTextSystemPrompt": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Function App Stream Text System Prompt"
+              }
             }
           },
           "variables": {
+            "valueOne": "1",
             "WebAppImageName": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:{0}', parameters('imageTag'))]"
           },
           "resources": [
@@ -3252,6 +3297,42 @@
                     {
                       "name": "SQLDB_USER_MID",
                       "value": "[parameters('userassignedIdentityClientId')]"
+                    },
+                    {
+                      "name": "OPENAI_API_VERSION",
+                      "value": "[parameters('AzureOpenAIApiVersion')]"
+                    },
+                    {
+                      "name": "AZURE_AI_SEARCH_API_KEY",
+                      "value": "[parameters('azureSearchAdminKey')]"
+                    },
+                    {
+                      "name": "AZURE_AI_SEARCH_ENDPOINT",
+                      "value": "[parameters('azureSearchServiceEndpoint')]"
+                    },
+                    {
+                      "name": "PYTHON_ENABLE_INIT_INDEXING",
+                      "value": "[variables('valueOne')]"
+                    },
+                    {
+                      "name": "PYTHON_ISOLATE_WORKER_DEPENDENCIES",
+                      "value": "[variables('valueOne')]"
+                    },
+                    {
+                      "name": "SQLDB_CONNECTION_STRING",
+                      "value": "TBD"
+                    },
+                    {
+                      "name": "AZURE_SQL_SYSTEM_PROMPT",
+                      "value": "[parameters('sqlSystemPrompt')]"
+                    },
+                    {
+                      "name": "AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT",
+                      "value": "[parameters('callTranscriptSystemPrompt')]"
+                    },
+                    {
+                      "name": "AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT",
+                      "value": "[parameters('streamTextSystemPrompt')]"
                     }
                   ],
                   "linuxFxVersion": "[variables('WebAppImageName')]"

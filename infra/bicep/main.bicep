@@ -335,6 +335,11 @@ module appserviceModule 'deploy_app_service.bicep' = {
     userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityWebAppOutput.id
     applicationInsightsId: aifoundry.outputs.applicationInsightsId
+    azureSearchAdminKey:keyVault.getSecret('AZURE-SEARCH-KEY')
+    azureSearchServiceEndpoint:aifoundry.outputs.aiSearchTarget
+    sqlSystemPrompt: functionAppSqlPrompt
+    callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
+    streamTextSystemPrompt: functionAppStreamTextSystemPrompt
   }
   scope: resourceGroup(resourceGroup().name)
 }
