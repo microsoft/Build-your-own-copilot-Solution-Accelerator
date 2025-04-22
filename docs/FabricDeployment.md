@@ -81,24 +81,3 @@
 8. Click on `Overview` from the left menu. Then click on `Restart` button in the top menu. Then click on `Yes` in the pop-up message. 
 
    ![Application Restart](images/fabric/AppServiceRestart.png)
-
-    
-## Step 6: Add Authentication in Azure App Service configuration
-
-1. Click on `Authentication` from left menu.
-
-  ![Authentication](images/fabric/AppAuthentication.png)
-
-2. Click on `+ Add Provider` to see a list of identity providers.
-
-  ![Authentication Identity](images/fabric/AppAuthenticationIdentity.png)
-
-3. Click on `+ Add Provider` to see a list of identity providers.
-
-  ![Add Provider](images/fabric/AppAuthIdentityProvider.png)
-
-4. Select the first option `Microsoft Entra Id` from the drop-down list.
- ![Add Provider](images/fabric/AppAuthIdentityProviderAdd.png)
-
-5. Accept the default values and click on `Add` button to go back to the previous page with the identify provider added.
- ![Add Provider](images/fabric/AppAuthIdentityProviderAdded.png)
