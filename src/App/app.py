@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 # from quart.sessions import SecureCookieSessionInterface
 from openai import AsyncAzureOpenAI
 from quart import (Blueprint, Quart, jsonify, make_response, render_template,
-                   request, send_from_directory)
+                   request, send_from_directory, Response)
 
 from backend.auth.auth_utils import (get_authenticated_user_details,
                                      get_tenantid)
@@ -25,6 +25,8 @@ from backend.utils import (convert_to_pf_format, format_as_ndjson,
                            parse_multi_columns)
 from db import get_connection
 from db import dict_cursor
+
+from chat_with_data_plugin import get_streaming_response_from_plugin
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
@@ -965,51 +967,11 @@ async def stream_chat_request(request_body, request_headers):
             return jsonify({"error": "No client ID provided"}), 400
         query = request_body.get("messages")[-1].get("content")
 
-        async def generate():
-            deltaText = ""
-            # async for completionChunk in response:
-            timeout = httpx.Timeout(10.0, read=None)
-            async with httpx.AsyncClient(
-                verify=False, timeout=timeout
-            ) as client:  # verify=False for development purposes
-                query_url = function_url + "?query=" + query + ":::" + client_id
-                async with client.stream("GET", query_url) as response:
-                    async for chunk in response.aiter_text():
-                        deltaText = ""
-                        deltaText = chunk
-                        completionChunk1 = {
-                            "id": "",
-                            "model": "",
-                            "created": 0,
-                            "object": "",
-                            "choices": [{"messages": [], "delta": {}}],
-                            "apim-request-id": "",
-                            "history_metadata": history_metadata,
-                        }
+        print("Query:", query)
+        print("Client ID:", client_id)
 
-                        completionChunk1["id"] = str(uuid.uuid4())
-                        completionChunk1["model"] = AZURE_OPENAI_MODEL_NAME
-                        completionChunk1["created"] = int(time.time())
-                        completionChunk1["object"] = "extensions.chat.completion.chunk"
-                        completionChunk1["apim-request-id"] = request_headers.get(
-                            "apim-request-id"
-                        )
-                        completionChunk1["choices"][0]["messages"].append(
-                            {"role": "assistant", "content": deltaText}
-                        )
-                        completionChunk1["choices"][0]["delta"] = {
-                            "role": "assistant",
-                            "content": deltaText,
-                        }
-                        completionChunk2 = json.loads(
-                            json.dumps(completionChunk1),
-                            object_hook=lambda d: SimpleNamespace(**d),
-                        )
-                        yield format_stream_response(
-                            completionChunk2, history_metadata, apim_request_id
-                        )
-
-        return generate()
+        response_stream = await get_streaming_response_from_plugin(query, client_id, request_headers, history_metadata)
+        return Response(response_stream(), content_type='text/event-stream')
 
     else:
         response, apim_request_id = await send_chat_request(
@@ -1029,11 +991,7 @@ async def stream_chat_request(request_body, request_headers):
 async def conversation_internal(request_body, request_headers):
     try:
         if SHOULD_STREAM:
-            result = await stream_chat_request(request_body, request_headers)
-            response = await make_response(format_as_ndjson(result))
-            response.timeout = None
-            response.mimetype = "application/json-lines"
-            return response
+            return await stream_chat_request(request_body, request_headers)
         else:
             result = await complete_chat_request(request_body, request_headers)
             return jsonify(result)
