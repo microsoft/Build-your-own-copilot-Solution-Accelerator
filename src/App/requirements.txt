@@ -26,3 +26,9 @@ pytest-asyncio==0.24.0
 pytest-cov==5.0.0
 
 pyodbc==5.2.0
+
+
+semantic_kernel==1.21.3
+azure-search-documents==11.6.0b9
+azure-ai-projects==1.0.0b9
+azure-ai-inference==1.0.0b9

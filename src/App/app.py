@@ -970,8 +970,39 @@ async def stream_chat_request(request_body, request_headers):
         print("Query:", query)
         print("Client ID:", client_id)
 
-        response_stream = await get_streaming_response_from_plugin(query, client_id, request_headers, history_metadata)
-        return Response(response_stream(), content_type='text/event-stream')
+        sk_response = await get_streaming_response_from_plugin(query, client_id, request_headers, history_metadata)
+
+        async def generate():
+            chunk_id = str(uuid.uuid4())
+            created_time = int(time.time())
+
+            async for chunk in sk_response():
+                deltaText = ""
+                deltaText = chunk
+
+                completionChunk = {
+                "id": chunk_id,
+                "model": AZURE_OPENAI_MODEL_NAME,
+                "created": created_time,
+                "object": "extensions.chat.completion.chunk",
+                "choices": [{
+                "messages": [{"role": "assistant", "content": deltaText}],
+                "delta": {"role": "assistant", "content": deltaText}
+                }],
+                "apim-request-id": request_headers.get("apim-request-id", ""),
+                "history_metadata": history_metadata,
+                }
+
+                completionChunk2 = json.loads(
+                json.dumps(completionChunk),
+                object_hook=lambda d: SimpleNamespace(**d)
+                )
+
+                yield json.dumps(
+                format_stream_response(completionChunk2, history_metadata, request_headers.get("apim-request-id", ""))
+                ) + "\n"
+
+        return Response(generate(), content_type="application/json-lines")
 
     else:
         response, apim_request_id = await send_chat_request(
@@ -992,6 +1023,10 @@ async def conversation_internal(request_body, request_headers):
     try:
         if SHOULD_STREAM:
             return await stream_chat_request(request_body, request_headers)
+            # response = await make_response(format_as_ndjson(result))
+            # response.timeout = None
+            # response.mimetype = "application/json-lines"
+            # return response
         else:
             result = await complete_chat_request(request_body, request_headers)
             return jsonify(result)

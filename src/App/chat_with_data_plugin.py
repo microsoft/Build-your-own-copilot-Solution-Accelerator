@@ -11,7 +11,6 @@ from semantic_kernel.contents.chat_message_content import ChatMessageContent
 from semantic_kernel.contents.utils.author_role import AuthorRole
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from typing import Annotated
-
 # --------------------------
 # Environment Variables
 # --------------------------
@@ -283,11 +282,8 @@ class ChatWithDataPlugin:
 # Streaming Response Logic
 # --------------------------
 async def get_streaming_response_from_plugin(query: str, client_id: str, request_headers: dict, history_metadata: dict):
-    from types import SimpleNamespace
-    import time
-    import uuid
-
     selected_client_name = get_client_name_from_db(client_id)  # Optionally fetch from DB
+    
     instructions = os.environ.get("AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT") or (
        "You are a helpful assistant to a Wealth Advisor."
         "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client."
@@ -320,27 +316,10 @@ async def get_streaming_response_from_plugin(query: str, client_id: str, request
     sk_response = agent.invoke_stream(thread_id=thread_id, additional_instructions=additional)
 
     async def generate():
-        chunk_id = str(uuid.uuid4())
-        created_time = int(time.time())
-
+        # yields deltaText strings one-by-one
         async for chunk in sk_response:
             if not chunk or not chunk.content:
                 continue
-
-            deltaText = chunk.content
-
-            completionChunk = {
-           "id": chunk_id,
-           "model": deployment,
-           "created": created_time,
-           "object": "extensions.chat.completion.chunk",  # 👈 Correct object type
-           "choices": [{
-           "messages": [{"role": "assistant", "content": deltaText}]
-            }],
-           "history_metadata": history_metadata,
-           "apim-request-id": request_headers.get("apim-request-id", ""),
-            }
-
-            yield json.dumps(completionChunk) + "\n"
+            yield chunk.content  # just the deltaText
 
     return generate
