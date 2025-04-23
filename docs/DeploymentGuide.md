@@ -208,7 +208,7 @@ This will rebuild the source code, package it into a container, and push it to t
     ```
 
 2. **Add Authentication Provider**  
-    - Follow steps in [App Authentication](./ConfigureAppAuthentication.md) to configure authenitcation in app service. Note that Authentication changes can take up to 10 minutes. 
+    - Follow steps in [App Authentication](./AppAuthentication.md) to configure authenitcation in app service. Note that Authentication changes can take up to 10 minutes. 
 
 3. **Fabric Configuration**, 
    - Follow steps in [Fabric Deployment guide](FabricDeployment.md) to set up the data processing pipelines and Power BI report in Fabric.
