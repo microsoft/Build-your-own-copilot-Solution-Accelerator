@@ -12,7 +12,7 @@ Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/g
 - [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/)
 - [Azure SQL Database](https://learn.microsoft.com/en-us/azure/azure-sql/)
 - [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/)
-- [Azure Semantic Search](./docs/AzureSemanticSearchRegion.md)  
+- [Azure Semantic Search](AzureSemanticSearchRegion.md)  
 
 Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central.
 
@@ -27,7 +27,7 @@ By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tok
 
 <!-- **For Global Standard | GPT-4o-mini - the capacity to at least 150k tokens post-deployment for optimal performance.** -->
 
-To adjust quota settings, follow these [steps](./docs/AzureGPTQuotaSettings.md)
+To adjust quota settings, follow these [steps](AzureGPTQuotaSettings.md)
 
 
 ## Deployment Options & Steps
