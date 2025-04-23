@@ -33,3 +33,4 @@ jobs:
       # Step 3: Print the result of the validation
       - name: Print result
         run: cat ${{ steps.validation.outputs.resultFile }}
+        
