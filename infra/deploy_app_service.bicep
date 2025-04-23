@@ -177,6 +177,7 @@ param streamTextSystemPrompt string
 @secure()
 param aiProjectConnectionString string
 param useAIProjectClientFlag string = 'false'
+param aiProjectName string
 
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
@@ -480,6 +481,23 @@ module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
   dependsOn: [
     Website
   ]
+}
+
+resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-preview' existing = {
+  name: aiProjectName
+}
+
+resource aiDeveloper 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: '64702f94-c441-49e6-a78b-ef80e0188fee'
+}
+
+resource aiDeveloperAccessProj 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(Website.name, aiHubProject.id, aiDeveloper.id)
+  scope: aiHubProject
+  properties: {
+    roleDefinitionId: aiDeveloper.id
+    principalId: Website.identity.principalId
+  }
 }
 
 output webAppUrl string = 'https://${WebsiteName}.azurewebsites.net'

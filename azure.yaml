@@ -6,11 +6,6 @@ metadata:
   template: build-your-own-copilot-solution-accelerator@1.0
   name: build-your-own-copilot-solution-accelerator@1.0
 
-infra:
-  provider: bicep
-  path: infra/bicep
-  module: main
-
 hooks:
   postprovision:
     windows:
