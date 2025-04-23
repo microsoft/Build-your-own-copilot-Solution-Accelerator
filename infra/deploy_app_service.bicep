@@ -182,7 +182,6 @@ param aiProjectName string
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
 // var WebAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
-var valueOne = '1'
 
 var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${imageTag}'
 
@@ -414,14 +413,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'AZURE_AI_SEARCH_ENDPOINT'
           value: azureSearchServiceEndpoint
-        }
-        {
-          name: 'PYTHON_ENABLE_INIT_INDEXING'
-          value: valueOne
-        }
-        {
-          name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
-          value: valueOne
         }
         {
           name: 'SQLDB_CONNECTION_STRING'
