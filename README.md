@@ -138,7 +138,6 @@ Please refer to [Transparency FAQ](../TRANSPARENCY_FAQ.md) for responsible AI tr
 
 <br/>
 <br/>
----
 
 ## Disclaimers
 
