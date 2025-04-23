@@ -216,4 +216,4 @@ This will rebuild the source code, package it into a container, and push it to t
    - *(Optional)* Follow steps in [Teams Tab App guide](TeamsAppDeployment.md) to add the Client Advisor app to Microsoft Teams.
 5. **Deleting Resources After a Failed Deployment**  
 
-     - Follow steps in [Delete Resource Group](./DeleteResourceGroup.md) if your deployment fails and/or you need to clean up the resources.
+     - Follow steps in [Delete Resource Group](DeleteResourceGroup.md) if your deployment fails and/or you need to clean up the resources.
