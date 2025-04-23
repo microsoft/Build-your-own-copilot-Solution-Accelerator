@@ -145,6 +145,7 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2021-10-01' = {
     apiProperties: {
       statisticsEnabled: false
     }
+    publicNetworkAccess: 'Enabled'
   }
 }
 

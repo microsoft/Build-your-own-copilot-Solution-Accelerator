@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.34.44.8038",
-      "templateHash": "17505213616444744865"
+      "templateHash": "2828817870488203676"
     }
   },
   "parameters": {
@@ -342,9 +342,9 @@
     "uniqueId": "[toLower(uniqueString(parameters('environmentName'), subscription().id, variables('solutionLocation')))]",
     "solutionPrefix": "[format('ca{0}', padLeft(take(variables('uniqueId'), 12), 12, '0'))]",
     "abbrs": "[variables('$fxv#0')]",
-    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\n   1. Table: Clients\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\n   2. Table: InvestmentGoals\n   Columns: ClientId, InvestmentGoal\n   3. Table: Assets\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\n   4. Table: ClientSummaries\n   Columns: ClientId, ClientSummary\n   5. Table: InvestmentGoalsDetails\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\n   6. Table: Retirement\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\n   7. Table: ClientMeetings\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\n   Always use the Investment column from the Assets table as the value.\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\n   Do not use client name in filters.\n   Do not include assets values unless asked for.\n   ALWAYS use ClientId = {clientid} in the query filter.\n   ALWAYS select Client Name (Column: Client) in the query.\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\n   Only return the generated SQL query. Do not return anything else.",
-    "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \n  You have access to the client’s past meeting call transcripts. \n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \n  If no data is available, state 'No relevant data found for previous meetings.",
-    "functionAppStreamTextSystemPrompt": "You are a helpful assistant to a Wealth Advisor. \n  The currently selected client's name is '{SelectedClientName}', and any case-insensitive or partial mention should be understood as referring to this client.\n  If no name is provided, assume the question is about '{SelectedClientName}'.\n  If the query references a different client or includes comparative terms like 'compare' or 'other client', please respond with: 'Please only ask questions about the selected client or select another client.'\n  Otherwise, provide thorough answers using only data from SQL or call transcripts. \n  If no data is found, please respond with 'No data found for that client.' Remove any client identifiers from the final response."
+    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\r\n   1. Table: Clients\r\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\r\n   2. Table: InvestmentGoals\r\n   Columns: ClientId, InvestmentGoal\r\n   3. Table: Assets\r\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\r\n   4. Table: ClientSummaries\r\n   Columns: ClientId, ClientSummary\r\n   5. Table: InvestmentGoalsDetails\r\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\r\n   6. Table: Retirement\r\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\r\n   7. Table: ClientMeetings\r\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\r\n   Always use the Investment column from the Assets table as the value.\r\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n   Do not use client name in filters.\r\n   Do not include assets values unless asked for.\r\n   ALWAYS use ClientId = {clientid} in the query filter.\r\n   ALWAYS select Client Name (Column: Client) in the query.\r\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n   Only return the generated SQL query. Do not return anything else.",
+    "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \r\n  You have access to the client’s past meeting call transcripts. \r\n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \r\n  If no data is available, state 'No relevant data found for previous meetings.",
+    "functionAppStreamTextSystemPrompt": "You are a helpful assistant to a Wealth Advisor. \r\n  The currently selected client's name is '{SelectedClientName}', and any case-insensitive or partial mention should be understood as referring to this client.\r\n  If no name is provided, assume the question is about '{SelectedClientName}'.\r\n  If the query references a different client or includes comparative terms like 'compare' or 'other client', please respond with: 'Please only ask questions about the selected client or select another client.'\r\n  Otherwise, provide thorough answers using only data from SQL or call transcripts. \r\n  If no data is found, please respond with 'No data found for that client.' Remove any client identifiers from the final response."
   },
   "resources": [
     {
@@ -711,7 +711,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "5067998078893813664"
+              "templateHash": "3569608512312433081"
             }
           },
           "parameters": {
@@ -1136,7 +1136,8 @@
                 "customSubDomainName": "[variables('aiServicesName')]",
                 "apiProperties": {
                   "statisticsEnabled": false
-                }
+                },
+                "publicNetworkAccess": "Enabled"
               }
             },
             {
@@ -1932,7 +1933,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "7638613638995120962"
+              "templateHash": "1848692139029312246"
             }
           },
           "parameters": {
@@ -1990,8 +1991,6 @@
               "location": "[parameters('location')]",
               "kind": "v12.0",
               "properties": {
-                "administratorLogin": "[parameters('administratorLogin')]",
-                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
                 "publicNetworkAccess": "Enabled",
                 "version": "12.0",
                 "restrictOutboundNetworkAccess": "Disabled",
