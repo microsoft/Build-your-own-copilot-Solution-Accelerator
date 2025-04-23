@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.34.44.8038",
-      "templateHash": "5995671308040328650"
+      "templateHash": "6807899313442022071"
     }
   },
   "parameters": {
@@ -375,7 +375,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "4185471320343431208"
+              "templateHash": "13475249900025738327"
             }
           },
           "parameters": {
@@ -427,16 +427,6 @@
             {
               "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
               "apiVersion": "2023-01-31",
-              "name": "[format('{0}-fn', parameters('miName'))]",
-              "location": "[parameters('solutionLocation')]",
-              "tags": {
-                "app": "[parameters('solutionName')]",
-                "location": "[parameters('solutionLocation')]"
-              }
-            },
-            {
-              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-              "apiVersion": "2023-01-31",
               "name": "[format('{0}-webapp', parameters('miName'))]",
               "location": "[parameters('solutionLocation')]",
               "tags": {
@@ -453,15 +443,6 @@
                 "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('miName')), '2023-01-31').principalId]",
                 "clientId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('miName')), '2023-01-31').clientId]",
                 "name": "[parameters('miName')]"
-              }
-            },
-            "managedIdentityFnAppOutput": {
-              "type": "object",
-              "value": {
-                "id": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-fn', parameters('miName')))]",
-                "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-fn', parameters('miName'))), '2023-01-31').principalId]",
-                "clientId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-fn', parameters('miName'))), '2023-01-31').clientId]",
-                "name": "[format('{0}-fn', parameters('miName'))]"
               }
             },
             "managedIdentityWebAppOutput": {
@@ -730,7 +711,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "5067998078893813664"
+              "templateHash": "3569608512312433081"
             }
           },
           "parameters": {
@@ -1155,7 +1136,8 @@
                 "customSubDomainName": "[variables('aiServicesName')]",
                 "apiProperties": {
                   "statisticsEnabled": false
-                }
+                },
+                "publicNetworkAccess": "Enabled"
               }
             },
             {
@@ -1951,7 +1933,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "7638613638995120962"
+              "templateHash": "1848692139029312246"
             }
           },
           "parameters": {
@@ -2009,8 +1991,6 @@
               "location": "[parameters('location')]",
               "kind": "v12.0",
               "properties": {
-                "administratorLogin": "[parameters('administratorLogin')]",
-                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
                 "publicNetworkAccess": "Enabled",
                 "version": "12.0",
                 "restrictOutboundNetworkAccess": "Disabled",
@@ -2122,378 +2102,6 @@
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_keyvault')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "deploy_azure_function",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "solutionLocation": {
-            "value": "[variables('solutionLocation')]"
-          },
-          "functionAppName": {
-            "value": "[format('{0}{1}', variables('abbrs').compute.functionApp, variables('solutionPrefix'))]"
-          },
-          "containerAppEnvame": {
-            "value": "[format('{0}{1}', variables('abbrs').containers.containerAppsEnvironment, variables('solutionPrefix'))]"
-          },
-          "azureOpenAIApiKey": {
-            "reference": {
-              "keyVault": {
-                "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.KeyVault/vaults', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.keyvaultName.value)]"
-              },
-              "secretName": "AZURE-OPENAI-KEY"
-            }
-          },
-          "azureOpenAIApiVersion": {
-            "value": "[parameters('azureOpenaiAPIVersion')]"
-          },
-          "azureOpenAIEndpoint": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiServicesTarget.value]"
-          },
-          "azureSearchAdminKey": {
-            "reference": {
-              "keyVault": {
-                "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.KeyVault/vaults', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.keyvaultName.value)]"
-              },
-              "secretName": "AZURE-SEARCH-KEY"
-            }
-          },
-          "azureSearchServiceEndpoint": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchTarget.value]"
-          },
-          "azureSearchIndex": {
-            "value": "transcripts_index"
-          },
-          "sqlServerName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value]"
-          },
-          "sqlDbName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbName.value]"
-          },
-          "sqlDbUser": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbUser.value]"
-          },
-          "sqlDbPwd": {
-            "reference": {
-              "keyVault": {
-                "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.KeyVault/vaults', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.keyvaultName.value)]"
-              },
-              "secretName": "SQLDB-PASSWORD"
-            }
-          },
-          "imageTag": {
-            "value": "[parameters('imageTag')]"
-          },
-          "sqlSystemPrompt": {
-            "value": "[variables('functionAppSqlPrompt')]"
-          },
-          "callTranscriptSystemPrompt": {
-            "value": "[variables('functionAppCallTranscriptSystemPrompt')]"
-          },
-          "streamTextSystemPrompt": {
-            "value": "[variables('functionAppStreamTextSystemPrompt')]"
-          },
-          "userassignedIdentityClientId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.clientId]"
-          },
-          "userassignedIdentityId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.id]"
-          },
-          "applicationInsightsId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.applicationInsightsId.value]"
-          },
-          "storageAccountName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.storageAccountName.value]"
-          },
-          "logAnalyticsWorkspaceName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.logAnalyticsWorkspaceResourceName.value]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "2778443846888822542"
-            }
-          },
-          "parameters": {
-            "solutionLocation": {
-              "type": "string"
-            },
-            "azureOpenAIApiKey": {
-              "type": "securestring"
-            },
-            "azureOpenAIApiVersion": {
-              "type": "string"
-            },
-            "azureOpenAIEndpoint": {
-              "type": "string"
-            },
-            "azureSearchAdminKey": {
-              "type": "securestring"
-            },
-            "azureSearchServiceEndpoint": {
-              "type": "string"
-            },
-            "azureSearchIndex": {
-              "type": "string"
-            },
-            "sqlServerName": {
-              "type": "string"
-            },
-            "sqlDbName": {
-              "type": "string"
-            },
-            "sqlDbUser": {
-              "type": "string"
-            },
-            "sqlDbPwd": {
-              "type": "securestring"
-            },
-            "imageTag": {
-              "type": "string"
-            },
-            "sqlSystemPrompt": {
-              "type": "string",
-              "metadata": {
-                "description": "Azure Function App SQL System Prompt"
-              }
-            },
-            "callTranscriptSystemPrompt": {
-              "type": "string",
-              "metadata": {
-                "description": "Azure Function App CallTranscript System Prompt"
-              }
-            },
-            "streamTextSystemPrompt": {
-              "type": "string",
-              "metadata": {
-                "description": "Azure Function App Stream Text System Prompt"
-              }
-            },
-            "userassignedIdentityId": {
-              "type": "string"
-            },
-            "userassignedIdentityClientId": {
-              "type": "string"
-            },
-            "storageAccountName": {
-              "type": "string"
-            },
-            "applicationInsightsId": {
-              "type": "string"
-            },
-            "functionAppName": {
-              "type": "string"
-            },
-            "containerAppEnvame": {
-              "type": "string"
-            },
-            "logAnalyticsWorkspaceName": {
-              "type": "string"
-            }
-          },
-          "variables": {
-            "azureOpenAIDeploymentModel": "gpt-4o-mini",
-            "azureOpenAIEmbeddingDeployment": "text-embedding-ada-002",
-            "valueOne": "1",
-            "FnAppImageName": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-fn:{0}', parameters('imageTag'))]"
-          },
-          "resources": [
-            {
-              "type": "Microsoft.App/managedEnvironments",
-              "apiVersion": "2022-06-01-preview",
-              "name": "[parameters('containerAppEnvame')]",
-              "location": "[parameters('solutionLocation')]",
-              "sku": {
-                "name": "Consumption"
-              },
-              "properties": {
-                "appLogsConfiguration": {
-                  "destination": "log-analytics",
-                  "logAnalyticsConfiguration": {
-                    "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName')), '2023-09-01').customerId]",
-                    "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName')), '2023-09-01').primarySharedKey]"
-                  }
-                }
-              }
-            },
-            {
-              "type": "Microsoft.Web/sites",
-              "apiVersion": "2024-04-01",
-              "name": "[parameters('functionAppName')]",
-              "location": "[parameters('solutionLocation')]",
-              "kind": "functionapp",
-              "identity": {
-                "type": "SystemAssigned, UserAssigned",
-                "userAssignedIdentities": {
-                  "[format('{0}', parameters('userassignedIdentityId'))]": {}
-                }
-              },
-              "properties": {
-                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('containerAppEnvame'))]",
-                "siteConfig": {
-                  "linuxFxVersion": "[variables('FnAppImageName')]",
-                  "appSettings": [
-                    {
-                      "name": "AzureWebJobsStorage__accountname",
-                      "value": "[parameters('storageAccountName')]"
-                    },
-                    {
-                      "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                      "value": "[reference(parameters('applicationInsightsId'), '2015-05-01').InstrumentationKey]"
-                    },
-                    {
-                      "name": "AZURE_OPEN_AI_API_KEY",
-                      "value": "[parameters('azureOpenAIApiKey')]"
-                    },
-                    {
-                      "name": "AZURE_OPEN_AI_DEPLOYMENT_MODEL",
-                      "value": "[variables('azureOpenAIDeploymentModel')]"
-                    },
-                    {
-                      "name": "AZURE_OPEN_AI_ENDPOINT",
-                      "value": "[parameters('azureOpenAIEndpoint')]"
-                    },
-                    {
-                      "name": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
-                      "value": "[variables('azureOpenAIEmbeddingDeployment')]"
-                    },
-                    {
-                      "name": "OPENAI_API_VERSION",
-                      "value": "[parameters('azureOpenAIApiVersion')]"
-                    },
-                    {
-                      "name": "AZURE_AI_SEARCH_API_KEY",
-                      "value": "[parameters('azureSearchAdminKey')]"
-                    },
-                    {
-                      "name": "AZURE_AI_SEARCH_ENDPOINT",
-                      "value": "[parameters('azureSearchServiceEndpoint')]"
-                    },
-                    {
-                      "name": "AZURE_SEARCH_INDEX",
-                      "value": "[parameters('azureSearchIndex')]"
-                    },
-                    {
-                      "name": "PYTHON_ENABLE_INIT_INDEXING",
-                      "value": "[variables('valueOne')]"
-                    },
-                    {
-                      "name": "PYTHON_ISOLATE_WORKER_DEPENDENCIES",
-                      "value": "[variables('valueOne')]"
-                    },
-                    {
-                      "name": "SQLDB_CONNECTION_STRING",
-                      "value": "TBD"
-                    },
-                    {
-                      "name": "SQLDB_SERVER",
-                      "value": "[parameters('sqlServerName')]"
-                    },
-                    {
-                      "name": "SQLDB_DATABASE",
-                      "value": "[parameters('sqlDbName')]"
-                    },
-                    {
-                      "name": "SQLDB_USERNAME",
-                      "value": "[parameters('sqlDbUser')]"
-                    },
-                    {
-                      "name": "SQLDB_PASSWORD",
-                      "value": "[parameters('sqlDbPwd')]"
-                    },
-                    {
-                      "name": "AZURE_SQL_SYSTEM_PROMPT",
-                      "value": "[parameters('sqlSystemPrompt')]"
-                    },
-                    {
-                      "name": "AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT",
-                      "value": "[parameters('callTranscriptSystemPrompt')]"
-                    },
-                    {
-                      "name": "AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT",
-                      "value": "[parameters('streamTextSystemPrompt')]"
-                    },
-                    {
-                      "name": "SQLDB_USER_MID",
-                      "value": "[parameters('userassignedIdentityClientId')]"
-                    }
-                  ]
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.App/managedEnvironments', parameters('containerAppEnvame'))]"
-              ]
-            }
-          ],
-          "outputs": {
-            "functionAppName": {
-              "type": "string",
-              "value": "[parameters('functionAppName')]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "deploy_azure_function_script_url",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "functionAppName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_function'), '2022-09-01').outputs.functionAppName.value]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "13475450415852067224"
-            }
-          },
-          "parameters": {
-            "functionAppName": {
-              "type": "string"
-            }
-          },
-          "variables": {
-            "functionName": "stream_openai_text"
-          },
-          "resources": [],
-          "outputs": {
-            "functionAppUrl": {
-              "type": "string",
-              "value": "[format('https://{0}/api/{1}', reference(resourceId('Microsoft.Web/sites', parameters('functionAppName')), '2021-02-01').defaultHostName, variables('functionName'))]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'deploy_azure_function')]"
       ]
     },
     {
@@ -2621,11 +2229,8 @@
           "AzureOpenAIEmbeddingEndpoint": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiServicesTarget.value]"
           },
-          "USE_AZUREFUNCTION": {
+          "USE_INTERNAL_STREAM": {
             "value": "True"
-          },
-          "STREAMING_AZUREFUNCTION_ENDPOINT": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_function_script_url'), '2022-09-01').outputs.functionAppUrl.value]"
           },
           "SQLDB_SERVER": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value]"
@@ -2667,6 +2272,37 @@
           },
           "applicationInsightsId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.applicationInsightsId.value]"
+          },
+          "azureSearchAdminKey": {
+            "reference": {
+              "keyVault": {
+                "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.KeyVault/vaults', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.keyvaultName.value)]"
+              },
+              "secretName": "AZURE-SEARCH-KEY"
+            }
+          },
+          "azureSearchServiceEndpoint": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchTarget.value]"
+          },
+          "sqlSystemPrompt": {
+            "value": "[variables('functionAppSqlPrompt')]"
+          },
+          "callTranscriptSystemPrompt": {
+            "value": "[variables('functionAppCallTranscriptSystemPrompt')]"
+          },
+          "streamTextSystemPrompt": {
+            "value": "[variables('functionAppStreamTextSystemPrompt')]"
+          },
+          "aiProjectConnectionString": {
+            "reference": {
+              "keyVault": {
+                "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.KeyVault/vaults', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.keyvaultName.value)]"
+              },
+              "secretName": "AZURE-AI-PROJECT-CONN-STRING"
+            }
+          },
+          "aiProjectName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiProjectName.value]"
           }
         },
         "template": {
@@ -2676,7 +2312,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "2369588288479285540"
+              "templateHash": "8701343999231764795"
             }
           },
           "parameters": {
@@ -2949,7 +2585,7 @@
                 "description": "Enable chat history by deploying a Cosmos DB instance"
               }
             },
-            "USE_AZUREFUNCTION": {
+            "USE_INTERNAL_STREAM": {
               "type": "string",
               "defaultValue": "True",
               "metadata": {
@@ -3029,6 +2665,40 @@
               "type": "string"
             },
             "applicationInsightsId": {
+              "type": "string"
+            },
+            "azureSearchAdminKey": {
+              "type": "securestring"
+            },
+            "azureSearchServiceEndpoint": {
+              "type": "string"
+            },
+            "sqlSystemPrompt": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Function App SQL System Prompt"
+              }
+            },
+            "callTranscriptSystemPrompt": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Function App CallTranscript System Prompt"
+              }
+            },
+            "streamTextSystemPrompt": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Function App Stream Text System Prompt"
+              }
+            },
+            "aiProjectConnectionString": {
+              "type": "securestring"
+            },
+            "useAIProjectClientFlag": {
+              "type": "string",
+              "defaultValue": "false"
+            },
+            "aiProjectName": {
               "type": "string"
             }
           },
@@ -3214,8 +2884,8 @@
                       "value": "[parameters('SQLDB_PASSWORD')]"
                     },
                     {
-                      "name": "USE_AZUREFUNCTION",
-                      "value": "[parameters('USE_AZUREFUNCTION')]"
+                      "name": "USE_INTERNAL_STREAM",
+                      "value": "[parameters('USE_INTERNAL_STREAM')]"
                     },
                     {
                       "name": "STREAMING_AZUREFUNCTION_ENDPOINT",
@@ -3252,6 +2922,42 @@
                     {
                       "name": "SQLDB_USER_MID",
                       "value": "[parameters('userassignedIdentityClientId')]"
+                    },
+                    {
+                      "name": "OPENAI_API_VERSION",
+                      "value": "[parameters('AzureOpenAIApiVersion')]"
+                    },
+                    {
+                      "name": "AZURE_AI_SEARCH_API_KEY",
+                      "value": "[parameters('azureSearchAdminKey')]"
+                    },
+                    {
+                      "name": "AZURE_AI_SEARCH_ENDPOINT",
+                      "value": "[parameters('azureSearchServiceEndpoint')]"
+                    },
+                    {
+                      "name": "SQLDB_CONNECTION_STRING",
+                      "value": "TBD"
+                    },
+                    {
+                      "name": "AZURE_SQL_SYSTEM_PROMPT",
+                      "value": "[parameters('sqlSystemPrompt')]"
+                    },
+                    {
+                      "name": "AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT",
+                      "value": "[parameters('callTranscriptSystemPrompt')]"
+                    },
+                    {
+                      "name": "AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT",
+                      "value": "[parameters('streamTextSystemPrompt')]"
+                    },
+                    {
+                      "name": "AZURE_AI_PROJECT_CONN_STRING",
+                      "value": "[parameters('aiProjectConnectionString')]"
+                    },
+                    {
+                      "name": "USE_AI_PROJECT_CLIENT",
+                      "value": "[parameters('useAIProjectClientFlag')]"
                     }
                   ],
                   "linuxFxVersion": "[variables('WebAppImageName')]"
@@ -3259,6 +2965,19 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', parameters('HostingPlanName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.MachineLearningServices/workspaces/{0}', parameters('aiProjectName'))]",
+              "name": "[guid(parameters('WebsiteName'), resourceId('Microsoft.MachineLearningServices/workspaces', parameters('aiProjectName')), resourceId('Microsoft.Authorization/roleDefinitions', '64702f94-c441-49e6-a78b-ef80e0188fee'))]",
+              "properties": {
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '64702f94-c441-49e6-a78b-ef80e0188fee')]",
+                "principalId": "[reference(resourceId('Microsoft.Web/sites', parameters('WebsiteName')), '2020-06-01', 'full').identity.principalId]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
               ]
             },
             {
@@ -3333,7 +3052,6 @@
       },
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry')]",
-        "[resourceId('Microsoft.Resources/deployments', 'deploy_azure_function_script_url')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db')]"
@@ -3372,14 +3090,6 @@
     "SQLDB_DATABASE": {
       "type": "string",
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbName.value]"
-    },
-    "MANAGEDINDENTITY_FNAPP_NAME": {
-      "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.name]"
-    },
-    "MANAGEDINDENTITY_FNAPP_CLIENTID": {
-      "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityFnAppOutput.value.clientId]"
     },
     "MANAGEDINDENTITY_WEBAPP_NAME": {
       "type": "string",

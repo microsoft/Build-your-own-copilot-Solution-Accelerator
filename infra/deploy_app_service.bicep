@@ -120,7 +120,7 @@ param AzureOpenAIEmbeddingEndpoint string = ''
 param WebAppEnableChatHistory string = 'False'
 
 @description('Use Azure Function')
-param USE_AZUREFUNCTION string = 'True'
+param USE_INTERNAL_STREAM string = 'True'
 
 @description('Azure Function Endpoint')
 param STREAMING_AZUREFUNCTION_ENDPOINT string = ''
@@ -162,6 +162,22 @@ param imageTag string
 param userassignedIdentityId string
 param userassignedIdentityClientId string
 param applicationInsightsId string
+
+@secure()
+param azureSearchAdminKey string
+param azureSearchServiceEndpoint string
+
+@description('Azure Function App SQL System Prompt')
+param sqlSystemPrompt string
+@description('Azure Function App CallTranscript System Prompt')
+param callTranscriptSystemPrompt string
+@description('Azure Function App Stream Text System Prompt')
+param streamTextSystemPrompt string
+
+@secure()
+param aiProjectConnectionString string
+param useAIProjectClientFlag string = 'false'
+param aiProjectName string
 
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
@@ -347,8 +363,8 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           value: SQLDB_PASSWORD
         }
 
-        {name: 'USE_AZUREFUNCTION'
-          value: USE_AZUREFUNCTION
+        {name: 'USE_INTERNAL_STREAM'
+          value: USE_INTERNAL_STREAM
         }
 
         {name: 'STREAMING_AZUREFUNCTION_ENDPOINT'
@@ -386,6 +402,42 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           name: 'SQLDB_USER_MID'
           value: userassignedIdentityClientId
         }
+        {
+          name: 'OPENAI_API_VERSION'
+          value: AzureOpenAIApiVersion
+        }
+        {
+          name: 'AZURE_AI_SEARCH_API_KEY'
+          value: azureSearchAdminKey
+        }
+        {
+          name: 'AZURE_AI_SEARCH_ENDPOINT'
+          value: azureSearchServiceEndpoint
+        }
+        {
+          name: 'SQLDB_CONNECTION_STRING'
+          value: 'TBD'
+        }
+        {
+          name: 'AZURE_SQL_SYSTEM_PROMPT'
+          value: sqlSystemPrompt
+        }
+        {
+          name: 'AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT'
+          value: callTranscriptSystemPrompt
+        }
+        {
+          name: 'AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT'
+          value: streamTextSystemPrompt
+        }
+        {
+          name: 'AZURE_AI_PROJECT_CONN_STRING'
+          value: aiProjectConnectionString
+        }
+        {
+          name: 'USE_AI_PROJECT_CLIENT'
+          value: useAIProjectClientFlag
+        }
       ]
       linuxFxVersion: WebAppImageName
     }
@@ -420,6 +472,23 @@ module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
   dependsOn: [
     Website
   ]
+}
+
+resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-preview' existing = {
+  name: aiProjectName
+}
+
+resource aiDeveloper 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: '64702f94-c441-49e6-a78b-ef80e0188fee'
+}
+
+resource aiDeveloperAccessProj 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(Website.name, aiHubProject.id, aiDeveloper.id)
+  scope: aiHubProject
+  properties: {
+    roleDefinitionId: aiDeveloper.id
+    principalId: Website.identity.principalId
+  }
 }
 
 output webAppUrl string = 'https://${WebsiteName}.azurewebsites.net'

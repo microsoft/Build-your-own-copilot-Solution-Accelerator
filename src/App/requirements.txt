@@ -1,7 +1,7 @@
 # Core requirements
 azure-identity==1.20.0
 # Flask[async]==2.3.2
-openai==1.63.0
+openai==1.64.0
 azure-search-documents==11.6.0b9
 azure-storage-blob==12.24.1
 python-dotenv==1.0.1
@@ -26,3 +26,9 @@ pytest-asyncio==0.24.0
 pytest-cov==5.0.0
 
 pyodbc==5.2.0
+
+
+semantic_kernel==1.21.3
+azure-search-documents==11.6.0b9
+azure-ai-projects==1.0.0b9
+azure-ai-inference==1.0.0b9

@@ -1,8 +1,10 @@
+import asyncio
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from quart import Response
 from app import (create_app, delete_all_conversations, generate_title,
                  init_cosmosdb_client, init_openai_client, stream_chat_request)
 
@@ -1309,33 +1311,55 @@ class MockChatCompletionChunk:
         self.choices = choices
 
 
+# Simulated async generator for testing purposes
+async def fake_internal_stream_response():
+    # Simulating streaming data chunk by chunk
+    chunks = ["chunk1", "chunk2"]
+    for chunk in chunks:
+        await asyncio.sleep(0.1)
+        yield chunk
+
+
 @pytest.mark.asyncio
-async def test_stream_chat_request_with_azurefunction():
+async def test_stream_chat_request_with_internal_stream():
+    # Test input data for stream_chat_request
     request_body = {
         "history_metadata": {},
         "client_id": "test_client",
-        "messages": [{"content": "test query"}],
+        "messages": [{"content": "test query", "role": "user"}],
     }
     request_headers = {"apim-request-id": "test_id"}
 
-    async with create_app().app_context():
-        with patch.multiple(
-            "app",
-            USE_AZUREFUNCTION=True,
-            STREAMING_AZUREFUNCTION_ENDPOINT="http://example.com",
-        ):
-            with patch("httpx.AsyncClient.stream") as mock_stream:
-                mock_response = AsyncMock()
-                mock_response.__aenter__.return_value.aiter_text = (
-                    lambda: async_generator(["chunk1", "chunk2"])
-                )
-                mock_stream.return_value = mock_response
+    # Patch stream_response_from_wealth_assistant and USE_INTERNAL_STREAM
+    with patch("app.stream_response_from_wealth_assistant", return_value=fake_internal_stream_response), \
+         patch("app.USE_INTERNAL_STREAM", True):
 
-                generator = await stream_chat_request(request_body, request_headers)
-                chunks = [chunk async for chunk in generator]
+        # Create the Quart app context for the test
+        async with create_app().app_context():
+            response = await stream_chat_request(request_body, request_headers)
 
-                assert len(chunks) == 2
-                assert "apim-request-id" in chunks[0]
+            # Ensure that response is a Quart Response object
+            assert isinstance(response, Response)
+
+            # Await get_data to get the data content as text
+            response_data = await response.get_data(as_text=True)
+
+            # Create an async generator for iterating over the streamed content
+            async def async_response_data():
+                for chunk in response_data.split('\n'):
+                    if chunk.strip():  # Ignore empty chunks
+                        yield chunk
+
+            # Collect all streamed chunks from the response using async for
+            chunks = []
+            async for chunk in async_response_data():
+                chunks.append(chunk)
+
+            # Ensure we got the expected number of chunks
+            assert len(chunks) == 2
+            assert "chunk1" in chunks[0]
+            assert "chunk2" in chunks[1]
+            assert "apim-request-id" in chunks[0]
 
 
 @pytest.mark.asyncio
@@ -1344,7 +1368,7 @@ async def test_stream_chat_request_no_client_id():
     request_headers = {"apim-request-id": "test_id"}
 
     async with create_app().app_context():
-        with patch("app.USE_AZUREFUNCTION", True):
+        with patch("app.USE_INTERNAL_STREAM", True):
             response, status_code = await stream_chat_request(
                 request_body, request_headers
             )
@@ -1362,7 +1386,7 @@ async def test_stream_chat_request_without_azurefunction():
     }
     request_headers = {"apim-request-id": "test_id"}
 
-    with patch("app.USE_AZUREFUNCTION", False):
+    with patch("app.USE_INTERNAL_STREAM", False):
         with patch("app.send_chat_request", new_callable=AsyncMock) as mock_send:
             mock_send.return_value = (
                 async_generator(

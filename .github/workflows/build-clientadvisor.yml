@@ -21,9 +21,6 @@ jobs:
           - app_name: byc-wa-app
             dockerfile: src/App/WebApp.Dockerfile
             password_secret: DOCKER_PASSWORD
-          - app_name: byc-wa-fn
-            dockerfile: src/AzureFunction/Dockerfile
-            password_secret: DOCKER_PASSWORD
 
     uses: ./.github/workflows/build-docker.yml
     with:

@@ -1,86 +1,86 @@
-import azure.functions as func
-import openai
-from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 import os
-from typing import Annotated
-
+import openai
+import struct
+import logging
+import pyodbc
+from azure.identity import DefaultAzureCredential
+from azure.ai.projects import AIProjectClient
 from semantic_kernel.agents.open_ai import AzureAssistantAgent
+from semantic_kernel.kernel import Kernel
 from semantic_kernel.contents.chat_message_content import ChatMessageContent
 from semantic_kernel.contents.utils.author_role import AuthorRole
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
-from semantic_kernel.kernel import Kernel
-from azure.identity import DefaultAzureCredential
-import pyodbc
-import struct
-import logging
+from typing import Annotated
 
 # --------------------------
-# Azure Function App setup
+# Environment Variables
 # --------------------------
-app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
-
-# Retrieve required environment variables
-endpoint = os.environ.get("AZURE_OPEN_AI_ENDPOINT")
-api_key = os.environ.get("AZURE_OPEN_AI_API_KEY")
+endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+api_key = os.environ.get("AZURE_OPENAI_KEY")
 api_version = os.environ.get("OPENAI_API_VERSION")
-deployment = os.environ.get("AZURE_OPEN_AI_DEPLOYMENT_MODEL")
-temperature = 0
-
+deployment = os.environ.get("AZURE_OPENAI_MODEL")
 search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT")
 search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
-
-# --------------------------
-# Helper function to get client name
-# --------------------------
-def get_client_name_from_db(client_id: str) -> str:
-    """
-    Connects to your SQL database and returns the client name for the given client_id.
-    """
-
-    conn = get_connection()
-    cursor = conn.cursor()
-    
-    sql = "SELECT Client FROM Clients WHERE ClientId = ?"
-    cursor.execute(sql, (client_id,))
-    row = cursor.fetchone()
-    conn.close()
-    
-    if row:
-        return row[0]  # The 'Client' column
-    else:
-        return ""
+project_connection_string = os.environ.get("AZURE_AI_PROJECT_CONN_STRING")
+use_ai_project_client = os.environ.get("USE_AI_PROJECT_CLIENT", "false").lower() == "true"
 
 # --------------------------
 # ChatWithDataPlugin Class
 # --------------------------
+
+
 class ChatWithDataPlugin:
+
     @kernel_function(name="GreetingsResponse", description="Respond to any greeting or general questions")
     def greeting(self, input: Annotated[str, "the question"]) -> Annotated[str, "The output is a string"]:
         """
         Simple greeting handler using Azure OpenAI.
         """
         try:
-            client = openai.AzureOpenAI(
-                azure_endpoint=endpoint,
-                api_key=api_key,
-                api_version=api_version
-            )
-            completion = client.chat.completions.create(
-                model=deployment,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant to respond to greetings or general questions."
-                    },
-                    {
-                        "role": "user",
-                        "content": input
-                    },
-                ],
-                temperature=0,
-                top_p=1,
-                n=1
-            )
+            if self.use_ai_project_client:
+                project = AIProjectClient.from_connection_string(
+                    conn_str=self.azure_ai_project_conn_string,
+                    credential=DefaultAzureCredential()
+                )
+                client = project.inference.get_chat_completions_client()
+
+                completion = client.complete(
+                    model=self.azure_openai_deployment_model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a helpful assistant to respond to greetings or general questions."
+                        },
+                        {
+                            "role": "user",
+                            "content": input
+                        },
+                    ],
+                    temperature=0,
+                )
+            else:
+                client = openai.AzureOpenAI(
+                    azure_endpoint=endpoint,
+                    api_key=api_key,
+                    api_version=api_version
+                )
+                completion = client.chat.completions.create(
+                    model=deployment,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a helpful assistant to respond to greetings or general questions."
+                        },
+                        {
+                            "role": "user",
+                            "content": input
+                        },
+                    ],
+                    temperature=0,
+                    top_p=1,
+                    n=1
+                )
+
             answer = completion.choices[0].message.content
         except Exception as e:
             answer = f"Error retrieving greeting response: {str(e)}"
@@ -98,13 +98,6 @@ class ChatWithDataPlugin:
         """
         clientid = ClientId
         query = input
-
-        # Initialize the Azure OpenAI client
-        client = openai.AzureOpenAI(
-            azure_endpoint=endpoint,
-            api_key=api_key,
-            api_version=api_version
-        )
 
         # Retrieve the SQL prompt from environment variables (if available)
         sql_prompt = os.environ.get("AZURE_SQL_SYSTEM_PROMPT")
@@ -137,16 +130,38 @@ class ChatWithDataPlugin:
             Only return the generated SQL query. Do not return anything else.'''
 
         try:
-            completion = client.chat.completions.create(
-                model=deployment,
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": sql_prompt},
-                ],
-                temperature=0,
-                top_p=1,
-                n=1
-            )
+            if use_ai_project_client:
+                project = AIProjectClient.from_connection_string(
+                    conn_str=project_connection_string,
+                    credential=DefaultAzureCredential()
+                )
+                client = project.inference.get_chat_completions_client()
+                completion = client.complete(
+                    model=deployment,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": sql_prompt},
+                    ],
+                    temperature=0,
+                )
+
+            else:
+                # Initialize the Azure OpenAI client
+                client = openai.AzureOpenAI(
+                    azure_endpoint=endpoint,
+                    api_key=api_key,
+                    api_version=api_version
+                )
+                completion = client.chat.completions.create(
+                    model=deployment,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": sql_prompt},
+                    ],
+                    temperature=0,
+                    top_p=1,
+                    n=1
+                )
 
             sql_query = completion.choices[0].message.content
 
@@ -154,7 +169,7 @@ class ChatWithDataPlugin:
             sql_query = sql_query.replace("```sql", "").replace("```", "")
 
             print("Generated SQL:", sql_query)
-        
+
             conn = get_connection()
             # conn = pyodbc.connect(connectionString)
             cursor = conn.cursor()
@@ -169,6 +184,7 @@ class ChatWithDataPlugin:
                     answer += str(row) + "\n"
 
             conn.close()
+            answer = answer[:20000] if len(answer) > 20000 else answer
 
         except Exception as e:
             answer = f"Error retrieving data from SQL: {str(e)}"
@@ -217,7 +233,6 @@ class ChatWithDataPlugin:
                             "parameters": {
                                 "endpoint": search_endpoint,
                                 "index_name": os.environ.get("AZURE_SEARCH_INDEX"),
-                                "semantic_configuration": "default",
                                 "query_type": "vector_simple_hybrid",
                                 "fields_mapping": {
                                     "content_fields_separator": "\n",
@@ -259,6 +274,70 @@ class ChatWithDataPlugin:
             return f"Error retrieving data from call transcripts: {str(e)}"
 
 
+# --------------------------
+# Streaming Response Logic
+# --------------------------
+
+
+async def stream_response_from_wealth_assistant(query: str, client_id: str):
+    """
+       Streams real-time chat response from the Wealth Assistant.
+       Uses Semantic Kernel agent with SQL and Azure Cognitive Search based on the client ID.
+    """
+
+    # Dynamically get the name from the database
+    selected_client_name = get_client_name_from_db(client_id)  # Optionally fetch from DB
+
+    # Prepare fallback instructions with the single-line prompt
+    host_instructions = os.environ.get("AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT")
+    if not host_instructions:
+        # Insert the name in the prompt:
+        host_instructions = (
+            "You are a helpful assistant to a Wealth Advisor."
+            "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client."
+            "If the user mentions no name, assume they are asking about '{SelectedClientName}'."
+            "If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts."
+            "If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
+        )
+    host_instructions = host_instructions.replace("{SelectedClientName}", selected_client_name)
+
+    # Create the agent using the Semantic Kernel Assistant Agent
+    kernel = Kernel()
+    kernel.add_plugin(ChatWithDataPlugin(), plugin_name="ChatWithData")
+
+    agent = await AzureAssistantAgent.create(
+        kernel=kernel,
+        service_id="agent",
+        name="WealthAdvisor",
+        instructions=host_instructions,
+        api_key=api_key,
+        deployment_name=deployment,
+        endpoint=endpoint,
+        api_version=api_version,
+    )
+
+    # Create a conversation thread and add the user's message
+    thread_id = await agent.create_thread()
+    message = ChatMessageContent(role=AuthorRole.USER, content=query)
+    await agent.add_chat_message(thread_id=thread_id, message=message)
+
+    # Additional instructions: pass the clientId
+    additional_instructions = f"Always send clientId as {client_id}"
+    sk_response = agent.invoke_stream(thread_id=thread_id, additional_instructions=additional_instructions)
+
+    async def generate():
+        # yields deltaText strings one-by-one
+        async for chunk in sk_response:
+            if not chunk or not chunk.content:
+                continue
+            yield chunk.content  # just the deltaText
+
+    return generate
+
+
+# --------------------------
+# Get SQL Connection
+# --------------------------
 def get_connection():
     driver = "{ODBC Driver 18 for SQL Server}"
     server = os.environ.get("SQLDB_SERVER")
@@ -266,109 +345,37 @@ def get_connection():
     username = os.environ.get("SQLDB_USERNAME")
     password = os.environ.get("SQLDB_PASSWORD")
     mid_id = os.environ.get("SQLDB_USER_MID")
-    try :
+
+    try:
         credential = DefaultAzureCredential(managed_identity_client_id=mid_id)
-
-        token_bytes = credential.get_token(
-        "https://database.windows.net/.default"
-        ).token.encode("utf-16-LE")
+        token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("utf-16-LE")
         token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
-        SQL_COPT_SS_ACCESS_TOKEN = (
-        1256  # This connection option is defined by microsoft in msodbcsql.h
-        )
+        SQL_COPT_SS_ACCESS_TOKEN = 1256
 
-        # Set up the connection
         connection_string = f"DRIVER={driver};SERVER={server};DATABASE={database};"
-        conn = pyodbc.connect(
-        connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
-        )
+        conn = pyodbc.connect(connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct})
         return conn
-    
     except pyodbc.Error as e:
-        logging.error(f"Failed with Default Credential: {str(e)}")
+        logging.error(f"Default Credential failed: {str(e)}")
         conn = pyodbc.connect(
             f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}",
             timeout=5
         )
-        logging.info("Connected using Username & Password")
         return conn
-    
 
 
-# --------------------------
-# Streaming Processor
-# --------------------------
-async def stream_processor(response):
+def get_client_name_from_db(client_id: str) -> str:
     """
-    Streams the model's response back to the client in real-time.
+    Connects to your SQL database and returns the client name for the given client_id.
     """
-    async for message in response:
-        if message.content:
-            yield message.content
 
-# --------------------------
-# HTTP Trigger Function
-# --------------------------
-@app.route(route="stream_openai_text", methods=[func.HttpMethod.GET])
-async def stream_openai_text(req: Request) -> StreamingResponse:
-    """
-    The main Azure Function endpoint. 
-    Receives a query of the form: ?query=<user question>:::<client id>
-    Example: ?query=Give summary of previous meetings:::10001
-    """
-    query = req.query_params.get("query", None)
-    if not query:
-        query = "please pass a query:::00000"  # default if none provided
-
-    #Parse user query and client id
-    user_query = query.split(":::")[0]
-    client_id = query.split(":::")[-1]
-
-    #Dynamically get the name from the database
-    selected_client_name = get_client_name_from_db(client_id)
-
-    #Prepare fallback instructions with the single-line prompt
-    HOST_INSTRUCTIONS = os.environ.get("AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT")
-    if not HOST_INSTRUCTIONS:
-        # Insert the name in the prompt:
-        HOST_INSTRUCTIONS = (
-            "You are a helpful assistant to a Wealth Advisor."
-            "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client."
-            "If the user mentions no name, assume they are asking about '{SelectedClientName}'."
-            "If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts."
-            "If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
-        )
-    HOST_INSTRUCTIONS = HOST_INSTRUCTIONS.replace("{SelectedClientName}", selected_client_name)
-    #Create the agent using the Semantic Kernel Assistant Agent
-    kernel = Kernel()
-    kernel.add_plugin(ChatWithDataPlugin(), plugin_name="ChatWithData")
-
-    service_id = "agent"
-    HOST_NAME = "WealthAdvisor"
-
-    agent = await AzureAssistantAgent.create(
-        kernel=kernel,
-        service_id=service_id,
-        name=HOST_NAME,
-        instructions=HOST_INSTRUCTIONS,
-        api_key=api_key,
-        deployment_name=deployment,
-        endpoint=endpoint,
-        api_version=api_version,
-    )
-
-    #Create a conversation thread and add the user's message
-    thread_id = await agent.create_thread()
-    message = ChatMessageContent(role=AuthorRole.USER, content=user_query)
-    await agent.add_chat_message(thread_id=thread_id, message=message)
-
-    #dditional instructions: pass the clientId
-    ADDITIONAL_INSTRUCTIONS = f"Always send clientId as {client_id}"
-
-    #Invoke the streaming response
-    sk_response = agent.invoke_stream(
-        thread_id=thread_id,
-        additional_instructions=ADDITIONAL_INSTRUCTIONS
-    )
-
-    return StreamingResponse(stream_processor(sk_response), media_type="text/event-stream")
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "SELECT Client FROM Clients WHERE ClientId = ?"
+    cursor.execute(sql, (client_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return row[0]  # The 'Client' column
+    else:
+        return ""
