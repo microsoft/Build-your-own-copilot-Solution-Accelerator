@@ -1,8 +1,10 @@
+import asyncio
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from quart import Response
 from app import (create_app, delete_all_conversations, generate_title,
                  init_cosmosdb_client, init_openai_client, stream_chat_request)
 
@@ -1309,8 +1311,18 @@ class MockChatCompletionChunk:
         self.choices = choices
 
 
+# Simulated async generator for testing purposes
+async def fake_internal_stream_response():
+    # Simulating streaming data chunk by chunk
+    chunks = ["chunk1", "chunk2"]
+    for chunk in chunks:
+        await asyncio.sleep(0.1)
+        yield chunk
+
+
 @pytest.mark.asyncio
-async def test_stream_chat_request_with_azurefunction():
+async def test_stream_chat_request_with_internal_stream():
+    # Test input data for stream_chat_request
     request_body = {
         "history_metadata": {},
         "client_id": "test_client",
@@ -1318,17 +1330,36 @@ async def test_stream_chat_request_with_azurefunction():
     }
     request_headers = {"apim-request-id": "test_id"}
 
-    with patch("app.stream_response_from_wealth_assistant", return_value=fake_async_generator):
+    # Patch stream_response_from_wealth_assistant and USE_INTERNAL_STREAM
+    with patch("app.stream_response_from_wealth_assistant", return_value=fake_internal_stream_response), \
+         patch("app.USE_INTERNAL_STREAM", True):
+
+        # Create the Quart app context for the test
         async with create_app().app_context():
             response = await stream_chat_request(request_body, request_headers)
 
-            # Confirm it's a Response object
-            assert hasattr(response, "get_data")
+            # Ensure that response is a Quart Response object
+            assert isinstance(response, Response)
 
-            # Get the streamed content
+            # Await get_data to get the data content as text
             response_data = await response.get_data(as_text=True)
 
-            assert "chunk1" in response_data or "chunk2" in response_data
+            # Create an async generator for iterating over the streamed content
+            async def async_response_data():
+                for chunk in response_data.split('\n'):
+                    if chunk.strip():  # Ignore empty chunks
+                        yield chunk
+
+            # Collect all streamed chunks from the response using async for
+            chunks = []
+            async for chunk in async_response_data():
+                chunks.append(chunk)
+
+            # Ensure we got the expected number of chunks
+            assert len(chunks) == 2
+            assert "chunk1" in chunks[0]
+            assert "chunk2" in chunks[1]
+            assert "apim-request-id" in chunks[0]
 
 
 @pytest.mark.asyncio
@@ -1393,9 +1424,3 @@ async def test_stream_chat_request_without_azurefunction():
 
             assert len(chunks) == 2
             assert "apim-request-id" in chunks[0]
-
-
-# Helper to mock an async generator
-async def fake_async_generator():
-    for chunk in ["chunk1", "chunk2"]:
-        yield chunk
