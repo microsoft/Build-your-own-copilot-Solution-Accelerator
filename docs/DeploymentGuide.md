@@ -103,7 +103,7 @@ Consider the following settings during your deployment to modify specific settin
 <details>
   <summary><b>Configurable Deployment Settings</b></summary>
 
-When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](./docs/CustomizingAzdParameters.md):  
+When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](CustomizingAzdParameters.md):  
 
 | **Setting** | **Description** |  **Default value** |
 |------------|----------------|  ------------|
@@ -169,7 +169,7 @@ Once you've opened the project in [Codespaces](#github-codespaces), [Dev Contain
     ```
 
 6. Open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service and get the app URL from `Default domain`.
-7. Test the app locally with the sample question with any selected client: _Show latest asset value by asset type?_. For more sample questions you can test in the application, see [Sample Questions](./docs/SampleQuestions.md).
+7. Test the app locally with the sample question with any selected client: _Show latest asset value by asset type?_. For more sample questions you can test in the application, see [Sample Questions](SampleQuestions.md).
 8. You can now delete the resources by running `azd down`, if you are done trying out the application. 
 
 ### Publishing Local Build Container to Azure Container Registry
@@ -211,9 +211,9 @@ This will rebuild the source code, package it into a container, and push it to t
     - Follow steps in [App Authentication](./ConfigureAppAuthentication.md) to configure authenitcation in app service. Note that Authentication changes can take up to 10 minutes. 
 
 3. **Fabric Configuration**, 
-   - Follow steps in [Fabric Deployment guide](./docs/FabricDeployment.md) to set up the data processing pipelines and Power BI report in Fabric.
+   - Follow steps in [Fabric Deployment guide](FabricDeployment.md) to set up the data processing pipelines and Power BI report in Fabric.
 4. **Teams App Configuration**
-   - *(Optional)* Follow steps in [Teams Tab App guide](./docs/TeamsAppDeployment.md) to add the Client Advisor app to Microsoft Teams.
+   - *(Optional)* Follow steps in [Teams Tab App guide](TeamsAppDeployment.md) to add the Client Advisor app to Microsoft Teams.
 5. **Deleting Resources After a Failed Deployment**  
 
      - Follow steps in [Delete Resource Group](./DeleteResourceGroup.md) if your deployment fails and/or you need to clean up the resources.
