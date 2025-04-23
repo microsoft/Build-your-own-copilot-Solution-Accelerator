@@ -184,6 +184,7 @@ class ChatWithDataPlugin:
                     answer += str(row) + "\n"
 
             conn.close()
+            answer = answer[:20000] if len(answer) > 20000 else answer
 
         except Exception as e:
             answer = f"Error retrieving data from SQL: {str(e)}"

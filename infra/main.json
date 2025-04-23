@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.34.44.8038",
-      "templateHash": "2828817870488203676"
+      "templateHash": "15493241603308901855"
     }
   },
   "parameters": {
@@ -2300,6 +2300,9 @@
               },
               "secretName": "AZURE-AI-PROJECT-CONN-STRING"
             }
+          },
+          "aiProjectName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiProjectName.value]"
           }
         },
         "template": {
@@ -2309,7 +2312,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "12002862009015749569"
+              "templateHash": "11617464416957853545"
             }
           },
           "parameters": {
@@ -2694,6 +2697,9 @@
             "useAIProjectClientFlag": {
               "type": "string",
               "defaultValue": "false"
+            },
+            "aiProjectName": {
+              "type": "string"
             }
           },
           "variables": {
@@ -2968,6 +2974,19 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', parameters('HostingPlanName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.MachineLearningServices/workspaces/{0}', parameters('aiProjectName'))]",
+              "name": "[guid(parameters('WebsiteName'), resourceId('Microsoft.MachineLearningServices/workspaces', parameters('aiProjectName')), resourceId('Microsoft.Authorization/roleDefinitions', '64702f94-c441-49e6-a78b-ef80e0188fee'))]",
+              "properties": {
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '64702f94-c441-49e6-a78b-ef80e0188fee')]",
+                "principalId": "[reference(resourceId('Microsoft.Web/sites', parameters('WebsiteName')), '2020-06-01', 'full').identity.principalId]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
               ]
             },
             {
