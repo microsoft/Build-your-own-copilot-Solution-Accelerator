@@ -29,7 +29,7 @@
 9.   Click Copy button in popup window.
 10.  Wait 5 minutes to allow the data pipelines to finish processing then proceed to next step.
 ## Step 3: **Open Power BI report**
-1.   Download the .pbix file from the [Reports folder](../PowerBIReport/).
+1.   Download the .pbix file from the [Reports folder](../powerbireport/).
 2.   Open Power BI report in Power BI Dashboard
 3.   Click on `Transform Data` menu option from the Task Bar
 4.   Click `Data source settings`
