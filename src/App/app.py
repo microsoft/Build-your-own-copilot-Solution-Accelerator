@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 import httpx
 import requests
-from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from dotenv import load_dotenv
 
 # from quart.sessions import SecureCookieSessionInterface
