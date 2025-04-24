@@ -2,7 +2,6 @@ param solutionLocation string
 
 @description('Name')
 param cosmosDBName string
-@secure()
 param kvName string
 param databaseName string = 'db_conversation_history'
 param collectionName string = 'conversations'
