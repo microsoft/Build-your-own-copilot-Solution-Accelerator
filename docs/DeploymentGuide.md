@@ -164,15 +164,7 @@ Once you've opened the project in [Codespaces](#github-codespaces), [Dev Contain
     - This deployment will take *7-10 minutes* to provision the resources in your account and set up the solution with sample data.
     - If you encounter an error or timeout during deployment, changing the location may help, as there could be availability constraints for the resources.
 
-5. Once the deployment has completed successfully and you would like to use the sample data, run the bash command printed in the terminal. The bash command will look like the following: 
-    ```shell 
-    bash ./infra/scripts/process_sample_data.sh
-    ```
-    This script/command will pick the required parameters for created azd env, if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
-    ```shell
-    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName>
-    ```
-
+5. Once the deployment is complete, please follow the [Import Sample Data](#post-deployment-steps) instructions under **Post Deployment Steps** to load the sample data correctly.
 6. Open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service and get the app URL from `Default domain`.
 7. Test the app locally with the sample question with any selected client: _Show latest asset value by asset type?_. For more sample questions you can test in the application, see [Sample Questions](SampleQuestions.md).
 8. You can now delete the resources by running `azd down`, if you are done trying out the application. 
@@ -210,6 +202,10 @@ This will rebuild the source code, package it into a container, and push it to t
    -Run  bash command printed in the terminal. The bash command will look like the following: 
     ```shell 
     bash ./infra/scripts/process_sample_data.sh
+    ```
+    if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
+    ```shell
+    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName>
     ```
 
 2. **Add Authentication Provider**  
