@@ -24,7 +24,7 @@ Here are some example regions where the services are available: East US, East US
 ### [Optional] Quota Recommendations  
 By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tokens**, so we recommend
 
-<!-- **For Global Standard | GPT-4o-mini - the capacity to at least 150k tokens post-deployment for optimal performance.** -->
+> **For Global Standard | GPT-4o-mini - the capacity to at least 100k tokens post-deployment for optimal performance.**
 
 To adjust quota settings, follow these [steps](AzureGPTQuotaSettings.md)
 
