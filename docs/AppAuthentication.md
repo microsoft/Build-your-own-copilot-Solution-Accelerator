@@ -15,7 +15,7 @@ This document provides step-by-step instructions to configure Azure App Registra
 
 1. Click on `+ Add identity provider` to see a list of identity providers.
 
-  ![Authentication Identity](images/AppAuthenticationIdentity.png)
+  ![Authentication Identity](images/AppAuthenticationIdentityNew.png)
 
 1. Click on `+ Add Provider` to see a list of identity providers.
 
@@ -25,3 +25,4 @@ This document provides step-by-step instructions to configure Azure App Registra
  ![Add Provider](images/AppAuthIdentityProviderAdd.png)
 
 1. Accept the default values and click on `Add` button to go back to the previous page with the identify provider added.
+  ![Authentication Identity](images/AppAuthenticationIdentity.png)

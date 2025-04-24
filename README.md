@@ -18,7 +18,7 @@ It leverages Azure OpenAI Service, Azure AI Search and Microsoft Fabric, to stre
 > Note: Some features contained in this repository are in private preview. Certain features might not be supported or might have constrained capabilities. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms).
 
 >**Version history:**  
->An updated version of the **Build Your Own Copilot** solution accelerator was published on **[MM/DD/YYYY]**. If you deployed the accelerator prior to that date, please see the “Version history” in the [Version History](#version-history) section for details.
+>An updated version of the **Build Your Own Copilot** solution accelerator was published on **[04/24/2025]**. If you deployed the accelerator prior to that date, please see the “Version history” in the [Version History](#version-history) section for details.
 
 **Technical Key Features**
 
@@ -59,10 +59,10 @@ Follow the quick deploy steps on the deployment guide to deploy this solution to
 > ⚠️ **Important: Check Azure OpenAI Quota Availability** <br/>To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./docs/quota_check.md) before you deploy the solution.
 
 <!-- Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central. -->
-<!-- 
-| [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fdocument-generation-solution-accelerator%2Fmain%2Finfra%2Fmain.json) |
+
+| [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fbuild-your-own-copilot-solution-accelerator%2Fdev%2Finfra%2Fmain.json) |
 |---|
--->
+
 
 <br/>
 <br>
@@ -121,7 +121,7 @@ Customer stories coming soon.
 <h2>
 Version History
 </h2>
-An updated version of the **Build Your Own Copilot** solution accelerator was published on **[MM/DD/YYYY]**. If you deployed the accelerator prior to that date, please note the following changes:
+An updated version of the **Build Your Own Copilot** solution accelerator was published on **[04/24/2025]**. If you deployed the accelerator prior to that date, please note the following changes:
 
 - The **Research Assistant** project has been moved to a separate branch. You can access it here: [**Research Assistant Branch**](https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator/tree/byoc-researcher).
 - This repository now focuses exclusively on the **Client Advisor** solution scenario.
