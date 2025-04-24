@@ -4,15 +4,18 @@ param managedIdentityObjectId string
 param managedIdentityName string
 
 @description('The name of the SQL logical server.')
+@secure()
 param serverName string
 
 @description('The name of the SQL Database.')
+@secure()
 param sqlDBName string
 
 @description('Location for all resources.')
 param location string = solutionLocation
 
 @description('The administrator username of the SQL logical server.')
+@secure()
 param administratorLogin string = 'sqladmin'
 
 @description('The administrator password of the SQL logical server.')
