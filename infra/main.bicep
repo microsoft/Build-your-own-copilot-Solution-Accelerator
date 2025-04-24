@@ -45,8 +45,6 @@ param embeddingModel string = 'text-embedding-ada-002'
 @description('Capacity of the Embedding Model deployment')
 param embeddingDeploymentCapacity int = 80
 
-// @description('Fabric Workspace Id if you have one, else leave it empty. ')
-// param fabricWorkspaceId string
 param imageTag string = 'latest'
 
 //restricting to these regions because assistants api for gpt-4o-mini is available only in these regions

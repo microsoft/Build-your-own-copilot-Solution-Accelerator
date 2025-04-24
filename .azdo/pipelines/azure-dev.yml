@@ -3,6 +3,7 @@
 trigger:
   - main
   - master
+  - dev
 
 # Azure Pipelines workflow to deploy to Azure using azd
 # To configure required secrets and service connection for connecting to Azure, simply run `azd pipeline config --provider azdo`
