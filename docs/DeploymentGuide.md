@@ -8,7 +8,6 @@ Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/g
 
 - [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
 - [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
-- [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/)
 - [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/)
 - [Azure SQL Database](https://learn.microsoft.com/en-us/azure/azure-sql/)
 - [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/)
@@ -84,6 +83,8 @@ If you're not using one of the above options for opening the project, then you'l
     - [Python 3.9+](https://www.python.org/downloads/)
     - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     - [Git](https://git-scm.com/downloads)
+    - [Microsoft ODBC Driver 18 for SQL Server](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16)
+    - [sqlcmd(ODBC-Windows)](https://learn.microsoft.com/en-us/sql/tools/sqlcmd/sqlcmd-utility?view=sql-server-ver16&tabs=odbc%2Cwindows%2Cwindows-support&pivots=cs1-bash#download-and-install-sqlcmd) / [sqlcmd(Linux/Mac)](https://learn.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-ver16&tabs=redhat-install)
 
 2. Clone the repository or download the project code via command-line:
 
@@ -166,6 +167,10 @@ Once you've opened the project in [Codespaces](#github-codespaces), [Dev Contain
 5. Once the deployment has completed successfully and you would like to use the sample data, run the bash command printed in the terminal. The bash command will look like the following: 
     ```shell 
     bash ./infra/scripts/process_sample_data.sh
+    ```
+    This script/command will pick the required parameters for created azd env, if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
+    ```shell
+    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName>
     ```
 
 6. Open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service and get the app URL from `Default domain`.
