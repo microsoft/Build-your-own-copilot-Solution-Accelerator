@@ -225,9 +225,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureOpenAIEmbeddingkey:keyVault.getSecret('AZURE-OPENAI-KEY')
     AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aiServicesTarget
     USE_INTERNAL_STREAM:'True'
-    SQLDB_SERVER:sqlDBModule.outputs.sqlServerName
-    SQLDB_DATABASE:sqlDBModule.outputs.sqlDbName
-    SQLDB_USERNAME:sqlDBModule.outputs.sqlDbUser
+    SQLDB_SERVER:'${sqlDBModule.name}.database.windows.net'
+    SQLDB_DATABASE:sqlDBModule.name
+    SQLDB_USERNAME:'sqladmin'
     SQLDB_PASSWORD:keyVault.getSecret('SQLDB-PASSWORD')
     AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosAccountName
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosContainerName

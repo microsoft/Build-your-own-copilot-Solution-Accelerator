@@ -115,6 +115,6 @@ resource sqldbDatabasePwd 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview'
   }
 }
 
-output sqlServerName string = '${serverName}.database.windows.net'
-output sqlDbName string = sqlDBName
-output sqlDbUser string = administratorLogin
+// output sqlServerName string = '${serverName}.database.windows.net'
+// output sqlDbName string = sqlDBName
+// output sqlDbUser string = administratorLogin
