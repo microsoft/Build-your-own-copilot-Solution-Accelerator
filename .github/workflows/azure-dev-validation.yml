@@ -1,9 +1,5 @@
 name: Azure Template Validation
 on:
-  push:
-    branches:
-      - dev
-      - main 
   workflow_dispatch:
 
 permissions:
