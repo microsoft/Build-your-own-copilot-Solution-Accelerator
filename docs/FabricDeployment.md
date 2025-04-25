@@ -47,7 +47,9 @@
 2.  Select Fabric Workspace
 3.  Click `Select`
 4.  After publish is complete, navigate to Fabric Workspace
-5.  Click `...` next to the Semantic model for Power BI report
+5. You will find the report in the Fabric Workspace under the name **WealthAdvisor-Client360Report**.  
+6. Compare the values in the report with the responses provided by the Client Advisor chatbot to verify their accuracy and credibility.
+<!-- 5.  Click `...` next to the Semantic model for Power BI report
 6.  Click on `Settings` 
 7.  Click on `Edit credentials` (under Data source credentials)
 8.  Select `OAuth2` for the Authentication method
@@ -55,9 +57,9 @@
 10. Click `Sign in`
 11. Navigate back to Fabric workspace and click on Power BI report.
 12. Click on `File` -> `Embed Report` -> `Website or Portal` from the top menu.
-13. Copy the first line from the popup with title `Here's a link you can use to embed this content.` for use later in step 5.6.
+13. Copy the first line from the popup with title `Here's a link you can use to embed this content.` for use later in step 5.6. -->
 
-## Step 5: Update the Power BI URL in Azure App Service configuration
+<!-- ## Step 5: Update the Power BI URL in Azure App Service configuration
 1. Launch the Azure Portal [Azure Portal](https://portal.azure.com/).
 2. Enter `Resource Groups` in the top search bar.
 
@@ -80,4 +82,4 @@
 
 8. Click on `Overview` from the left menu. Then click on `Restart` button in the top menu. Then click on `Yes` in the pop-up message. 
 
-   ![Application Restart](images/fabric/AppServiceRestart.png)
+   ![Application Restart](images/fabric/AppServiceRestart.png) -->
