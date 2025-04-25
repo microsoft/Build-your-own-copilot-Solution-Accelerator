@@ -118,13 +118,23 @@ if [ -n "$managedIdentityClientId" ]; then
     sed -i "s/mici_to-be-replaced/${managedIdentityClientId}/g" ${pythonScriptPath}"create_sql_tables.py"
 fi
 
+# Determine the correct Python command
+if command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+elif command -v python &> /dev/null; then
+    PYTHON_CMD="python"
+else
+    echo "Python is not installed on this system. Or it is not added in the PATH."
+    exit 1
+fi
+
 # create virtual environment
 # Check if the virtual environment already exists
 if [ -d $pythonScriptPath"scriptenv" ]; then
     echo "Virtual environment already exists. Skipping creation."
 else
     echo "Creating virtual environment"
-    python3 -m venv $pythonScriptPath"scriptenv"
+    $PYTHON_CMD -m venv $pythonScriptPath"scriptenv"
 fi
 
 # Activate the virtual environment

@@ -2,7 +2,6 @@ key_vault_name = 'kv_to-be-replaced'
 managed_identity_client_id = 'mici_to-be-replaced'
 
 import pandas as pd
-import pymssql
 import os
 from datetime import datetime
 
