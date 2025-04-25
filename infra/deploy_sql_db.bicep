@@ -4,11 +4,9 @@ param managedIdentityObjectId string
 param managedIdentityName string
 
 @description('The name of the SQL logical server.')
-@secure()
 param serverName string
 
 @description('The name of the SQL Database.')
-@secure()
 param sqlDBName string
 
 @description('Location for all resources.')
@@ -115,6 +113,6 @@ resource sqldbDatabasePwd 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview'
   }
 }
 
-// output sqlServerName string = '${serverName}.database.windows.net'
-// output sqlDbName string = sqlDBName
+output sqlServerName string = '${serverName}.database.windows.net'
+output sqlDbName string = sqlDBName
 // output sqlDbUser string = administratorLogin
