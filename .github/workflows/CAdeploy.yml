@@ -115,7 +115,7 @@ jobs:
           az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters AZURE_ENV_OPENAI_LOCATION=${{ env.AZURE_LOCATION }}
+            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }}
 
       - name: List KeyVaults and Store in Array
         id: list_keyvaults
