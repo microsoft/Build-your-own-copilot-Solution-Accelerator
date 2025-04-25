@@ -17,6 +17,9 @@ This document provides step-by-step instructions to configure Azure App Registra
 
   ![Authentication Identity](images/AppAuthenticationIdentityNew.png)
 
+  > **Note:** If you encounter the following error message indicating that your organization's policy prohibits the automatic use of secrets, please refer to our [Manual App Registration Configuration](./ManualAppRegistrationConfiguration.md) for detailed manual setup instructions.
+>  ![add_auth_provider_web_3](./Images/AppAuthenticationIdentityProviderRestriction.png)
+
 1. Click on `+ Add Provider` to see a list of identity providers.
 
   ![Add Provider](images/AppAuthIdentityProvider.png)
