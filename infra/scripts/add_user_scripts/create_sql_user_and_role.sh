@@ -92,7 +92,11 @@ OS=$(uname | tr '[:upper:]' '[:lower:]')
 if [[ "$OS" == "mingw"* || "$OS" == "cygwin"* || "$OS" == "msys"* ]]; then
     echo "Running on Windows OS, will use interactive login"
     echo "Getting signed in user email"
-    UserEmail=$(az ad signed-in-user show --query userPrincipalName -o tsv)
+    UserEmail=$(az ad signed-in-user show --query mail -o tsv)
+     # If the email is null or empty, use userPrincipalName
+    if [[ -z "$UserEmail" ]]; then
+        UserEmail=$(az ad signed-in-user show --query userPrincipalName -o tsv)
+    fi
     # Execute the SQL query
     echo "Executing SQL query..."
     sqlcmd -S "$SqlServerName" -d "$SqlDatabaseName" -G -U "$UserEmail" -Q "$SQL_QUERY_FINAL" || {

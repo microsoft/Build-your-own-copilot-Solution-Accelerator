@@ -401,3 +401,6 @@ FodyWeavers.xsd
 
 scriptenv
 .azure
+
+clientdata
+clienttranscripts

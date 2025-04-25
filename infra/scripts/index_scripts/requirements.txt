@@ -10,7 +10,6 @@ azure-ai-textanalytics
 azure-search-documents==11.6.0b9
 azure-keyvault-secrets
 pandas
-pymssql
 datetime
 
 pyodbc==5.2.0
