@@ -60,8 +60,8 @@ Follow the quick deploy steps on the deployment guide to deploy this solution to
 
 <!-- Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central. -->
 
-| [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fbuild-your-own-copilot-solution-accelerator%2Fdev%2Finfra%2Fmain.json) |
-|---|
+<!-- | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fbuild-your-own-copilot-solution-accelerator%2Fdev%2Finfra%2Fmain.json) |
+|---| -->
 
 
 <br/>
