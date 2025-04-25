@@ -47,8 +47,8 @@
 2.  Select Fabric Workspace
 3.  Click `Select`
 4.  After publish is complete, navigate to Fabric Workspace
-5. You will find the report in the Fabric Workspace under the name **WealthAdvisor-Client360Report**.  
-6. Compare the values in the report with the responses provided by the Client Advisor chatbot to verify their accuracy and credibility.
+5.  You will find the report in the Fabric Workspace under the name **WealthAdvisor-Client360Report**.  
+6.  Use the report's filtering options to analyze client data. Cross-check the values in the report with the responses provided by the Client Advisor chatbot to ensure their accuracy and reliability.
 <!-- 5.  Click `...` next to the Semantic model for Power BI report
 6.  Click on `Settings` 
 7.  Click on `Edit credentials` (under Data source credentials)
