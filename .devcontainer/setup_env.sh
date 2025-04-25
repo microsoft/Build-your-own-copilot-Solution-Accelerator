@@ -5,6 +5,7 @@ git pull
 
 # provide execute permission to quotacheck script
 sudo chmod +x ./infra/scripts/checkquota.sh
+sudo chmod +x ./infra/scripts/quota_check_params.sh
 
 # Add the path to ~/.bashrc for persistence
 if ! grep -q '/opt/mssql-tools18/bin' ~/.bashrc; then

@@ -24,7 +24,7 @@ Here are some example regions where the services are available: East US, East US
 ### [Optional] Quota Recommendations  
 By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tokens**, so we recommend
 
-> **For Global Standard | GPT-4o-mini - the capacity to at least 100k tokens post-deployment for optimal performance.**
+> **For Global Standard | GPT-4o-mini - increase the capacity to at least 150k tokens post-deployment for optimal performance.**
 
 To adjust quota settings, follow these [steps](AzureGPTQuotaSettings.md)
 
@@ -80,7 +80,7 @@ If you're not using one of the above options for opening the project, then you'l
 1. Make sure the following tools are installed:
     - [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.5) <small>(v7.0+)</small> - available for Windows, macOS, and Linux.
     - [Azure Developer CLI (azd)](https://aka.ms/install-azd)
-    - [Python 3.9+](https://www.python.org/downloads/)
+    - [Python 3.9 to 3.11](https://www.python.org/downloads/)
     - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     - [Git](https://git-scm.com/downloads)
     - [Microsoft ODBC Driver 18 for SQL Server](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16)
