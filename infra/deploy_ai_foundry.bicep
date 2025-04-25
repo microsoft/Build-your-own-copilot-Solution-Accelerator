@@ -335,135 +335,135 @@ resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-p
 }
 
 
-// resource tenantIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'TENANT-ID'
-//   properties: {
-//     value: subscription().tenantId
-//   }
-// }
+resource tenantIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'TENANT-ID'
+  properties: {
+    value: subscription().tenantId
+  }
+}
 
 
-// resource azureOpenAIApiKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-OPENAI-KEY'
-//   properties: {
-//     value: aiServices.listKeys().key1 //aiServices_m.listKeys().key1
-//   }
-// }
+resource azureOpenAIApiKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-OPENAI-KEY'
+  properties: {
+    value: aiServices.listKeys().key1 //aiServices_m.listKeys().key1
+  }
+}
 
-// resource azureOpenAIDeploymentModel 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-OPEN-AI-DEPLOYMENT-MODEL'
-//   properties: {
-//     value: gptModelName
-//   }
-// }
+resource azureOpenAIDeploymentModel 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-OPEN-AI-DEPLOYMENT-MODEL'
+  properties: {
+    value: gptModelName
+  }
+}
 
-// resource azureOpenAIApiVersionEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
-//   properties: {
-//     value: azureOpenaiAPIVersion  //'2024-07-18'
-//   }
-// }
+resource azureOpenAIApiVersionEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
+  properties: {
+    value: azureOpenaiAPIVersion  //'2024-07-18'
+  }
+}
 
-// resource azureOpenAIEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-OPENAI-ENDPOINT'
-//   properties: {
-//     value: aiServices.properties.endpoint //aiServices_m.properties.endpoint
-//   }
-// }
+resource azureOpenAIEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-OPENAI-ENDPOINT'
+  properties: {
+    value: aiServices.properties.endpoint //aiServices_m.properties.endpoint
+  }
+}
 
-// resource azureAIProjectConnectionStringEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-AI-PROJECT-CONN-STRING'
-//   properties: {
-//     value: '${split(aiHubProject.properties.discoveryUrl, '/')[2]};${subscription().subscriptionId};${resourceGroup().name};${aiHubProject.name}'
-//   }
-// }
+resource azureAIProjectConnectionStringEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-AI-PROJECT-CONN-STRING'
+  properties: {
+    value: '${split(aiHubProject.properties.discoveryUrl, '/')[2]};${subscription().subscriptionId};${resourceGroup().name};${aiHubProject.name}'
+  }
+}
 
 
-// resource azureSearchAdminKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-SEARCH-KEY'
-//   properties: {
-//     value: aiSearch.listAdminKeys().primaryKey
-//   }
-// }
+resource azureSearchAdminKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-SEARCH-KEY'
+  properties: {
+    value: aiSearch.listAdminKeys().primaryKey
+  }
+}
 
-// resource azureSearchServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-SEARCH-ENDPOINT'
-//   properties: {
-//     value: 'https://${aiSearch.name}.search.windows.net'
-//   }
-// }
+resource azureSearchServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-SEARCH-ENDPOINT'
+  properties: {
+    value: 'https://${aiSearch.name}.search.windows.net'
+  }
+}
 
-// resource azureSearchServiceEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-SEARCH-SERVICE'
-//   properties: {
-//     value: aiSearch.name
-//   }
-// }
+resource azureSearchServiceEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-SEARCH-SERVICE'
+  properties: {
+    value: aiSearch.name
+  }
+}
 
-// resource azureSearchIndexEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-SEARCH-INDEX'
-//   properties: {
-//     value: 'transcripts_index'
-//   }
-// }
+resource azureSearchIndexEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-SEARCH-INDEX'
+  properties: {
+    value: 'transcripts_index'
+  }
+}
 
-// resource cogServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'COG-SERVICES-ENDPOINT'
-//   properties: {
-//     value: aiServices.properties.endpoint
-//   }
-// }
+resource cogServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'COG-SERVICES-ENDPOINT'
+  properties: {
+    value: aiServices.properties.endpoint
+  }
+}
 
-// resource cogServiceKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'COG-SERVICES-KEY'
-//   properties: {
-//     value: aiServices.listKeys().key1
-//   }
-// }
+resource cogServiceKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'COG-SERVICES-KEY'
+  properties: {
+    value: aiServices.listKeys().key1
+  }
+}
 
-// resource cogServiceNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'COG-SERVICES-NAME'
-//   properties: {
-//     value: aiServicesName
-//   }
-// }
+resource cogServiceNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'COG-SERVICES-NAME'
+  properties: {
+    value: aiServicesName
+  }
+}
 
-// resource azureSubscriptionIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-SUBSCRIPTION-ID'
-//   properties: {
-//     value: subscription().subscriptionId
-//   }
-// }
+resource azureSubscriptionIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-SUBSCRIPTION-ID'
+  properties: {
+    value: subscription().subscriptionId
+  }
+}
 
-// resource resourceGroupNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-RESOURCE-GROUP'
-//   properties: {
-//     value: resourceGroup().name
-//   }
-//}
+resource resourceGroupNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-RESOURCE-GROUP'
+  properties: {
+    value: resourceGroup().name
+  }
+}
 
-// resource azureLocatioEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-LOCATION'
-//   properties: {
-//     value: solutionLocation
-//   }
-// }
+resource azureLocatioEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'AZURE-LOCATION'
+  properties: {
+    value: solutionLocation
+  }
+}
 
 output keyvaultName string = keyvaultName
 output keyvaultId string = keyVault.id
