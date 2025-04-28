@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.34.44.8038",
-      "templateHash": "11801658341418670293"
+      "templateHash": "6807899313442022071"
     }
   },
   "parameters": {
@@ -1535,7 +1535,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "2118882128751550441"
+              "templateHash": "18024619127503050220"
             }
           },
           "parameters": {
@@ -1649,6 +1649,52 @@
               "dependsOn": [
                 "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName'))]"
               ]
+            },
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2021-11-01-preview",
+              "name": "[format('{0}/{1}', parameters('kvName'), 'AZURE-COSMOSDB-ACCOUNT')]",
+              "properties": {
+                "value": "[parameters('cosmosDBName')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2021-11-01-preview",
+              "name": "[format('{0}/{1}', parameters('kvName'), 'AZURE-COSMOSDB-ACCOUNT-KEY')]",
+              "properties": {
+                "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName')), '2022-08-15').primaryMasterKey]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2021-11-01-preview",
+              "name": "[format('{0}/{1}', parameters('kvName'), 'AZURE-COSMOSDB-DATABASE')]",
+              "properties": {
+                "value": "[parameters('databaseName')]"
+              }
+            },
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2021-11-01-preview",
+              "name": "[format('{0}/{1}', parameters('kvName'), 'AZURE-COSMOSDB-CONVERSATIONS-CONTAINER')]",
+              "properties": {
+                "value": "[parameters('collectionName')]"
+              }
+            },
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2021-11-01-preview",
+              "name": "[format('{0}/{1}', parameters('kvName'), 'AZURE-COSMOSDB-ENABLE-FEEDBACK')]",
+              "properties": {
+                "value": "True"
+              }
             }
           ],
           "outputs": {
@@ -1887,7 +1933,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "4179944107717925300"
+              "templateHash": "1848692139029312246"
             }
           },
           "parameters": {
@@ -2040,11 +2086,15 @@
           "outputs": {
             "sqlServerName": {
               "type": "string",
-              "value": "[parameters('serverName')]"
+              "value": "[format('{0}.database.windows.net', parameters('serverName'))]"
             },
             "sqlDbName": {
               "type": "string",
               "value": "[parameters('sqlDBName')]"
+            },
+            "sqlDbUser": {
+              "type": "string",
+              "value": "[parameters('administratorLogin')]"
             }
           }
         }
@@ -2183,13 +2233,13 @@
             "value": "True"
           },
           "SQLDB_SERVER": {
-            "value": "[format('{0}.database.windows.net', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value)]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value]"
           },
           "SQLDB_DATABASE": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbName.value]"
           },
           "SQLDB_USERNAME": {
-            "value": "sqladmin"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbUser.value]"
           },
           "SQLDB_PASSWORD": {
             "reference": {
@@ -3035,7 +3085,7 @@
     },
     "SQLDB_SERVER": {
       "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value]"
+      "value": "[replace(reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value, '.database.windows.net', '')]"
     },
     "SQLDB_DATABASE": {
       "type": "string",

@@ -4,7 +4,8 @@ git fetch
 git pull
 
 # provide execute permission to quotacheck script
-chmod +x ./infra/scripts/checkquota.sh
+sudo chmod +x ./infra/scripts/checkquota.sh
+sudo chmod +x ./infra/scripts/quota_check_params.sh
 
 # Add the path to ~/.bashrc for persistence
 if ! grep -q '/opt/mssql-tools18/bin' ~/.bashrc; then
@@ -20,9 +21,3 @@ if ! command -v sqlcmd &> /dev/null; then
     exit 1
 fi
 
-# Install Azure function core tool
-wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
-sudo dpkg -i packages-microsoft-prod.deb
-
-sudo apt-get update
-sudo apt-get install azure-functions-core-tools-4

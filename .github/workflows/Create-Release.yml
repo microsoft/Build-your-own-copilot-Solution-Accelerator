@@ -56,7 +56,7 @@ jobs:
                '@semantic-release/github'
              ]
          env:
-             GITHUB_TOKEN: ${{ secrets.TOKEN }}
+             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        - run: echo ${{ steps.semantic.outputs.release-version }}
  
        - run: echo "$OUTPUTS"

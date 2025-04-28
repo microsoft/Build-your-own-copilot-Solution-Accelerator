@@ -21,7 +21,6 @@ param deploymentType string = 'GlobalStandard'
 @description('Name of the GPT model to deploy:')
 @allowed([
   'gpt-4o-mini'
-  'gpt-4o'
 ])
 param gptModelName string = 'gpt-4o-mini'
 
@@ -45,10 +44,12 @@ param embeddingModel string = 'text-embedding-ada-002'
 @description('Capacity of the Embedding Model deployment')
 param embeddingDeploymentCapacity int = 80
 
+// @description('Fabric Workspace Id if you have one, else leave it empty. ')
+// param fabricWorkspaceId string
 param imageTag string = 'latest'
 
 //restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
-@allowed(['australiaeast','eastus', 'eastus2','francecentral','japaneast','norwayeast','southindia', 'swedencentral','uksouth', 'westus', 'westus3'])
+@allowed(['australiaeast','eastus', 'eastus2','francecentral','japaneast','swedencentral','uksouth', 'westus', 'westus3'])
 @description('Azure OpenAI Location')
 param AzureOpenAILocation string = 'eastus2'
 
