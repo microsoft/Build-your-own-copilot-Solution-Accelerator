@@ -28,8 +28,7 @@
 				"ms-python.python",
 				"ms-azuretools.vscode-azcli",
 				"ms-azuretools.vscode-bicep",
-				"ms-azuretools.azure-dev",
-				"ms-azuretools.vscode-azurefunctions"
+				"ms-azuretools.azure-dev"
 			]
 		}
 	},
