@@ -226,9 +226,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureOpenAIEmbeddingkey:keyVault.getSecret('AZURE-OPENAI-KEY')
     AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aiServicesTarget
     USE_INTERNAL_STREAM:'True'
-    SQLDB_SERVER:sqlDBModule.outputs.sqlServerName
+    SQLDB_SERVER:'${sqlDBModule.outputs.sqlServerName}.database.windows.net'
     SQLDB_DATABASE:sqlDBModule.outputs.sqlDbName
-    SQLDB_USERNAME:sqlDBModule.outputs.sqlDbUser
+    SQLDB_USERNAME:'sqladmin'
     SQLDB_PASSWORD:keyVault.getSecret('SQLDB-PASSWORD')
     AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosAccountName
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosContainerName
@@ -256,7 +256,7 @@ output STORAGE_CONTAINER_NAME string = storageAccountModule.outputs.storageConta
 output KEY_VAULT_NAME string = keyvaultModule.outputs.keyvaultName
 output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
 output RESOURCE_GROUP_NAME string = resourceGroup().name
-output SQLDB_SERVER string = replace(sqlDBModule.outputs.sqlServerName, '.database.windows.net','')
+output SQLDB_SERVER string = sqlDBModule.outputs.sqlServerName
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
 output MANAGEDINDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
 output MANAGEDINDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId

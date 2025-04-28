@@ -112,4 +112,3 @@ resource AZURE_COSMOSDB_ENABLE_FEEDBACK 'Microsoft.KeyVault/vaults/secrets@2021-
 output cosmosAccountName string = cosmos.name
 output cosmosDatabaseName string = databaseName
 output cosmosContainerName string = collectionName
-

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.34.44.8038",
-      "templateHash": "6807899313442022071"
+      "templateHash": "1797657337218629559"
     }
   },
   "parameters": {
@@ -39,8 +39,7 @@
       "type": "string",
       "defaultValue": "gpt-4o-mini",
       "allowedValues": [
-        "gpt-4o-mini",
-        "gpt-4o"
+        "gpt-4o-mini"
       ],
       "minLength": 1,
       "metadata": {
@@ -91,8 +90,6 @@
         "eastus2",
         "francecentral",
         "japaneast",
-        "norwayeast",
-        "southindia",
         "swedencentral",
         "uksouth",
         "westus",
@@ -1933,7 +1930,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.34.44.8038",
-              "templateHash": "1848692139029312246"
+              "templateHash": "4179944107717925300"
             }
           },
           "parameters": {
@@ -1969,7 +1966,7 @@
               }
             },
             "administratorLogin": {
-              "type": "string",
+              "type": "securestring",
               "defaultValue": "sqladmin",
               "metadata": {
                 "description": "The administrator username of the SQL logical server."
@@ -2086,15 +2083,11 @@
           "outputs": {
             "sqlServerName": {
               "type": "string",
-              "value": "[format('{0}.database.windows.net', parameters('serverName'))]"
+              "value": "[parameters('serverName')]"
             },
             "sqlDbName": {
               "type": "string",
               "value": "[parameters('sqlDBName')]"
-            },
-            "sqlDbUser": {
-              "type": "string",
-              "value": "[parameters('administratorLogin')]"
             }
           }
         }
@@ -2233,13 +2226,13 @@
             "value": "True"
           },
           "SQLDB_SERVER": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value]"
+            "value": "[format('{0}.database.windows.net', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value)]"
           },
           "SQLDB_DATABASE": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbName.value]"
           },
           "SQLDB_USERNAME": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbUser.value]"
+            "value": "sqladmin"
           },
           "SQLDB_PASSWORD": {
             "reference": {
@@ -3085,7 +3078,7 @@
     },
     "SQLDB_SERVER": {
       "type": "string",
-      "value": "[replace(reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value, '.database.windows.net', '')]"
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value]"
     },
     "SQLDB_DATABASE": {
       "type": "string",

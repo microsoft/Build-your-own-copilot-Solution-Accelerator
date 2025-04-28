@@ -13,6 +13,7 @@ param sqlDBName string
 param location string = solutionLocation
 
 @description('The administrator username of the SQL logical server.')
+@secure()
 param administratorLogin string = 'sqladmin'
 
 @description('The administrator password of the SQL logical server.')
@@ -112,6 +113,6 @@ resource sqldbDatabasePwd 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview'
   }
 }
 
-output sqlServerName string = '${serverName}.database.windows.net'
+output sqlServerName string = serverName
 output sqlDbName string = sqlDBName
-output sqlDbUser string = administratorLogin
+// output sqlDbUser string = administratorLogin
