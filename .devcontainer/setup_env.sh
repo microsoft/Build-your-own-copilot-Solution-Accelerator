@@ -20,4 +20,3 @@ if ! command -v sqlcmd &> /dev/null; then
     echo "sqlcmd is not available in the PATH. Please check the installation."
     exit 1
 fi
-
