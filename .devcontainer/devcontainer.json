@@ -32,7 +32,7 @@
 			]
 		}
 	},
-	"postCreateCommand": "bash ./.devcontainer/setup_env.sh",
+	"postCreateCommand": "sed -i 's/\\r$//' ./.devcontainer/setup_env.sh && find ./infra -type f -name \"*.sh\" -exec sed -i 's/\\r$//' {} \\; && bash ./.devcontainer/setup_env.sh",
 	"remoteUser": "vscode",
 	"hostRequirements": {
 		"memory": "4gb"
