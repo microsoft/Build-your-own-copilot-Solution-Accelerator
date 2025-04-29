@@ -117,6 +117,15 @@ jobs:
             --template-file infra/main.bicep \
             --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
 
+      - name: Get AI Services name and store in variable
+        id: get_ai_services_name
+        run: |
+          set -e
+          echo "Getting AI Services name..."
+          # Get the AI Services name from the deployment output
+          ai_services_name = $(az cognitiveservices account list -g ${{ env.RESOURCE_GROUP_NAME }} --query "[0].name" -o tsv)
+          echo "AI_SERVICES_NAME=${ai_services_name}" >> $GITHUB_ENV
+
       - name: List KeyVaults and Store in Array
         id: list_keyvaults
         run: |
@@ -150,25 +159,25 @@ jobs:
             echo "KEYVAULTS=$keyvault_array" >> $GITHUB_ENV
           fi
           
-      - name: Update PowerBI URL
-        if: success()
-        run: |
-          set -e
+      # - name: Update PowerBI URL
+      #   if: success()
+      #   run: |
+      #     set -e
 
-          COMMON_PART="-app-service"
-          application_name="${{ env.SOLUTION_PREFIX }}${COMMON_PART}"
-          echo "Updating application: $application_name"
+      #     COMMON_PART="-app-service"
+      #     application_name="${{ env.SOLUTION_PREFIX }}${COMMON_PART}"
+      #     echo "Updating application: $application_name"
           
-          # Log the Power BI URL being set
-          echo "Setting Power BI URL: ${{ vars.VITE_POWERBI_EMBED_URL }}"
+      #     # Log the Power BI URL being set
+      #     echo "Setting Power BI URL: ${{ vars.VITE_POWERBI_EMBED_URL }}"
           
-          # Update the application settings
-          az webapp config appsettings set --name "$application_name" --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --settings VITE_POWERBI_EMBED_URL="${{ vars.VITE_POWERBI_EMBED_URL }}"
+      #     # Update the application settings
+      #     az webapp config appsettings set --name "$application_name" --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --settings VITE_POWERBI_EMBED_URL="${{ vars.VITE_POWERBI_EMBED_URL }}"
 
-          # Restart the web app
-          az webapp restart --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --name "$application_name"
+      #     # Restart the web app
+      #     az webapp restart --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --name "$application_name"
 
-          echo "Power BI URL updated successfully for application: $application_name."
+      #     echo "Power BI URL updated successfully for application: $application_name."
 
       - name: Delete Bicep Deployment
         if: success()
@@ -200,7 +209,7 @@ jobs:
           IFS=',' read -r -a resources_to_check <<< "$stripped_keyvaults"
           
           # Append new resources to the array
-          resources_to_check+=("${{ env.SOLUTION_PREFIX }}-openai" "${{ env.SOLUTION_PREFIX }}-cogser")
+          # resources_to_check+=("${{ env.SOLUTION_PREFIX }}-openai" "${{ env.SOLUTION_PREFIX }}-cogser")
 
           echo "List of resources to check: ${resources_to_check[@]}"
          
@@ -252,29 +261,43 @@ jobs:
 
           set -e 
           # Define variables
-          OPENAI_COMMON_PART="-openai"
-          openai_name="${{ env.SOLUTION_PREFIX }}${OPENAI_COMMON_PART}"
-          echo "Azure OpenAI: $openai_name"
+          # OPENAI_COMMON_PART="-openai"
+          # openai_name="${{ env.SOLUTION_PREFIX }}${OPENAI_COMMON_PART}"
+          # echo "Azure OpenAI: $openai_name"
 
-          MULTISERVICE_COMMON_PART="-cogser"
-          multiservice_account_name="${{ env.SOLUTION_PREFIX }}${MULTISERVICE_COMMON_PART}"
-          echo "Azure MultiService Account: $multiservice_account_name"
+          # MULTISERVICE_COMMON_PART="-cogser"
+          # multiservice_account_name="${{ env.SOLUTION_PREFIX }}${MULTISERVICE_COMMON_PART}"
+          # echo "Azure MultiService Account: $multiservice_account_name"
 
-          # Purge OpenAI Resource
-          echo "Purging the OpenAI Resource..."
-          if ! az resource delete --ids /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.CognitiveServices/locations/uksouth/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/deletedAccounts/$openai_name --verbose; then
-            echo "Failed to purge openai resource: $openai_name"
-          else
-            echo "Purged the openai resource: $openai_name"
-          fi
+          # # Purge OpenAI Resource
+          # echo "Purging the OpenAI Resource..."
+          # if ! az resource delete --ids /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.CognitiveServices/locations/uksouth/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/deletedAccounts/$openai_name --verbose; then
+          #   echo "Failed to purge openai resource: $openai_name"
+          # else
+          #   echo "Purged the openai resource: $openai_name"
+          # fi
    
-          # Purge MultiService Account Resource
-          echo "Purging the MultiService Account Resource..."
-          if ! az resource delete --ids /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.CognitiveServices/locations/uksouth/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/deletedAccounts/$multiservice_account_name --verbose; then
-            echo "Failed to purge multiService account resource: $multiservice_account_name"
+          # # Purge MultiService Account Resource
+          # echo "Purging the MultiService Account Resource..."
+          # if ! az resource delete --ids /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.CognitiveServices/locations/uksouth/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/deletedAccounts/$multiservice_account_name --verbose; then
+          #   echo "Failed to purge multiService account resource: $multiservice_account_name"
+          # else
+          #   echo "Purged the multiService account resource: $multiservice_account_name"
+          # fi
+
+          # Purge AI Services
+          if [ -z "${{ env.AI_SERVICES_NAME }}" ]; then
+            echo "AI_SERVICES_NAME is not set. Skipping purge."
           else
-            echo "Purged the multiService account resource: $multiservice_account_name"
+            echo "Purging AI Services..."
+            if [ -n "$(az cognitiveservices account list-deleted --query "[?name=='${{env.AI_SERVICES_NAME}}']" -o tsv)" ]; then
+              echo "AI Services '${{env.AI_SERVICES_NAME}}' is soft-deleted. Proceeding to purge..."
+              az cognitiveservices account purge --location ${{ env.AZURE_LOCATION }} --resource-group ${{env.RESOURCE_GROUP_NAME}} --name ${{ env.AI_SERVICES_NAME }}
+            else
+              echo "AI Services '${{env.AI_SERVICES_NAME}}' is not soft-deleted. No action taken."
+            fi
           fi
+
 
           # Ensure KEYVAULTS is properly formatted as a comma-separated string
           KEYVAULTS="${{ env.KEYVAULTS }}"
