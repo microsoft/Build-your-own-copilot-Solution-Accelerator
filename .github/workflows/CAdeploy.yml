@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - psl-hb-minorfix-29apr
   schedule:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
@@ -123,7 +124,7 @@ jobs:
           set -e
           echo "Getting AI Services name..."
           # Get the AI Services name from the deployment output
-          ai_services_name = $(az cognitiveservices account list -g ${{ env.RESOURCE_GROUP_NAME }} --query "[0].name" -o tsv)
+          ai_services_name=$(az cognitiveservices account list -g ${{ env.RESOURCE_GROUP_NAME }} --query "[0].name" -o tsv)
           echo "AI_SERVICES_NAME=${ai_services_name}" >> $GITHUB_ENV
 
       - name: List KeyVaults and Store in Array
