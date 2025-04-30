@@ -10,7 +10,7 @@ param solutionName string
 param solutionLocation string
 
 @description('Name')
-param saName string = '${ solutionName }storageaccount'
+param saName string 
 
 param managedIdentityObjectId string
 

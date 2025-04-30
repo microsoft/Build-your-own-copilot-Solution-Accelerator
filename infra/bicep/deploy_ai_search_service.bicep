@@ -4,7 +4,7 @@
 param solutionName string
 param solutionLocation string
 
-param searchServices_byc_cs_name string = '${ solutionName }-cs'
+param searchServices_byc_cs_name string 
 
 resource searchServices_byc_cs_name_resource 'Microsoft.Search/searchServices@2023-11-01' = {
   name: searchServices_byc_cs_name
