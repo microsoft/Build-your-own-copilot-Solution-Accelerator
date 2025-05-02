@@ -2,12 +2,12 @@
 param solutionName string
 param solutionLocation string
 param keyVaultName string
-param deploymentType string 
+param deploymentType string
 param gptModelName string
 param azureOpenaiAPIVersion string
 param gptDeploymentCapacity int
 param embeddingModel string
-param embeddingDeploymentCapacity int 
+param embeddingDeploymentCapacity int
 param managedIdentityObjectId string
 
 // Load the abbrevations file required to name the azure resources.
@@ -85,7 +85,6 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
 //   }
 // }
 
-
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName
   location: location
@@ -97,7 +96,6 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
     WorkspaceResourceId: logAnalytics.id
   }
 }
-
 
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
   name: containerRegistryNameCleaned
@@ -130,10 +128,9 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-09-01' =
   }
 }
 
-
 var storageNameCleaned = replace(storageName, '-', '')
 
-resource aiServices 'Microsoft.CognitiveServices/accounts@2021-10-01' = {
+resource aiServices 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' = {
   name: aiServicesName
   location: location
   sku: {
@@ -142,56 +139,72 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2021-10-01' = {
   kind: 'AIServices'
   properties: {
     customSubDomainName: aiServicesName
-    apiProperties: {
-      statisticsEnabled: false
-    }
+    // apiProperties: {
+    //   statisticsEnabled: false
+    // }
     publicNetworkAccess: 'Enabled'
   }
 }
 
-
+// resource aiServices 'Microsoft.CognitiveServices/accounts@2021-10-01' = {
+//   name: aiServicesName
+//   location: location
+//   sku: {
+//     name: 'S0'
+//   }
+//   kind: 'AIServices'
+//   properties: {
+//     customSubDomainName: aiServicesName
+//     // apiProperties: {
+//     //   statisticsEnabled: false
+//     // }
+//     publicNetworkAccess: 'Enabled'
+//   }
+// }
 
 @batchSize(1)
-resource aiServicesDeployments 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for aiModeldeployment in aiModelDeployments: {
-  parent: aiServices //aiServices_m
-  name: aiModeldeployment.name
-  properties: {
-    model: {
-      format: 'OpenAI'
-      name: aiModeldeployment.model
+resource aiServicesDeployments 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [
+  for aiModeldeployment in aiModelDeployments: {
+    parent: aiServices //aiServices_m
+    name: aiModeldeployment.name
+    properties: {
+      model: {
+        format: 'OpenAI'
+        name: aiModeldeployment.model
+      }
+      raiPolicyName: aiModeldeployment.raiPolicyName
     }
-    raiPolicyName: aiModeldeployment.raiPolicyName
+    sku: {
+      name: aiModeldeployment.sku.name
+      capacity: aiModeldeployment.sku.capacity
+    }
   }
-  sku:{
-    name: aiModeldeployment.sku.name
-    capacity: aiModeldeployment.sku.capacity
-  }
-}]
+]
 
 resource aiSearch 'Microsoft.Search/searchServices@2023-11-01' = {
-    name: aiSearchName
-    location: solutionLocation
-    sku: {
-      name: 'basic'
-    }
-    properties: {
-      replicaCount: 1
-      partitionCount: 1
-      hostingMode: 'default'
-      publicNetworkAccess: 'enabled'
-      networkRuleSet: {
-        ipRules: []
-      }
-      encryptionWithCmk: {
-        enforcement: 'Unspecified'
-      }
-      disableLocalAuth: false
-      authOptions: {
-        apiKeyOnly: {}
-      }
-      semanticSearch: 'free'
-    }
+  name: aiSearchName
+  location: solutionLocation
+  sku: {
+    name: 'basic'
   }
+  properties: {
+    replicaCount: 1
+    partitionCount: 1
+    hostingMode: 'default'
+    publicNetworkAccess: 'enabled'
+    networkRuleSet: {
+      ipRules: []
+    }
+    encryptionWithCmk: {
+      enforcement: 'Unspecified'
+    }
+    disableLocalAuth: false
+    authOptions: {
+      apiKeyOnly: {}
+    }
+    semanticSearch: 'free'
+  }
+}
 
 resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: storageNameCleaned
@@ -242,7 +255,6 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   }
 }
 
-
 @description('This is the built-in Storage Blob Data Contributor.')
 resource blobDataContributor 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
   scope: resourceGroup()
@@ -253,8 +265,8 @@ resource storageroleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
   name: guid(resourceGroup().id, managedIdentityObjectId, blobDataContributor.id)
   properties: {
     principalId: managedIdentityObjectId
-    roleDefinitionId:blobDataContributor.id
-    principalType: 'ServicePrincipal' 
+    roleDefinitionId: blobDataContributor.id
+    principalType: 'ServicePrincipal'
   }
 }
 
@@ -293,10 +305,11 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2023-08-01-preview'
       }
     }
     dependsOn: [
-      aiServicesDeployments,aiSearch
+      aiServicesDeployments
+      aiSearch
     ]
   }
-  
+
   resource aiSearchConnection 'connections@2024-07-01-preview' = {
     name: '${aiHubName}-connection-AzureAISearch'
     properties: {
@@ -308,16 +321,17 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2023-08-01-preview'
         key: aiSearch.listAdminKeys().primaryKey
       }
       metadata: {
-        type:'azure_ai_search'
+        type: 'azure_ai_search'
         ApiType: 'Azure'
         ResourceId: aiSearch.id
-        ApiVersion:'2024-05-01-preview'
-        DeploymentApiVersion:'2023-11-01'
+        ApiVersion: '2024-05-01-preview'
+        DeploymentApiVersion: '2023-11-01'
       }
     }
   }
   dependsOn: [
-    aiServicesDeployments,aiSearch
+    aiServicesDeployments
+    aiSearch
   ]
 }
 
@@ -334,7 +348,6 @@ resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-p
   }
 }
 
-
 resource tenantIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
   name: 'TENANT-ID'
@@ -342,7 +355,6 @@ resource tenantIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = 
     value: subscription().tenantId
   }
 }
-
 
 resource azureOpenAIApiKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
@@ -364,7 +376,7 @@ resource azureOpenAIApiVersionEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-0
   parent: keyVault
   name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
   properties: {
-    value: azureOpenaiAPIVersion  //'2024-07-18'
+    value: azureOpenaiAPIVersion //'2024-07-18'
   }
 }
 
@@ -383,7 +395,6 @@ resource azureAIProjectConnectionStringEntry 'Microsoft.KeyVault/vaults/secrets@
     value: '${split(aiHubProject.properties.discoveryUrl, '/')[2]};${subscription().subscriptionId};${resourceGroup().name};${aiHubProject.name}'
   }
 }
-
 
 resource azureSearchAdminKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
