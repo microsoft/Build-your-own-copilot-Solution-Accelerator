@@ -295,7 +295,7 @@ describe('Layout Component', () => {
     })
   })
 
-  test('should log error when getUderInfo fails', async () => {
+  test('should log error when getUserInfo fails', async () => {
     ;(getUserInfo as jest.Mock).mockRejectedValue(new Error())
 
     const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {})

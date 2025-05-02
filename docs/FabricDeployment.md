@@ -12,7 +12,7 @@
 ## Step 2: Deploy Fabric resources and artifacts
 1.   Navigate to ([Azure Portal](https://portal.azure.com/))
 2.   Click on Azure Cloud Shell in the top right of navigation Menu (add image)
-3.   Run the run the following commands:  
+3.   Run the following commands:  
       - ```az login``` 
       - ```rm -rf Build-your-own-copilot-Solution-Accelerator```
       - ```git clone https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator```
