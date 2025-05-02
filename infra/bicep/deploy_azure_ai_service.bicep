@@ -4,7 +4,7 @@
 param solutionName string
 param solutionLocation string
 
-param accounts_byc_cogser_name string = '${ solutionName }-cogser'
+param accounts_byc_cogser_name string 
 
 resource accounts_byc_cogser_name_resource 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: accounts_byc_cogser_name

@@ -4,7 +4,7 @@
 param solutionName string
 param solutionLocation string
 
-param accounts_byc_openai_name string = '${ solutionName }-openai'
+param accounts_byc_openai_name string 
 
 resource accounts_byc_openai_name_resource 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: accounts_byc_openai_name
@@ -26,7 +26,7 @@ resource accounts_byc_openai_name_resource 'Microsoft.CognitiveServices/accounts
 
 resource accounts_byc_openai_name_gpt_35_turbo 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: accounts_byc_openai_name_resource
-  name: 'gpt-35-turbo-16k'
+  name: 'gpt-35-turbo'
   sku: {
     name: 'Standard'
     capacity: 30
@@ -34,8 +34,8 @@ resource accounts_byc_openai_name_gpt_35_turbo 'Microsoft.CognitiveServices/acco
   properties: {
     model: {
       format: 'OpenAI'
-      name: 'gpt-35-turbo-16k'
-      version: '0613'
+      name: 'gpt-35-turbo'
+      version: '0125'
     }
     versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
     raiPolicyName: 'Microsoft.Default'

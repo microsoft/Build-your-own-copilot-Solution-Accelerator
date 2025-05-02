@@ -12,7 +12,7 @@ param solutionLocation string
 param utc string = utcNow()
 
 @description('Name')
-param kvName string = '${ solutionName }-kv-${uniqueString(utc)}'
+param kvName string 
 
 @description('Object Id. The object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault.')
 param objectId string

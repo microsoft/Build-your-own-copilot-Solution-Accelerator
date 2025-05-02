@@ -12,7 +12,7 @@ param solutionLocation string
 param identity string
 
 @description('Name of App Service plan')
-param HostingPlanName string = '${ solutionName }-app-service-plan'
+param HostingPlanName string 
 
 @description('The pricing tier for the App Service plan')
 @allowed(
@@ -21,10 +21,10 @@ param HostingPlanName string = '${ solutionName }-app-service-plan'
 param HostingPlanSku string = 'B1'
 
 @description('Name of Web App')
-param WebsiteName string = '${ solutionName }-app-service'
+param WebsiteName string 
 
 @description('Name of Application Insights')
-param ApplicationInsightsName string = '${ solutionName }-app-insights'
+param ApplicationInsightsName string 
 
 @description('Name of Azure Search Service')
 param AzureSearchService string = ''

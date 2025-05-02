@@ -5,7 +5,7 @@ targetScope = 'resourceGroup'
 @maxLength(6)
 @description('Prefix Name')
 param solutionPrefix string
-
+var abbrs = loadJsonContent('./abbreviations.json')
 // @description('Fabric Workspace Id if you have one, else leave it empty. ')
 // param fabricWorkspaceId string
 
@@ -14,7 +14,7 @@ var resourceGroupName = resourceGroup().name
 var subscriptionId  = subscription().subscriptionId
 
 var solutionLocation = resourceGroupLocation
-var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/'
+var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/'
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
@@ -22,6 +22,7 @@ module managedIdentityModule 'deploy_managed_identity.bicep' = {
   params: {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
+    miName: '${abbrs.security.managedIdentity}${solutionPrefix}'
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -33,6 +34,7 @@ module storageAccountModule 'deploy_storage_account.bicep' = {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+    saName:'${abbrs.storage.storageAccount}${ solutionPrefix}' 
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -43,6 +45,7 @@ module azAIMultiServiceAccount 'deploy_azure_ai_service.bicep' = {
   params: {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
+    accounts_byc_cogser_name : '${abbrs.ai.documentIntelligence}${solutionPrefix}'
   }
 } 
 
@@ -52,6 +55,7 @@ module azSearchService 'deploy_ai_search_service.bicep' = {
   params: {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
+    searchServices_byc_cs_name: '${abbrs.ai.aiSearch}${solutionPrefix}'
   }
 } 
 
@@ -61,6 +65,7 @@ module azOpenAI 'deploy_azure_open_ai.bicep' = {
   params: {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
+    accounts_byc_openai_name: '${abbrs.ai.openAIService}${solutionPrefix}'
   }
 }
 
@@ -99,6 +104,7 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
     cogServiceName:azAIMultiServiceAccount.outputs.cogSearchOutput.cogServiceName
     cogServiceKey:azAIMultiServiceAccount.outputs.cogSearchOutput.cogServiceKey
     enableSoftDelete:false
+    kvName:'${abbrs.security.keyVault}${solutionPrefix}'
   }
   scope: resourceGroup(resourceGroup().name)
   dependsOn:[storageAccountModule,azOpenAI,azAIMultiServiceAccount,azSearchService]
@@ -163,9 +169,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchUrlColumn:'publicurl'
     AzureOpenAIResource:azOpenAI.outputs.openAIOutput.openAPIEndpoint
     AzureOpenAIEndpoint:azOpenAI.outputs.openAIOutput.openAPIEndpoint
-    AzureOpenAIModel:'gpt-35-turbo-16k'
+    AzureOpenAIModel:'gpt-35-turbo'
     AzureOpenAIKey:azOpenAI.outputs.openAIOutput.openAPIKey
-    AzureOpenAIModelName:'gpt-35-turbo-16k'
+    AzureOpenAIModelName:'gpt-35-turbo'
     AzureOpenAITemperature:'0'
     AzureOpenAITopP:'1'
     AzureOpenAIMaxTokens:'1000'
@@ -194,6 +200,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AIStudioDraftFlowAPIKey:'TBD'
     AIStudioDraftFlowDeploymentName:'TBD'
     AIStudioUse:'False'
+    HostingPlanName:'${abbrs.compute.appServicePlan}${solutionPrefix}'
+    WebsiteName:'${abbrs.compute.webApp}${solutionPrefix}'
+    ApplicationInsightsName:'${abbrs.analytics.analysisServicesServer}${solutionPrefix}'
   }
   scope: resourceGroup(resourceGroup().name)
   dependsOn:[storageAccountModule,azOpenAI,azAIMultiServiceAccount,azSearchService]
