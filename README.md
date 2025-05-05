@@ -1,4 +1,4 @@
-# {🟨TODO: Accelerator name} solution accelerator
+# Build your own copilot solution accelerator
 
 This solution accelerator is a powerful tool that helps you create your own copilots. The accelerator can be used by any customer looking for reusable architecture and code snippets to build custom copilots with their own enterprise data.
 
