@@ -18,7 +18,7 @@ Here are some example regions where the services are available: East US, East US
 
 ### **Important: Check Azure OpenAI Quota Availability**
 
-⚠️ To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./quota_check.md) before you deploy the solution.
+⚠️ To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./QuotaCheck.md) before you deploy the solution.
 
 
 ### [Optional] Quota Recommendations  

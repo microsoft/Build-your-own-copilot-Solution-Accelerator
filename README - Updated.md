@@ -16,58 +16,50 @@ Solution overview
 </h2>
 
 
-It leverages Azure OpenAI Service, Azure AI Search and Microsoft Fabric, to streamline daily tasks and customer meeting preparation for customer-facing roles. As a result, this helps to improve client retention and customer satisfaction. By increasing employee productivity and improving customer conversations, our solution enables organizations to serve more customers and drive increased revenue for the entire company.
+Leverages Azure OpenAI Service and Azure AI Search, this solution streamlines daily tasks and customer meeting preparation for customer-facing roles. As a result, this helps to improve client retention and customer satisfaction. By increasing employee productivity and improving customer conversations, our solution enables organizations to serve more customers and drive increased revenue for the entire company.
 
 ### Solution architecture
 |![image](./docs/images/readme/solution-architecture.png)|
 |---|
-{🟨TODO: Update solution architecture image}
+
 
 ### How to customize
 If you'd like to customize the solution accelerator, here are some common areas to start:
 
-{🟨TODO: Fill in links to supplementary documentations}
+[Azd deployment parameters](./docs/CustomizingAzdParameters.md)
 
-[Doc name](./docs/...)
+[Fabric integration deployment](./docs/FabricDeployment.md)
 
-[Doc name](./docs/...)
-
-[Doc name](./docs/...)
+[Teams integration deployment](./docs/TeamsAppDeployment.md)
 
 <br/>
 
 ### Additional resources
 
-{🟨TODO: Fill in links to other internal or external links}
+[Getting started with sample questions](./docs/SampleQuestions.md)
 
-[Doc name]()
+[Version History & Researcher Use Case](#version-history)
+<br/>
 
-[Doc name]()
 
 <br/>
 
-{🟨TODO: Fill in with key features}
+
 ### Key features
 <details open>
   <summary>Click to learn more about the key features this solution enables</summary>
 
-  - **Features name** <br/>
-  Features description goes here.​
+  - **Data processing** <br/>
+  Process past conversations at scale to add to AI search index with vector embeddings.​
   
-  - **Features name** <br/>
-  Features description goes here.​
+  - **Semantic search** <br/>
+  Azure AI Search enabled RAG and grounding of the application on the processed datasets.​
 
-  - **Features name** <br/>
-  Features description goes here.​
+  - **Seummarization** <br/>
+  Azure OpenAI Service helps to summarize the conversations and actions for the next meeting.​
 
-  - **Features name** <br/>
-  Features description goes here.​
-
-  - **Features name** <br/>
-  Features description goes here.​
-
-  - **Features name** <br/>
-  Features description goes here.​
+  - **Chat with data** <br/>
+  Azure OpenAI Service helpsenable chat with structured and unstructured data using Semantic Kernel autonomous function calling.​
      
 </details>
 
@@ -84,14 +76,11 @@ Follow the quick deploy steps on the deployment guide to deploy this solution 
 [Click here to launch the deployment guide](./docs/DeploymentGuide.md)
 <br/><br/>
 
-{🟨TODO: Fill in table with deployment specific links}
 
-| [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/content-processing-solution-accelerator) | [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/microsoft/content-processing-solution-accelerator) | 
+| [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/Build-your-own-copilot-Solution-Accelerator) | [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator) | 
 |---|---|
 
 <br/>
-
-{🟨TODO: Remove if Azure OpenAI quota check is not required }
 
 > ⚠️ **Important: Check Azure OpenAI Quota Availability**
  <br/>To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./docs/QuotaCheck.md) before you deploy the solution.
@@ -99,15 +88,12 @@ Follow the quick deploy steps on the deployment guide to deploy this solution 
 <br/>
 
 ### Prerequisites and Costs
-{🟨TODO: Update with solution specific notes like role requirements}
 
 To deploy this solution accelerator, ensure you have access to an [Azure subscription](https://azure.microsoft.com/free/) with the necessary permissions to create **resource groups, resources, app registrations, and assign roles at the resource group level**. This should include Contributor role at the subscription level and  Role Based Access Control role on the subscription and/or resource group level. Follow the steps in [Azure Account Set Up](./docs/AzureAccountSetUp.md).
 
-Here are some example regions where the services are available: {🟨TODO: Update with suggested regions specific to this solution}
+Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central.
 
 Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) page and select a **region** where the following services are available.
-
-{🟨TODO: Call out specific pricing "gotchas" like Azure Container Registry if known}
 
 Pricing varies per region and usage, so it isn't possible to predict exact costs for your usage. The majority of the Azure resources used in this infrastructure are on usage-based pricing tiers. However, Azure Container Registry has a fixed cost per registry per day.
 
@@ -204,13 +190,6 @@ You may want to consider additional security measures, such as:
 
 <br/>
 
-### Frequently asked questions
-
-{🟨TODO: Remove this section if you don't have FAQs}
-
-[Click here](./docs/FAQs.md) to learn more about common questions about this solution.
-
-<br/>
 
 ### Cross references
 Check out similar solution accelerators
@@ -225,6 +204,17 @@ Check out similar solution accelerators
 
 
 <br/>   
+
+### Version history
+
+An updated version of the **Build Your Own Copilot** solution accelerator was published on **[04/24/2025]**. If you deployed the accelerator prior to that date, please note the following changes:
+
+- The **Research Assistant** project has been moved to a separate branch. You can access it here: [**Research Assistant Branch**](https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator/tree/byoc-researcher).
+- This repository now focuses exclusively on the **Client Advisor** solution scenario.
+- The previous folder structure containing both `research-assistant/` and `client-advisor/` directories has been removed.
+- The **Client Advisor** solution accelerator is now featured directly on the main landing page, with no additional folders associated.
+
+<br />
 
 
 ## Provide feedback
@@ -242,6 +232,18 @@ Please refer to [Transparency FAQ](./TRANSPARENCY_FAQ.md) for responsible AI tra
 
 ## Disclaimers
 
+This release is an artificial intelligence (AI) system that generates text based on user input. The text generated by this system may include ungrounded content, meaning that it is not verified by any reliable source or based on any factual data. The data included in this release is synthetic, meaning that it is artificially created by the system and may contain factual errors or inconsistencies. Users of this release are responsible for determining the accuracy, validity, and suitability of any content generated by the system for their intended purposes. Users should not rely on the system output as a source of truth or as a substitute for human judgment or expertise. 
+
+This release only supports English language input and output. Users should not attempt to use the system with any other language or format. The system output may not be compatible with any translation tools or services, and may lose its meaning or coherence if translated. 
+
+This release does not reflect the opinions, views, or values of Microsoft Corporation or any of its affiliates, subsidiaries, or partners. The system output is solely based on the system's own logic and algorithms, and does not represent any endorsement, recommendation, or advice from Microsoft or any other entity. Microsoft disclaims any liability or responsibility for any damages, losses, or harms arising from the use of this release or its output by any user or third party. 
+
+This release does not provide any financial advice, and is not designed to replace the role of qualified client advisors in appropriately advising clients. Users should not use the system output for any financial decisions or transactions, and should consult with a professional financial advisor before taking any action based on the system output. Microsoft is not a financial institution or a fiduciary, and does not offer any financial products or services through this release or its output. 
+
+This release is intended as a proof of concept only, and is not a finished or polished product. It is not intended for commercial use or distribution, and is subject to change or discontinuation without notice. Any planned deployment of this release or its output should include comprehensive testing and evaluation to ensure it is fit for purpose and meets the user's requirements and expectations. Microsoft does not guarantee the quality, performance, reliability, or availability of this release or its output, and does not provide any warranty or support for it. 
+
+This Software requires the use of third-party components which are governed by separate proprietary or open-source licenses as identified below, and you must comply with the terms of each applicable license in order to use the Software. You acknowledge and agree that this license does not grant you a license or other right to use any such third-party proprietary or open-source components.  
+
 To the extent that the Software includes components or code used in or derived from Microsoft products or services, including without limitation Microsoft Azure Services (collectively, “Microsoft Products and Services”), you must also comply with the Product Terms applicable to such Microsoft Products and Services. You acknowledge and agree that the license governing the Software does not grant you a license or other right to use Microsoft Products and Services. Nothing in the license or this ReadMe file will serve to supersede, amend, terminate or modify any terms in the Product Terms for any Microsoft Products and Services. 
 
 You must also comply with all domestic and international export laws and regulations that apply to the Software, which include restrictions on destinations, end users, and end use. For further information on export restrictions, visit https://aka.ms/exporting. 
@@ -250,4 +252,4 @@ You acknowledge that the Software and Microsoft Products and Services (1) are no
 
 You acknowledge the Software is not subject to SOC 1 and SOC 2 compliance audits. No Microsoft technology, nor any of its component technologies, including the Software, is intended or made available as a substitute for the professional advice, opinion, or judgement of a certified financial services professional. Do not use the Software to replace, substitute, or provide professional financial advice or judgment.  
 
-BY ACCESSING OR USING THE SOFTWARE, YOU ACKNOWLEDGE THAT THE SOFTWARE IS NOT DESIGNED OR INTENDED TO SUPPORT ANY USE IN WHICH A SERVICE INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE COULD RESULT IN THE DEATH OR SERIOUS BODILY INJURY OF ANY PERSON OR IN PHYSICAL OR ENVIRONMENTAL DAMAGE (COLLECTIVELY, “HIGH-RISK USE”), AND THAT YOU WILL ENSURE THAT, IN THE EVENT OF ANY INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE, THE SAFETY OF PEOPLE, PROPERTY, AND THE ENVIRONMENT ARE NOT REDUCED BELOW A LEVEL THAT IS REASONABLY, APPROPRIATE, AND LEGAL, WHETHER IN GENERAL OR IN A SPECIFIC INDUSTRY. BY ACCESSING THE SOFTWARE, YOU FURTHER ACKNOWLEDGE THAT YOUR HIGH-RISK USE OF THE SOFTWARE IS AT YOUR OWN RISK.  
+BY ACCESSING OR USING THE SOFTWARE, YOU ACKNOWLEDGE THAT THE SOFTWARE IS NOT DESIGNED OR INTENDED TO SUPPORT ANY USE IN WHICH A SERVICE INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE COULD RESULT IN THE DEATH OR SERIOUS BODILY INJURY OF ANY PERSON OR IN PHYSICAL OR ENVIRONMENTAL DAMAGE (COLLECTIVELY, “HIGH-RISK USE”), AND THAT YOU WILL ENSURE THAT, IN THE EVENT OF ANY INTERRUPTION, DEFECT, ERROR, OR OTHER FAILURE OF THE SOFTWARE, THE SAFETY OF PEOPLE, PROPERTY, AND THE ENVIRONMENT ARE NOT REDUCED BELOW A LEVEL THAT IS REASONABLY, APPROPRIATE, AND LEGAL, WHETHER IN GENERAL OR IN A SPECIFIC INDUSTRY. BY ACCESSING THE SOFTWARE, YOU FURTHER ACKNOWLEDGE THAT YOUR HIGH-RISK USE OF THE SOFTWARE IS AT YOUR OWN RISK.
