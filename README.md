@@ -23,22 +23,16 @@ Leverages Azure OpenAI Service and Azure AI Search, this solution streamlines da
 |---|
 
 
-### How to customize
-If you'd like to customize the solution accelerator, here are some common areas to start:
-
-[Azd deployment parameters](./docs/CustomizingAzdParameters.md)
-
 <br/>
 
 ### Additional resources
 
 [Getting started with sample questions](./docs/SampleQuestions.md)
 
-[⚠️ Version history & researcher use case](#version-history)
-<br/>
-
+⚠️ [Version history & researcher use case](#version-history)
 
 <br/>
+
 
 
 ### Key features
