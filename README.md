@@ -28,17 +28,13 @@ If you'd like to customize the solution accelerator, here are some common areas 
 
 [Azd deployment parameters](./docs/CustomizingAzdParameters.md)
 
-[Fabric integration deployment](./docs/FabricDeployment.md)
-
-[Teams integration deployment](./docs/TeamsAppDeployment.md)
-
 <br/>
 
 ### Additional resources
 
 [Getting started with sample questions](./docs/SampleQuestions.md)
 
-[Version History & Researcher Use Case](#version-history)
+[⚠️ Version history & researcher use case](#version-history)
 <br/>
 
 
@@ -181,7 +177,7 @@ To ensure continued best practices in your own repository, we recommend that any
 
 You may want to consider additional security measures, such as:
 
-* Enabling Microsoft Defender for Cloud to [secure your Azure resources](https://learn.microsoft.com/azure/security-center/defender-for-cloud).
+* Enabling Microsoft Defender for Cloud to [secure your Azure resources](https://learn.microsoft.com/en-us/azure/defender-for-cloud/).
 * Protecting the Azure Container Apps instance with a [firewall](https://learn.microsoft.com/azure/container-apps/waf-app-gateway) and/or [Virtual Network](https://learn.microsoft.com/azure/container-apps/networking?tabs=workload-profiles-env%2Cazure-cli).
 
 <br/>
