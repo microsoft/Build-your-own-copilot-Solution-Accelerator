@@ -4,8 +4,13 @@ on:
   push:
     branches:
       - main
+      - fix-deploy-pipeline
   schedule:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
+
+env:
+  GPT_MIN_CAPACITY: 1
+  TEXT_EMBEDDING_MIN_CAPACITY: 1
 
 jobs:
   deploy:
@@ -22,8 +27,8 @@ jobs:
           export AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
           export AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}
           export AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          export GPT_MIN_CAPACITY="11"
-          export TEXT_EMBEDDING_MIN_CAPACITY="45"
+          export GPT_MIN_CAPACITY=${{ env.GPT_MIN_CAPACITY }}
+          export TEXT_EMBEDDING_MIN_CAPACITY=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }}
           export AZURE_REGIONS="${{ vars.AZURE_REGIONS_CA }}"
 
           chmod +x infra/scripts/checkquota.sh
@@ -115,7 +120,7 @@ jobs:
           az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
+            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2 gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} textEmbeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} \
 
       - name: Get AI Services name and store in variable
         id: get_ai_services_name
@@ -180,7 +185,7 @@ jobs:
       #     echo "Power BI URL updated successfully for application: $application_name."
 
       - name: Delete Bicep Deployment
-        if: success()
+        if: always()
         run: |
           set -e  
           echo "Checking if resource group exists..."
