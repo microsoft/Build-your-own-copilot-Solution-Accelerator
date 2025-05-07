@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fix-deploy-pipeline
   schedule:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
@@ -122,7 +123,7 @@ jobs:
             --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2 gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} \
 
       - name: Get AI Services name and store in variable
-        if: steps.check_create_rg.outcome == 'success'
+        if: always() && steps.check_create_rg.outcome == 'success'
         id: get_ai_services_name
         run: |
           set -e
@@ -138,7 +139,7 @@ jobs:
           fi
 
       - name: List KeyVaults and Store in Array
-        if: steps.check_create_rg.outcome == 'success'
+        if: always() && steps.check_create_rg.outcome == 'success'
         id: list_keyvaults
         run: |
 
@@ -192,7 +193,7 @@ jobs:
       #     echo "Power BI URL updated successfully for application: $application_name."
 
       - name: Delete Bicep Deployment
-        if: steps.check_create_rg.outcome == 'success'
+        if: always()
         run: |
           set -e  
           echo "Checking if resource group exists..."
@@ -209,7 +210,7 @@ jobs:
           fi
 
       - name: Wait for resource deletion to complete
-        if: steps.check_create_rg.outcome == 'success'
+        if: always() && steps.check_create_rg.outcome == 'success'
         run: |
 
           # List of keyvaults 
@@ -269,7 +270,7 @@ jobs:
           done
 
       - name: Purging the Resources
-        if: steps.check_create_rg.outcome == 'success'
+        if: always() && steps.check_create_rg.outcome == 'success'
         run: |
 
           set -e 
