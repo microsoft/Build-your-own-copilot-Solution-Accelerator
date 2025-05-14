@@ -97,6 +97,17 @@ export const FeatureCard = (props: Props) => {
 export const TextFieldCard = ({ className, ...props }: CardProps) => {
   const appStateContext = React.useContext(AppStateContext);
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (event.key === 'Enter') {
+      if (appStateContext?.state.researchTopic?.trim()) {
+        appStateContext.dispatch({
+          type: 'UPDATE_SIDEBAR_SELECTION',
+          payload: SidebarOptions.Article,
+        });
+      }
+    }
+  };
+
   return (
     <Card
       {...props}
@@ -150,6 +161,7 @@ export const TextFieldCard = ({ className, ...props }: CardProps) => {
             flex: 1,
             width: "100%",
           }}
+          onKeyDown={handleKeyDown}
         />
       </Stack>
       
