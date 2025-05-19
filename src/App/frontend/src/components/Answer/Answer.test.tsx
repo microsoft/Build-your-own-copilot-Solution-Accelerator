@@ -129,7 +129,7 @@ describe('Answer Component', () => {
         expect(screen.getByText(/This is an example answer with citations/i)).toBeInTheDocument();
     });
 
-    it('should show "1 reference" when citations lenght is one', () => {
+    it('should show "1 reference" when citations length is one', () => {
 
         const answerWithMissingFeedback = {
            ...mockAnswerProps,

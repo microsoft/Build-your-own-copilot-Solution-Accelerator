@@ -10,7 +10,6 @@ Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/g
 - [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
 - [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/)
 - [Azure SQL Database](https://learn.microsoft.com/en-us/azure/azure-sql/)
-- [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/)
 - [Azure Semantic Search](AzureSemanticSearchRegion.md)  
 
 Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central.
@@ -18,17 +17,16 @@ Here are some example regions where the services are available: East US, East US
 
 ### **Important: Check Azure OpenAI Quota Availability**
 
-⚠️ To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./quota_check.md) before you deploy the solution.
+⚠️ To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./QuotaCheck.md) before you deploy the solution.
 
 
 ### [Optional] Quota Recommendations  
-By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tokens**, so we recommend
+By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tokens**, so we recommend updating the following:
 
 > **For Global Standard | GPT-4o-mini - increase the capacity to at least 150k tokens post-deployment for optimal performance.**
 
-To adjust quota settings, follow these [steps](AzureGPTQuotaSettings.md)
-
-
+Depending on your subscription quota and capacity, you can [adjust quota settings](AzureGPTQuotaSettings.md) to better meet your specific needs. You can also [adjust the deployment parameters](CustomizingAzdParameters.md) for additional optimization.
+­
 ## Deployment Options & Steps
 
 Pick from the options below to see step-by-step instructions for GitHub Codespaces, VS Code Dev Containers, and Local Environments.
@@ -211,10 +209,6 @@ This will rebuild the source code, package it into a container, and push it to t
 2. **Add Authentication Provider**  
     - Follow steps in [App Authentication](./AppAuthentication.md) to configure authenitcation in app service. Note that Authentication changes can take up to 10 minutes. 
 
-3. **Fabric Configuration**, 
-   - Follow steps in [Fabric Deployment guide](FabricDeployment.md) to set up the data processing pipelines and Power BI report in Fabric.
-4. **Teams App Configuration**
-   - *(Optional)* Follow steps in [Teams Tab App guide](TeamsAppDeployment.md) to add the Client Advisor app to Microsoft Teams.
-5. **Deleting Resources After a Failed Deployment**  
+3. **Deleting Resources After a Failed Deployment**  
 
      - Follow steps in [Delete Resource Group](DeleteResourceGroup.md) if your deployment fails and/or you need to clean up the resources.

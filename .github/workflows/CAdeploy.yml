@@ -7,6 +7,10 @@ on:
   schedule:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
+env:
+  GPT_MIN_CAPACITY: 10
+  TEXT_EMBEDDING_MIN_CAPACITY: 10
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -22,8 +26,8 @@ jobs:
           export AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
           export AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}
           export AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          export GPT_MIN_CAPACITY="11"
-          export TEXT_EMBEDDING_MIN_CAPACITY="45"
+          export GPT_MIN_CAPACITY=${{ env.GPT_MIN_CAPACITY }}
+          export TEXT_EMBEDDING_MIN_CAPACITY=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }}
           export AZURE_REGIONS="${{ vars.AZURE_REGIONS_CA }}"
 
           chmod +x infra/scripts/checkquota.sh
@@ -77,7 +81,7 @@ jobs:
         id: generate_rg_name
         run: |
           echo "Generating a unique resource group name..."
-          ACCL_NAME="cabyoc"  # Account name as specified
+          ACCL_NAME="ca"  # Account name as specified
           SHORT_UUID=$(uuidgen | cut -d'-' -f1)
           UNIQUE_RG_NAME="arg-${ACCL_NAME}-${SHORT_UUID}"
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
@@ -115,18 +119,26 @@ jobs:
           az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2
+            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2 gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} \
 
       - name: Get AI Services name and store in variable
+        if: always() && steps.check_create_rg.outcome == 'success'
         id: get_ai_services_name
         run: |
           set -e
           echo "Getting AI Services name..."
-          # Get the AI Services name from the deployment output
+          # Get the AI Services name
           ai_services_name=$(az cognitiveservices account list -g ${{ env.RESOURCE_GROUP_NAME }} --query "[0].name" -o tsv)
-          echo "AI_SERVICES_NAME=${ai_services_name}" >> $GITHUB_ENV
+          if [ -z "$ai_services_name" ]; then
+            echo "No AI Services resource found in the resource group."
+            echo "AI_SERVICES_NAME=" >> $GITHUB_ENV
+          else
+            echo "AI_SERVICES_NAME=${ai_services_name}" >> $GITHUB_ENV
+            echo "Found AI Services resource: $ai_services_name"
+          fi
 
       - name: List KeyVaults and Store in Array
+        if: always() && steps.check_create_rg.outcome == 'success'
         id: list_keyvaults
         run: |
 
@@ -180,7 +192,7 @@ jobs:
       #     echo "Power BI URL updated successfully for application: $application_name."
 
       - name: Delete Bicep Deployment
-        if: success()
+        if: always()
         run: |
           set -e  
           echo "Checking if resource group exists..."
@@ -197,6 +209,7 @@ jobs:
           fi
 
       - name: Wait for resource deletion to complete
+        if: always() && steps.check_create_rg.outcome == 'success'
         run: |
 
           # List of keyvaults 
@@ -256,7 +269,7 @@ jobs:
           done
 
       - name: Purging the Resources
-        if: success()
+        if: always() && steps.check_create_rg.outcome == 'success'
         run: |
 
           set -e 
