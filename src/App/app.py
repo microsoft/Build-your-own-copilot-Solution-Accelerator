@@ -1330,7 +1330,7 @@ async def update_conversation():
             track_event_if_configured("AssistantMessageStored", {
                 "user_id": user_id,
                 "conversation_id": conversation_id,
-                "message": messages[-1]    
+                "message": messages[-1]
             })
         else:
             raise Exception("No bot messages found")
