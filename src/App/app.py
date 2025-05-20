@@ -484,7 +484,6 @@ def get_configured_data_source():
             and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
         ):
             query_type = "semantic"
-        
         track_event_if_configured("query_type_determined", {"query_type": query_type})
 
         # Set filter
@@ -510,7 +509,6 @@ def get_configured_data_source():
         else:
             # If key is not provided, assume AOAI resource identity has been granted access to the search service
             authentication = {"type": "system_assigned_managed_identity"}
-        
         track_event_if_configured("authentication_set", {"auth_type": authentication["type"]})
 
         data_source = {
@@ -824,7 +822,6 @@ def get_configured_data_source():
     
     return data_source
 
-
 def prepare_model_args(request_body, request_headers):
     track_event_if_configured("prepare_model_args_start", {})
     request_messages = request_body.get("messages", [])
@@ -852,7 +849,6 @@ def prepare_model_args(request_body, request_headers):
         }
         user_json = json.dumps(user_args)
         track_event_if_configured("ms_defender_user_info_added", {"user_id": user_args["EndUserId"]})
-
 
     model_args = {
         "messages": messages,
@@ -1132,7 +1128,6 @@ async def stream_chat_request(request_body, request_headers):
             track_event_if_configured("stream_openai_selected", {})
 
         return generate()
-
 
 async def conversation_internal(request_body, request_headers):
     track_event_if_configured("conversation_internal_start", {
@@ -1643,7 +1638,6 @@ async def rename_conversation():
         "conversation_id": conversation_id,
         "new_title": title
     })
-    
     return jsonify(updated_conversation), 200
 
 
@@ -1852,7 +1846,6 @@ def get_users():
 
     track_event_if_configured("UserFetch_Start", {})
     conn = None
-    
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -1994,8 +1987,8 @@ def get_users():
             users.append(user)
 
             track_event_if_configured("UserFetch_Success", {
-            "user_count": len(users),
-        })
+                "user_count": len(users),
+            })
 
         return jsonify(users)
 
