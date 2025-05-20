@@ -819,7 +819,6 @@ def get_configured_data_source():
         "datasource_type": DATASOURCE_TYPE,
         "query_type": query_type
     })
-    
     return data_source
 
 def prepare_model_args(request_body, request_headers):
@@ -1123,13 +1122,12 @@ async def stream_chat_request(request_body, request_headers):
             async for completionChunk in response:
                 yield format_stream_response(
                     completionChunk, history_metadata, apim_request_id
-                )
-            
+                ) 
             track_event_if_configured("stream_openai_selected", {})
-
         return generate()
 
 async def conversation_internal(request_body, request_headers):
+
     track_event_if_configured("conversation_internal_start", {
         "streaming": SHOULD_STREAM,
         "promptflow": USE_PROMPTFLOW,
@@ -1272,8 +1270,6 @@ async def add_conversation():
         )
         return await conversation_internal(request_body, request.headers)
 
-
-
     except Exception as e:
         span = trace.get_current_span()
         if span is not None:
@@ -1337,7 +1333,6 @@ async def update_conversation():
             })
         else:
             raise Exception("No bot messages found")
-
         # Submit request to Chat Completions for response
         await cosmos_conversation_client.cosmosdb_client.close()
         track_event_if_configured("UpdateConversation_Success", {
