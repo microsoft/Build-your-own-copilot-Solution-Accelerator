@@ -37,6 +37,10 @@ from db import get_connection
 from db import dict_cursor
 
 from backend.chat_logic_handler import stream_response_from_wealth_assistant
+from backend.event_utils import track_event_if_configured
+from azure.monitor.opentelemetry import configure_azure_monitor
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
@@ -60,6 +64,30 @@ UI_CHAT_DESCRIPTION = (
 )
 UI_FAVICON = os.environ.get("UI_FAVICON") or "/favicon.ico"
 UI_SHOW_SHARE_BUTTON = os.environ.get("UI_SHOW_SHARE_BUTTON", "true").lower() == "true"
+
+# Check if the Application Insights Instrumentation Key is set in the environment variables
+instrumentation_key = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+if instrumentation_key:
+    # Configure Application Insights if the Instrumentation Key is found
+    configure_azure_monitor(connection_string=instrumentation_key)
+    logging.info("Application Insights configured with the provided Instrumentation Key")
+else:
+    # Log a warning if the Instrumentation Key is not found
+    logging.warning("No Application Insights Instrumentation Key found. Skipping configuration")
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+# Suppress INFO logs from 'azure.core.pipeline.policies.http_logging_policy'
+logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(
+    logging.WARNING
+)
+logging.getLogger("azure.identity.aio._internal").setLevel(logging.WARNING)
+
+# Suppress info logs from OpenTelemetry exporter
+logging.getLogger("azure.monitor.opentelemetry.exporter.export._base").setLevel(
+    logging.WARNING
+)
 
 
 def create_app():
@@ -384,9 +412,19 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
             azure_endpoint=endpoint,
         )
 
+        track_event_if_configured("AzureOpenAIClientInitialized", {
+            "status": "success",
+            "endpoint": endpoint,
+            "use_api_key": bool(aoai_api_key),
+        })
+
         return azure_openai_client
     except Exception as e:
         logging.exception("Exception in Azure OpenAI initialization", e)
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         azure_openai_client = None
         raise e
 
@@ -411,8 +449,20 @@ def init_cosmosdb_client():
                 container_name=AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
                 enable_message_feedback=AZURE_COSMOSDB_ENABLE_FEEDBACK,
             )
+
+            track_event_if_configured("CosmosDBClientInitialized", {
+                "status": "success",
+                "endpoint": cosmos_endpoint,
+                "database": AZURE_COSMOSDB_DATABASE,
+                "container": AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
+                "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK,
+            })
         except Exception as e:
             logging.exception("Exception in CosmosDB initialization", e)
+            span = trace.get_current_span()
+            if span is not None:
+                span.record_exception(e)
+                span.set_status(Status(StatusCode.ERROR, str(e)))
             cosmos_conversation_client = None
             raise e
     else:
@@ -425,6 +475,7 @@ def get_configured_data_source():
     data_source = {}
     query_type = "simple"
     if DATASOURCE_TYPE == "AzureCognitiveSearch":
+        track_event_if_configured("datasource_selected", {"type": "AzureCognitiveSearch"})
         # Set query type
         if AZURE_SEARCH_QUERY_TYPE:
             query_type = AZURE_SEARCH_QUERY_TYPE
@@ -433,6 +484,8 @@ def get_configured_data_source():
             and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
         ):
             query_type = "semantic"
+        
+        track_event_if_configured("query_type_determined", {"query_type": query_type})
 
         # Set filter
         filter = None
@@ -441,11 +494,13 @@ def get_configured_data_source():
             userToken = request.headers.get("X-MS-TOKEN-AAD-ACCESS-TOKEN", "")
             logging.debug(f"USER TOKEN is {'present' if userToken else 'not present'}")
             if not userToken:
+                track_event_if_configured("user_token_missing", {})
                 raise Exception(
                     "Document-level access control is enabled, but user access token could not be fetched."
                 )
 
             filter = generateFilterString(userToken)
+            track_event_if_configured("filter_generated", {"filter": filter})
             logging.debug(f"FILTER: {filter}")
 
         # Set authentication
@@ -455,6 +510,8 @@ def get_configured_data_source():
         else:
             # If key is not provided, assume AOAI resource identity has been granted access to the search service
             authentication = {"type": "system_assigned_managed_identity"}
+        
+        track_event_if_configured("authentication_set", {"auth_type": authentication["type"]})
 
         data_source = {
             "type": "azure_search",
@@ -508,6 +565,7 @@ def get_configured_data_source():
         }
     elif DATASOURCE_TYPE == "AzureCosmosDB":
         query_type = "vector"
+        track_event_if_configured("datasource_selected", {"type": "AzureCosmosDB"})
 
         data_source = {
             "type": "azure_cosmos_db",
@@ -566,8 +624,10 @@ def get_configured_data_source():
             },
         }
     elif DATASOURCE_TYPE == "Elasticsearch":
+        track_event_if_configured("datasource_selected", {"type": "Elasticsearch"})
         if ELASTICSEARCH_QUERY_TYPE:
             query_type = ELASTICSEARCH_QUERY_TYPE
+        track_event_if_configured("query_type_determined", {"query_type": query_type})
 
         data_source = {
             "type": "elasticsearch",
@@ -621,8 +681,10 @@ def get_configured_data_source():
             },
         }
     elif DATASOURCE_TYPE == "AzureMLIndex":
+        track_event_if_configured("datasource_selected", {"type": "AzureMLIndex"})
         if AZURE_MLINDEX_QUERY_TYPE:
             query_type = AZURE_MLINDEX_QUERY_TYPE
+        track_event_if_configured("query_type_determined", {"query_type": query_type})
 
         data_source = {
             "type": "azure_ml_index",
@@ -674,6 +736,7 @@ def get_configured_data_source():
         }
     elif DATASOURCE_TYPE == "Pinecone":
         query_type = "vector"
+        track_event_if_configured("datasource_selected", {"type": "Pinecone"})
 
         data_source = {
             "type": "pinecone",
@@ -716,6 +779,7 @@ def get_configured_data_source():
             },
         }
     else:
+        track_event_if_configured("unknown_datasource_type", {"type": DATASOURCE_TYPE})
         raise Exception(
             f"DATASOURCE_TYPE is not configured or unknown: {DATASOURCE_TYPE}"
         )
@@ -742,15 +806,29 @@ def get_configured_data_source():
                 "model_id": ELASTICSEARCH_EMBEDDING_MODEL_ID,
             }
         else:
+            track_event_if_configured("embedding_dependency_missing", {
+                "datasource_type": DATASOURCE_TYPE,
+                "query_type": query_type
+            })
             raise Exception(
                 f"Vector query type ({query_type}) is selected for data source type {DATASOURCE_TYPE} but no embedding dependency is configured"
             )
+        
+        track_event_if_configured("embedding_dependency_set", {
+            "embedding_type": embeddingDependency.get("type")
+        })
         data_source["parameters"]["embedding_dependency"] = embeddingDependency
-
+    
+    track_event_if_configured("get_configured_data_source_complete", {
+        "datasource_type": DATASOURCE_TYPE,
+        "query_type": query_type
+    })
+    
     return data_source
 
 
 def prepare_model_args(request_body, request_headers):
+    track_event_if_configured("prepare_model_args_start", {})
     request_messages = request_body.get("messages", [])
     messages = []
     if not SHOULD_USE_DATA:
@@ -775,6 +853,8 @@ def prepare_model_args(request_body, request_headers):
             ),
         }
         user_json = json.dumps(user_args)
+        track_event_if_configured("ms_defender_user_info_added", {"user_id": user_args["EndUserId"]})
+
 
     model_args = {
         "messages": messages,
@@ -792,6 +872,7 @@ def prepare_model_args(request_body, request_headers):
     }
 
     if SHOULD_USE_DATA:
+        track_event_if_configured("ms_defender_user_info_added", {"user_id": user_args["EndUserId"]})
         model_args["extra_body"] = {"data_sources": [get_configured_data_source()]}
 
     model_args_clean = copy.deepcopy(model_args)
@@ -829,11 +910,13 @@ def prepare_model_args(request_body, request_headers):
                     ]["authentication"][field] = "*****"
 
     logging.debug(f"REQUEST BODY: {json.dumps(model_args_clean, indent=4)}")
+    track_event_if_configured("prepare_model_args_complete", {"model": AZURE_OPENAI_MODEL})
 
     return model_args
 
 
 async def promptflow_request(request):
+    track_event_if_configured("promptflow_request_start", {})
     try:
         headers = {
             "Content-Type": "application/json",
@@ -861,12 +944,18 @@ async def promptflow_request(request):
             )
         resp = response.json()
         resp["id"] = request["messages"][-1]["id"]
+        track_event_if_configured("promptflow_request_success", {})
         return resp
     except Exception as e:
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         logging.error(f"An error occurred while making promptflow_request: {e}")
 
 
 async def send_chat_request(request_body, request_headers):
+    track_event_if_configured("send_chat_request_start", {})
     filtered_messages = []
     messages = request_body.get("messages", [])
     for message in messages:
@@ -885,13 +974,20 @@ async def send_chat_request(request_body, request_headers):
         )
         response = raw_response.parse()
         apim_request_id = raw_response.headers.get("apim-request-id")
+
+        track_event_if_configured("send_chat_request_success", {"model": model_args.get("model")})
     except Exception as e:
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         logging.exception("Exception in send_chat_request")
         raise e
     return response, apim_request_id
 
 
 async def complete_chat_request(request_body, request_headers):
+    track_event_if_configured("complete_chat_request_start", {})
     if USE_PROMPTFLOW and PROMPTFLOW_ENDPOINT and PROMPTFLOW_API_KEY:
         response = await promptflow_request(request_body)
         history_metadata = request_body.get("history_metadata", {})
@@ -902,6 +998,7 @@ async def complete_chat_request(request_body, request_headers):
             PROMPTFLOW_CITATIONS_FIELD_NAME,
         )
     elif USE_INTERNAL_STREAM:
+        track_event_if_configured("internal_stream_selected", {})
         request_body = await request.get_json()
         client_id = request_body.get("client_id")
         print(request_body)
@@ -963,10 +1060,13 @@ async def complete_chat_request(request_body, request_headers):
             {"role": "assistant", "content": query_response}
         )
 
+        track_event_if_configured("complete_chat_request_success", {"client_id": client_id})
+
         return response
 
 
 async def stream_chat_request(request_body, request_headers):
+    track_event_if_configured("stream_chat_request_start", {})
     if USE_INTERNAL_STREAM:
         history_metadata = request_body.get("history_metadata", {})
         # function_url = STREAMING_AZUREFUNCTION_ENDPOINT
@@ -974,8 +1074,10 @@ async def stream_chat_request(request_body, request_headers):
 
         client_id = request_body.get("client_id")
         if client_id is None:
+            track_event_if_configured("client_id_missing", {})
             return jsonify({"error": "No client ID provided"}), 400
         query = request_body.get("messages")[-1].get("content")
+        track_event_if_configured("stream_internal_selected", {"client_id": client_id})
 
         sk_response = await stream_response_from_wealth_assistant(query, client_id)
 
@@ -1028,11 +1130,18 @@ async def stream_chat_request(request_body, request_headers):
                 yield format_stream_response(
                     completionChunk, history_metadata, apim_request_id
                 )
+            
+            track_event_if_configured("stream_openai_selected", {})
 
         return generate()
 
 
 async def conversation_internal(request_body, request_headers):
+    track_event_if_configured("conversation_internal_start", {
+        "streaming": SHOULD_STREAM,
+        "promptflow": USE_PROMPTFLOW,
+        "internal_stream": USE_INTERNAL_STREAM
+    })
     try:
         if SHOULD_STREAM:
             return await stream_chat_request(request_body, request_headers)
@@ -1042,9 +1151,14 @@ async def conversation_internal(request_body, request_headers):
             # return response
         else:
             result = await complete_chat_request(request_body, request_headers)
+            track_event_if_configured("conversation_internal_success", {})
             return jsonify(result)
 
     except Exception as ex:
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(ex)
+            span.set_status(Status(StatusCode.ERROR, str(ex)))
         logging.exception(ex)
         if hasattr(ex, "status_code"):
             return jsonify({"error": str(ex)}), ex.status_code
@@ -1055,9 +1169,10 @@ async def conversation_internal(request_body, request_headers):
 @bp.route("/conversation", methods=["POST"])
 async def conversation():
     if not request.is_json:
+        track_event_if_configured("invalid_request_format", {})
         return jsonify({"error": "request must be json"}), 415
     request_json = await request.get_json()
-
+    track_event_if_configured("conversation_api_invoked", {})
     return await conversation_internal(request_json, request.headers)
 
 
@@ -1067,6 +1182,10 @@ def get_frontend_settings():
         return jsonify(frontend_settings), 200
     except Exception as e:
         logging.exception("Exception in /frontend_settings")
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         return jsonify({"error": str(e)}), 500
 
 
@@ -1075,6 +1194,10 @@ def get_frontend_settings():
 async def add_conversation():
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user["user_principal_id"]
+    track_event_if_configured(
+        "HistoryGenerate_Start",
+        {"user_id": user_id}
+    )
 
     # check request for conversation_id
     request_json = await request.get_json()
@@ -1097,6 +1220,15 @@ async def add_conversation():
             history_metadata["title"] = title
             history_metadata["date"] = conversation_dict["createdAt"]
 
+            track_event_if_configured(
+                "ConversationCreated",
+                {
+                    "user_id": user_id,
+                    "conversation_id": conversation_id,
+                    "title": title
+                }
+            )
+
         # Format the incoming message object in the "chat/completions" messages format
         # then write it to the conversation history in cosmos
         messages = request_json["messages"]
@@ -1113,6 +1245,14 @@ async def add_conversation():
                     + conversation_id
                     + "."
                 )
+            track_event_if_configured(
+                "UserMessageAdded",
+                {
+                    "user_id": user_id,
+                    "conversation_id": conversation_id,
+                    "message": messages[-1],
+                }
+            )
         else:
             raise Exception("No user message found")
 
@@ -1122,9 +1262,30 @@ async def add_conversation():
         request_body = await request.get_json()
         history_metadata["conversation_id"] = conversation_id
         request_body["history_metadata"] = history_metadata
+        track_event_if_configured(
+            "SendingToChatCompletions",
+            {
+                "user_id": user_id,
+                "conversation_id": conversation_id
+            }
+        )
         return await conversation_internal(request_body, request.headers)
 
+        duration = time.time() - start_time
+        track_event_if_configured(
+            "HistoryGenerate_Completed",
+            {
+                "user_id": user_id,
+                "conversation_id": conversation_id
+            }
+        )
+
+
     except Exception as e:
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         logging.exception("Exception in /history/generate")
         return jsonify({"error": str(e)}), 500
 
@@ -1137,6 +1298,11 @@ async def update_conversation():
     # check request for conversation_id
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
+
+    track_event_if_configured("UpdateConversation_Start", {
+        "user_id": user_id,
+        "conversation_id": conversation_id
+    })
 
     try:
         # make sure cosmos is configured
@@ -1160,6 +1326,10 @@ async def update_conversation():
                     user_id=user_id,
                     input_message=messages[-2],
                 )
+                track_event_if_configured("ToolMessageStored", {
+                    "user_id": user_id,
+                    "conversation_id": conversation_id
+                })
             # write the assistant message
             await cosmos_conversation_client.create_message(
                 uuid=messages[-1]["id"],
@@ -1167,16 +1337,29 @@ async def update_conversation():
                 user_id=user_id,
                 input_message=messages[-1],
             )
+            track_event_if_configured("AssistantMessageStored", {
+                "user_id": user_id,
+                "conversation_id": conversation_id,
+                "message": messages[-1]    
+            })
         else:
             raise Exception("No bot messages found")
 
         # Submit request to Chat Completions for response
         await cosmos_conversation_client.cosmosdb_client.close()
+        track_event_if_configured("UpdateConversation_Success", {
+            "user_id": user_id,
+            "conversation_id": conversation_id
+        })
         response = {"success": True}
         return jsonify(response), 200
 
     except Exception as e:
         logging.exception("Exception in /history/update")
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         return jsonify({"error": str(e)}), 500
 
 
@@ -1190,6 +1373,11 @@ async def update_message():
     request_json = await request.get_json()
     message_id = request_json.get("message_id", None)
     message_feedback = request_json.get("message_feedback", None)
+
+    track_event_if_configured("MessageFeedback_Start", {
+        "user_id": user_id,
+        "message_id": message_id
+    })
     try:
         if not message_id:
             return jsonify({"error": "message_id is required"}), 400
@@ -1202,6 +1390,11 @@ async def update_message():
             user_id, message_id, message_feedback
         )
         if updated_message:
+            track_event_if_configured("MessageFeedback_Updated", {
+                "user_id": user_id,
+                "message_id": message_id,
+                "feedback": message_feedback
+            })
             return (
                 jsonify(
                     {
@@ -1212,6 +1405,10 @@ async def update_message():
                 200,
             )
         else:
+            track_event_if_configured("MessageFeedback_NotFound", {
+                "user_id": user_id,
+                "message_id": message_id
+            })
             return (
                 jsonify(
                     {
@@ -1223,6 +1420,10 @@ async def update_message():
 
     except Exception as e:
         logging.exception("Exception in /history/message_feedback")
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         return jsonify({"error": str(e)}), 500
 
 
@@ -1235,6 +1436,11 @@ async def delete_conversation():
     # check request for conversation_id
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
+
+    track_event_if_configured("DeleteConversation_Start", {
+        "user_id": user_id,
+        "conversation_id": conversation_id
+    })
 
     try:
         if not conversation_id:
@@ -1253,6 +1459,11 @@ async def delete_conversation():
 
         await cosmos_conversation_client.cosmosdb_client.close()
 
+        track_event_if_configured("DeleteConversation_Success", {
+            "user_id": user_id,
+            "conversation_id": conversation_id
+        })
+
         return (
             jsonify(
                 {
@@ -1264,6 +1475,10 @@ async def delete_conversation():
         )
     except Exception as e:
         logging.exception("Exception in /history/delete")
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         return jsonify({"error": str(e)}), 500
 
 
@@ -1272,6 +1487,11 @@ async def list_conversations():
     offset = request.args.get("offset", 0)
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user["user_principal_id"]
+
+    track_event_if_configured("ListConversations_Start", {
+        "user_id": user_id,
+        "offset": offset
+    })
 
     # make sure cosmos is configured
     cosmos_conversation_client = init_cosmosdb_client()
@@ -1284,9 +1504,18 @@ async def list_conversations():
     )
     await cosmos_conversation_client.cosmosdb_client.close()
     if not isinstance(conversations, list):
+        track_event_if_configured("ListConversations_Empty", {
+                "user_id": user_id,
+                "offset": offset
+        })
         return jsonify({"error": f"No conversations for {user_id} were found"}), 404
 
     # return the conversation ids
+
+    track_event_if_configured("ListConversations_Success", {
+            "user_id": user_id,
+            "conversation_count": len(conversations)
+        })
 
     return jsonify(conversations), 200
 
@@ -1300,7 +1529,17 @@ async def get_conversation():
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
 
+    track_event_if_configured("GetConversation_Start", {
+        "user_id": user_id,
+        "conversation_id": conversation_id,
+    })
+
     if not conversation_id:
+        track_event_if_configured("GetConversation_Failed", {
+                "user_id": user_id,
+                "conversation_id": conversation_id,
+                "error": f"Conversation {conversation_id} not found",
+            })
         return jsonify({"error": "conversation_id is required"}), 400
 
     # make sure cosmos is configured
@@ -1341,6 +1580,11 @@ async def get_conversation():
     ]
 
     await cosmos_conversation_client.cosmosdb_client.close()
+    track_event_if_configured("GetConversation_Success", {
+            "user_id": user_id,
+            "conversation_id": conversation_id,
+            "message_count": len(messages)
+        })
     return jsonify({"conversation_id": conversation_id, "messages": messages}), 200
 
 
@@ -1353,7 +1597,17 @@ async def rename_conversation():
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
 
+    track_event_if_configured("RenameConversation_Start", {
+        "user_id": user_id,
+        "conversation_id": conversation_id
+    })
+
     if not conversation_id:
+        track_event_if_configured("RenameConversation_Failed", {
+                "user_id": user_id,
+                "conversation_id": conversation_id,
+                "error": f"Conversation {conversation_id} not found",
+            })
         return jsonify({"error": "conversation_id is required"}), 400
 
     # make sure cosmos is configured
@@ -1385,6 +1639,13 @@ async def rename_conversation():
     )
 
     await cosmos_conversation_client.cosmosdb_client.close()
+
+    track_event_if_configured("RenameConversation_Success", {
+            "user_id": user_id,
+            "conversation_id": conversation_id,
+            "new_title": title
+        })
+    
     return jsonify(updated_conversation), 200
 
 
@@ -1393,6 +1654,10 @@ async def delete_all_conversations():
     # get the user id from the request headers
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user["user_principal_id"]
+
+    track_event_if_configured("DeleteAllConversations_Start", {
+        "user_id": user_id
+    })
 
     # get conversations for user
     try:
@@ -1405,6 +1670,9 @@ async def delete_all_conversations():
             user_id, offset=0, limit=None
         )
         if not conversations:
+            track_event_if_configured("DeleteAllConversations_Empty", {
+                "user_id": user_id,
+            })
             return jsonify({"error": f"No conversations for {user_id} were found"}), 404
 
         # delete each conversation
@@ -1419,6 +1687,12 @@ async def delete_all_conversations():
                 user_id, conversation["id"]
             )
         await cosmos_conversation_client.cosmosdb_client.close()
+
+        track_event_if_configured("DeleteAllConversations_Success", {
+            "user_id": user_id,
+            "conversation_count": len(conversations)
+        })
+
         return (
             jsonify(
                 {
@@ -1430,6 +1704,10 @@ async def delete_all_conversations():
 
     except Exception as e:
         logging.exception("Exception in /history/delete_all")
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         return jsonify({"error": str(e)}), 500
 
 
@@ -1443,8 +1721,18 @@ async def clear_messages():
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
 
+    track_event_if_configured("ClearConversationMessages_Start", {
+        "user_id": user_id,
+        "conversation_id": conversation_id,
+    })
+
     try:
         if not conversation_id:
+            track_event_if_configured("ClearConversationMessages_Failed", {
+                "user_id": user_id,
+                "conversation_id": conversation_id,
+                "error": "conversation_id is required"
+            })
             return jsonify({"error": "conversation_id is required"}), 400
 
         # make sure cosmos is configured
@@ -1454,6 +1742,11 @@ async def clear_messages():
 
         # delete the conversation messages from cosmos
         await cosmos_conversation_client.delete_messages(conversation_id, user_id)
+
+        track_event_if_configured("ClearConversationMessages_Success", {
+            "user_id": user_id,
+            "conversation_id": conversation_id
+        })
 
         return (
             jsonify(
@@ -1466,12 +1759,19 @@ async def clear_messages():
         )
     except Exception as e:
         logging.exception("Exception in /history/clear_messages")
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/history/ensure", methods=["GET"])
 async def ensure_cosmos():
     if not AZURE_COSMOSDB_ACCOUNT:
+        track_event_if_configured("EnsureCosmosDB_Failed", {
+            "error": "CosmosDB is not configured",
+        })
         return jsonify({"error": "CosmosDB is not configured"}), 404
 
     try:
@@ -1479,13 +1779,23 @@ async def ensure_cosmos():
         success, err = await cosmos_conversation_client.ensure()
         if not cosmos_conversation_client or not success:
             if err:
+                track_event_if_configured("EnsureCosmosDB_Failed", {
+                    "error": err,
+                })
                 return jsonify({"error": err}), 422
             return jsonify({"error": "CosmosDB is not configured or not working"}), 500
 
         await cosmos_conversation_client.cosmosdb_client.close()
+        track_event_if_configured("EnsureCosmosDB_Failed", {
+                "error": "CosmosDB is not configured or not working",
+            })
         return jsonify({"message": "CosmosDB is configured and working"}), 200
     except Exception as e:
         logging.exception("Exception in /history/ensure")
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         cosmos_exception = str(e)
         if "Invalid credentials" in cosmos_exception:
             return jsonify({"error": cosmos_exception}), 401
@@ -1512,6 +1822,7 @@ async def ensure_cosmos():
 
 
 async def generate_title(conversation_messages):
+
     # make sure the messages are sorted by _ts descending
     title_prompt = 'Summarize the conversation so far into a 4-word or less title. Do not use any quotation marks or punctuation. Respond with a json object in the format {{"title": string}}. Do not include any other commentary or description.'
 
@@ -1540,7 +1851,10 @@ async def generate_title(conversation_messages):
 
 @bp.route("/api/users", methods=["GET"])
 def get_users():
+
+    track_event_if_configured("UserFetch_Start", {})
     conn = None
+    
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -1594,6 +1908,9 @@ def get_users():
         rows = dict_cursor(cursor)
 
         if len(rows) <= 6:
+            track_event_if_configured("UserFetch_SampleUpdate", {
+                "rows_count": len(rows),
+            })
             # update ClientMeetings,Assets,Retirement tables sample data to current date
             cursor = conn.cursor()
             combined_stmt = """
@@ -1678,9 +1995,17 @@ def get_users():
             }
             users.append(user)
 
+            track_event_if_configured("UserFetch_Success", {
+            "user_count": len(users),
+        })
+
         return jsonify(users)
 
     except Exception as e:
+        span = trace.get_current_span()
+        if span is not None:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
         print("Exception occurred:", e)
         return str(e), 500
     finally:

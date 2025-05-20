@@ -246,6 +246,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
     aiProjectConnectionString:keyVault.getSecret('AZURE-AI-PROJECT-CONN-STRING')
     aiProjectName:aifoundry.outputs.aiProjectName
+    applicationInsightsConnectionString:aifoundry.outputs.applicationInsightsConnectionString
   }
   scope: resourceGroup(resourceGroup().name)
 }
