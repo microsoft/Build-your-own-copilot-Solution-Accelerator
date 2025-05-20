@@ -813,12 +813,10 @@ def get_configured_data_source():
             raise Exception(
                 f"Vector query type ({query_type}) is selected for data source type {DATASOURCE_TYPE} but no embedding dependency is configured"
             )
-        
         track_event_if_configured("embedding_dependency_set", {
             "embedding_type": embeddingDependency.get("type")
         })
         data_source["parameters"]["embedding_dependency"] = embeddingDependency
-    
     track_event_if_configured("get_configured_data_source_complete", {
         "datasource_type": DATASOURCE_TYPE,
         "query_type": query_type
@@ -1269,9 +1267,7 @@ async def add_conversation():
                 "conversation_id": conversation_id
             }
         )
-        return await conversation_internal(request_body, request.headers)
 
-        duration = time.time() - start_time
         track_event_if_configured(
             "HistoryGenerate_Completed",
             {
@@ -1279,6 +1275,8 @@ async def add_conversation():
                 "conversation_id": conversation_id
             }
         )
+        return await conversation_internal(request_body, request.headers)
+
 
 
     except Exception as e:
@@ -1505,17 +1503,17 @@ async def list_conversations():
     await cosmos_conversation_client.cosmosdb_client.close()
     if not isinstance(conversations, list):
         track_event_if_configured("ListConversations_Empty", {
-                "user_id": user_id,
-                "offset": offset
+            "user_id": user_id,
+            "offset": offset
         })
         return jsonify({"error": f"No conversations for {user_id} were found"}), 404
 
     # return the conversation ids
 
     track_event_if_configured("ListConversations_Success", {
-            "user_id": user_id,
-            "conversation_count": len(conversations)
-        })
+        "user_id": user_id,
+        "conversation_count": len(conversations)
+    })
 
     return jsonify(conversations), 200
 
@@ -1536,10 +1534,10 @@ async def get_conversation():
 
     if not conversation_id:
         track_event_if_configured("GetConversation_Failed", {
-                "user_id": user_id,
-                "conversation_id": conversation_id,
-                "error": f"Conversation {conversation_id} not found",
-            })
+            "user_id": user_id,
+            "conversation_id": conversation_id,
+            "error": f"Conversation {conversation_id} not found",
+        })
         return jsonify({"error": "conversation_id is required"}), 400
 
     # make sure cosmos is configured
@@ -1581,10 +1579,10 @@ async def get_conversation():
 
     await cosmos_conversation_client.cosmosdb_client.close()
     track_event_if_configured("GetConversation_Success", {
-            "user_id": user_id,
-            "conversation_id": conversation_id,
-            "message_count": len(messages)
-        })
+        "user_id": user_id,
+        "conversation_id": conversation_id,
+        "message_count": len(messages)
+    })
     return jsonify({"conversation_id": conversation_id, "messages": messages}), 200
 
 
@@ -1604,10 +1602,10 @@ async def rename_conversation():
 
     if not conversation_id:
         track_event_if_configured("RenameConversation_Failed", {
-                "user_id": user_id,
-                "conversation_id": conversation_id,
-                "error": f"Conversation {conversation_id} not found",
-            })
+            "user_id": user_id,
+            "conversation_id": conversation_id,
+            "error": f"Conversation {conversation_id} not found",
+        })
         return jsonify({"error": "conversation_id is required"}), 400
 
     # make sure cosmos is configured
@@ -1641,10 +1639,10 @@ async def rename_conversation():
     await cosmos_conversation_client.cosmosdb_client.close()
 
     track_event_if_configured("RenameConversation_Success", {
-            "user_id": user_id,
-            "conversation_id": conversation_id,
-            "new_title": title
-        })
+        "user_id": user_id,
+        "conversation_id": conversation_id,
+        "new_title": title
+    })
     
     return jsonify(updated_conversation), 200
 
@@ -1787,8 +1785,8 @@ async def ensure_cosmos():
 
         await cosmos_conversation_client.cosmosdb_client.close()
         track_event_if_configured("EnsureCosmosDB_Failed", {
-                "error": "CosmosDB is not configured or not working",
-            })
+            "error": "CosmosDB is not configured or not working",
+        })
         return jsonify({"message": "CosmosDB is configured and working"}), 200
     except Exception as e:
         logging.exception("Exception in /history/ensure")
