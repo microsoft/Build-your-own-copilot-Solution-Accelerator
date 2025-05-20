@@ -821,6 +821,7 @@ def get_configured_data_source():
     })
     return data_source
 
+
 def prepare_model_args(request_body, request_headers):
     track_event_if_configured("prepare_model_args_start", {})
     request_messages = request_body.get("messages", [])
@@ -1122,12 +1123,12 @@ async def stream_chat_request(request_body, request_headers):
             async for completionChunk in response:
                 yield format_stream_response(
                     completionChunk, history_metadata, apim_request_id
-                ) 
+                )
             track_event_if_configured("stream_openai_selected", {})
         return generate()
 
-async def conversation_internal(request_body, request_headers):
 
+async def conversation_internal(request_body, request_headers):
     track_event_if_configured("conversation_internal_start", {
         "streaming": SHOULD_STREAM,
         "promptflow": USE_PROMPTFLOW,
