@@ -157,6 +157,5 @@ cython_debug/
 # Ignore other unnecessary files
 *.bak
 *.swp
-.DS_Store
 *.pdb
 *.sqlite3
