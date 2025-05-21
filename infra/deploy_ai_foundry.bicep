@@ -492,3 +492,5 @@ output aiProjectName string = aiHubProject.name
 output applicationInsightsId string = applicationInsights.id
 output logAnalyticsWorkspaceResourceName string = logAnalytics.name
 output storageAccountName string = storageNameCleaned
+output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
+

@@ -178,6 +178,7 @@ param streamTextSystemPrompt string
 param aiProjectConnectionString string
 param useAIProjectClientFlag string = 'false'
 param aiProjectName string
+param applicationInsightsConnectionString string
 
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
@@ -214,6 +215,10 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: reference(applicationInsightsId, '2015-05-01').InstrumentationKey
+        }
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: applicationInsightsConnectionString
         }
         {
           name: 'AZURE_SEARCH_SERVICE'
