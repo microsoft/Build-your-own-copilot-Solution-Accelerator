@@ -32,3 +32,13 @@ semantic_kernel==1.21.3
 azure-search-documents==11.6.0b9
 azure-ai-projects==1.0.0b9
 azure-ai-inference==1.0.0b9
+
+opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-grpc
+azure-monitor-events-extension
+opentelemetry-sdk==1.31.1
+opentelemetry-api==1.31.1
+opentelemetry-semantic-conventions==0.52b1
+opentelemetry-instrumentation==0.52b1
+azure-monitor-opentelemetry==1.6.8
