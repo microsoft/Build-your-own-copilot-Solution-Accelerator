@@ -86,7 +86,7 @@ class ChatWithDataPlugin:
             answer = f"Error retrieving greeting response: {str(e)}"
         return answer
 
-    @kernel_function(name="ChatWithSQLDatabase", description="Given a query about client assets, investements and meeting dates or times, get details from the database based on the provided question and client id")
+    @kernel_function(name="ChatWithSQLDatabase", description="Given a query about client assets, investments and scheduled meetings (including upcoming or next meeting dates/times), get details from the database based on the provided question and client id")
     def get_SQL_Response(
         self,
         input: Annotated[str, "the question"],
