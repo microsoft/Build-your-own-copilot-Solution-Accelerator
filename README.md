@@ -45,7 +45,7 @@ Leverages Azure OpenAI Service and Azure AI Search, this solution streamlines da
   - **Semantic search** <br/>
   Azure AI Search enabled RAG and grounding of the application on the processed datasets.​
 
-  - **Seummarization** <br/>
+  - **Summarization** <br/>
   Azure OpenAI Service helps to summarize the conversations and actions for the next meeting.​
 
   - **Chat with data** <br/>
