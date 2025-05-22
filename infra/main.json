@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.34.44.8038",
-      "templateHash": "1797657337218629559"
+      "version": "0.35.1.17967",
+      "templateHash": "12824324392196719415"
     }
   },
   "parameters": {
@@ -371,8 +371,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "13475249900025738327"
+              "version": "0.35.1.17967",
+              "templateHash": "13884114971020005637"
             }
           },
           "parameters": {
@@ -485,8 +485,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "7780154815289754884"
+              "version": "0.35.1.17967",
+              "templateHash": "13533490792012888554"
             }
           },
           "parameters": {
@@ -707,8 +707,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "3569608512312433081"
+              "version": "0.35.1.17967",
+              "templateHash": "15504864984003912125"
             }
           },
           "parameters": {
@@ -1016,11 +1016,11 @@
               "name": "[format('{0}/{1}', variables('aiHubName'), format('{0}-connection-AzureOpenAI', variables('aiHubName')))]",
               "properties": {
                 "category": "AIServices",
-                "target": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2021-10-01').endpoint]",
+                "target": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2024-04-01-preview').endpoint]",
                 "authType": "ApiKey",
                 "isSharedToAll": true,
                 "credentials": {
-                  "key": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2021-10-01').key1]"
+                  "key": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2024-04-01-preview').key1]"
                 },
                 "metadata": {
                   "ApiType": "Azure",
@@ -1122,7 +1122,7 @@
             },
             {
               "type": "Microsoft.CognitiveServices/accounts",
-              "apiVersion": "2021-10-01",
+              "apiVersion": "2024-04-01-preview",
               "name": "[variables('aiServicesName')]",
               "location": "[variables('location')]",
               "sku": {
@@ -1131,9 +1131,6 @@
               "kind": "AIServices",
               "properties": {
                 "customSubDomainName": "[variables('aiServicesName')]",
-                "apiProperties": {
-                  "statisticsEnabled": false
-                },
                 "publicNetworkAccess": "Enabled"
               }
             },
@@ -1303,7 +1300,7 @@
               "apiVersion": "2021-11-01-preview",
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'AZURE-OPENAI-KEY')]",
               "properties": {
-                "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2021-10-01').key1]"
+                "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2024-04-01-preview').key1]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName'))]"
@@ -1330,7 +1327,7 @@
               "apiVersion": "2021-11-01-preview",
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'AZURE-OPENAI-ENDPOINT')]",
               "properties": {
-                "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2021-10-01').endpoint]"
+                "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2024-04-01-preview').endpoint]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName'))]"
@@ -1393,7 +1390,7 @@
               "apiVersion": "2021-11-01-preview",
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'COG-SERVICES-ENDPOINT')]",
               "properties": {
-                "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2021-10-01').endpoint]"
+                "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2024-04-01-preview').endpoint]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName'))]"
@@ -1404,7 +1401,7 @@
               "apiVersion": "2021-11-01-preview",
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'COG-SERVICES-KEY')]",
               "properties": {
-                "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2021-10-01').key1]"
+                "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2024-04-01-preview').key1]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName'))]"
@@ -1454,7 +1451,7 @@
             },
             "aiServicesTarget": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2021-10-01').endpoint]"
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiServicesName')), '2024-04-01-preview').endpoint]"
             },
             "aiServicesName": {
               "type": "string",
@@ -1531,8 +1528,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "18024619127503050220"
+              "version": "0.35.1.17967",
+              "templateHash": "9117647475512750570"
             }
           },
           "parameters": {
@@ -1744,8 +1741,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "5751354717279779763"
+              "version": "0.35.1.17967",
+              "templateHash": "1117979962296827839"
             }
           },
           "parameters": {
@@ -1929,8 +1926,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "4179944107717925300"
+              "version": "0.35.1.17967",
+              "templateHash": "13918782005857949552"
             }
           },
           "parameters": {
@@ -1991,6 +1988,7 @@
                 "publicNetworkAccess": "Enabled",
                 "version": "12.0",
                 "restrictOutboundNetworkAccess": "Disabled",
+                "minimalTlsVersion": "1.2",
                 "administrators": {
                   "login": "[parameters('managedIdentityName')]",
                   "sid": "[parameters('managedIdentityObjectId')]",
@@ -2304,8 +2302,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "8701343999231764795"
+              "version": "0.35.1.17967",
+              "templateHash": "9862570739171059712"
             }
           },
           "parameters": {
@@ -2999,8 +2997,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.34.44.8038",
-                      "templateHash": "14262313259972528331"
+                      "version": "0.35.1.17967",
+                      "templateHash": "629726085607478347"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },
