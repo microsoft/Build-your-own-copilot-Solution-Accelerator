@@ -29,6 +29,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
       publicNetworkAccess: 'Enabled'
       version: '12.0'
       restrictOutboundNetworkAccess: 'Disabled'
+      minimalTlsVersion: '1.2'
       administrators: {
         login: managedIdentityName
         sid: managedIdentityObjectId
