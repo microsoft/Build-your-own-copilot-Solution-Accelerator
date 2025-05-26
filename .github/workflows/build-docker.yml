@@ -33,6 +33,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Get input password
+      id: input_password
+      run: echo "password=${{ inputs.password_secret }}" >> $GITHUB_OUTPUT
+      
+
     - name: Docker Login
       if: ${{ inputs.push && inputs.password_secret != '' }}
       uses: docker/login-action@v3
