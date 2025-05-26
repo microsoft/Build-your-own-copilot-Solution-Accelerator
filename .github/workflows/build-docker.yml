@@ -23,7 +23,7 @@ on:
         type: boolean
     secrets:
       DOCKER_PASSWORD:
-        required: false
+        required: true
 
 jobs:
   docker-build:
@@ -33,13 +33,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Get input password
-      id: input_password
-      run: echo "password=${{ inputs.password_secret }}" >> $GITHUB_OUTPUT
+    - name: Check Docker Password Secret
+      id: check_secret
+      run: |
+        if [ -z "${{ secrets.DOCKER_PASSWORD }}" ]; then
+          echo "docker_password_present=false" >> $GITHUB_OUTPUT
+        else
+          echo "docker_password_present=true" >> $GITHUB_OUTPUT
+        fi
       
 
     - name: Docker Login
-      if: ${{ inputs.push && inputs.password_secret != '' }}
+      if: ${{ inputs.push && steps.check_secret.outputs.docker_password_present == 'true' }}
       uses: docker/login-action@v3
       with:
         registry: ${{ inputs.registry }}
