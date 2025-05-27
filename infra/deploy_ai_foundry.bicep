@@ -9,6 +9,8 @@ param gptDeploymentCapacity int
 param embeddingModel string
 param embeddingDeploymentCapacity int
 param managedIdentityObjectId string
+// param fabricWorkspaceId string = ''
+param logAnalyticsWorkspaceId string = ''
 
 // Load the abbrevations file required to name the azure resources.
 var abbrs = loadJsonContent('./abbreviations.json')
@@ -54,7 +56,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (logAnalyticsWorkspaceId == ''){
   name: workspaceName
   location: location
   tags: {}
@@ -65,6 +67,9 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
     }
   }
 }
+
+var resolvedLogAnalyticsId = logAnalyticsWorkspaceId != '' ? logAnalyticsWorkspaceId : logAnalytics.id
+
 
 // resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
 //   name: applicationInsightsName
@@ -93,7 +98,8 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
     Application_Type: 'web'
     publicNetworkAccessForIngestion: 'Enabled'
     publicNetworkAccessForQuery: 'Enabled'
-    WorkspaceResourceId: logAnalytics.id
+    // WorkspaceResourceId: logAnalytics.id
+    WorkspaceResourceId: resolvedLogAnalyticsId
   }
 }
 
@@ -490,5 +496,5 @@ output aiSearchService string = aiSearch.name
 output aiProjectName string = aiHubProject.name
 
 output applicationInsightsId string = applicationInsights.id
-output logAnalyticsWorkspaceResourceName string = logAnalytics.name
+output logAnalyticsWorkspaceResourceName string = logAnalyticsWorkspaceId
 output storageAccountName string = storageNameCleaned

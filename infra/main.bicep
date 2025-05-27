@@ -1,6 +1,13 @@
 // ========== main.bicep ========== //
 targetScope = 'resourceGroup'
 
+// @description('If non-empty, use this existing Fabric workspace ID; otherwise create a new one.')
+// param fabricWorkspaceId string = ''
+
+@description('If non-empty, use this existing Log Analytics workspace ID; otherwise create a new one.')
+param logAnalyticsWorkspaceId string = ''
+
+
 @minLength(3)
 @maxLength(20)
 @description('A unique prefix for all resources in this deployment. This should be 3-20 characters long:')
@@ -42,7 +49,7 @@ param embeddingModel string = 'text-embedding-ada-002'
 
 @minValue(10)
 @description('Capacity of the Embedding Model deployment')
-param embeddingDeploymentCapacity int = 80
+param embeddingDeploymentCapacity int = 10
 
 // @description('Fabric Workspace Id if you have one, else leave it empty. ')
 // param fabricWorkspaceId string
@@ -140,6 +147,8 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     embeddingModel: embeddingModel
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+    // fabricWorkspaceId: fabricWorkspaceId
+    logAnalyticsWorkspaceId: logAnalyticsWorkspaceId
   }
   scope: resourceGroup(resourceGroup().name)
 }
