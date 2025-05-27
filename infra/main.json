@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.34.44.8038",
-      "templateHash": "9713836480105967098"
+      "version": "0.35.1.17967",
+      "templateHash": "12824324392196719415"
     }
   },
   "parameters": {
@@ -371,8 +371,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "13475249900025738327"
+              "version": "0.35.1.17967",
+              "templateHash": "13884114971020005637"
             }
           },
           "parameters": {
@@ -485,8 +485,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "7780154815289754884"
+              "version": "0.35.1.17967",
+              "templateHash": "13533490792012888554"
             }
           },
           "parameters": {
@@ -707,8 +707,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "18186919711353368589"
+              "version": "0.35.1.17967",
+              "templateHash": "15504864984003912125"
             }
           },
           "parameters": {
@@ -1532,8 +1532,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "18024619127503050220"
+              "version": "0.35.1.17967",
+              "templateHash": "9117647475512750570"
             }
           },
           "parameters": {
@@ -1745,8 +1745,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "5751354717279779763"
+              "version": "0.35.1.17967",
+              "templateHash": "1117979962296827839"
             }
           },
           "parameters": {
@@ -1930,8 +1930,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "4179944107717925300"
+              "version": "0.35.1.17967",
+              "templateHash": "13918782005857949552"
             }
           },
           "parameters": {
@@ -1992,6 +1992,7 @@
                 "publicNetworkAccess": "Enabled",
                 "version": "12.0",
                 "restrictOutboundNetworkAccess": "Disabled",
+                "minimalTlsVersion": "1.2",
                 "administrators": {
                   "login": "[parameters('managedIdentityName')]",
                   "sid": "[parameters('managedIdentityObjectId')]",
@@ -2308,8 +2309,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "15866728948176241669"
+              "version": "0.35.1.17967",
+              "templateHash": "9862570739171059712"
             }
           },
           "parameters": {
@@ -3010,8 +3011,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.34.44.8038",
-                      "templateHash": "14262313259972528331"
+                      "version": "0.35.1.17967",
+                      "templateHash": "629726085607478347"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },
