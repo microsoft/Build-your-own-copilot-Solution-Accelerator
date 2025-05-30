@@ -2139,9 +2139,6 @@
           "AzureSearchSemanticSearchConfig": {
             "value": "my-semantic-config"
           },
-          "AzureSearchIndexIsPrechunked": {
-            "value": "False"
-          },
           "AzureSearchTopK": {
             "value": "5"
           },
@@ -2158,7 +2155,7 @@
             "value": "sourceurl"
           },
           "AzureOpenAIResource": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiServicesTarget.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiServicesName.value]"
           },
           "AzureOpenAIEndpoint": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiServicesTarget.value]"
@@ -2173,9 +2170,6 @@
               },
               "secretName": "AZURE-OPENAI-KEY"
             }
-          },
-          "AzureOpenAIModelName": {
-            "value": "[parameters('gptModelName')]"
           },
           "AzureOpenAITemperature": {
             "value": "0"
@@ -2267,14 +2261,6 @@
           },
           "applicationInsightsId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.applicationInsightsId.value]"
-          },
-          "azureSearchAdminKey": {
-            "reference": {
-              "keyVault": {
-                "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.KeyVault/vaults', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.keyvaultName.value)]"
-              },
-              "secretName": "AZURE-SEARCH-KEY"
-            }
           },
           "azureSearchServiceEndpoint": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchTarget.value]"
@@ -2383,13 +2369,6 @@
                 "description": "Semantic search config"
               }
             },
-            "AzureSearchIndexIsPrechunked": {
-              "type": "string",
-              "defaultValue": "False",
-              "metadata": {
-                "description": "Is the index prechunked"
-              }
-            },
             "AzureSearchTopK": {
               "type": "string",
               "defaultValue": "5",
@@ -2442,13 +2421,6 @@
               "type": "string",
               "metadata": {
                 "description": "Azure OpenAI Model Deployment Name"
-              }
-            },
-            "AzureOpenAIModelName": {
-              "type": "string",
-              "defaultValue": "gpt-4o-mini",
-              "metadata": {
-                "description": "Azure OpenAI Model Name"
               }
             },
             "AzureOpenAIEndpoint": {
@@ -2576,25 +2548,11 @@
                 "description": "Azure Open AI Embedding Endpoint"
               }
             },
-            "WebAppEnableChatHistory": {
-              "type": "string",
-              "defaultValue": "False",
-              "metadata": {
-                "description": "Enable chat history by deploying a Cosmos DB instance"
-              }
-            },
             "USE_INTERNAL_STREAM": {
               "type": "string",
               "defaultValue": "True",
               "metadata": {
                 "description": "Use Azure Function"
-              }
-            },
-            "STREAMING_AZUREFUNCTION_ENDPOINT": {
-              "type": "string",
-              "defaultValue": "",
-              "metadata": {
-                "description": "Azure Function Endpoint"
               }
             },
             "SQLDB_SERVER": {
@@ -2665,9 +2623,6 @@
             "applicationInsightsId": {
               "type": "string"
             },
-            "azureSearchAdminKey": {
-              "type": "securestring"
-            },
             "azureSearchServiceEndpoint": {
               "type": "string"
             },
@@ -2704,7 +2659,7 @@
             }
           },
           "variables": {
-            "WebAppImageName": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:{0}', parameters('imageTag'))]"
+            "WebAppImageName": "DOCKER|macaetestcr.azurecr.io/cawebapp:testca"
           },
           "resources": [
             {
@@ -2765,10 +2720,6 @@
                       "value": "[parameters('AzureSearchSemanticSearchConfig')]"
                     },
                     {
-                      "name": "AZURE_SEARCH_INDEX_IS_PRECHUNKED",
-                      "value": "[parameters('AzureSearchIndexIsPrechunked')]"
-                    },
-                    {
                       "name": "AZURE_SEARCH_TOP_K",
                       "value": "[parameters('AzureSearchTopK')]"
                     },
@@ -2807,10 +2758,6 @@
                     {
                       "name": "AZURE_OPENAI_KEY",
                       "value": "[parameters('AzureOpenAIKey')]"
-                    },
-                    {
-                      "name": "AZURE_OPENAI_MODEL_NAME",
-                      "value": "[parameters('AzureOpenAIModelName')]"
                     },
                     {
                       "name": "AZURE_OPENAI_TEMPERATURE",
@@ -2869,10 +2816,6 @@
                       "value": "[parameters('AzureOpenAIEmbeddingEndpoint')]"
                     },
                     {
-                      "name": "WEB_APP_ENABLE_CHAT_HISTORY",
-                      "value": "[parameters('WebAppEnableChatHistory')]"
-                    },
-                    {
                       "name": "SQLDB_SERVER",
                       "value": "[parameters('SQLDB_SERVER')]"
                     },
@@ -2893,10 +2836,6 @@
                       "value": "[parameters('USE_INTERNAL_STREAM')]"
                     },
                     {
-                      "name": "STREAMING_AZUREFUNCTION_ENDPOINT",
-                      "value": "[parameters('STREAMING_AZUREFUNCTION_ENDPOINT')]"
-                    },
-                    {
                       "name": "AZURE_COSMOSDB_ACCOUNT",
                       "value": "[parameters('AZURE_COSMOSDB_ACCOUNT')]"
                     },
@@ -2913,28 +2852,12 @@
                       "value": "[parameters('AZURE_COSMOSDB_ENABLE_FEEDBACK')]"
                     },
                     {
-                      "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
-                      "value": "true"
-                    },
-                    {
-                      "name": "UWSGI_PROCESSES",
-                      "value": "2"
-                    },
-                    {
-                      "name": "UWSGI_THREADS",
-                      "value": "2"
-                    },
-                    {
                       "name": "SQLDB_USER_MID",
                       "value": "[parameters('userassignedIdentityClientId')]"
                     },
                     {
                       "name": "OPENAI_API_VERSION",
                       "value": "[parameters('AzureOpenAIApiVersion')]"
-                    },
-                    {
-                      "name": "AZURE_AI_SEARCH_API_KEY",
-                      "value": "[parameters('azureSearchAdminKey')]"
                     },
                     {
                       "name": "AZURE_AI_SEARCH_ENDPOINT",
