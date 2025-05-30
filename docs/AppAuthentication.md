@@ -7,7 +7,7 @@ This document provides step-by-step instructions to configure Azure App Registra
 - Access to **Microsoft Entra ID**
 - Necessary permissions to create and manage **App Registrations**
 
-## Step 1 Add Authentication in Azure App Service configuration
+## Step 1: Add Authentication in Azure App Service configuration
 
 1. Click on `Authentication` from left menu.
 
