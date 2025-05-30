@@ -9,3 +9,4 @@ param gptDeploymentCapacity = int(readEnvironmentVariable('AZURE_ENV_MODEL_CAPAC
 param embeddingDeploymentCapacity = int(readEnvironmentVariable('AZURE_ENV_EMBEDDING_MODEL_CAPACITY', '80'))
 param AzureOpenAILocation = readEnvironmentVariable('AZURE_ENV_OPENAI_LOCATION', 'eastus2')
 param AZURE_LOCATION = readEnvironmentVariable('AZURE_LOCATION', '')
+param existingLogAnalyticsWorkspaceId = readEnvironmentVariable('AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID', '')

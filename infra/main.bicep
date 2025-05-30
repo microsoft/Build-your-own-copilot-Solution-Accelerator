@@ -6,6 +6,9 @@ targetScope = 'resourceGroup'
 @description('A unique prefix for all resources in this deployment. This should be 3-20 characters long:')
 param environmentName string
 
+@description('Optional: Existing Log Analytics Workspace Resource ID')
+param existingLogAnalyticsWorkspaceId string = ''
+
 @description('CosmosDB Location')
 param cosmosLocation string
 
@@ -140,6 +143,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     embeddingModel: embeddingModel
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+    existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
   }
   scope: resourceGroup(resourceGroup().name)
 }
