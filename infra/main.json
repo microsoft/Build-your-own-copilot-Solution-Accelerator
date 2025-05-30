@@ -2659,7 +2659,7 @@
             }
           },
           "variables": {
-            "WebAppImageName": "DOCKER|macaetestcr.azurecr.io/cawebapp:testca"
+            "WebAppImageName": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:{0}', parameters('imageTag'))]"
           },
           "resources": [
             {
@@ -2854,10 +2854,6 @@
                     {
                       "name": "SQLDB_USER_MID",
                       "value": "[parameters('userassignedIdentityClientId')]"
-                    },
-                    {
-                      "name": "OPENAI_API_VERSION",
-                      "value": "[parameters('AzureOpenAIApiVersion')]"
                     },
                     {
                       "name": "AZURE_AI_SEARCH_ENDPOINT",
