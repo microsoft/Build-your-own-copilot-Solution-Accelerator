@@ -6,7 +6,7 @@ This solution accelerator is a powerful tool that helps you create your own copi
 
 <div align="center">
   
-[**SOLUTION OVERVIEW**](#solution-overview)  \| [**QUICK DEPLOY**](#quick-deploy)  \| [**BUSINESS USE CASE**](#business-use-case)  \| [**SUPPORTING DOCUMENTATION**](#supporting-documentation)
+[**SOLUTION OVERVIEW**](#solution-overview)  \| [**QUICK DEPLOY**](#quick-deploy)  \| [**BUSINESS SCENARIO**](#business-scenario)  \| [**SUPPORTING DOCUMENTATION**](#supporting-documentation)
 
 </div>
 <br/>
@@ -49,7 +49,7 @@ Leverages Azure OpenAI Service and Azure AI Search, this solution streamlines da
   Azure OpenAI Service helps to summarize the conversations and actions for the next meeting.​
 
   - **Chat with data** <br/>
-  Azure OpenAI Service helpsenable chat with structured and unstructured data using Semantic Kernel autonomous function calling.​
+  Azure OpenAI Service helps enable chat with structured and unstructured data using Semantic Kernel autonomous function calling.​
      
 </details>
 
@@ -117,7 +117,7 @@ either by deleting the resource group in the Portal or running `azd down`.
 
 <br /><br />
 <h2><img src="./docs/images/readme/business-scenario.png" width="48" />
-Business Use Case
+Business Scenario
 </h2>
 
 
