@@ -21,15 +21,6 @@ updates:
     open-pull-requests-limit: 100
 
   - package-ecosystem: "pip"
-    directory: "/src/AzureFunction"
-    schedule:
-      interval: "monthly"
-    commit-message:
-      prefix: "build"
-    target-branch: "dependabotchanges"
-    open-pull-requests-limit: 100
-
-  - package-ecosystem: "pip"
     directory: "/src/infra/scripts/fabric_scripts"
     schedule:
       interval: "monthly"
