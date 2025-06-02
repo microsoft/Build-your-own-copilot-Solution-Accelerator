@@ -37,7 +37,7 @@ def test_parse_multi_columns(input_str, expected):
     assert parse_multi_columns(input_str) == expected
 
 
-@patch("app.requests.get")
+@patch("backend.utils.requests.get")
 def test_fetch_user_groups(mock_get):
     mock_response = MagicMock()
     mock_response.status_code = 200
