@@ -1218,15 +1218,12 @@ async def test_conversation_route(client):
 
     with patch("app.stream_chat_request", new_callable=AsyncMock) as mock_stream:
         mock_stream.return_value = ["chunk1", "chunk2"]
-        with patch(
-            "app.complete_chat_request", new_callable=AsyncMock
-        ) as mock_complete:
-            mock_complete.return_value = {"response": "test response"}
-            response = await client.post(
-                "/conversation", json=request_body, headers=request_headers
-            )
 
-            assert response.status_code == 200
+        response = await client.post(
+            "/conversation", json=request_body, headers=request_headers
+        )
+
+        assert response.status_code == 200
 
 
 @pytest.mark.asyncio
