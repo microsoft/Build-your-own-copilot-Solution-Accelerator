@@ -1,5 +1,5 @@
 ## Fabric Deployment
-## Step 1: Create Fabric workspace
+## Step 1: Create or Use an Existing Microsoft Fabric Workspace
 
 ℹ️ Note: If you already have an existing Microsoft Fabric Workspace, you can **skip this step** and proceed to Step 2. To retrieve an existing Workspace ID, check **Point 5 below**.
 
