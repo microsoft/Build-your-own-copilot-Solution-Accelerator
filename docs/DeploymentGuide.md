@@ -114,6 +114,8 @@ When you start the deployment, most parameters will have **default values**, but
 | **GPT Model Deployment Capacity** | Configure capacity for **GPT models**. | 30k |
 | **Embedding Model** | OpenAI embedding model |  text-embedding-ada-002 |
 | **Embedding Model Capacity** | Set the capacity for **embedding models**. |  80k |
+| **Existing Log analytics workspace** | To reuse the existing Log analytics workspace Id. |  |
+
 
 </details>
 
