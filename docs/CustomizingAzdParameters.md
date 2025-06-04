@@ -5,44 +5,31 @@ By default this template will use the environment name as the prefix to prevent 
 
 > To override any of the parameters, run `azd env set <key> <value>` before running `azd up`. On the first azd command, it will prompt you for the environment name. Be sure to choose 3-20 charaters alphanumeric unique name. 
 
+## Parameters
 
-Change the Secondary Location (example: eastus2, westus2, etc.)
+| Name                          | Type    | Default Value       | Purpose                                                                                              |
+| -----------------------------| ------- | ------------------- | ---------------------------------------------------------------------------------------------------- |
+| `environmentName`            | string  | `azdtemp`           | Used as a prefix for all resource names to ensure uniqueness across environments.                    |
+| `cosmosLocation`             | string  | `Sweden Central`    | Location of the Cosmos DB instance. Choose from allowed values: Sweden Central, Australia East.      |
+| `deploymentType`             | string  | `GlobalStandard`    | Change the Model Deployment Type (allowed values: Standard, GlobalStandard).                         |
+| `gptModelName`               | string  | `gpt-4o`            | Set the GPT model name (allowed values: gpt-4o).                                                      |
+| `azureOpenaiAPIVersion`     | string  | `2024-08-06`        | Set the Azure OpenAI API version (allowed values: 2024-08-06).                                       |
+| `gptDeploymentCapacity`     | integer | `200`               | Set the model capacity for GPT deployment. Choose based on your Azure quota and usage needs.         |
+| `embeddingModel`            | string  | `text-embedding-3`  | Set the model name used for embeddings.                                                              |
+| `embeddingDeploymentCapacity` | integer | `50`              | Set the capacity for embedding model deployment.                                                     |
+| `imageTag`                  | string  | `latest`            | Set the image tag (allowed values: latest, dev, hotfix).                                             |
+| `AzureOpenAILocation`       | string  | `Sweden Central`    | Location of the Azure OpenAI resource. Choose from allowed values: Sweden Central, Australia East.   |
+| `AZURE_LOCATION`            | string  | `japaneast`         | Location of the Azure infrastructure deployment. Controls where core resources will be provisioned.  |
 
-```shell
-azd env set AZURE_ENV_SECONDARY_LOCATION eastus2
+## How to Set a Parameter
+To customize any of the above values, run the following command **before** `azd up`:
+
+```bash
+azd env set <PARAMETER_NAME> <VALUE>
 ```
 
-Change the Model Deployment Type (allowed values: Standard, GlobalStandard)
+**Example:**
 
-```shell
-azd env set AZURE_ENV_MODEL_DEPLOYMENT_TYPE Standard
-```
-
-Set the Model Name (allowed values: gpt-4, gpt-4o)
-
-```shell
-azd env set AZURE_ENV_MODEL_NAME gpt-4o
-```
-
-Change the Model Capacity (choose a number based on available GPT model capacity in your subscription)
-
-```shell
-azd env set AZURE_ENV_MODEL_CAPACITY 30
-```
-
-Change the Embedding Model 
-
-```shell
-azd env set AZURE_ENV_EMBEDDING_MODEL_NAME text-embedding-ada-002
-```
-
-Change the Embedding Deployment Capacity (choose a number based on available embedding model capacity in your subscription)
-
-```shell
-azd env set AZURE_ENV_EMBEDDING_MODEL_CAPACITY 80
-```
-
-Set the Log Analytics Workspace Id if you need to reuse the existing workspace which is already existing
-```shell
-azd env set AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID '<Existing Log Analytics Workspace Id>'
+```bash
+azd env set AZURE_LOCATION westus2
 ```
