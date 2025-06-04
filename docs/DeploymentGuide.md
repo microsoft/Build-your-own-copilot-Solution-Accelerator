@@ -104,17 +104,22 @@ Consider the following settings during your deployment to modify specific settin
 
 When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](CustomizingAzdParameters.md):  
 
-| **Setting** | **Description** |  **Default value** |
-|------------|----------------|  ------------|
-| **Azure OpenAI Location** | The region where OpenAI deploys | eastus2 | 
-| **Environment Name** | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources. |  byocatemplate |
-| **Cosmos Location** | A **less busy** region for **CosmosDB**, useful in case of availability constraints. |  eastus2 |
-| **Deployment Type** | Select from a drop-down list. |  Global Standard |
-| **GPT Model** | OpenAI GPT model  | gpt-4o-mini |  
-| **GPT Model Deployment Capacity** | Configure capacity for **GPT models**. | 30k |
-| **Embedding Model** | OpenAI embedding model |  text-embedding-ada-002 |
-| **Embedding Model Capacity** | Set the capacity for **embedding models**. |  80k |
-| **Existing Log analytics workspace** | To reuse the existing Log analytics workspace Id. |  |
+
+| **Setting**                         | **Description**                                                                 | **Default value**         |
+|------------------------------------|---------------------------------------------------------------------------------|----------------------------|
+| **Azure OpenAI Location**          | The region where Azure OpenAI deploys. Choose from `Sweden Central`, `Australia East`, etc. | `Sweden Central`           |
+| **Environment Name**               | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources. | `azdtemp`                  |
+| **Cosmos Location**                | A **less busy** region for **CosmosDB**, useful in case of availability constraints. | `Sweden Central`           |
+| **Deployment Type**                | Select from a drop-down list (`Standard`, `GlobalStandard`).                      | `GlobalStandard`           |
+| **GPT Model**                      | Azure OpenAI GPT model to deploy.                                               | `gpt-4o`                   |
+| **GPT Model Deployment Capacity**  | Configure capacity for **GPT models**. Choose based on Azure OpenAI quota.      | `200`                      |
+| **Embedding Model**                | OpenAI embedding model used for vector similarity.                              | `text-embedding-3`         |
+| **Embedding Model Capacity**       | Set the capacity for **embedding models**. Choose based on usage and quota.     | `50`                       |
+| **Image Tag**                      | The version of the Docker image to use (e.g., `latest`, `dev`, `hotfix`).       | `latest`                   |
+| **Azure OpenAI API Version**       | Set the API version for OpenAI model deployments.                               | `2024-08-06`               |
+| **AZURE_LOCATION**                 | Location of Azure infrastructure deployment. Defaults to resource group location if not specified. | `japaneast`                |
+| **Existing Log Analytics Workspace** | To reuse an existing Log Analytics Workspace ID instead of creating a new one. | *(empty)*                  |
+
 
 
 </details>
