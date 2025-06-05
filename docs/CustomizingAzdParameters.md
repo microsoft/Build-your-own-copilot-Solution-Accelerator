@@ -9,17 +9,18 @@ By default this template will use the environment name as the prefix to prevent 
 
 | Name                          | Type    | Default Value       | Purpose                                                                                              |
 | -----------------------------| ------- | ------------------- | ---------------------------------------------------------------------------------------------------- |
-| `environmentName`            | string  | `azdtemp`           | Used as a prefix for all resource names to ensure uniqueness across environments.                    |
-| `cosmosLocation`             | string  | `Sweden Central`    | Location of the Cosmos DB instance. Choose from allowed values: Sweden Central, Australia East.      |
-| `deploymentType`             | string  | `GlobalStandard`    | Change the Model Deployment Type (allowed values: Standard, GlobalStandard).                         |
-| `gptModelName`               | string  | `gpt-4o`            | Set the GPT model name (allowed values: gpt-4o).                                                      |
-| `azureOpenaiAPIVersion`     | string  | `2024-08-06`        | Set the Azure OpenAI API version (allowed values: 2024-08-06).                                       |
-| `gptDeploymentCapacity`     | integer | `200`               | Set the model capacity for GPT deployment. Choose based on your Azure quota and usage needs.         |
-| `embeddingModel`            | string  | `text-embedding-3`  | Set the model name used for embeddings.                                                              |
-| `embeddingDeploymentCapacity` | integer | `50`              | Set the capacity for embedding model deployment.                                                     |
-| `imageTag`                  | string  | `latest`            | Set the image tag (allowed values: latest, dev, hotfix).                                             |
-| `AzureOpenAILocation`       | string  | `Sweden Central`    | Location of the Azure OpenAI resource. Choose from allowed values: Sweden Central, Australia East.   |
+| `AZURE_ENV_NAME`            | string  | `azdtemp`           | Used as a prefix for all resource names to ensure uniqueness across environments.                    |
+| `AZURE_ENV_COSMOS_LOCATION`             | string  | `Sweden Central`    | Location of the Cosmos DB instance. Choose from allowed values: Sweden Central, Australia East.      |
+| `AZURE_ENV_MODEL_DEPLOYMENT_TYPE`             | string  | `GlobalStandard`    | Change the Model Deployment Type (allowed values: Standard, GlobalStandard).                         |
+| `AZURE_ENV_MODEL_NAME`               | string  | `gpt-4o`            | Set the GPT model name (allowed values: gpt-4o).                                                      |
+| `AZURE_ENV_MODEL_VERSION`     | string  | `2024-08-06`        | Set the Azure OpenAI API version (allowed values: 2024-08-06).                                       |
+| `ZURE_ENV_MODEL_CAPACITY`     | integer | `200`               | Set the model capacity for GPT deployment. Choose based on your Azure quota and usage needs.         |
+| `AZURE_ENV_EMBEDDING_MODEL_NAM`            | string  | `text-embedding-3`  | Set the model name used for embeddings.                                                              |
+| `AZURE_ENV_EMBEDDING_MODEL_CAPACITY` | integer | `50`              | Set the capacity for embedding model deployment.                                                     |
+| `AZURE_ENV_IMAGETAG`                  | string  | `latest`            | Set the image tag (allowed values: latest, dev, hotfix).                                             |
+| `AZURE_ENV_OPENAI_LOCATION`       | string  | `Sweden Central`    | Location of the Azure OpenAI resource. Choose from allowed values: Sweden Central, Australia East.   |
 | `AZURE_LOCATION`            | string  | `japaneast`         | Location of the Azure infrastructure deployment. Controls where core resources will be provisioned.  |
+| `AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID`            | string  | `japaneast`         | Location of the Azure infrastructure deployment. Controls where core resources will be provisioned.  |
 
 ## How to Set a Parameter
 To customize any of the above values, run the following command **before** `azd up`:
