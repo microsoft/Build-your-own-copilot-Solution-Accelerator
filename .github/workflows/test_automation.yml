@@ -5,9 +5,9 @@ on:
     branches:
       - main
       - dev
-      - VE-Automate
-    # paths:
-    #   - 'byoc-client-advisor/**'
+      # - VE-Automate
+    paths:
+      - 'byoc-client-advisor/**'
   schedule:
       - cron: '0 13 * * *'  # Runs at 1 PM UTC 
   workflow_dispatch:
