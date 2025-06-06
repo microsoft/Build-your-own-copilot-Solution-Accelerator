@@ -32,9 +32,6 @@ param AzureSearchUseSemanticSearch string = 'False'
 @description('Semantic search config')
 param AzureSearchSemanticSearchConfig string = 'default'
 
-@description('Is the index prechunked')
-param AzureSearchIndexIsPrechunked string = 'False'
-
 @description('Top K results')
 param AzureSearchTopK string = '5'
 
@@ -58,9 +55,6 @@ param AzureOpenAIResource string
 
 @description('Azure OpenAI Model Deployment Name')
 param AzureOpenAIModel string
-
-@description('Azure OpenAI Model Name')
-param AzureOpenAIModelName string = 'gpt-4o-mini'
 
 @description('Azure Open AI Endpoint')
 param AzureOpenAIEndpoint string = ''
@@ -116,14 +110,8 @@ param AzureOpenAIEmbeddingkey string = ''
 @description('Azure Open AI Embedding Endpoint')
 param AzureOpenAIEmbeddingEndpoint string = ''
 
-@description('Enable chat history by deploying a Cosmos DB instance')
-param WebAppEnableChatHistory string = 'False'
-
 @description('Use Azure Function')
 param USE_INTERNAL_STREAM string = 'True'
-
-@description('Azure Function Endpoint')
-param STREAMING_AZUREFUNCTION_ENDPOINT string = ''
 
 @description('SQL Database Server Name')
 param SQLDB_SERVER string = ''
@@ -163,8 +151,6 @@ param userassignedIdentityId string
 param userassignedIdentityClientId string
 param applicationInsightsId string
 
-@secure()
-param azureSearchAdminKey string
 param azureSearchServiceEndpoint string
 
 @description('Azure Function App SQL System Prompt')
@@ -178,6 +164,7 @@ param streamTextSystemPrompt string
 param aiProjectConnectionString string
 param useAIProjectClientFlag string = 'false'
 param aiProjectName string
+param applicationInsightsConnectionString string
 
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
@@ -216,6 +203,10 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           value: reference(applicationInsightsId, '2015-05-01').InstrumentationKey
         }
         {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: applicationInsightsConnectionString
+        }
+        {
           name: 'AZURE_SEARCH_SERVICE'
           value: AzureSearchService
         }
@@ -234,10 +225,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG'
           value: AzureSearchSemanticSearchConfig
-        }
-        {
-          name: 'AZURE_SEARCH_INDEX_IS_PRECHUNKED'
-          value: AzureSearchIndexIsPrechunked
         }
         {
           name: 'AZURE_SEARCH_TOP_K'
@@ -278,10 +265,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'AZURE_OPENAI_KEY'
           value: AzureOpenAIKey
-        }
-        {
-          name: 'AZURE_OPENAI_MODEL_NAME'
-          value: AzureOpenAIModelName
         }
         {
           name: 'AZURE_OPENAI_TEMPERATURE'
@@ -341,11 +324,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           name: 'AZURE_OPENAI_EMBEDDING_ENDPOINT'
           value: AzureOpenAIEmbeddingEndpoint
         }
-          
-        {
-          name: 'WEB_APP_ENABLE_CHAT_HISTORY'
-          value: WebAppEnableChatHistory
-        }
 
         {name: 'SQLDB_SERVER'
           value: SQLDB_SERVER
@@ -367,10 +345,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           value: USE_INTERNAL_STREAM
         }
 
-        {name: 'STREAMING_AZUREFUNCTION_ENDPOINT'
-          value: STREAMING_AZUREFUNCTION_ENDPOINT
-        }
-
         {name: 'AZURE_COSMOSDB_ACCOUNT'
           value: AZURE_COSMOSDB_ACCOUNT
         }
@@ -387,28 +361,8 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         //  value: VITE_POWERBI_EMBED_URL
         //}
         {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'true'
-        }
-        {
-          name: 'UWSGI_PROCESSES'
-          value: '2'
-        }
-        {
-          name: 'UWSGI_THREADS'
-          value: '2'
-        }
-        {
           name: 'SQLDB_USER_MID'
           value: userassignedIdentityClientId
-        }
-        {
-          name: 'OPENAI_API_VERSION'
-          value: AzureOpenAIApiVersion
-        }
-        {
-          name: 'AZURE_AI_SEARCH_API_KEY'
-          value: azureSearchAdminKey
         }
         {
           name: 'AZURE_AI_SEARCH_ENDPOINT'

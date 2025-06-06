@@ -9,6 +9,7 @@ param gptDeploymentCapacity int
 param embeddingModel string
 param embeddingDeploymentCapacity int
 param managedIdentityObjectId string
+param existingLogAnalyticsWorkspaceId string = ''
 
 // Load the abbrevations file required to name the azure resources.
 var abbrs = loadJsonContent('./abbreviations.json')
@@ -54,7 +55,17 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+var useExisting = !empty(existingLogAnalyticsWorkspaceId)
+var existingLawSubscription = useExisting ? split(existingLogAnalyticsWorkspaceId, '/')[2] : ''
+var existingLawResourceGroup = useExisting ? split(existingLogAnalyticsWorkspaceId, '/')[4] : ''
+var existingLawName = useExisting ? split(existingLogAnalyticsWorkspaceId, '/')[8] : ''
+
+resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = if (useExisting) {
+  name: existingLawName
+  scope: resourceGroup(existingLawSubscription, existingLawResourceGroup)
+}
+
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (!useExisting) {
   name: workspaceName
   location: location
   tags: {}
@@ -93,7 +104,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
     Application_Type: 'web'
     publicNetworkAccessForIngestion: 'Enabled'
     publicNetworkAccessForQuery: 'Enabled'
-    WorkspaceResourceId: logAnalytics.id
+    WorkspaceResourceId: useExisting ? existingLogAnalyticsWorkspace.id : logAnalytics.id
   }
 }
 
@@ -490,5 +501,10 @@ output aiSearchService string = aiSearch.name
 output aiProjectName string = aiHubProject.name
 
 output applicationInsightsId string = applicationInsights.id
-output logAnalyticsWorkspaceResourceName string = logAnalytics.name
+output logAnalyticsWorkspaceResourceName string = useExisting ? existingLogAnalyticsWorkspace.name : logAnalytics.name
+output logAnalyticsWorkspaceResourceGroup string = useExisting ? existingLawResourceGroup : resourceGroup().name
+
+
 output storageAccountName string = storageNameCleaned
+output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
+

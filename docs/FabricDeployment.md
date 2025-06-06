@@ -1,5 +1,8 @@
 ## Fabric Deployment
-## Step 1: Create Fabric workspace
+## Step 1: Create or Use an Existing Microsoft Fabric Workspace
+
+ℹ️ Note: If you already have an existing Microsoft Fabric Workspace, you can **skip this step** and proceed to Step 2. To retrieve an existing Workspace ID, check **Point 5 below**.
+
 1.  Navigate to ([Fabric Workspace](https://app.fabric.microsoft.com/))
 2.  Click on Workspaces from left Navigation
 3.  Click on + New Workspace
@@ -19,7 +22,7 @@
       - ```cd ./Build-your-own-copilot-Solution-Accelerator/infra/scripts/fabric_scripts```
       - ```sh ./run_fabric_items_scripts.sh keyvault_param workspaceid_param solutionprefix_param```  
          1. keyvault_param - the name of the keyvault that was created in Step 1
-         2. workspaceid_param - the workspaceid created in Step 2
+         2. workspaceid_param - Existing Workspaceid or workspaceid created in Step 2
          3. solutionprefix_param - prefix used to append to lakehouse upon creation
 4.  Get Fabric Lakehouse connection details:
 5.  Once deployment is complete, navigate to Fabric Workspace

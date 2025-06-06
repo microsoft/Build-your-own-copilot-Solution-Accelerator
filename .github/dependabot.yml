@@ -15,7 +15,7 @@ updates:
         patterns:
           - "*"
 
-  # 2. Python dependencies – App
+  # 2. Python dependencies â€“ App
   - package-ecosystem: "pip"
     directory: "/src/App"
     schedule:
@@ -28,22 +28,8 @@ updates:
       backend-deps:
         patterns:
           - "*"
-
-  # 3. Python dependencies – Azure Function
-  - package-ecosystem: "pip"
-    directory: "/src/AzureFunction"
-    schedule:
-      interval: "monthly"
-    commit-message:
-      prefix: "build"
-    target-branch: "dependabotchanges"
-    open-pull-requests-limit: 10
-    groups:
-      backend-deps:
-        patterns:
-          - "*"
-
-  # 4. Python dependencies – Fabric Scripts
+          
+  # 3. Python dependencies â€“ Fabric Scripts
   - package-ecosystem: "pip"
     directory: "/src/infra/scripts/fabric_scripts"
     schedule:
@@ -57,7 +43,7 @@ updates:
         patterns:
           - "*"
 
-  # 5. Python dependencies – Index Scripts
+  # 4. Python dependencies â€“ Index Scripts
   - package-ecosystem: "pip"
     directory: "/src/infra/scripts/index_scripts"
     schedule:

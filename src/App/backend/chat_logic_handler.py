@@ -17,10 +17,10 @@ from typing import Annotated
 # --------------------------
 endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 api_key = os.environ.get("AZURE_OPENAI_KEY")
-api_version = os.environ.get("OPENAI_API_VERSION")
+api_version = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION")
 deployment = os.environ.get("AZURE_OPENAI_MODEL")
 search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT")
-search_key = os.environ.get("AZURE_AI_SEARCH_API_KEY")
+search_key = os.environ.get("AZURE_SEARCH_KEY")
 project_connection_string = os.environ.get("AZURE_AI_PROJECT_CONN_STRING")
 use_ai_project_client = os.environ.get("USE_AI_PROJECT_CLIENT", "false").lower() == "true"
 

@@ -6,6 +6,9 @@ targetScope = 'resourceGroup'
 @description('A unique prefix for all resources in this deployment. This should be 3-20 characters long:')
 param environmentName string
 
+@description('Optional: Existing Log Analytics Workspace Resource ID')
+param existingLogAnalyticsWorkspaceId string = ''
+
 @description('CosmosDB Location')
 param cosmosLocation string
 
@@ -140,6 +143,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     embeddingModel: embeddingModel
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
     managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+    existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -200,17 +204,15 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchKey:keyVault.getSecret('AZURE-SEARCH-KEY')
     AzureSearchUseSemanticSearch:'True'
     AzureSearchSemanticSearchConfig:'my-semantic-config'
-    AzureSearchIndexIsPrechunked:'False'
     AzureSearchTopK:'5'
     AzureSearchContentColumns:'content'
     AzureSearchFilenameColumn:'chunk_id'
     AzureSearchTitleColumn:'client_id'
     AzureSearchUrlColumn:'sourceurl'
-    AzureOpenAIResource:aifoundry.outputs.aiServicesTarget
+    AzureOpenAIResource:aifoundry.outputs.aiServicesName
     AzureOpenAIEndpoint:aifoundry.outputs.aiServicesTarget
     AzureOpenAIModel:gptModelName
     AzureOpenAIKey:keyVault.getSecret('AZURE-OPENAI-KEY')
-    AzureOpenAIModelName:gptModelName
     AzureOpenAITemperature:'0'
     AzureOpenAITopP:'1'
     AzureOpenAIMaxTokens:'1000'
@@ -239,13 +241,13 @@ module appserviceModule 'deploy_app_service.bicep' = {
     userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
     userassignedIdentityId:managedIdentityModule.outputs.managedIdentityWebAppOutput.id
     applicationInsightsId: aifoundry.outputs.applicationInsightsId
-    azureSearchAdminKey:keyVault.getSecret('AZURE-SEARCH-KEY')
     azureSearchServiceEndpoint:aifoundry.outputs.aiSearchTarget
     sqlSystemPrompt: functionAppSqlPrompt
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
     aiProjectConnectionString:keyVault.getSecret('AZURE-AI-PROJECT-CONN-STRING')
     aiProjectName:aifoundry.outputs.aiProjectName
+    applicationInsightsConnectionString:aifoundry.outputs.applicationInsightsConnectionString
   }
   scope: resourceGroup(resourceGroup().name)
 }

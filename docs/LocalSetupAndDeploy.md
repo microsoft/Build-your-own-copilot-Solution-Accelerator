@@ -40,9 +40,11 @@ Follow these steps to deploy the application to Azure App Service:
 If this is your first time deploying the app, use the `az webapp up` command. Run the following commands from the `App` folder, replacing the placeholders with your desired values:
 
 ```sh
-az webapp up --runtime PYTHON:3.11 --sku B1 --name <new-app-name> --resource-group <resource-group-name> --location <azure-region> --subscription <subscription-name>
+az webapp up --runtime PYTHON:3.11 --sku B1 --name <new-app-name> --resource-group <resource-group-name> --location <azure-region> --subscription <subscription-id>
 
-az webapp config set --startup-file "python3 -m gunicorn app:app" --name <new-app-name>  --resource-group <resource-group-name>
+az webapp config set --startup-file "python3 -m uvicorn app:app --host 0.0.0.0 --port 8000" --name <new-app-name>  --resource-group <resource-group-name>
+
+az webapp config appsettings set --resource-group <resource-group-name> --name <new-app-name> --settings WEBSITES_PORT=8000
 ```
 
 Next, configure the required environment variables in the deployed app to ensure it functions correctly.
@@ -83,7 +85,7 @@ az webapp up \
   --resource-group <resource-group-name>
 
 az webapp config set \
-  --startup-file "python3 -m gunicorn app:app" \
+  --startup-file "python3 -m uvicorn app:app --host 0.0.0.0 --port 8000" \
   --name <existing-app-name> --resource-group <resource-group-name>
 ```
 
