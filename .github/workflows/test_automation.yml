@@ -40,7 +40,7 @@ jobs:
         id: test1
         run: |
           xvfb-run pytest --headed --html=report/report.html --self-contained-html
-        working-directory: byoc-client-advisor
+        working-directory: tests/e2e-test
         continue-on-error: true
 
       - name: Sleep for 30 seconds
@@ -53,7 +53,7 @@ jobs:
         id: test2
         run: |
           xvfb-run pytest --headed --html=report/report.html --self-contained-html
-        working-directory: byoc-client-advisor
+        working-directory: tests/e2e-test
         continue-on-error: true
 
       - name: Sleep for 60 seconds
@@ -66,7 +66,7 @@ jobs:
         id: test3
         run: |
           xvfb-run pytest --headed --html=report/report.html --self-contained-html
-        working-directory: byoc-client-advisor
+        working-directory: tests/e2e-test
 
       - name: Upload test report
         id: upload_report
