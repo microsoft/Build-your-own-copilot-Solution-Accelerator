@@ -107,7 +107,7 @@ When you start the deployment, most parameters will have **default values**, but
 
 | **Setting**                          | **Description**                                                                                    | **Default value**        |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------ |
-| **Azure OpenAI Location**            | The region where Azure OpenAI deploys. Choose from `Sweden Central`, `Australia East`, etc.        | `eastus2`                |
+| **Azure OpenAI Location**            | The region where Azure OpenAI deploys. Choose from `swedencentral`, `australiaeast`, etc.        | `eastus2`                |
 | **Environment Name**                 | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources.      | `azdtemp`                |
 | **Cosmos Location**                  | A **less busy** region for **CosmosDB**, useful in case of availability constraints.               | `eastus2`                |
 | **Deployment Type**                  | Select from a drop-down list (`Standard`, `GlobalStandard`).                                       | `GlobalStandard`         |
