@@ -215,7 +215,7 @@ This will rebuild the source code, package it into a container, and push it to t
     ```
 
 2. **Add Authentication Provider**  
-    - Follow steps in [App Authentication](./AppAuthentication.md) to configure authenitcation in app service. Note that Authentication changes can take up to 10 minutes. 
+    - Follow steps in [App Authentication](./AppAuthentication.md) to configure authentication in app service. Note that Authentication changes can take up to 10 minutes. 
 
 3. **Deleting Resources After a Failed Deployment**  
 

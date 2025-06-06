@@ -27,6 +27,7 @@ To customize any of the above values, run the following command **before** `azd 
 
 ```bash
 azd env set <PARAMETER_NAME> <VALUE>
+
 ```
 
 **Example:**
