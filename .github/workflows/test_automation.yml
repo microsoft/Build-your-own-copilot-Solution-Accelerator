@@ -5,9 +5,9 @@ on:
     branches:
       - main
       - dev
-      # - VE-Automate
+      
     paths:
-      - 'byoc-client-advisor/**'
+      - 'tests/e2e-test/**'
   schedule:
       - cron: '0 13 * * *'  # Runs at 1 PM UTC 
   workflow_dispatch:
@@ -74,7 +74,7 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: test-report
-          path: byoc-client-advisor/report/*
+          path: tests/e2e-test/report/*
 
       - name: Send Notification
         if: always()
