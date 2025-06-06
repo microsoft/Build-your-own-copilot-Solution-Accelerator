@@ -3,7 +3,7 @@
 By default this template will use the environment name as the prefix to prevent naming collisions within Azure. The parameters below show the default values. You only need to run the statements below if you need to change the values. 
 
 
-> To override any of the parameters, run `azd env set <key> <value>` before running `azd up`. On the first azd command, it will prompt you for the environment name. Be sure to choose 3-20 charaters alphanumeric unique name. 
+> To override any of the parameters, run `azd env set <key> <value>` before running `azd up`. On the first azd command, it will prompt you for the environment name. Be sure to choose 3-20 characters alphanumeric unique name. 
 
 
 Change the Secondary Location (example: eastus2, westus2, etc.)
@@ -43,6 +43,7 @@ azd env set AZURE_ENV_EMBEDDING_MODEL_CAPACITY 80
 ```
 
 Set the Log Analytics Workspace Id if you need to reuse the existing workspace which is already existing
+
 ```shell
 azd env set AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.OperationalInsights/workspaces/<workspace-name>'
 ```

@@ -23,7 +23,7 @@ This guide provides detailed steps to manually register both front-end and backe
   - Copy the Default domain url from the Overview .
 
 - Click **Register**  
-  ![ManualRegisterAppWeb1](./Images/ManualRegisterAppWeb1.png)
+  ![ManualRegisterAppWeb1](./images/ManualRegisterAppWeb1.png)
 
 
 
@@ -36,13 +36,13 @@ This guide provides detailed steps to manually register both front-end and backe
 - Start (Optional for custom range): Set the starting date of the secret's validity
 - End (Optional for custom range): Set the ending date of the secret's validity
 - Click **Add** and remember to copy and store the secret value securely as it will not be shown again
-![ManualRegisterAppWeb3](./Images/ManualRegisterAppWeb3.png)
+![ManualRegisterAppWeb3](./images/ManualRegisterAppWeb3.png)
 
 ### 3. Get Tenant ID
 - Go to **Tenant Properties** in [Azure Portal](https://portal.azure.com)
 - Copy the Tenant ID (will be used in next step)
 
-![ManualRegisterAppWeb6](./Images/ManualRegisterAppWeb6.png)
+![ManualRegisterAppWeb6](./images/ManualRegisterAppWeb6.png)
 
 ### 4. Set Up Authentication in Web Container App
 
@@ -57,7 +57,7 @@ This guide provides detailed steps to manually register both front-end and backe
   - **Allowed Token Audiences**: Usually the Application ID URI or Client ID
 - Click **Add**  
   
-![ManualRegisterAppWeb4](./Images/ManualRegisterAppWeb4.png)
+![ManualRegisterAppWeb4](./images/ManualRegisterAppWeb4.png)
 
 ---
 
