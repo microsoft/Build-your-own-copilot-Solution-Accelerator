@@ -1,0 +1,6 @@
+user_name = 'Your login username'
+pass_word = 'Your login password'
+client_id = 'client id'
+client_secret = 'client secret'
+tenant_id = 'tenant id'
+url = 'web app url'
