@@ -19,7 +19,7 @@ By default this template will use the environment name as the prefix to prevent 
 | `AZURE_ENV_EMBEDDING_MODEL_CAPACITY` | integer | `80`              | Set the capacity for embedding model deployment.                                                     |
 | `AZURE_ENV_IMAGETAG`                  | string  | `latest`            | Set the image tag (allowed values: `latest`, `dev`, `hotfix`).                                             |
 | `AZURE_ENV_OPENAI_LOCATION`       | string  | `eastus2`    | Location of the Azure OpenAI resource. Choose from (allowed values: `swedencentral`, `australiaeast`).   |
-| `AZURE_LOCATION`            | string  | `japaneast`         | Location of the Azure infrastructure deployment. Controls where core resources will be provisioned.  |
+| `AZURE_LOCATION`            | string  | `japaneast`         | Sets the Azure region for resource deployment.  |
 | `AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID`            | string  | `<Existing Workspace Id>`         | Reuses an existing Log Analytics Workspace instead of provisioning a new one.   |
 
 ## How to Set a Parameter
