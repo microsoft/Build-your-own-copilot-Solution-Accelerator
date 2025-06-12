@@ -16,7 +16,7 @@ var abbrs = loadJsonContent('./abbreviations.json')
 
 var storageName = '${abbrs.storage.storageAccount}${solutionName}hub'
 var storageSkuName = 'Standard_LRS'
-var aiServicesName = '${abbrs.ai.aiServices}${solutionName}'
+var aiFoundryName = '${abbrs.ai.aiFoundry}${solutionName}'
 var applicationInsightsName = '${abbrs.managementGovernance.applicationInsights}${solutionName}'
 var containerRegistryName = '${abbrs.containers.containerRegistry}${solutionName}'
 var keyvaultName = keyVaultName
@@ -24,8 +24,9 @@ var location = solutionLocation //'eastus2'
 var aiHubName = '${abbrs.ai.aiHub}${solutionName}-hub'
 var aiHubFriendlyName = aiHubName
 var aiHubDescription = 'AI Hub'
-var aiProjectName = '${abbrs.ai.aiHubProject}${solutionName}'
+var aiProjectName = '${abbrs.ai.aiFoundryProject}${solutionName}'
 var aiProjectFriendlyName = aiProjectName
+var aiProjectDescription = 'AI Foundry Project'
 var aiSearchName = '${abbrs.ai.aiSearch}${solutionName}'
 var workspaceName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${solutionName}'
 var aiModelDeployments = [
@@ -108,75 +109,79 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
-  name: containerRegistryNameCleaned
-  location: location
-  sku: {
-    name: 'Premium'
-  }
-  properties: {
-    adminUserEnabled: true
-    dataEndpointEnabled: false
-    networkRuleBypassOptions: 'AzureServices'
-    networkRuleSet: {
-      defaultAction: 'Deny'
-    }
-    policies: {
-      quarantinePolicy: {
-        status: 'enabled'
-      }
-      retentionPolicy: {
-        status: 'enabled'
-        days: 7
-      }
-      trustPolicy: {
-        status: 'disabled'
-        type: 'Notary'
-      }
-    }
-    publicNetworkAccess: 'Disabled'
-    zoneRedundancy: 'Disabled'
-  }
-}
+// resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
+//   name: containerRegistryNameCleaned
+//   location: location
+//   sku: {
+//     name: 'Premium'
+//   }
+//   properties: {
+//     adminUserEnabled: true
+//     dataEndpointEnabled: false
+//     networkRuleBypassOptions: 'AzureServices'
+//     networkRuleSet: {
+//       defaultAction: 'Deny'
+//     }
+//     policies: {
+//       quarantinePolicy: {
+//         status: 'enabled'
+//       }
+//       retentionPolicy: {
+//         status: 'enabled'
+//         days: 7
+//       }
+//       trustPolicy: {
+//         status: 'disabled'
+//         type: 'Notary'
+//       }
+//     }
+//     publicNetworkAccess: 'Disabled'
+//     zoneRedundancy: 'Disabled'
+//   }
+// }
 
 var storageNameCleaned = replace(storageName, '-', '')
 
-resource aiServices 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' = {
-  name: aiServicesName
+resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
+  name: aiFoundryName
   location: location
   sku: {
     name: 'S0'
   }
   kind: 'AIServices'
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
-    customSubDomainName: aiServicesName
-    // apiProperties: {
-    //   statisticsEnabled: false
-    // }
+    allowProjectManagement: true
+    customSubDomainName: aiFoundryName
+    networkAcls: {
+      defaultAction: 'Allow'
+      virtualNetworkRules: []
+      ipRules: []
+    }
     publicNetworkAccess: 'Enabled'
+    disableLocalAuth: false
   }
 }
 
-// resource aiServices 'Microsoft.CognitiveServices/accounts@2021-10-01' = {
-//   name: aiServicesName
-//   location: location
-//   sku: {
-//     name: 'S0'
-//   }
-//   kind: 'AIServices'
-//   properties: {
-//     customSubDomainName: aiServicesName
-//     // apiProperties: {
-//     //   statisticsEnabled: false
-//     // }
-//     publicNetworkAccess: 'Enabled'
-//   }
-// }
+resource aiFoundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' = {
+  parent: aiFoundry
+  name: aiProjectName
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    description: aiProjectDescription
+    displayName: aiProjectFriendlyName
+  }
+}
 
 @batchSize(1)
-resource aiServicesDeployments 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [
+resource aiFModelDeployments 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [
   for aiModeldeployment in aiModelDeployments: {
-    parent: aiServices //aiServices_m
+    parent: aiFoundry
     name: aiModeldeployment.name
     properties: {
       model: {
@@ -192,11 +197,14 @@ resource aiServicesDeployments 'Microsoft.CognitiveServices/accounts/deployments
   }
 ]
 
-resource aiSearch 'Microsoft.Search/searchServices@2023-11-01' = {
+resource aiSearch 'Microsoft.Search/searchServices@2025-02-01-preview' = {
   name: aiSearchName
   location: solutionLocation
   sku: {
     name: 'basic'
+  }
+  identity: {
+    type: 'SystemAssigned'
   }
   properties: {
     replicaCount: 1
@@ -211,60 +219,126 @@ resource aiSearch 'Microsoft.Search/searchServices@2023-11-01' = {
     }
     disableLocalAuth: false
     authOptions: {
-      apiKeyOnly: {}
+      aadOrApiKey: {
+        aadAuthFailureMode: 'http403'
+      }
     }
     semanticSearch: 'free'
   }
 }
 
-resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: storageNameCleaned
-  location: location
-  sku: {
-    name: storageSkuName
-  }
-  kind: 'StorageV2'
+resource aiSearchFoundryConnection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' ={
+  name: 'foundry-search-connection'
+  parent: aiFoundry
   properties: {
-    accessTier: 'Hot'
-    allowBlobPublicAccess: false
-    allowCrossTenantReplication: false
-    allowSharedKeyAccess: false
-    encryption: {
-      keySource: 'Microsoft.Storage'
-      requireInfrastructureEncryption: false
-      services: {
-        blob: {
-          enabled: true
-          keyType: 'Account'
-        }
-        file: {
-          enabled: true
-          keyType: 'Account'
-        }
-        queue: {
-          enabled: true
-          keyType: 'Service'
-        }
-        table: {
-          enabled: true
-          keyType: 'Service'
-        }
-      }
+    category: 'CognitiveSearch'
+    target: aiSearch.properties.endpoint
+    authType: 'AAD'
+    isSharedToAll: true
+    metadata: {
+      ApiType: 'Azure'
+      ResourceId: aiSearch.id
+      location: aiSearch.location
     }
-    isHnsEnabled: false
-    isNfsV3Enabled: false
-    keyPolicy: {
-      keyExpirationPeriodInDays: 7
-    }
-    largeFileSharesState: 'Disabled'
-    minimumTlsVersion: 'TLS1_2'
-    networkAcls: {
-      bypass: 'AzureServices'
-      defaultAction: 'Allow'
-    }
-    supportsHttpsTrafficOnly: true
   }
 }
+
+@description('This is the built-in Search Index Data Reader role.')
+resource searchIndexDataReaderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: aiFoundry
+  name: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
+}
+
+resource searchIndexDataReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiFoundry.id, searchIndexDataReaderRoleDefinition.id)
+  properties: {
+    roleDefinitionId: searchIndexDataReaderRoleDefinition.id
+    principalId: aiFoundry.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+@description('This is the built-in Search Service Contributor role.')
+resource searchServiceContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: aiFoundry
+  name: '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
+}
+
+resource searchServiceContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiFoundry.id, searchServiceContributorRoleDefinition.id)
+  properties: {
+    roleDefinitionId: searchServiceContributorRoleDefinition.id
+    principalId: aiFoundry.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource appInsightsFoundryConnection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' = {
+  name: 'foundry-app-insights-connection'
+  parent: aiFoundry
+  properties: {
+    category: 'AppInsights'
+    target: applicationInsights.id
+    authType: 'ApiKey'
+    isSharedToAll: true
+    credentials: {
+      key: applicationInsights.properties.ConnectionString
+    }
+    metadata: {
+      ApiType: 'Azure'
+      ResourceId: applicationInsights.id
+    }
+  }
+}
+
+// resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+//   name: storageNameCleaned
+//   location: location
+//   sku: {
+//     name: storageSkuName
+//   }
+//   kind: 'StorageV2'
+//   properties: {
+//     accessTier: 'Hot'
+//     allowBlobPublicAccess: false
+//     allowCrossTenantReplication: false
+//     allowSharedKeyAccess: false
+//     encryption: {
+//       keySource: 'Microsoft.Storage'
+//       requireInfrastructureEncryption: false
+//       services: {
+//         blob: {
+//           enabled: true
+//           keyType: 'Account'
+//         }
+//         file: {
+//           enabled: true
+//           keyType: 'Account'
+//         }
+//         queue: {
+//           enabled: true
+//           keyType: 'Service'
+//         }
+//         table: {
+//           enabled: true
+//           keyType: 'Service'
+//         }
+//       }
+//     }
+//     isHnsEnabled: false
+//     isNfsV3Enabled: false
+//     keyPolicy: {
+//       keyExpirationPeriodInDays: 7
+//     }
+//     largeFileSharesState: 'Disabled'
+//     minimumTlsVersion: 'TLS1_2'
+//     networkAcls: {
+//       bypass: 'AzureServices'
+//       defaultAction: 'Allow'
+//     }
+//     supportsHttpsTrafficOnly: true
+//   }
+// }
 
 @description('This is the built-in Storage Blob Data Contributor.')
 resource blobDataContributor 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
@@ -281,84 +355,6 @@ resource storageroleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
   }
 }
 
-resource aiHub 'Microsoft.MachineLearningServices/workspaces@2023-08-01-preview' = {
-  name: aiHubName
-  location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    // organization
-    friendlyName: aiHubFriendlyName
-    description: aiHubDescription
-
-    // dependent resources
-    keyVault: keyVault.id
-    storageAccount: storage.id
-    applicationInsights: applicationInsights.id
-    containerRegistry: containerRegistry.id
-  }
-  kind: 'hub'
-
-  resource aiServicesConnection 'connections@2024-07-01-preview' = {
-    name: '${aiHubName}-connection-AzureOpenAI'
-    properties: {
-      category: 'AIServices'
-      target: aiServices.properties.endpoint
-      authType: 'ApiKey'
-      isSharedToAll: true
-      credentials: {
-        key: aiServices.listKeys().key1
-      }
-      metadata: {
-        ApiType: 'Azure'
-        ResourceId: aiServices.id
-      }
-    }
-    dependsOn: [
-      aiServicesDeployments
-      aiSearch
-    ]
-  }
-
-  resource aiSearchConnection 'connections@2024-07-01-preview' = {
-    name: '${aiHubName}-connection-AzureAISearch'
-    properties: {
-      category: 'CognitiveSearch'
-      target: 'https://${aiSearch.name}.search.windows.net'
-      authType: 'ApiKey'
-      isSharedToAll: true
-      credentials: {
-        key: aiSearch.listAdminKeys().primaryKey
-      }
-      metadata: {
-        type: 'azure_ai_search'
-        ApiType: 'Azure'
-        ResourceId: aiSearch.id
-        ApiVersion: '2024-05-01-preview'
-        DeploymentApiVersion: '2023-11-01'
-      }
-    }
-  }
-  dependsOn: [
-    aiServicesDeployments
-    aiSearch
-  ]
-}
-
-resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-preview' = {
-  name: aiProjectName
-  location: location
-  kind: 'Project'
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    friendlyName: aiProjectFriendlyName
-    hubResourceId: aiHub.id
-  }
-}
-
 resource tenantIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
   name: 'TENANT-ID'
@@ -371,7 +367,7 @@ resource azureOpenAIApiKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-pr
   parent: keyVault
   name: 'AZURE-OPENAI-KEY'
   properties: {
-    value: aiServices.listKeys().key1 //aiServices_m.listKeys().key1
+    value: aiFoundry.listKeys().key1 //aiServices_m.listKeys().key1
   }
 }
 
@@ -395,17 +391,17 @@ resource azureOpenAIEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-
   parent: keyVault
   name: 'AZURE-OPENAI-ENDPOINT'
   properties: {
-    value: aiServices.properties.endpoint //aiServices_m.properties.endpoint
+    value: aiFoundry.properties.endpoint //aiServices_m.properties.endpoint
   }
 }
 
-resource azureAIProjectConnectionStringEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-AI-PROJECT-CONN-STRING'
-  properties: {
-    value: '${split(aiHubProject.properties.discoveryUrl, '/')[2]};${subscription().subscriptionId};${resourceGroup().name};${aiHubProject.name}'
-  }
-}
+// resource azureAIProjectConnectionStringEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+//   parent: keyVault
+//   name: 'AZURE-AI-PROJECT-CONN-STRING'
+//   properties: {
+//     value: '${split(aiFProject.properties., '/')[2]};${subscription().subscriptionId};${resourceGroup().name};${aiFoundryProject.name}'
+//   }
+// }
 
 resource azureSearchAdminKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
@@ -443,7 +439,7 @@ resource cogServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-p
   parent: keyVault
   name: 'COG-SERVICES-ENDPOINT'
   properties: {
-    value: aiServices.properties.endpoint
+    value: aiFoundry.properties.endpoint
   }
 }
 
@@ -451,7 +447,7 @@ resource cogServiceKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-previe
   parent: keyVault
   name: 'COG-SERVICES-KEY'
   properties: {
-    value: aiServices.listKeys().key1
+    value: aiFoundry.listKeys().key1
   }
 }
 
@@ -459,7 +455,7 @@ resource cogServiceNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-previ
   parent: keyVault
   name: 'COG-SERVICES-NAME'
   properties: {
-    value: aiServicesName
+    value: aiFoundryName
   }
 }
 
@@ -490,15 +486,15 @@ resource azureLocatioEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview
 output keyvaultName string = keyvaultName
 output keyvaultId string = keyVault.id
 
-output aiServicesTarget string = aiServices.properties.endpoint //aiServices_m.properties.endpoint
-output aiServicesName string = aiServicesName //aiServicesName_m
-output aiServicesId string = aiServices.id //aiServices_m.id
+output aiServicesTarget string = aiFoundry.properties.endpoint //aiServices_m.properties.endpoint
+output aiServicesName string = aiFoundryName //aiServicesName_m
+output aiServicesId string = aiFoundry.id //aiServices_m.id
 
 output aiSearchName string = aiSearchName
 output aiSearchId string = aiSearch.id
 output aiSearchTarget string = 'https://${aiSearch.name}.search.windows.net'
 output aiSearchService string = aiSearch.name
-output aiProjectName string = aiHubProject.name
+output aiProjectName string = aiFoundryProject.name
 
 output applicationInsightsId string = applicationInsights.id
 output logAnalyticsWorkspaceResourceName string = useExisting ? existingLogAnalyticsWorkspace.name : logAnalytics.name

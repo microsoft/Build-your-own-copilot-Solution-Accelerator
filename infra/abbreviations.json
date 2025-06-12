@@ -1,6 +1,8 @@
 {
   "ai": {
     "aiSearch": "srch-",
+    "aiFoundry": "aif-",
+    "aiFoundryProject": "aifp-",
     "aiServices": "aisa-",
     "aiVideoIndexer": "avi-",
     "machineLearningWorkspace": "mlw-",

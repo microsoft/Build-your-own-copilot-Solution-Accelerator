@@ -160,8 +160,8 @@ param callTranscriptSystemPrompt string
 @description('Azure Function App Stream Text System Prompt')
 param streamTextSystemPrompt string
 
-@secure()
-param aiProjectConnectionString string
+// @secure()
+// param aiProjectConnectionString string
 param useAIProjectClientFlag string = 'false'
 param aiProjectName string
 param applicationInsightsConnectionString string
@@ -384,10 +384,10 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           name: 'AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT'
           value: streamTextSystemPrompt
         }
-        {
-          name: 'AZURE_AI_PROJECT_CONN_STRING'
-          value: aiProjectConnectionString
-        }
+        // {
+        //   name: 'AZURE_AI_PROJECT_CONN_STRING'
+        //   value: aiProjectConnectionString
+        // }
         {
           name: 'USE_AI_PROJECT_CLIENT'
           value: useAIProjectClientFlag
@@ -428,21 +428,21 @@ module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
   ]
 }
 
-resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-preview' existing = {
-  name: aiProjectName
-}
+// resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-preview' existing = {
+//   name: aiProjectName
+// }
 
-resource aiDeveloper 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: '64702f94-c441-49e6-a78b-ef80e0188fee'
-}
+// resource aiDeveloper 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+//   name: '64702f94-c441-49e6-a78b-ef80e0188fee'
+// }
 
-resource aiDeveloperAccessProj 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(Website.name, aiHubProject.id, aiDeveloper.id)
-  scope: aiHubProject
-  properties: {
-    roleDefinitionId: aiDeveloper.id
-    principalId: Website.identity.principalId
-  }
-}
+// resource aiDeveloperAccessProj 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   name: guid(Website.name, aiHubProject.id, aiDeveloper.id)
+//   scope: aiHubProject
+//   properties: {
+//     roleDefinitionId: aiDeveloper.id
+//     principalId: Website.identity.principalId
+//   }
+// }
 
 output webAppUrl string = 'https://${WebsiteName}.azurewebsites.net'
