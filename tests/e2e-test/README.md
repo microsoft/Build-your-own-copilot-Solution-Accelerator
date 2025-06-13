@@ -23,7 +23,7 @@ Installing Playwright Pytest from Virtual Environment
 - Install the required browsers "playwright install"
 
 Run test cases
-- To run test cases from your 'tests' folder : "pytest --headed --html=report/report.html"
+- To run test cases from your 'tests/e2e-test' folder : "pytest --headed --html=report/report.html"
 
 Steps need to be followed to enable Access Token and Client Credentials 
 - Go to App Service from the resource group and select the Access Tokens check box in 'Manage->Authentication' tab
