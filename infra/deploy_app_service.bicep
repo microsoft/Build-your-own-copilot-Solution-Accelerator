@@ -162,8 +162,11 @@ param streamTextSystemPrompt string
 
 // @secure()
 // param aiProjectConnectionString string
+
+param aiFoundryProjectEndpoint string
 param useAIProjectClientFlag string = 'false'
-param aiProjectName string
+param aiFoundryProjectName string
+param aiFoundryName string
 param applicationInsightsConnectionString string
 
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
@@ -392,6 +395,18 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           name: 'USE_AI_PROJECT_CLIENT'
           value: useAIProjectClientFlag
         }
+        {
+          name: 'AZURE_AI_AGENT_ENDPOINT'
+          value: aiFoundryProjectEndpoint
+        }
+        {
+          name: 'AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME'
+          value: AzureOpenAIModel
+        }
+        {
+          name: 'AZURE_AI_AGENT_API_VERSION'
+          value: AzureOpenAIApiVersion
+        }
       ]
       linuxFxVersion: WebAppImageName
     }
@@ -444,5 +459,46 @@ module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
 //     principalId: Website.identity.principalId
 //   }
 // }
+
+resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
+  name: aiFoundryName
+}
+
+resource aiFoundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' existing = {
+  parent: aiFoundry
+  name: aiFoundryProjectName
+}
+
+@description('This is the built-in Azure AI User role.')
+resource aiUserRoleDefinitionFoundry 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: aiFoundry
+  name: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
+}
+
+resource aiUserRoleAssignmentFoundry 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(Website.id, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
+  scope: aiFoundry
+  properties: {
+    roleDefinitionId: aiUserRoleDefinitionFoundry.id
+    principalId: Website.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+@description('This is the built-in Azure AI User role.')
+resource aiUserRoleDefinitionFoundryProject 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: aiFoundryProject
+  name: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
+}
+
+resource aiUserRoleAssignmentFoundryProject 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(Website.id, aiFoundryProject.id, aiUserRoleDefinitionFoundryProject.id)
+  scope: aiFoundryProject
+  properties: {
+    roleDefinitionId: aiUserRoleDefinitionFoundryProject.id
+    principalId: Website.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
 
 output webAppUrl string = 'https://${WebsiteName}.azurewebsites.net'

@@ -27,7 +27,7 @@ param deploymentType string = 'GlobalStandard'
 ])
 param gptModelName string = 'gpt-4o-mini'
 
-param azureOpenaiAPIVersion string = '2025-01-01-preview'
+param azureOpenaiAPIVersion string = '2025-04-01-preview'
 
 @minValue(10)
 @description('Capacity of the GPT deployment:')
@@ -209,8 +209,8 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchFilenameColumn:'chunk_id'
     AzureSearchTitleColumn:'client_id'
     AzureSearchUrlColumn:'sourceurl'
-    AzureOpenAIResource:aifoundry.outputs.aiServicesName
-    AzureOpenAIEndpoint:aifoundry.outputs.aiServicesTarget
+    AzureOpenAIResource:aifoundry.outputs.aiFoundryName
+    AzureOpenAIEndpoint:aifoundry.outputs.aoaiEndpoint
     AzureOpenAIModel:gptModelName
     AzureOpenAIKey:keyVault.getSecret('AZURE-OPENAI-KEY')
     AzureOpenAITemperature:'0'
@@ -226,7 +226,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchStrictness:'3'
     AzureOpenAIEmbeddingName:embeddingModel
     AzureOpenAIEmbeddingkey:keyVault.getSecret('AZURE-OPENAI-KEY')
-    AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aiServicesTarget
+    AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aoaiEndpoint
     USE_INTERNAL_STREAM:'True'
     SQLDB_SERVER:'${sqlDBModule.outputs.sqlServerName}.database.windows.net'
     SQLDB_DATABASE:sqlDBModule.outputs.sqlDbName
@@ -246,7 +246,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
     // aiProjectConnectionString:keyVault.getSecret('AZURE-AI-PROJECT-CONN-STRING')
-    aiProjectName:aifoundry.outputs.aiProjectName
+    aiFoundryProjectName:aifoundry.outputs.aiFoundryProjectName
+    aiFoundryProjectEndpoint: aifoundry.outputs.aiFoundryProjectEndpoint
+    aiFoundryName: aifoundry.outputs.aiFoundryName
     applicationInsightsConnectionString:aifoundry.outputs.applicationInsightsConnectionString
   }
   scope: resourceGroup(resourceGroup().name)
