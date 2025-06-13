@@ -160,10 +160,13 @@ param callTranscriptSystemPrompt string
 @description('Azure Function App Stream Text System Prompt')
 param streamTextSystemPrompt string
 
-@secure()
-param aiProjectConnectionString string
+// @secure()
+// param aiProjectConnectionString string
+
+param aiFoundryProjectEndpoint string
 param useAIProjectClientFlag string = 'false'
-param aiProjectName string
+param aiFoundryProjectName string
+param aiFoundryName string
 param applicationInsightsConnectionString string
 
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
@@ -384,13 +387,25 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           name: 'AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT'
           value: streamTextSystemPrompt
         }
-        {
-          name: 'AZURE_AI_PROJECT_CONN_STRING'
-          value: aiProjectConnectionString
-        }
+        // {
+        //   name: 'AZURE_AI_PROJECT_CONN_STRING'
+        //   value: aiProjectConnectionString
+        // }
         {
           name: 'USE_AI_PROJECT_CLIENT'
           value: useAIProjectClientFlag
+        }
+        {
+          name: 'AZURE_AI_AGENT_ENDPOINT'
+          value: aiFoundryProjectEndpoint
+        }
+        {
+          name: 'AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME'
+          value: AzureOpenAIModel
+        }
+        {
+          name: 'AZURE_AI_AGENT_API_VERSION'
+          value: AzureOpenAIApiVersion
         }
       ]
       linuxFxVersion: WebAppImageName
@@ -428,20 +443,61 @@ module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
   ]
 }
 
-resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-preview' existing = {
-  name: aiProjectName
+// resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-preview' existing = {
+//   name: aiProjectName
+// }
+
+// resource aiDeveloper 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+//   name: '64702f94-c441-49e6-a78b-ef80e0188fee'
+// }
+
+// resource aiDeveloperAccessProj 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   name: guid(Website.name, aiHubProject.id, aiDeveloper.id)
+//   scope: aiHubProject
+//   properties: {
+//     roleDefinitionId: aiDeveloper.id
+//     principalId: Website.identity.principalId
+//   }
+// }
+
+resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
+  name: aiFoundryName
 }
 
-resource aiDeveloper 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: '64702f94-c441-49e6-a78b-ef80e0188fee'
+resource aiFoundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' existing = {
+  parent: aiFoundry
+  name: aiFoundryProjectName
 }
 
-resource aiDeveloperAccessProj 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(Website.name, aiHubProject.id, aiDeveloper.id)
-  scope: aiHubProject
+@description('This is the built-in Azure AI User role.')
+resource aiUserRoleDefinitionFoundry 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: aiFoundry
+  name: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
+}
+
+resource aiUserRoleAssignmentFoundry 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(Website.id, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
+  scope: aiFoundry
   properties: {
-    roleDefinitionId: aiDeveloper.id
+    roleDefinitionId: aiUserRoleDefinitionFoundry.id
     principalId: Website.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+@description('This is the built-in Azure AI User role.')
+resource aiUserRoleDefinitionFoundryProject 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: aiFoundryProject
+  name: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
+}
+
+resource aiUserRoleAssignmentFoundryProject 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(Website.id, aiFoundryProject.id, aiUserRoleDefinitionFoundryProject.id)
+  scope: aiFoundryProject
+  properties: {
+    roleDefinitionId: aiUserRoleDefinitionFoundryProject.id
+    principalId: Website.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
