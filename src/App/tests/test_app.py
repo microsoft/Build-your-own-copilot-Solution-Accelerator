@@ -3,10 +3,16 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from quart import Response
-from app import (create_app, delete_all_conversations, generate_title,
-                 init_cosmosdb_client, init_openai_client, stream_chat_request)
+
+from app import (
+    create_app,
+    delete_all_conversations,
+    generate_title,
+    init_cosmosdb_client,
+    init_openai_client,
+    stream_chat_request,
+)
 
 # Constants for testing
 INVALID_API_VERSION = "2022-01-01"
@@ -232,9 +238,9 @@ async def test_get_users_success(mock_dict_cursor, mock_get_connection, client):
             {
                 "ClientMeetingDaysDifference": 5,
                 "AssetMonthsDifference": 1,
-                "StatusMonthsDifference": 1
+                "StatusMonthsDifference": 1,
             }
-        ]
+        ],
     ]
 
     # Call the function
@@ -1328,8 +1334,10 @@ async def test_stream_chat_request_with_internal_stream():
     request_headers = {"apim-request-id": "test_id"}
 
     # Patch stream_response_from_wealth_assistant and USE_INTERNAL_STREAM
-    with patch("app.stream_response_from_wealth_assistant", return_value=fake_internal_stream_response), \
-         patch("app.USE_INTERNAL_STREAM", True):
+    with patch(
+        "app.stream_response_from_wealth_assistant",
+        return_value=fake_internal_stream_response,
+    ), patch("app.USE_INTERNAL_STREAM", True):
 
         # Create the Quart app context for the test
         async with create_app().app_context():
@@ -1343,7 +1351,7 @@ async def test_stream_chat_request_with_internal_stream():
 
             # Create an async generator for iterating over the streamed content
             async def async_response_data():
-                for chunk in response_data.split('\n'):
+                for chunk in response_data.split("\n"):
                     if chunk.strip():  # Ignore empty chunks
                         yield chunk
 

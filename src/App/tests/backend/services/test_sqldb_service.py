@@ -1,16 +1,17 @@
 import struct
 from unittest.mock import MagicMock, patch
 
-import db
 import pyodbc
 
+import backend.services.sqldb_service as sql_db
+
 # Mock configuration
-db.server = "mock_server"
-db.username = "mock_user"
-db.password = "mock_password"
-db.database = "mock_database"
-db.driver = "mock_driver"
-db.mid_id = "mock_mid_id"  # Managed identity client ID if needed
+sql_db.server = "mock_server"
+sql_db.username = "mock_user"
+sql_db.password = "mock_password"
+sql_db.database = "mock_database"
+sql_db.driver = "mock_driver"
+sql_db.mid_id = "mock_mid_id"  # Managed identity client ID if needed
 
 
 @patch("db.pyodbc.connect")  # Mock pyodbc.connect
@@ -27,19 +28,27 @@ def test_get_connection(mock_credential_class, mock_connect):
     mock_connect.return_value = mock_conn
 
     # Call the function
-    conn = db.get_connection()
+    conn = sql_db.get_connection()
 
     # Assert that DefaultAzureCredential and get_token were called correctly
-    mock_credential_class.assert_called_once_with(managed_identity_client_id=db.mid_id)
-    mock_credential.get_token.assert_called_once_with("https://database.windows.net/.default")
+    mock_credential_class.assert_called_once_with(
+        managed_identity_client_id=sql_db.mid_id
+    )
+    mock_credential.get_token.assert_called_once_with(
+        "https://database.windows.net/.default"
+    )
 
     # Assert that pyodbc.connect was called with the correct parameters, including the token
     expected_attrs_before = {
-        1256: struct.pack(f"<I{len(mock_token.token.encode('utf-16-LE'))}s", len(mock_token.token.encode("utf-16-LE")), mock_token.token.encode("utf-16-LE"))
+        1256: struct.pack(
+            f"<I{len(mock_token.token.encode('utf-16-LE'))}s",
+            len(mock_token.token.encode("utf-16-LE")),
+            mock_token.token.encode("utf-16-LE"),
+        )
     }
     mock_connect.assert_called_once_with(
-        f"DRIVER={db.driver};SERVER={db.server};DATABASE={db.database};",
-        attrs_before=expected_attrs_before
+        f"DRIVER={sql_db.driver};SERVER={sql_db.server};DATABASE={sql_db.database};",
+        attrs_before=expected_attrs_before,
     )
 
     # Assert that the connection returned is the mock connection
@@ -64,12 +73,12 @@ def test_get_connection_token_failure(mock_credential_class, mock_connect):
     mock_connect.side_effect = [pyodbc.Error("pyodbc connection error"), mock_conn]
 
     # Call the function and ensure fallback is used after the pyodbc error
-    conn = db.get_connection()
+    conn = sql_db.get_connection()
 
     # Assert that pyodbc.connect was called with username and password as fallback
     mock_connect.assert_any_call(
-        f"DRIVER={db.driver};SERVER={db.server};DATABASE={db.database};UID={db.username};PWD={db.password}",
-        timeout=5
+        f"DRIVER={sql_db.driver};SERVER={sql_db.server};DATABASE={sql_db.database};UID={sql_db.username};PWD={sql_db.password}",
+        timeout=5,
     )
 
     # Assert that the connection returned is the mock connection
@@ -85,8 +94,11 @@ def test_dict_cursor():
     mock_cursor.fetchall.return_value = [(1, "Alice", 30), (2, "Bob", 25)]
 
     # Call the dict_cursor function
-    result = db.dict_cursor(mock_cursor)
+    result = sql_db.dict_cursor(mock_cursor)
 
     # Verify the result
-    expected_result = [{'id': 1, 'name': 'Alice', 'age': 30}, {'id': 2, 'name': 'Bob', 'age': 25}]
+    expected_result = [
+        {"id": 1, "name": "Alice", "age": 30},
+        {"id": 2, "name": "Bob", "age": 25},
+    ]
     assert result == expected_result

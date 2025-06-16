@@ -7,68 +7,53 @@ import uuid
 from types import SimpleNamespace
 
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-from dotenv import load_dotenv
+from azure.monitor.opentelemetry import configure_azure_monitor
 
 # from quart.sessions import SecureCookieSessionInterface
 from openai import AsyncAzureOpenAI
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
 from quart import (
     Blueprint,
     Quart,
+    Response,
     jsonify,
     render_template,
     request,
     send_from_directory,
-    Response
 )
 
+from backend.agents.agent_factory import AgentFactory
 from backend.auth.auth_utils import get_authenticated_user_details, get_tenantid
-from backend.history.cosmosdbservice import CosmosConversationClient
-from backend.utils import (
+from backend.common.config import config
+from backend.common.event_utils import track_event_if_configured
+from backend.common.utils import (
     format_stream_response,
     generateFilterString,
-    parse_multi_columns
+    parse_multi_columns,
 )
-from db import get_connection
-from db import dict_cursor
-
-from backend.chat_logic_handler import stream_response_from_wealth_assistant
-from backend.event_utils import track_event_if_configured
-from azure.monitor.opentelemetry import configure_azure_monitor
-from opentelemetry import trace
-from opentelemetry.trace import Status, StatusCode
+from backend.services import sqldb_service
+from backend.services.chat_service import stream_response_from_wealth_assistant
+from backend.services.cosmosdb_service import CosmosConversationClient
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
-
-# Current minimum Azure OpenAI version supported
-MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION = "2024-02-15-preview"
-
-load_dotenv()
 
 # app = Flask(__name__)
 # CORS(app)
 
-
-# UI configuration (optional)
-UI_TITLE = os.environ.get("UI_TITLE") or "Woodgrove Bank"
-UI_LOGO = os.environ.get("UI_LOGO")
-UI_CHAT_LOGO = os.environ.get("UI_CHAT_LOGO")
-UI_CHAT_TITLE = os.environ.get("UI_CHAT_TITLE") or "Start chatting"
-UI_CHAT_DESCRIPTION = (
-    os.environ.get("UI_CHAT_DESCRIPTION")
-    or "This chatbot is configured to answer your questions"
-)
-UI_FAVICON = os.environ.get("UI_FAVICON") or "/favicon.ico"
-UI_SHOW_SHARE_BUTTON = os.environ.get("UI_SHOW_SHARE_BUTTON", "true").lower() == "true"
-
 # Check if the Application Insights Instrumentation Key is set in the environment variables
-instrumentation_key = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+instrumentation_key = config.INSTRUMENTATION_KEY
 if instrumentation_key:
     # Configure Application Insights if the Instrumentation Key is found
     configure_azure_monitor(connection_string=instrumentation_key)
-    logging.info("Application Insights configured with the provided Instrumentation Key")
+    logging.info(
+        "Application Insights configured with the provided Instrumentation Key"
+    )
 else:
     # Log a warning if the Instrumentation Key is not found
-    logging.warning("No Application Insights Instrumentation Key found. Skipping configuration")
+    logging.warning(
+        "No Application Insights Instrumentation Key found. Skipping configuration"
+    )
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -89,6 +74,19 @@ def create_app():
     app = Quart(__name__)
     app.register_blueprint(bp)
     app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+    # Setup agent initialization and cleanup
+    @app.before_serving
+    async def startup():
+        app.agent = await AgentFactory.get_instance()
+        logging.info("Agent initialized during application startup")
+
+    @app.after_serving
+    async def shutdown():
+        await AgentFactory.delete_instance()
+        app.agent = None
+        logging.info("Agent cleaned up during application shutdown")
+
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
     return app
@@ -96,7 +94,9 @@ def create_app():
 
 @bp.route("/")
 async def index():
-    return await render_template("index.html", title=UI_TITLE, favicon=UI_FAVICON)
+    return await render_template(
+        "index.html", title=config.UI_TITLE, favicon=config.UI_FAVICON
+    )
 
 
 @bp.route("/favicon.ico")
@@ -116,89 +116,19 @@ if DEBUG.lower() == "true":
 
 USER_AGENT = "GitHubSampleWebApp/AsyncAzureOpenAI/1.0.0"
 
-# On Your Data Settings
-DATASOURCE_TYPE = os.environ.get("DATASOURCE_TYPE", "AzureCognitiveSearch")
-
-# ACS Integration Settings
-AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
-AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX")
-AZURE_SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY", None)
-AZURE_SEARCH_USE_SEMANTIC_SEARCH = os.environ.get(
-    "AZURE_SEARCH_USE_SEMANTIC_SEARCH", "false"
-)
-AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get(
-    "AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG", "default"
-)
-AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", 5)
-AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get(
-    "AZURE_SEARCH_ENABLE_IN_DOMAIN", "true"
-)
-AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS")
-AZURE_SEARCH_FILENAME_COLUMN = os.environ.get("AZURE_SEARCH_FILENAME_COLUMN")
-AZURE_SEARCH_TITLE_COLUMN = os.environ.get("AZURE_SEARCH_TITLE_COLUMN")
-AZURE_SEARCH_URL_COLUMN = os.environ.get("AZURE_SEARCH_URL_COLUMN")
-AZURE_SEARCH_VECTOR_COLUMNS = os.environ.get("AZURE_SEARCH_VECTOR_COLUMNS")
-AZURE_SEARCH_QUERY_TYPE = os.environ.get("AZURE_SEARCH_QUERY_TYPE")
-AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get(
-    "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN"
-)
-AZURE_SEARCH_STRICTNESS = os.environ.get("AZURE_SEARCH_STRICTNESS", 3)
-
-# AOAI Integration Settings
-AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")
-AZURE_OPENAI_MODEL = os.environ.get("AZURE_OPENAI_MODEL")
-AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
-AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY")
-AZURE_OPENAI_TEMPERATURE = os.environ.get("AZURE_OPENAI_TEMPERATURE", 0)
-AZURE_OPENAI_TOP_P = os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
-AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
-AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
-AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get(
-    "AZURE_OPENAI_SYSTEM_MESSAGE",
-    "You are an AI assistant that helps people find information.",
-)
-AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get(
-    "AZURE_OPENAI_PREVIEW_API_VERSION",
-    MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION,
-)
-AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
-AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT")
-AZURE_OPENAI_EMBEDDING_KEY = os.environ.get("AZURE_OPENAI_EMBEDDING_KEY")
-AZURE_OPENAI_EMBEDDING_NAME = os.environ.get("AZURE_OPENAI_EMBEDDING_NAME", "")
-
-SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
-
-# Chat History CosmosDB Integration Settings
-AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
-AZURE_COSMOSDB_ACCOUNT = os.environ.get("AZURE_COSMOSDB_ACCOUNT")
-AZURE_COSMOSDB_CONVERSATIONS_CONTAINER = os.environ.get(
-    "AZURE_COSMOSDB_CONVERSATIONS_CONTAINER"
-)
-AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("AZURE_COSMOSDB_ACCOUNT_KEY")
-AZURE_COSMOSDB_ENABLE_FEEDBACK = (
-    os.environ.get("AZURE_COSMOSDB_ENABLE_FEEDBACK", "false").lower() == "true"
-)
-USE_INTERNAL_STREAM = os.environ.get("USE_INTERNAL_STREAM", "false").lower() == "true"
-# Frontend Settings via Environment Variables
-AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
-CHAT_HISTORY_ENABLED = (
-    AZURE_COSMOSDB_ACCOUNT
-    and AZURE_COSMOSDB_DATABASE
-    and AZURE_COSMOSDB_CONVERSATIONS_CONTAINER
-)
-SANITIZE_ANSWER = os.environ.get("SANITIZE_ANSWER", "false").lower() == "true"
 frontend_settings = {
-    "auth_enabled": AUTH_ENABLED,
-    "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and CHAT_HISTORY_ENABLED,
+    "auth_enabled": config.AUTH_ENABLED,
+    "feedback_enabled": config.AZURE_COSMOSDB_ENABLE_FEEDBACK
+    and config.CHAT_HISTORY_ENABLED,
     "ui": {
-        "title": UI_TITLE,
-        "logo": UI_LOGO,
-        "chat_logo": UI_CHAT_LOGO or UI_LOGO,
-        "chat_title": UI_CHAT_TITLE,
-        "chat_description": UI_CHAT_DESCRIPTION,
-        "show_share_button": UI_SHOW_SHARE_BUTTON,
+        "title": config.UI_TITLE,
+        "logo": config.UI_LOGO,
+        "chat_logo": config.UI_CHAT_LOGO or config.UI_LOGO,
+        "chat_title": config.UI_CHAT_TITLE,
+        "chat_description": config.UI_CHAT_DESCRIPTION,
+        "show_share_button": config.UI_SHOW_SHARE_BUTTON,
     },
-    "sanitize_answer": SANITIZE_ANSWER,
+    "sanitize_answer": config.SANITIZE_ANSWER,
 }
 # Enable Microsoft Defender for Cloud Integration
 MS_DEFENDER_ENABLED = os.environ.get("MS_DEFENDER_ENABLED", "false").lower() == "true"
@@ -208,7 +138,7 @@ MS_DEFENDER_ENABLED = os.environ.get("MS_DEFENDER_ENABLED", "false").lower() == 
 
 def should_use_data():
     global DATASOURCE_TYPE
-    if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX:
+    if config.AZURE_SEARCH_SERVICE and config.AZURE_SEARCH_INDEX:
         DATASOURCE_TYPE = "AzureCognitiveSearch"
         logging.debug("Using Azure Cognitive Search")
         return True
@@ -225,27 +155,27 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
     try:
         # API version check
         if (
-            AZURE_OPENAI_PREVIEW_API_VERSION
-            < MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION
+            config.AZURE_OPENAI_PREVIEW_API_VERSION
+            < config.MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION
         ):
             raise Exception(
-                f"The minimum supported Azure OpenAI preview API version is '{MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION}'"
+                f"The minimum supported Azure OpenAI preview API version is '{config.MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION}'"
             )
 
         # Endpoint
-        if not AZURE_OPENAI_ENDPOINT and not AZURE_OPENAI_RESOURCE:
+        if not config.AZURE_OPENAI_ENDPOINT and not config.AZURE_OPENAI_RESOURCE:
             raise Exception(
                 "AZURE_OPENAI_ENDPOINT or AZURE_OPENAI_RESOURCE is required"
             )
 
         endpoint = (
-            AZURE_OPENAI_ENDPOINT
-            if AZURE_OPENAI_ENDPOINT
-            else f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
+            config.AZURE_OPENAI_ENDPOINT
+            if config.AZURE_OPENAI_ENDPOINT
+            else f"https://{config.AZURE_OPENAI_RESOURCE}.openai.azure.com/"
         )
 
         # Authentication
-        aoai_api_key = AZURE_OPENAI_KEY
+        aoai_api_key = config.AZURE_OPENAI_KEY
         ad_token_provider = None
         if not aoai_api_key:
             logging.debug("No AZURE_OPENAI_KEY found, using Azure AD auth")
@@ -254,7 +184,7 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
             )
 
         # Deployment
-        deployment = AZURE_OPENAI_MODEL
+        deployment = config.AZURE_OPENAI_MODEL
         if not deployment:
             raise Exception("AZURE_OPENAI_MODEL is required")
 
@@ -262,18 +192,21 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
         default_headers = {"x-ms-useragent": USER_AGENT}
 
         azure_openai_client = AsyncAzureOpenAI(
-            api_version=AZURE_OPENAI_PREVIEW_API_VERSION,
+            api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION,
             api_key=aoai_api_key,
             azure_ad_token_provider=ad_token_provider,
             default_headers=default_headers,
             azure_endpoint=endpoint,
         )
 
-        track_event_if_configured("AzureOpenAIClientInitialized", {
-            "status": "success",
-            "endpoint": endpoint,
-            "use_api_key": bool(aoai_api_key),
-        })
+        track_event_if_configured(
+            "AzureOpenAIClientInitialized",
+            {
+                "status": "success",
+                "endpoint": endpoint,
+                "use_api_key": bool(aoai_api_key),
+            },
+        )
 
         return azure_openai_client
     except Exception as e:
@@ -288,32 +221,35 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
 
 def init_cosmosdb_client():
     cosmos_conversation_client = None
-    if CHAT_HISTORY_ENABLED:
+    if config.CHAT_HISTORY_ENABLED:
         try:
             cosmos_endpoint = (
-                f"https://{AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/"
+                f"https://{config.AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/"
             )
 
-            if not AZURE_COSMOSDB_ACCOUNT_KEY:
+            if not config.AZURE_COSMOSDB_ACCOUNT_KEY:
                 credential = DefaultAzureCredential()
             else:
-                credential = AZURE_COSMOSDB_ACCOUNT_KEY
+                credential = config.AZURE_COSMOSDB_ACCOUNT_KEY
 
             cosmos_conversation_client = CosmosConversationClient(
                 cosmosdb_endpoint=cosmos_endpoint,
                 credential=credential,
-                database_name=AZURE_COSMOSDB_DATABASE,
-                container_name=AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
-                enable_message_feedback=AZURE_COSMOSDB_ENABLE_FEEDBACK,
+                database_name=config.AZURE_COSMOSDB_DATABASE,
+                container_name=config.AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
+                enable_message_feedback=config.AZURE_COSMOSDB_ENABLE_FEEDBACK,
             )
 
-            track_event_if_configured("CosmosDBClientInitialized", {
-                "status": "success",
-                "endpoint": cosmos_endpoint,
-                "database": AZURE_COSMOSDB_DATABASE,
-                "container": AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
-                "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK,
-            })
+            track_event_if_configured(
+                "CosmosDBClientInitialized",
+                {
+                    "status": "success",
+                    "endpoint": cosmos_endpoint,
+                    "database": config.AZURE_COSMOSDB_DATABASE,
+                    "container": config.AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
+                    "feedback_enabled": config.AZURE_COSMOSDB_ENABLE_FEEDBACK,
+                },
+            )
         except Exception as e:
             logging.exception("Exception in CosmosDB initialization", e)
             span = trace.get_current_span()
@@ -332,13 +268,15 @@ def get_configured_data_source():
     data_source = {}
     query_type = "simple"
     if DATASOURCE_TYPE == "AzureCognitiveSearch":
-        track_event_if_configured("datasource_selected", {"type": "AzureCognitiveSearch"})
+        track_event_if_configured(
+            "datasource_selected", {"type": "AzureCognitiveSearch"}
+        )
         # Set query type
-        if AZURE_SEARCH_QUERY_TYPE:
-            query_type = AZURE_SEARCH_QUERY_TYPE
+        if config.AZURE_SEARCH_QUERY_TYPE:
+            query_type = config.AZURE_SEARCH_QUERY_TYPE
         elif (
-            AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true"
-            and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
+            config.AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true"
+            and config.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
         ):
             query_type = "semantic"
         track_event_if_configured("query_type_determined", {"query_type": query_type})
@@ -346,7 +284,7 @@ def get_configured_data_source():
         # Set filter
         filter = None
         userToken = None
-        if AZURE_SEARCH_PERMITTED_GROUPS_COLUMN:
+        if config.AZURE_SEARCH_PERMITTED_GROUPS_COLUMN:
             userToken = request.headers.get("X-MS-TOKEN-AAD-ACCESS-TOKEN", "")
             logging.debug(f"USER TOKEN is {'present' if userToken else 'not present'}")
             if not userToken:
@@ -361,59 +299,63 @@ def get_configured_data_source():
 
         # Set authentication
         authentication = {}
-        if AZURE_SEARCH_KEY:
-            authentication = {"type": "api_key", "api_key": AZURE_SEARCH_KEY}
+        if config.AZURE_SEARCH_KEY:
+            authentication = {"type": "api_key", "api_key": config.AZURE_SEARCH_KEY}
         else:
             # If key is not provided, assume AOAI resource identity has been granted access to the search service
             authentication = {"type": "system_assigned_managed_identity"}
-        track_event_if_configured("authentication_set", {"auth_type": authentication["type"]})
+        track_event_if_configured(
+            "authentication_set", {"auth_type": authentication["type"]}
+        )
 
         data_source = {
             "type": "azure_search",
             "parameters": {
-                "endpoint": f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
+                "endpoint": f"https://{config.AZURE_SEARCH_SERVICE}.search.windows.net",
                 "authentication": authentication,
-                "index_name": AZURE_SEARCH_INDEX,
+                "index_name": config.AZURE_SEARCH_INDEX,
                 "fields_mapping": {
                     "content_fields": (
-                        parse_multi_columns(AZURE_SEARCH_CONTENT_COLUMNS)
-                        if AZURE_SEARCH_CONTENT_COLUMNS
+                        parse_multi_columns(config.AZURE_SEARCH_CONTENT_COLUMNS)
+                        if config.AZURE_SEARCH_CONTENT_COLUMNS
                         else []
                     ),
                     "title_field": (
-                        AZURE_SEARCH_TITLE_COLUMN if AZURE_SEARCH_TITLE_COLUMN else None
+                        config.AZURE_SEARCH_TITLE_COLUMN
+                        if config.AZURE_SEARCH_TITLE_COLUMN
+                        else None
                     ),
                     "url_field": (
-                        AZURE_SEARCH_URL_COLUMN if AZURE_SEARCH_URL_COLUMN else None
+                        config.AZURE_SEARCH_URL_COLUMN
+                        if config.AZURE_SEARCH_URL_COLUMN
+                        else None
                     ),
                     "filepath_field": (
-                        AZURE_SEARCH_FILENAME_COLUMN
-                        if AZURE_SEARCH_FILENAME_COLUMN
+                        config.AZURE_SEARCH_FILENAME_COLUMN
+                        if config.AZURE_SEARCH_FILENAME_COLUMN
                         else None
                     ),
                     "vector_fields": (
-                        parse_multi_columns(AZURE_SEARCH_VECTOR_COLUMNS)
-                        if AZURE_SEARCH_VECTOR_COLUMNS
+                        parse_multi_columns(config.AZURE_SEARCH_VECTOR_COLUMNS)
+                        if config.AZURE_SEARCH_VECTOR_COLUMNS
                         else []
                     ),
                 },
                 "in_scope": (
-                    True if AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False
+                    True
+                    if config.AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true"
+                    else False
                 ),
-                "top_n_documents": (
-                    int(AZURE_SEARCH_TOP_K)
-                ),
+                "top_n_documents": (int(config.AZURE_SEARCH_TOP_K)),
                 "query_type": query_type,
                 "semantic_configuration": (
-                    AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
-                    if AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
+                    config.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
+                    if config.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
                     else ""
                 ),
-                "role_information": AZURE_OPENAI_SYSTEM_MESSAGE,
+                "role_information": config.AZURE_OPENAI_SYSTEM_MESSAGE,
                 "filter": filter,
-                "strictness": (
-                    int(AZURE_SEARCH_STRICTNESS)
-                ),
+                "strictness": (int(config.AZURE_SEARCH_STRICTNESS)),
             },
         }
     else:
@@ -424,36 +366,39 @@ def get_configured_data_source():
 
     if "vector" in query_type.lower() and DATASOURCE_TYPE != "AzureMLIndex":
         embeddingDependency = {}
-        if AZURE_OPENAI_EMBEDDING_NAME:
+        if config.AZURE_OPENAI_EMBEDDING_NAME:
             embeddingDependency = {
                 "type": "deployment_name",
-                "deployment_name": AZURE_OPENAI_EMBEDDING_NAME,
+                "deployment_name": config.AZURE_OPENAI_EMBEDDING_NAME,
             }
-        elif AZURE_OPENAI_EMBEDDING_ENDPOINT and AZURE_OPENAI_EMBEDDING_KEY:
+        elif (
+            config.AZURE_OPENAI_EMBEDDING_ENDPOINT and config.AZURE_OPENAI_EMBEDDING_KEY
+        ):
             embeddingDependency = {
                 "type": "endpoint",
-                "endpoint": AZURE_OPENAI_EMBEDDING_ENDPOINT,
+                "endpoint": config.AZURE_OPENAI_EMBEDDING_ENDPOINT,
                 "authentication": {
                     "type": "api_key",
-                    "key": AZURE_OPENAI_EMBEDDING_KEY,
+                    "key": config.AZURE_OPENAI_EMBEDDING_KEY,
                 },
             }
         else:
-            track_event_if_configured("embedding_dependency_missing", {
-                "datasource_type": DATASOURCE_TYPE,
-                "query_type": query_type
-            })
+            track_event_if_configured(
+                "embedding_dependency_missing",
+                {"datasource_type": DATASOURCE_TYPE, "query_type": query_type},
+            )
             raise Exception(
                 f"Vector query type ({query_type}) is selected for data source type {DATASOURCE_TYPE} but no embedding dependency is configured"
             )
-        track_event_if_configured("embedding_dependency_set", {
-            "embedding_type": embeddingDependency.get("type")
-        })
+        track_event_if_configured(
+            "embedding_dependency_set",
+            {"embedding_type": embeddingDependency.get("type")},
+        )
         data_source["parameters"]["embedding_dependency"] = embeddingDependency
-    track_event_if_configured("get_configured_data_source_complete", {
-        "datasource_type": DATASOURCE_TYPE,
-        "query_type": query_type
-    })
+    track_event_if_configured(
+        "get_configured_data_source_complete",
+        {"datasource_type": DATASOURCE_TYPE, "query_type": query_type},
+    )
     return data_source
 
 
@@ -462,7 +407,7 @@ def prepare_model_args(request_body, request_headers):
     request_messages = request_body.get("messages", [])
     messages = []
     if not SHOULD_USE_DATA:
-        messages = [{"role": "system", "content": AZURE_OPENAI_SYSTEM_MESSAGE}]
+        messages = [{"role": "system", "content": config.AZURE_OPENAI_SYSTEM_MESSAGE}]
 
     for message in request_messages:
         if message:
@@ -483,25 +428,29 @@ def prepare_model_args(request_body, request_headers):
             ),
         }
         user_json = json.dumps(user_args)
-        track_event_if_configured("ms_defender_user_info_added", {"user_id": user_args["EndUserId"]})
+        track_event_if_configured(
+            "ms_defender_user_info_added", {"user_id": user_args["EndUserId"]}
+        )
 
     model_args = {
         "messages": messages,
-        "temperature": float(AZURE_OPENAI_TEMPERATURE),
-        "max_tokens": int(AZURE_OPENAI_MAX_TOKENS),
-        "top_p": float(AZURE_OPENAI_TOP_P),
+        "temperature": float(config.AZURE_OPENAI_TEMPERATURE),
+        "max_tokens": int(config.AZURE_OPENAI_MAX_TOKENS),
+        "top_p": float(config.AZURE_OPENAI_TOP_P),
         "stop": (
-            parse_multi_columns(AZURE_OPENAI_STOP_SEQUENCE)
-            if AZURE_OPENAI_STOP_SEQUENCE
+            parse_multi_columns(config.AZURE_OPENAI_STOP_SEQUENCE)
+            if config.AZURE_OPENAI_STOP_SEQUENCE
             else None
         ),
-        "stream": SHOULD_STREAM,
-        "model": AZURE_OPENAI_MODEL,
+        "stream": config.SHOULD_STREAM,
+        "model": config.AZURE_OPENAI_MODEL,
         "user": user_json,
     }
 
-    if SHOULD_USE_DATA:
-        track_event_if_configured("ms_defender_user_info_added", {"user_id": user_args["EndUserId"]})
+    if config.SHOULD_USE_DATA:
+        track_event_if_configured(
+            "ms_defender_user_info_added", {"user_id": user_args["EndUserId"]}
+        )
         model_args["extra_body"] = {"data_sources": [get_configured_data_source()]}
 
     model_args_clean = copy.deepcopy(model_args)
@@ -539,7 +488,9 @@ def prepare_model_args(request_body, request_headers):
                     ]["authentication"][field] = "*****"
 
     logging.debug(f"REQUEST BODY: {json.dumps(model_args_clean, indent=4)}")
-    track_event_if_configured("prepare_model_args_complete", {"model": AZURE_OPENAI_MODEL})
+    track_event_if_configured(
+        "prepare_model_args_complete", {"model": config.AZURE_OPENAI_MODEL}
+    )
 
     return model_args
 
@@ -565,7 +516,9 @@ async def send_chat_request(request_body, request_headers):
         response = raw_response.parse()
         apim_request_id = raw_response.headers.get("apim-request-id")
 
-        track_event_if_configured("send_chat_request_success", {"model": model_args.get("model")})
+        track_event_if_configured(
+            "send_chat_request_success", {"model": model_args.get("model")}
+        )
     except Exception as e:
         span = trace.get_current_span()
         if span is not None:
@@ -578,7 +531,7 @@ async def send_chat_request(request_body, request_headers):
 
 async def stream_chat_request(request_body, request_headers):
     track_event_if_configured("stream_chat_request_start", {})
-    if USE_INTERNAL_STREAM:
+    if config.USE_INTERNAL_STREAM:
         history_metadata = request_body.get("history_metadata", {})
         apim_request_id = ""
 
@@ -597,11 +550,11 @@ async def stream_chat_request(request_body, request_headers):
 
             async for chunk in sk_response():
                 deltaText = ""
-                deltaText = chunk
+                deltaText = chunk.content
 
                 completionChunk = {
                     "id": chunk_id,
-                    "model": AZURE_OPENAI_MODEL,
+                    "model": config.AZURE_OPENAI_MODEL,
                     "created": created_time,
                     "object": "extensions.chat.completion.chunk",
                     "choices": [
@@ -641,16 +594,20 @@ async def stream_chat_request(request_body, request_headers):
                     completionChunk, history_metadata, apim_request_id
                 )
             track_event_if_configured("stream_openai_selected", {})
+
         return generate()
 
 
 async def conversation_internal(request_body, request_headers):
-    track_event_if_configured("conversation_internal_start", {
-        "streaming": SHOULD_STREAM,
-        "internal_stream": USE_INTERNAL_STREAM
-    })
+    track_event_if_configured(
+        "conversation_internal_start",
+        {
+            "streaming": config.SHOULD_STREAM,
+            "internal_stream": config.USE_INTERNAL_STREAM,
+        },
+    )
     try:
-        if SHOULD_STREAM:
+        if config.SHOULD_STREAM:
             return await stream_chat_request(request_body, request_headers)
             # response = await make_response(format_as_ndjson(result))
             # response.timeout = None
@@ -697,10 +654,7 @@ def get_frontend_settings():
 async def add_conversation():
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user["user_principal_id"]
-    track_event_if_configured(
-        "HistoryGenerate_Start",
-        {"user_id": user_id}
-    )
+    track_event_if_configured("HistoryGenerate_Start", {"user_id": user_id})
 
     # check request for conversation_id
     request_json = await request.get_json()
@@ -728,8 +682,8 @@ async def add_conversation():
                 {
                     "user_id": user_id,
                     "conversation_id": conversation_id,
-                    "title": title
-                }
+                    "title": title,
+                },
             )
 
         # Format the incoming message object in the "chat/completions" messages format
@@ -754,7 +708,7 @@ async def add_conversation():
                     "user_id": user_id,
                     "conversation_id": conversation_id,
                     "message": messages[-1],
-                }
+                },
             )
         else:
             raise Exception("No user message found")
@@ -767,18 +721,12 @@ async def add_conversation():
         request_body["history_metadata"] = history_metadata
         track_event_if_configured(
             "SendingToChatCompletions",
-            {
-                "user_id": user_id,
-                "conversation_id": conversation_id
-            }
+            {"user_id": user_id, "conversation_id": conversation_id},
         )
 
         track_event_if_configured(
             "HistoryGenerate_Completed",
-            {
-                "user_id": user_id,
-                "conversation_id": conversation_id
-            }
+            {"user_id": user_id, "conversation_id": conversation_id},
         )
         return await conversation_internal(request_body, request.headers)
 
@@ -800,10 +748,10 @@ async def update_conversation():
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
 
-    track_event_if_configured("UpdateConversation_Start", {
-        "user_id": user_id,
-        "conversation_id": conversation_id
-    })
+    track_event_if_configured(
+        "UpdateConversation_Start",
+        {"user_id": user_id, "conversation_id": conversation_id},
+    )
 
     try:
         # make sure cosmos is configured
@@ -827,10 +775,10 @@ async def update_conversation():
                     user_id=user_id,
                     input_message=messages[-2],
                 )
-                track_event_if_configured("ToolMessageStored", {
-                    "user_id": user_id,
-                    "conversation_id": conversation_id
-                })
+                track_event_if_configured(
+                    "ToolMessageStored",
+                    {"user_id": user_id, "conversation_id": conversation_id},
+                )
             # write the assistant message
             await cosmos_conversation_client.create_message(
                 uuid=messages[-1]["id"],
@@ -838,19 +786,22 @@ async def update_conversation():
                 user_id=user_id,
                 input_message=messages[-1],
             )
-            track_event_if_configured("AssistantMessageStored", {
-                "user_id": user_id,
-                "conversation_id": conversation_id,
-                "message": messages[-1]
-            })
+            track_event_if_configured(
+                "AssistantMessageStored",
+                {
+                    "user_id": user_id,
+                    "conversation_id": conversation_id,
+                    "message": messages[-1],
+                },
+            )
         else:
             raise Exception("No bot messages found")
         # Submit request to Chat Completions for response
         await cosmos_conversation_client.cosmosdb_client.close()
-        track_event_if_configured("UpdateConversation_Success", {
-            "user_id": user_id,
-            "conversation_id": conversation_id
-        })
+        track_event_if_configured(
+            "UpdateConversation_Success",
+            {"user_id": user_id, "conversation_id": conversation_id},
+        )
         response = {"success": True}
         return jsonify(response), 200
 
@@ -874,10 +825,9 @@ async def update_message():
     message_id = request_json.get("message_id", None)
     message_feedback = request_json.get("message_feedback", None)
 
-    track_event_if_configured("MessageFeedback_Start", {
-        "user_id": user_id,
-        "message_id": message_id
-    })
+    track_event_if_configured(
+        "MessageFeedback_Start", {"user_id": user_id, "message_id": message_id}
+    )
     try:
         if not message_id:
             return jsonify({"error": "message_id is required"}), 400
@@ -890,11 +840,14 @@ async def update_message():
             user_id, message_id, message_feedback
         )
         if updated_message:
-            track_event_if_configured("MessageFeedback_Updated", {
-                "user_id": user_id,
-                "message_id": message_id,
-                "feedback": message_feedback
-            })
+            track_event_if_configured(
+                "MessageFeedback_Updated",
+                {
+                    "user_id": user_id,
+                    "message_id": message_id,
+                    "feedback": message_feedback,
+                },
+            )
             return (
                 jsonify(
                     {
@@ -905,10 +858,10 @@ async def update_message():
                 200,
             )
         else:
-            track_event_if_configured("MessageFeedback_NotFound", {
-                "user_id": user_id,
-                "message_id": message_id
-            })
+            track_event_if_configured(
+                "MessageFeedback_NotFound",
+                {"user_id": user_id, "message_id": message_id},
+            )
             return (
                 jsonify(
                     {
@@ -937,10 +890,10 @@ async def delete_conversation():
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
 
-    track_event_if_configured("DeleteConversation_Start", {
-        "user_id": user_id,
-        "conversation_id": conversation_id
-    })
+    track_event_if_configured(
+        "DeleteConversation_Start",
+        {"user_id": user_id, "conversation_id": conversation_id},
+    )
 
     try:
         if not conversation_id:
@@ -959,10 +912,10 @@ async def delete_conversation():
 
         await cosmos_conversation_client.cosmosdb_client.close()
 
-        track_event_if_configured("DeleteConversation_Success", {
-            "user_id": user_id,
-            "conversation_id": conversation_id
-        })
+        track_event_if_configured(
+            "DeleteConversation_Success",
+            {"user_id": user_id, "conversation_id": conversation_id},
+        )
 
         return (
             jsonify(
@@ -988,10 +941,9 @@ async def list_conversations():
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user["user_principal_id"]
 
-    track_event_if_configured("ListConversations_Start", {
-        "user_id": user_id,
-        "offset": offset
-    })
+    track_event_if_configured(
+        "ListConversations_Start", {"user_id": user_id, "offset": offset}
+    )
 
     # make sure cosmos is configured
     cosmos_conversation_client = init_cosmosdb_client()
@@ -1004,18 +956,17 @@ async def list_conversations():
     )
     await cosmos_conversation_client.cosmosdb_client.close()
     if not isinstance(conversations, list):
-        track_event_if_configured("ListConversations_Empty", {
-            "user_id": user_id,
-            "offset": offset
-        })
+        track_event_if_configured(
+            "ListConversations_Empty", {"user_id": user_id, "offset": offset}
+        )
         return jsonify({"error": f"No conversations for {user_id} were found"}), 404
 
     # return the conversation ids
 
-    track_event_if_configured("ListConversations_Success", {
-        "user_id": user_id,
-        "conversation_count": len(conversations)
-    })
+    track_event_if_configured(
+        "ListConversations_Success",
+        {"user_id": user_id, "conversation_count": len(conversations)},
+    )
 
     return jsonify(conversations), 200
 
@@ -1029,17 +980,23 @@ async def get_conversation():
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
 
-    track_event_if_configured("GetConversation_Start", {
-        "user_id": user_id,
-        "conversation_id": conversation_id,
-    })
-
-    if not conversation_id:
-        track_event_if_configured("GetConversation_Failed", {
+    track_event_if_configured(
+        "GetConversation_Start",
+        {
             "user_id": user_id,
             "conversation_id": conversation_id,
-            "error": f"Conversation {conversation_id} not found",
-        })
+        },
+    )
+
+    if not conversation_id:
+        track_event_if_configured(
+            "GetConversation_Failed",
+            {
+                "user_id": user_id,
+                "conversation_id": conversation_id,
+                "error": f"Conversation {conversation_id} not found",
+            },
+        )
         return jsonify({"error": "conversation_id is required"}), 400
 
     # make sure cosmos is configured
@@ -1080,11 +1037,14 @@ async def get_conversation():
     ]
 
     await cosmos_conversation_client.cosmosdb_client.close()
-    track_event_if_configured("GetConversation_Success", {
-        "user_id": user_id,
-        "conversation_id": conversation_id,
-        "message_count": len(messages)
-    })
+    track_event_if_configured(
+        "GetConversation_Success",
+        {
+            "user_id": user_id,
+            "conversation_id": conversation_id,
+            "message_count": len(messages),
+        },
+    )
     return jsonify({"conversation_id": conversation_id, "messages": messages}), 200
 
 
@@ -1097,17 +1057,20 @@ async def rename_conversation():
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
 
-    track_event_if_configured("RenameConversation_Start", {
-        "user_id": user_id,
-        "conversation_id": conversation_id
-    })
+    track_event_if_configured(
+        "RenameConversation_Start",
+        {"user_id": user_id, "conversation_id": conversation_id},
+    )
 
     if not conversation_id:
-        track_event_if_configured("RenameConversation_Failed", {
-            "user_id": user_id,
-            "conversation_id": conversation_id,
-            "error": f"Conversation {conversation_id} not found",
-        })
+        track_event_if_configured(
+            "RenameConversation_Failed",
+            {
+                "user_id": user_id,
+                "conversation_id": conversation_id,
+                "error": f"Conversation {conversation_id} not found",
+            },
+        )
         return jsonify({"error": "conversation_id is required"}), 400
 
     # make sure cosmos is configured
@@ -1140,11 +1103,10 @@ async def rename_conversation():
 
     await cosmos_conversation_client.cosmosdb_client.close()
 
-    track_event_if_configured("RenameConversation_Success", {
-        "user_id": user_id,
-        "conversation_id": conversation_id,
-        "new_title": title
-    })
+    track_event_if_configured(
+        "RenameConversation_Success",
+        {"user_id": user_id, "conversation_id": conversation_id, "new_title": title},
+    )
     return jsonify(updated_conversation), 200
 
 
@@ -1154,9 +1116,7 @@ async def delete_all_conversations():
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user["user_principal_id"]
 
-    track_event_if_configured("DeleteAllConversations_Start", {
-        "user_id": user_id
-    })
+    track_event_if_configured("DeleteAllConversations_Start", {"user_id": user_id})
 
     # get conversations for user
     try:
@@ -1169,9 +1129,12 @@ async def delete_all_conversations():
             user_id, offset=0, limit=None
         )
         if not conversations:
-            track_event_if_configured("DeleteAllConversations_Empty", {
-                "user_id": user_id,
-            })
+            track_event_if_configured(
+                "DeleteAllConversations_Empty",
+                {
+                    "user_id": user_id,
+                },
+            )
             return jsonify({"error": f"No conversations for {user_id} were found"}), 404
 
         # delete each conversation
@@ -1187,10 +1150,10 @@ async def delete_all_conversations():
             )
         await cosmos_conversation_client.cosmosdb_client.close()
 
-        track_event_if_configured("DeleteAllConversations_Success", {
-            "user_id": user_id,
-            "conversation_count": len(conversations)
-        })
+        track_event_if_configured(
+            "DeleteAllConversations_Success",
+            {"user_id": user_id, "conversation_count": len(conversations)},
+        )
 
         return (
             jsonify(
@@ -1220,18 +1183,24 @@ async def clear_messages():
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
 
-    track_event_if_configured("ClearConversationMessages_Start", {
-        "user_id": user_id,
-        "conversation_id": conversation_id,
-    })
+    track_event_if_configured(
+        "ClearConversationMessages_Start",
+        {
+            "user_id": user_id,
+            "conversation_id": conversation_id,
+        },
+    )
 
     try:
         if not conversation_id:
-            track_event_if_configured("ClearConversationMessages_Failed", {
-                "user_id": user_id,
-                "conversation_id": conversation_id,
-                "error": "conversation_id is required"
-            })
+            track_event_if_configured(
+                "ClearConversationMessages_Failed",
+                {
+                    "user_id": user_id,
+                    "conversation_id": conversation_id,
+                    "error": "conversation_id is required",
+                },
+            )
             return jsonify({"error": "conversation_id is required"}), 400
 
         # make sure cosmos is configured
@@ -1242,10 +1211,10 @@ async def clear_messages():
         # delete the conversation messages from cosmos
         await cosmos_conversation_client.delete_messages(conversation_id, user_id)
 
-        track_event_if_configured("ClearConversationMessages_Success", {
-            "user_id": user_id,
-            "conversation_id": conversation_id
-        })
+        track_event_if_configured(
+            "ClearConversationMessages_Success",
+            {"user_id": user_id, "conversation_id": conversation_id},
+        )
 
         return (
             jsonify(
@@ -1267,10 +1236,13 @@ async def clear_messages():
 
 @bp.route("/history/ensure", methods=["GET"])
 async def ensure_cosmos():
-    if not AZURE_COSMOSDB_ACCOUNT:
-        track_event_if_configured("EnsureCosmosDB_Failed", {
-            "error": "CosmosDB is not configured",
-        })
+    if not config.AZURE_COSMOSDB_ACCOUNT:
+        track_event_if_configured(
+            "EnsureCosmosDB_Failed",
+            {
+                "error": "CosmosDB is not configured",
+            },
+        )
         return jsonify({"error": "CosmosDB is not configured"}), 404
 
     try:
@@ -1278,16 +1250,22 @@ async def ensure_cosmos():
         success, err = await cosmos_conversation_client.ensure()
         if not cosmos_conversation_client or not success:
             if err:
-                track_event_if_configured("EnsureCosmosDB_Failed", {
-                    "error": err,
-                })
+                track_event_if_configured(
+                    "EnsureCosmosDB_Failed",
+                    {
+                        "error": err,
+                    },
+                )
                 return jsonify({"error": err}), 422
             return jsonify({"error": "CosmosDB is not configured or not working"}), 500
 
         await cosmos_conversation_client.cosmosdb_client.close()
-        track_event_if_configured("EnsureCosmosDB_Failed", {
-            "error": "CosmosDB is not configured or not working",
-        })
+        track_event_if_configured(
+            "EnsureCosmosDB_Failed",
+            {
+                "error": "CosmosDB is not configured or not working",
+            },
+        )
         return jsonify({"message": "CosmosDB is configured and working"}), 200
     except Exception as e:
         logging.exception("Exception in /history/ensure")
@@ -1302,7 +1280,7 @@ async def ensure_cosmos():
             return (
                 jsonify(
                     {
-                        "error": f"{cosmos_exception} {AZURE_COSMOSDB_DATABASE} for account {AZURE_COSMOSDB_ACCOUNT}"
+                        "error": f"{cosmos_exception} {config.AZURE_COSMOSDB_DATABASE} for account {config.AZURE_COSMOSDB_ACCOUNT}"
                     }
                 ),
                 422,
@@ -1311,7 +1289,7 @@ async def ensure_cosmos():
             return (
                 jsonify(
                     {
-                        "error": f"{cosmos_exception}: {AZURE_COSMOSDB_CONVERSATIONS_CONTAINER}"
+                        "error": f"{cosmos_exception}: {config.AZURE_COSMOSDB_CONVERSATIONS_CONTAINER}"
                     }
                 ),
                 422,
@@ -1334,7 +1312,10 @@ async def generate_title(conversation_messages):
     try:
         azure_openai_client = init_openai_client(use_data=False)
         response = await azure_openai_client.chat.completions.create(
-            model=AZURE_OPENAI_MODEL, messages=messages, temperature=1, max_tokens=64
+            model=config.AZURE_OPENAI_MODEL,
+            messages=messages,
+            temperature=1,
+            max_tokens=64,
         )
 
         title = json.loads(response.choices[0].message.content)["title"]
@@ -1350,152 +1331,17 @@ async def generate_title(conversation_messages):
 
 @bp.route("/api/users", methods=["GET"])
 def get_users():
-
     track_event_if_configured("UserFetch_Start", {})
-    conn = None
+
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        sql_stmt = """
-        SELECT
-            ClientId,
-            Client,
-            Email,
-            FORMAT(AssetValue, 'N0') AS AssetValue,
-            ClientSummary,
-            CAST(LastMeeting AS DATE) AS LastMeetingDate,
-            FORMAT(CAST(LastMeeting AS DATE), 'dddd MMMM d, yyyy') AS LastMeetingDateFormatted,
-            FORMAT(LastMeeting, 'hh:mm tt') AS LastMeetingStartTime,
-            FORMAT(LastMeetingEnd, 'hh:mm tt') AS LastMeetingEndTime,
-            CAST(NextMeeting AS DATE) AS NextMeetingDate,
-            FORMAT(CAST(NextMeeting AS DATE), 'dddd MMMM d, yyyy') AS NextMeetingFormatted,
-            FORMAT(NextMeeting, 'hh:mm tt') AS NextMeetingStartTime,
-            FORMAT(NextMeetingEnd, 'hh:mm tt') AS NextMeetingEndTime
-        FROM (
-            SELECT ca.ClientId, Client, Email, AssetValue, ClientSummary, LastMeeting, LastMeetingEnd, NextMeeting, NextMeetingEnd
-            FROM (
-                SELECT c.ClientId, c.Client, c.Email, a.AssetValue, cs.ClientSummary
-                FROM Clients c
-                JOIN (
-                    SELECT a.ClientId, a.Investment AS AssetValue
-                    FROM (
-                        SELECT ClientId, sum(Investment) as Investment,
-                            ROW_NUMBER() OVER (PARTITION BY ClientId ORDER BY AssetDate DESC) AS RowNum
-                        FROM Assets
-                group by ClientId,AssetDate
-                    ) a
-                    WHERE a.RowNum = 1
-                ) a ON c.ClientId = a.ClientId
-                JOIN ClientSummaries cs ON c.ClientId = cs.ClientId
-            ) ca
-            JOIN (
-                SELECT cm.ClientId,
-                    MAX(CASE WHEN StartTime < GETDATE() THEN StartTime END) AS LastMeeting,
-                    DATEADD(MINUTE, 30, MAX(CASE WHEN StartTime < GETDATE() THEN StartTime END)) AS LastMeetingEnd,
-                    MIN(CASE WHEN StartTime > GETDATE() AND StartTime < GETDATE() + 7 THEN StartTime END) AS NextMeeting,
-                    DATEADD(MINUTE, 30, MIN(CASE WHEN StartTime > GETDATE() AND StartTime < GETDATE() + 7 THEN StartTime END)) AS NextMeetingEnd
-                FROM ClientMeetings cm
-                GROUP BY cm.ClientId
-            ) cm ON ca.ClientId = cm.ClientId
-        ) x
-        WHERE NextMeeting IS NOT NULL
-        ORDER BY NextMeeting ASC;
-        """
-        cursor.execute(sql_stmt)
-        # Since pyodbc returns query results as a list of tuples, using `dict_cursor` function to convert these tuples into a list of dictionaries
-        rows = dict_cursor(cursor)
+        users = sqldb_service.get_client_data()
 
-        if len(rows) <= 6:
-            track_event_if_configured("UserFetch_SampleUpdate", {
-                "rows_count": len(rows),
-            })
-            # update ClientMeetings,Assets,Retirement tables sample data to current date
-            cursor = conn.cursor()
-            combined_stmt = """
-                WITH MaxDates AS (
-                    SELECT
-                        MAX(CAST(StartTime AS Date)) AS MaxClientMeetingDate,
-                        MAX(AssetDate) AS MaxAssetDate,
-                        MAX(StatusDate) AS MaxStatusDate
-                    FROM
-                        (SELECT StartTime, NULL AS AssetDate, NULL AS StatusDate FROM ClientMeetings
-                        UNION ALL
-                        SELECT NULL AS StartTime, AssetDate, NULL AS StatusDate FROM Assets
-                        UNION ALL
-                        SELECT NULL AS StartTime, NULL AS AssetDate, StatusDate FROM Retirement) AS Combined
-                ),
-                Today AS (
-                    SELECT GETDATE() AS TodayDate
-                ),
-                DaysDifference AS (
-                    SELECT
-                        DATEDIFF(DAY, MaxClientMeetingDate, TodayDate) + 3 AS ClientMeetingDaysDifference,
-                        DATEDIFF(DAY, MaxAssetDate, TodayDate) - 30 AS AssetDaysDifference,
-                        DATEDIFF(DAY, MaxStatusDate, TodayDate) - 30 AS StatusDaysDifference
-                    FROM MaxDates, Today
-                )
-                SELECT
-                    ClientMeetingDaysDifference,
-                    AssetDaysDifference / 30 AS AssetMonthsDifference,
-                    StatusDaysDifference / 30 AS StatusMonthsDifference
-                FROM DaysDifference
-                """
-            cursor.execute(combined_stmt)
-            # Since pyodbc returns query results as a list of tuples, using `dict_cursor` function to convert these tuples into a list of dictionaries
-            date_diff_rows = dict_cursor(cursor)
-
-            client_days = (
-                date_diff_rows[0]["ClientMeetingDaysDifference"]
-                if date_diff_rows
-                else 0
-            )
-            asset_months = (
-                int(date_diff_rows[0]["AssetMonthsDifference"]) if date_diff_rows else 0
-            )
-            status_months = (
-                int(date_diff_rows[0]["StatusMonthsDifference"])
-                if date_diff_rows
-                else 0
-            )
-
-            # Update ClientMeetings
-            if client_days > 0:
-                client_update_stmt = f"UPDATE ClientMeetings SET StartTime = DATEADD(day, {client_days}, StartTime), EndTime = DATEADD(day, {client_days}, EndTime)"
-                cursor.execute(client_update_stmt)
-                conn.commit()
-
-            # Update Assets
-            if asset_months > 0:
-                asset_update_stmt = f"UPDATE Assets SET AssetDate = DATEADD(month, {asset_months}, AssetDate)"
-                cursor.execute(asset_update_stmt)
-                conn.commit()
-
-            # Update Retirement
-            if status_months > 0:
-                retire_update_stmt = f"UPDATE Retirement SET StatusDate = DATEADD(month, {status_months}, StatusDate)"
-                cursor.execute(retire_update_stmt)
-                conn.commit()
-
-        users = []
-        for row in rows:
-            user = {
-                "ClientId": row["ClientId"],
-                "ClientName": row["Client"],
-                "ClientEmail": row["Email"],
-                "AssetValue": row["AssetValue"],
-                "NextMeeting": row["NextMeetingFormatted"],
-                "NextMeetingTime": row["NextMeetingStartTime"],
-                "NextMeetingEndTime": row["NextMeetingEndTime"],
-                "LastMeeting": row["LastMeetingDateFormatted"],
-                "LastMeetingStartTime": row["LastMeetingStartTime"],
-                "LastMeetingEndTime": row["LastMeetingEndTime"],
-                "ClientSummary": row["ClientSummary"],
-            }
-            users.append(user)
-
-            track_event_if_configured("UserFetch_Success", {
+        track_event_if_configured(
+            "UserFetch_Success",
+            {
                 "user_count": len(users),
-            })
+            },
+        )
 
         return jsonify(users)
 
@@ -1506,9 +1352,6 @@ def get_users():
             span.set_status(Status(StatusCode.ERROR, str(e)))
         print("Exception occurred:", e)
         return str(e), 500
-    finally:
-        if conn:
-            conn.close()
 
 
 app = create_app()

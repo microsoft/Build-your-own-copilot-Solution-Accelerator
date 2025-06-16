@@ -99,12 +99,11 @@ var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports
   When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. 
   If no data is available, state 'No relevant data found for previous meetings.'''
 
-var functionAppStreamTextSystemPrompt = '''You are a helpful assistant to a Wealth Advisor. 
-  The currently selected client's name is '{SelectedClientName}', and any case-insensitive or partial mention should be understood as referring to this client.
-  If no name is provided, assume the question is about '{SelectedClientName}'.
-  If the query references a different client or includes comparative terms like 'compare' or 'other client', please respond with: 'Please only ask questions about the selected client or select another client.'
-  Otherwise, provide thorough answers using only data from SQL or call transcripts. 
-  If no data is found, please respond with 'No data found for that client.' Remove any client identifiers from the final response.'''
+var functionAppStreamTextSystemPrompt = '''The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.
+  If the user mentions no name, assume they are asking about '{SelectedClientName}'..
+  If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'
+  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.
+  Always send clientId as '{client_id}'.'''
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
