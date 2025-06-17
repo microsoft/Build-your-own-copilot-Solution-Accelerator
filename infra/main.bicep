@@ -141,7 +141,6 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     gptDeploymentCapacity: gptDeploymentCapacity
     embeddingModel: embeddingModel
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
-    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
     existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
   }
   scope: resourceGroup(resourceGroup().name)
@@ -153,7 +152,6 @@ module cosmosDBModule 'deploy_cosmos_db.bicep' = {
   params: {
     solutionLocation: cosmosLocation
     cosmosDBName:'${abbrs.databases.cosmosDBDatabase}${solutionPrefix}'
-    kvName: keyvaultModule.outputs.keyvaultName
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -200,7 +198,6 @@ module appserviceModule 'deploy_app_service.bicep' = {
     WebsiteName: '${abbrs.compute.webApp}${solutionPrefix}'
     AzureSearchService:aifoundry.outputs.aiSearchService
     AzureSearchIndex:'transcripts_index'
-    AzureSearchKey:keyVault.getSecret('AZURE-SEARCH-KEY')
     AzureSearchUseSemanticSearch:'True'
     AzureSearchSemanticSearchConfig:'my-semantic-config'
     AzureSearchTopK:'5'
@@ -211,7 +208,6 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureOpenAIResource:aifoundry.outputs.aiFoundryName
     AzureOpenAIEndpoint:aifoundry.outputs.aoaiEndpoint
     AzureOpenAIModel:gptModelName
-    AzureOpenAIKey:keyVault.getSecret('AZURE-OPENAI-KEY')
     AzureOpenAITemperature:'0'
     AzureOpenAITopP:'1'
     AzureOpenAIMaxTokens:'1000'
@@ -224,13 +220,10 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchPermittedGroupsField:''
     AzureSearchStrictness:'3'
     AzureOpenAIEmbeddingName:embeddingModel
-    AzureOpenAIEmbeddingkey:keyVault.getSecret('AZURE-OPENAI-KEY')
     AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aoaiEndpoint
     USE_INTERNAL_STREAM:'True'
     SQLDB_SERVER:'${sqlDBModule.outputs.sqlServerName}.database.windows.net'
     SQLDB_DATABASE:sqlDBModule.outputs.sqlDbName
-    SQLDB_USERNAME:'sqladmin'
-    SQLDB_PASSWORD:keyVault.getSecret('SQLDB-PASSWORD')
     AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosAccountName
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosContainerName
     AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosDatabaseName
@@ -244,7 +237,6 @@ module appserviceModule 'deploy_app_service.bicep' = {
     sqlSystemPrompt: functionAppSqlPrompt
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
-    // aiProjectConnectionString:keyVault.getSecret('AZURE-AI-PROJECT-CONN-STRING')
     aiFoundryProjectName:aifoundry.outputs.aiFoundryProjectName
     aiFoundryProjectEndpoint: aifoundry.outputs.aiFoundryProjectEndpoint
     aiFoundryName: aifoundry.outputs.aiFoundryName
@@ -263,3 +255,5 @@ output SQLDB_SERVER string = sqlDBModule.outputs.sqlServerName
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
 output MANAGEDINDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
 output MANAGEDINDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
+output AI_FOUNDARY_NAME string = aifoundry.outputs.aiFoundryName
+output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService

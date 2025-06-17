@@ -8,7 +8,6 @@ param azureOpenaiAPIVersion string
 param gptDeploymentCapacity int
 param embeddingModel string
 param embeddingDeploymentCapacity int
-param managedIdentityObjectId string
 param existingLogAnalyticsWorkspaceId string = ''
 
 // Load the abbrevations file required to name the azure resources.
@@ -252,44 +251,13 @@ resource appInsightsFoundryConnection 'Microsoft.CognitiveServices/accounts/conn
   }
 }
 
-// @description('This is the built-in Storage Blob Data Contributor.')
-// resource blobDataContributor 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
-//   scope: resourceGroup()
-//   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-// }
-
-// resource storageroleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-//   name: guid(resourceGroup().id, managedIdentityObjectId, blobDataContributor.id)
+// resource azureOpenAIApiKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+//   parent: keyVault
+//   name: 'AZURE-OPENAI-KEY'
 //   properties: {
-//     principalId: managedIdentityObjectId
-//     roleDefinitionId: blobDataContributor.id
-//     principalType: 'ServicePrincipal'
+//     value: aiFoundry.listKeys().key1 //aiServices_m.listKeys().key1
 //   }
 // }
-
-resource tenantIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'TENANT-ID'
-  properties: {
-    value: subscription().tenantId
-  }
-}
-
-resource azureOpenAIApiKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-OPENAI-KEY'
-  properties: {
-    value: aiFoundry.listKeys().key1 //aiServices_m.listKeys().key1
-  }
-}
-
-resource azureOpenAIDeploymentModel 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-OPEN-AI-DEPLOYMENT-MODEL'
-  properties: {
-    value: gptModelName
-  }
-}
 
 resource azureOpenAIApiVersionEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
@@ -307,21 +275,21 @@ resource azureOpenAIEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-
   }
 }
 
-// resource azureAIProjectConnectionStringEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-//   parent: keyVault
-//   name: 'AZURE-AI-PROJECT-CONN-STRING'
-//   properties: {
-//     value: '${split(aiFProject.properties., '/')[2]};${subscription().subscriptionId};${resourceGroup().name};${aiFoundryProject.name}'
-//   }
-// }
-
-resource azureSearchAdminKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+resource azureOpenAIEmbeddingModelEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
-  name: 'AZURE-SEARCH-KEY'
+  name: 'AZURE-OPENAI-EMBEDDING-MODEL'
   properties: {
-    value: aiSearch.listAdminKeys().primaryKey
+    value: embeddingModel
   }
 }
+
+// resource azureSearchAdminKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+//   parent: keyVault
+//   name: 'AZURE-SEARCH-KEY'
+//   properties: {
+//     value: aiSearch.listAdminKeys().primaryKey
+//   }
+// }
 
 resource azureSearchServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
@@ -331,67 +299,11 @@ resource azureSearchServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021
   }
 }
 
-resource azureSearchServiceEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-SEARCH-SERVICE'
-  properties: {
-    value: aiSearch.name
-  }
-}
-
 resource azureSearchIndexEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
   name: 'AZURE-SEARCH-INDEX'
   properties: {
     value: 'transcripts_index'
-  }
-}
-
-resource cogServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'COG-SERVICES-ENDPOINT'
-  properties: {
-    value: aiFoundry.properties.endpoint
-  }
-}
-
-resource cogServiceKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'COG-SERVICES-KEY'
-  properties: {
-    value: aiFoundry.listKeys().key1
-  }
-}
-
-resource cogServiceNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'COG-SERVICES-NAME'
-  properties: {
-    value: aiFoundryName
-  }
-}
-
-resource azureSubscriptionIdEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-SUBSCRIPTION-ID'
-  properties: {
-    value: subscription().subscriptionId
-  }
-}
-
-resource resourceGroupNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-RESOURCE-GROUP'
-  properties: {
-    value: resourceGroup().name
-  }
-}
-
-resource azureLocatioEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'AZURE-LOCATION'
-  properties: {
-    value: solutionLocation
   }
 }
 

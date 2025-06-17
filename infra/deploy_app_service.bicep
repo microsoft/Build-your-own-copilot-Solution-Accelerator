@@ -22,10 +22,6 @@ param AzureSearchService string = ''
 @description('Name of Azure Search Index')
 param AzureSearchIndex string = ''
 
-@description('Azure Search Admin Key')
-@secure()
-param AzureSearchKey string = ''
-
 @description('Use semantic search')
 param AzureSearchUseSemanticSearch string = 'False'
 
@@ -58,10 +54,6 @@ param AzureOpenAIModel string
 
 @description('Azure Open AI Endpoint')
 param AzureOpenAIEndpoint string = ''
-
-@description('Azure OpenAI Key')
-@secure()
-param AzureOpenAIKey string
 
 @description('Azure OpenAI Temperature')
 param AzureOpenAITemperature string = '0'
@@ -103,10 +95,6 @@ param AzureSearchStrictness string = '3'
 @description('Azure OpenAI Embedding Deployment Name')
 param AzureOpenAIEmbeddingName string = ''
 
-@description('Azure Open AI Embedding Key')
-@secure()
-param AzureOpenAIEmbeddingkey string = ''
-
 @description('Azure Open AI Embedding Endpoint')
 param AzureOpenAIEmbeddingEndpoint string = ''
 
@@ -119,19 +107,8 @@ param SQLDB_SERVER string = ''
 @description('SQL Database Name')
 param SQLDB_DATABASE string = ''
 
-@description('SQL Database Username')
-param SQLDB_USERNAME string = ''
-
-@description('SQL Database Password')
-@secure()
-param SQLDB_PASSWORD string = ''
-
 @description('Azure Cosmos DB Account')
 param AZURE_COSMOSDB_ACCOUNT string = ''
-
-// @description('Azure Cosmos DB Account Key')
-// @secure()
-// param AZURE_COSMOSDB_ACCOUNT_KEY string = ''
 
 @description('Azure Cosmos DB Conversations Container')
 param AZURE_COSMOSDB_CONVERSATIONS_CONTAINER string = ''
@@ -159,9 +136,6 @@ param sqlSystemPrompt string
 param callTranscriptSystemPrompt string
 @description('Azure Function App Stream Text System Prompt')
 param streamTextSystemPrompt string
-
-// @secure()
-// param aiProjectConnectionString string
 
 param aiFoundryProjectEndpoint string
 param useAIProjectClientFlag string = 'false'
@@ -218,10 +192,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           value: AzureSearchIndex
         }
         {
-          name: 'AZURE_SEARCH_KEY'
-          value: AzureSearchKey
-        }
-        {
           name: 'AZURE_SEARCH_USE_SEMANTIC_SEARCH'
           value: AzureSearchUseSemanticSearch
         }
@@ -264,10 +234,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'AZURE_OPENAI_ENDPOINT'
           value: AzureOpenAIEndpoint
-        }
-        {
-          name: 'AZURE_OPENAI_KEY'
-          value: AzureOpenAIKey
         }
         {
           name: 'AZURE_OPENAI_TEMPERATURE'
@@ -317,47 +283,36 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           name: 'AZURE_OPENAI_EMBEDDING_NAME'
           value: AzureOpenAIEmbeddingName
         }
-
-        {
-          name: 'AZURE_OPENAI_EMBEDDING_KEY'
-          value: AzureOpenAIEmbeddingkey
-        }
-
         {
           name: 'AZURE_OPENAI_EMBEDDING_ENDPOINT'
           value: AzureOpenAIEmbeddingEndpoint
         }
-
-        {name: 'SQLDB_SERVER'
+        {
+          name: 'SQLDB_SERVER'
           value: SQLDB_SERVER
         }
-
-        {name: 'SQLDB_DATABASE'
+        {
+          name: 'SQLDB_DATABASE'
           value: SQLDB_DATABASE
         }
-
-        {name: 'SQLDB_USERNAME'
-          value: SQLDB_USERNAME
-        }
-
-        {name: 'SQLDB_PASSWORD'
-          value: SQLDB_PASSWORD
-        }
-
-        {name: 'USE_INTERNAL_STREAM'
+        {
+          name: 'USE_INTERNAL_STREAM'
           value: USE_INTERNAL_STREAM
         }
-
-        {name: 'AZURE_COSMOSDB_ACCOUNT'
+        {
+          name: 'AZURE_COSMOSDB_ACCOUNT'
           value: AZURE_COSMOSDB_ACCOUNT
         }
-        {name: 'AZURE_COSMOSDB_CONVERSATIONS_CONTAINER'
+        {
+          name: 'AZURE_COSMOSDB_CONVERSATIONS_CONTAINER'
           value: AZURE_COSMOSDB_CONVERSATIONS_CONTAINER
         }
-        {name: 'AZURE_COSMOSDB_DATABASE'
+        {
+          name: 'AZURE_COSMOSDB_DATABASE'
           value: AZURE_COSMOSDB_DATABASE
         }
-        {name: 'AZURE_COSMOSDB_ENABLE_FEEDBACK'
+        {
+          name: 'AZURE_COSMOSDB_ENABLE_FEEDBACK'
           value: AZURE_COSMOSDB_ENABLE_FEEDBACK
         }
         //{name: 'VITE_POWERBI_EMBED_URL'
@@ -372,10 +327,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           value: azureSearchServiceEndpoint
         }
         {
-          name: 'SQLDB_CONNECTION_STRING'
-          value: 'TBD'
-        }
-        {
           name: 'AZURE_SQL_SYSTEM_PROMPT'
           value: sqlSystemPrompt
         }
@@ -387,10 +338,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
           name: 'AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT'
           value: streamTextSystemPrompt
         }
-        // {
-        //   name: 'AZURE_AI_PROJECT_CONN_STRING'
-        //   value: aiProjectConnectionString
-        // }
         {
           name: 'USE_AI_PROJECT_CLIENT'
           value: useAIProjectClientFlag
@@ -442,23 +389,6 @@ module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
     Website
   ]
 }
-
-// resource aiHubProject 'Microsoft.MachineLearningServices/workspaces@2024-01-01-preview' existing = {
-//   name: aiProjectName
-// }
-
-// resource aiDeveloper 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-//   name: '64702f94-c441-49e6-a78b-ef80e0188fee'
-// }
-
-// resource aiDeveloperAccessProj 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-//   name: guid(Website.name, aiHubProject.id, aiDeveloper.id)
-//   scope: aiHubProject
-//   properties: {
-//     roleDefinitionId: aiDeveloper.id
-//     principalId: Website.identity.principalId
-//   }
-// }
 
 resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: aiFoundryName
