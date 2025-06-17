@@ -1,10 +1,50 @@
 #!/bin/bash
 
-LOCATION="$1"
-GPT4O_CAPACITY="$2"
-EMBEDDING_CAPACITY="$3"
-GPT4O_DEPLOYMENT_TYPE="${4:-Standard}"
-EMBEDDING_DEPLOYMENT_TYPE="${5:-GlobalStandard}"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --location)
+      LOCATION="$2"
+      shift 2
+      ;;
+    --GPT4O_Name)
+      GPT4O_NAME="$2"
+      shift 2
+      ;;
+    --GPT4O_Capacity)
+      GPT4O_CAPACITY="$2"
+      shift 2
+      ;;
+    --GPT4O_DeploymentType)
+      GPT4O_DEPLOYMENT_TYPE="$2"
+      shift 2
+      ;;
+    --Embedding_Name)
+      EMBED_NAME="$2"
+      shift 2
+      ;;
+    --Embedding_Capacity)
+      EMBEDDING_CAPACITY="$2"
+      shift 2
+      ;;
+    --Embedding_DeploymentType)
+      EMBEDDING_DEPLOYMENT_TYPE="$2"
+      shift 2
+      ;;
+    *)
+      echo "❌ Unknown argument: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Optional: Debug print to verify variables
+echo "🔍 LOCATION: $LOCATION"
+echo "🔍 GPT4O_NAME: $GPT4O_NAME"
+echo "🔍 GPT4O_CAPACITY: $GPT4O_CAPACITY"
+echo "🔍 GPT4O_DEPLOYMENT_TYPE: $GPT4O_DEPLOYMENT_TYPE"
+echo "🔍 EMBED_NAME: $EMBED_NAME"
+echo "🔍 EMBEDDING_CAPACITY: $EMBEDDING_CAPACITY"
+echo "🔍 EMBEDDING_DEPLOYMENT_TYPE: $EMBEDDING_DEPLOYMENT_TYPE"
 
 GPT4O_MODEL="gpt-4o"
 EMBEDDING_MODEL="text-embedding-ada-002"
@@ -79,6 +119,56 @@ check_quota() {
 
     echo "$gpt_line|$embed_line"
 }
+
+check_fallback_regions() {
+    local skip_region="$1"
+    ALL_RESULTS=()
+    ELIGIBLE_FALLBACKS=()
+
+    echo "🌍 Preferred regions: ${PREFERRED_REGIONS[*]}"
+    
+    for region in "${PREFERRED_REGIONS[@]}"; do
+        [[ "$region" == "$skip_region" ]] && continue
+
+        echo "🔍 Checking quota in '$region'..."
+        result=$(check_quota "$region")
+
+        if [[ -n "$result" ]]; then
+            IFS='|' read -r gpt embed <<< "$result"
+            IFS=',' read -r _ _ _ _ gpt_avail <<< "$gpt"
+            IFS=',' read -r _ _ _ _ embed_avail <<< "$embed"
+
+            ALL_RESULTS+=("$result")
+
+            if (( gpt_avail >= GPT4O_CAPACITY && embed_avail >= EMBEDDING_CAPACITY )); then
+                ELIGIBLE_FALLBACKS+=("$region")
+            fi
+        fi
+    done
+
+    if (( ${#ELIGIBLE_FALLBACKS[@]} > 0 )); then
+        show_table
+        echo -e "\n👉 Eligible fallback regions:"
+        for region in "${ELIGIBLE_FALLBACKS[@]}"; do
+            echo "  - $region"
+        done
+
+        if confirm_action "❓ Proceed with manual region '$manual_region'?"; then
+            set_deployment_values "$manual_region" "$gpt_cap" "$embed_cap"
+            echo "✅ Deployment values set. Exiting."
+            exit 0
+        else
+            manual_prompt
+            return
+        fi
+    else
+        echo "❌ No eligible fallback regions found."
+        echo "🔁 Let's try again..."
+        manual_prompt
+        return
+    fi
+}
+
 
 show_table() {
     echo -e "\n📊 Validating model deployment: gpt-4o"
@@ -160,12 +250,17 @@ manual_prompt() {
         IFS=',' read -r _ _ _ _ gpt_avail <<< "$gpt"
         IFS=',' read -r _ _ _ _ embed_avail <<< "$embed"
 
-        (( gpt_avail < gpt_cap )) && echo "❌ Insufficient GPT-4o quota: $gpt_avail" && continue
-        (( embed_avail < embed_cap )) && echo "❌ Insufficient Embedding quota: $embed_avail" && continue
+        if (( gpt_avail < gpt_cap )); then
+            echo "❌ Insufficient GPT-4o quota: $gpt_avail"
+        fi
 
-        set_deployment_values "$manual_region" "$gpt_cap" "$embed_cap"
-        echo "✅ Deployment values set. Exiting."
-        exit 0
+        if (( embed_avail < embed_cap )); then
+            echo "❌ Insufficient Embedding quota: $embed_avail"
+        fi
+
+        check_fallback_regions "$manual_region"
+        echo -e "\n✅ Sufficient quota found in '${ELIGIBLE_FALLBACKS[*]}'."
+
     done
 }
 
@@ -196,19 +291,7 @@ else
     echo -e "\n❌ No quota data retrieved for '$LOCATION'."
 fi
 
-for region in "${PREFERRED_REGIONS[@]}"; do
-    [[ "$region" == "$LOCATION" ]] && continue
-    result=$(check_quota "$region")
-    if [[ -n "$result" ]]; then
-        IFS='|' read -r gpt embed <<< "$result"
-        IFS=',' read -r _ _ _ _ gpt_avail <<< "$gpt"
-        IFS=',' read -r _ _ _ _ embed_avail <<< "$embed"
-        ALL_RESULTS+=("$result")
-        if (( gpt_avail >= GPT4O_CAPACITY && embed_avail >= EMBEDDING_CAPACITY )); then
-            ELIGIBLE_FALLBACKS+=("$region")
-        fi
-    fi
-done
+check_fallback_regions "$LOCATION"
 
 if (( ${#ALL_RESULTS[@]} > 0 )); then
     show_table
