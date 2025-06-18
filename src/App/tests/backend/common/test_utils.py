@@ -43,7 +43,7 @@ def test_parse_multi_columns(input_str, expected):
     assert parse_multi_columns(input_str) == expected
 
 
-@patch("backend.utils.requests.get")
+@patch("backend.common.utils.requests.get")
 def test_fetch_user_groups(mock_get):
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -63,8 +63,8 @@ def test_fetch_user_groups(mock_get):
     assert user_groups == [{"id": "group1"}, {"id": "group1"}]
 
 
-@patch("backend.utils.fetchUserGroups")
-@patch("backend.utils.AZURE_SEARCH_PERMITTED_GROUPS_COLUMN", "your_column")
+@patch("backend.common.utils.fetchUserGroups")
+@patch("backend.common.utils.AZURE_SEARCH_PERMITTED_GROUPS_COLUMN", "your_column")
 def test_generate_filter_string(mock_fetch_user_groups):
     mock_fetch_user_groups.return_value = [{"id": "group1"}, {"id": "group2"}]
     filter_string = generateFilterString("fake_token")

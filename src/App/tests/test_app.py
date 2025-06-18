@@ -1,5 +1,9 @@
 import asyncio
 import json
+import logging
+import os
+import time
+import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -27,23 +31,19 @@ AZURE_COSMOSDB_ENABLE_FEEDBACK = True
 
 @pytest.fixture(autouse=True)
 def set_env_vars():
-    with patch("app.AZURE_OPENAI_PREVIEW_API_VERSION", "2024-02-15-preview"), patch(
-        "app.AZURE_OPENAI_ENDPOINT", "https://example.com/"
-    ), patch("app.AZURE_OPENAI_MODEL", "openai_model"), patch(
-        "app.CHAT_HISTORY_ENABLED", True
-    ), patch(
-        "app.AZURE_COSMOSDB_ACCOUNT", "test_account"
-    ), patch(
-        "app.AZURE_COSMOSDB_ACCOUNT_KEY", "test_key"
-    ), patch(
-        "app.AZURE_COSMOSDB_DATABASE", "test_database"
-    ), patch(
-        "app.AZURE_COSMOSDB_CONVERSATIONS_CONTAINER", "test_container"
-    ), patch(
-        "app.AZURE_COSMOSDB_ENABLE_FEEDBACK", True
-    ), patch(
-        "app.AZURE_OPENAI_KEY", "valid_key"
-    ):
+    with patch("backend.common.config.config.AZURE_OPENAI_PREVIEW_API_VERSION", "2024-02-15-preview"), \
+         patch("backend.common.config.config.AZURE_OPENAI_ENDPOINT", "https://example.com/"), \
+         patch("backend.common.config.config.AZURE_OPENAI_MODEL", "openai_model"), \
+         patch("backend.common.config.config.CHAT_HISTORY_ENABLED", True), \
+         patch("backend.common.config.config.AZURE_COSMOSDB_ACCOUNT", "test_account"), \
+         patch("backend.common.config.config.AZURE_COSMOSDB_ACCOUNT_KEY", "test_key"), \
+         patch("backend.common.config.config.AZURE_COSMOSDB_DATABASE", "test_database"), \
+         patch("backend.common.config.config.AZURE_COSMOSDB_CONVERSATIONS_CONTAINER", "test_container"), \
+         patch("backend.common.config.config.AZURE_COSMOSDB_ENABLE_FEEDBACK", True), \
+         patch("backend.common.config.config.AZURE_OPENAI_KEY", "valid_key"), \
+         patch("backend.common.config.config.UI_TITLE", "Woodgrove Bank"), \
+         patch("backend.common.config.config.UI_FAVICON", "/favicon.ico"), \
+         patch("backend.common.config.config.MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION", "2023-01-01"):
         yield
 
 
@@ -117,7 +117,7 @@ async def test_favicon(mock_send_static_file, client):
 
 @pytest.mark.asyncio
 async def test_ensure_cosmos_not_configured(client):
-    with patch("app.AZURE_COSMOSDB_ACCOUNT", ""):
+    with patch("backend.common.config.config.AZURE_COSMOSDB_ACCOUNT", ""):
         response = await client.get("/history/ensure")
         res_text = await response.get_data(as_text=True)
         assert response.status_code == 404
@@ -165,8 +165,8 @@ async def test_ensure_cosmos_exception(mock_init_cosmosdb_client, client):
 @pytest.mark.asyncio
 @patch("app.init_cosmosdb_client")
 async def test_ensure_cosmos_invalid_db_name(mock_init_cosmosdb_client, client):
-    with patch("app.AZURE_COSMOSDB_DATABASE", "your_db_name"), patch(
-        "app.AZURE_COSMOSDB_ACCOUNT", "your_account"
+    with patch("backend.common.config.config.AZURE_COSMOSDB_DATABASE", "your_db_name"), patch(
+        "backend.common.config.config.AZURE_COSMOSDB_ACCOUNT", "your_account"
     ):
         mock_init_cosmosdb_client.side_effect = Exception(
             "Invalid CosmosDB database name"
@@ -183,7 +183,7 @@ async def test_ensure_cosmos_invalid_db_name(mock_init_cosmosdb_client, client):
 @pytest.mark.asyncio
 @patch("app.init_cosmosdb_client")
 async def test_ensure_cosmos_invalid_container_name(mock_init_cosmosdb_client, client):
-    with patch("app.AZURE_COSMOSDB_CONVERSATIONS_CONTAINER", "your_container_name"):
+    with patch("backend.common.config.config.AZURE_COSMOSDB_CONVERSATIONS_CONTAINER", "your_container_name"):
         mock_init_cosmosdb_client.side_effect = Exception(
             "Invalid CosmosDB container name"
         )
@@ -208,39 +208,23 @@ async def test_ensure_cosmos_generic_exception(mock_init_cosmosdb_client, client
 
 
 @pytest.mark.asyncio
-@patch("app.get_connection")
-@patch("app.dict_cursor")
-async def test_get_users_success(mock_dict_cursor, mock_get_connection, client):
-    # Mock database connection and cursor
-    mock_conn = MagicMock()
-    mock_cursor = MagicMock()
-    mock_get_connection.return_value = mock_conn
-    mock_conn.cursor.return_value = mock_cursor
-
-    # Mock query results
-    mock_dict_cursor.side_effect = [
-        [  # First call (client data)
-            {
-                "ClientId": 1,
-                "Client": "Client A",
-                "Email": "clienta@example.com",
-                "AssetValue": "1,000,000",
-                "ClientSummary": "Summary A",
-                "LastMeetingDateFormatted": "Monday January 1, 2023",
-                "LastMeetingStartTime": "10:00 AM",
-                "LastMeetingEndTime": "10:30 AM",
-                "NextMeetingFormatted": "Monday January 8, 2023",
-                "NextMeetingStartTime": "11:00 AM",
-                "NextMeetingEndTime": "11:30 AM",
-            }
-        ],
-        [  # Second call (date difference query)
-            {
-                "ClientMeetingDaysDifference": 5,
-                "AssetMonthsDifference": 1,
-                "StatusMonthsDifference": 1,
-            }
-        ],
+@patch("backend.services.sqldb_service.get_client_data")
+async def test_get_users_success(mock_get_client_data, client):
+    # Mock the service function return
+    mock_get_client_data.return_value = [
+        {
+            "ClientId": 1,
+            "ClientName": "Client A",
+            "ClientEmail": "clienta@example.com",
+            "AssetValue": "1,000,000",
+            "ClientSummary": "Summary A",
+            "LastMeeting": "Monday January 1, 2023",
+            "LastMeetingStartTime": "10:00 AM",
+            "LastMeetingEndTime": "10:30 AM",
+            "NextMeeting": "Monday January 8, 2023",
+            "NextMeetingTime": "11:00 AM",
+            "NextMeetingEndTime": "11:30 AM",
+        }
     ]
 
     # Call the function
@@ -265,31 +249,25 @@ async def test_get_users_success(mock_dict_cursor, mock_get_connection, client):
 
 
 @pytest.mark.asyncio
-async def test_get_users_no_users(client):
-    mock_conn = MagicMock()
-    mock_cursor = MagicMock()
-    mock_conn.cursor.return_value = mock_cursor
-    mock_cursor.fetchall.return_value = []
+@patch("backend.services.sqldb_service.get_client_data")
+async def test_get_users_no_users(mock_get_client_data, client):
+    mock_get_client_data.return_value = []
 
-    with patch("app.get_connection", return_value=mock_conn):
-        response = await client.get("/api/users")
-        assert response.status_code == 200
-        res_text = await response.get_data(as_text=True)
-        assert json.loads(res_text) == []
+    response = await client.get("/api/users")
+    assert response.status_code == 200
+    res_text = await response.get_data(as_text=True)
+    assert json.loads(res_text) == []
 
 
 @pytest.mark.asyncio
-async def test_get_users_sql_execution_failure(client):
-    mock_conn = MagicMock()
-    mock_cursor = MagicMock()
-    mock_conn.cursor.return_value = mock_cursor
-    mock_cursor.execute.side_effect = Exception("SQL execution failed")
+@patch("backend.services.sqldb_service.get_client_data")
+async def test_get_users_sql_execution_failure(mock_get_client_data, client):
+    mock_get_client_data.side_effect = Exception("SQL execution failed")
 
-    with patch("app.get_connection", return_value=mock_conn):
-        response = await client.get("/api/users")
-        assert response.status_code == 500
-        res_text = await response.get_data(as_text=True)
-        assert "SQL execution failed" in res_text
+    response = await client.get("/api/users")
+    assert response.status_code == 500
+    res_text = await response.get_data(as_text=True)
+    assert "SQL execution failed" in res_text
 
 
 @pytest.fixture
@@ -1314,13 +1292,18 @@ class MockChatCompletionChunk:
         self.choices = choices
 
 
+# Mock chunk object with content attribute
+class MockStreamChunk:
+    def __init__(self, content):
+        self.content = content
+
 # Simulated async generator for testing purposes
 async def fake_internal_stream_response():
     # Simulating streaming data chunk by chunk
     chunks = ["chunk1", "chunk2"]
     for chunk in chunks:
         await asyncio.sleep(0.1)
-        yield chunk
+        yield MockStreamChunk(chunk)
 
 
 @pytest.mark.asyncio
@@ -1337,7 +1320,7 @@ async def test_stream_chat_request_with_internal_stream():
     with patch(
         "app.stream_response_from_wealth_assistant",
         return_value=fake_internal_stream_response,
-    ), patch("app.USE_INTERNAL_STREAM", True):
+    ), patch("backend.common.config.config.USE_INTERNAL_STREAM", True):
 
         # Create the Quart app context for the test
         async with create_app().app_context():
@@ -1373,7 +1356,7 @@ async def test_stream_chat_request_no_client_id():
     request_headers = {"apim-request-id": "test_id"}
 
     async with create_app().app_context():
-        with patch("app.USE_INTERNAL_STREAM", True):
+        with patch("backend.common.config.config.USE_INTERNAL_STREAM", True):
             response, status_code = await stream_chat_request(
                 request_body, request_headers
             )
@@ -1391,7 +1374,7 @@ async def test_stream_chat_request_without_azurefunction():
     }
     request_headers = {"apim-request-id": "test_id"}
 
-    with patch("app.USE_INTERNAL_STREAM", False):
+    with patch("backend.common.config.config.USE_INTERNAL_STREAM", False):
         with patch("app.send_chat_request", new_callable=AsyncMock) as mock_send:
             mock_send.return_value = (
                 async_generator(
