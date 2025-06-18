@@ -3,6 +3,8 @@ import os
 
 from azure.monitor.events.extension import track_event
 
+from backend.common.config import config
+
 
 def track_event_if_configured(event_name: str, event_data: dict):
     """Track an event if Application Insights is configured.
@@ -15,7 +17,7 @@ def track_event_if_configured(event_name: str, event_data: dict):
         event_data: Dictionary of event data/dimensions
     """
     try:
-        instrumentation_key = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+        instrumentation_key = config.APPLICATIONINSIGHTS_CONNECTION_STRING
         if instrumentation_key:
             track_event(event_name, event_data)
         else:

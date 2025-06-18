@@ -7,14 +7,16 @@ import pyodbc
 from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 
+from backend.common.config import config
+
 load_dotenv()
 
-driver = "{ODBC Driver 18 for SQL Server}"
-server = os.environ.get("SQLDB_SERVER")
-database = os.environ.get("SQLDB_DATABASE")
-username = os.environ.get("SQLDB_USERNAME")
-password = os.environ.get("SQLDB_PASSWORD")
-mid_id = os.environ.get("SQLDB_USER_MID")
+driver = config.ODBC_DRIVER
+server = config.SQL_SERVER
+database = config.SQL_DATABASE
+username = config.SQL_USERNAME
+password = config.SQL_PASSWORD
+mid_id = config.MID_ID
 
 
 def dict_cursor(cursor):
@@ -161,7 +163,7 @@ def get_client_data():
         return formatted_users
 
     except Exception as e:
-        logging.exception("Exception occurred in get_client_data:", e)
+        logging.exception("Exception occurred in get_client_data")
         raise e
     finally:
         if conn:
@@ -239,5 +241,5 @@ def update_sample_data(conn):
 
         logging.info("Sample data updated successfully")
     except Exception as e:
-        logging.exception("Error updating sample data:", e)
+        logging.exception("Error updating sample data")
         raise e

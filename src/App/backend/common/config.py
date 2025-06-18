@@ -31,6 +31,9 @@ class Config:
 
         # Application Insights Instrumentation Key
         self.INSTRUMENTATION_KEY = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+        self.APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+
+        self.DEBUG = os.environ.get("DEBUG", "false")
 
         # Current minimum Azure OpenAI version supported
         self.MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION = "2024-02-15-preview"

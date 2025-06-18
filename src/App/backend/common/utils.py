@@ -2,16 +2,14 @@ import dataclasses
 import json
 import logging
 import os
-
+from backend.common.config import config
 import requests
 
-DEBUG = os.environ.get("DEBUG", "false")
+DEBUG = config.DEBUG
 if DEBUG.lower() == "true":
     logging.basicConfig(level=logging.DEBUG)
 
-AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get(
-    "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN"
-)
+AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = config.AZURE_SEARCH_PERMITTED_GROUPS_COLUMN
 
 
 class JSONEncoder(json.JSONEncoder):

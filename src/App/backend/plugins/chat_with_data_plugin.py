@@ -64,6 +64,12 @@ class ChatWithDataPlugin:
         Dynamically generates a T-SQL query using the Azure OpenAI chat endpoint
         and then executes it against the SQL database.
         """
+        if not ClientId or not ClientId.strip():
+            return "Error: ClientId is required"
+        
+        if not input or not input.strip():
+            return "Error: Query input is required"
+
         clientid = ClientId
         query = input
 
@@ -157,6 +163,11 @@ class ChatWithDataPlugin:
         """
         Uses Azure Cognitive Search (via the Azure OpenAI extension) to find relevant call transcripts.
         """
+        if not ClientId or not ClientId.strip():
+            return "Error: ClientId is required"
+        if not question or not question.strip():
+            return "Error: Question input is required"
+
         try:
             client = self.get_openai_client()
 
