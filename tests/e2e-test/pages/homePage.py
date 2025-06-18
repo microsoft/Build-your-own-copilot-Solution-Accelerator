@@ -20,6 +20,11 @@ class HomePage(BasePage):
     HIDE_CHAT_HISTORY_BUTTON = "//span[text()='Hide chat history']"
     USER_CHAT_MESSAGE = "(//div[contains(@class,'chatMessageUserMessage')])[1]"
     STOP_GENERATING_LABEL = "//span[text()='Stop generating']"
+    CHAT_HISTORY_NAME = "//div[contains(@class, 'ChatHistoryListItemCell_chatTitle')]"
+    CLEAR_CHAT_HISTORY_MENU = "//button[@id='moreButton']"
+    CLEAR_CHAT_HISTORY = "//button[@role='menuitem']"
+    REFERENCE_LINKS_IN_RESPONSE = "//span[@role='button' and contains(@class, 'citationContainer')]"
+    CLOSE_BUTTON = "svg[role='button'][tabindex='0']"
 
     def __init__(self, page):
         self.page = page
@@ -36,6 +41,31 @@ class HomePage(BasePage):
         # Type a question in the text area
         self.page.locator(self.TYPE_QUESTION_TEXT_AREA).fill(text)
         self.page.wait_for_timeout(2000)
+
+    def delete_chat_history(self):
+        self.page.locator(self.SHOW_CHAT_HISTORY_BUTTON).click()
+        chat_history = self.page.locator("//span[contains(text(),'No chat history.')]")
+        if chat_history.is_visible():
+            self.page.wait_for_load_state('networkidle')
+            self.page.wait_for_timeout(2000)
+            self.page.locator(self.HIDE_CHAT_HISTORY_BUTTON).click()
+
+
+        else:
+            self.page.locator(self.CLEAR_CHAT_HISTORY_MENU).click()
+            self.page.locator(self.CLEAR_CHAT_HISTORY).click()
+            self.page.get_by_role("button", name="Clear All").click()
+            self.page.wait_for_timeout(10000)
+            self.page.locator(self.HIDE_CHAT_HISTORY_BUTTON).click()
+            self.page.wait_for_load_state('networkidle')
+            self.page.wait_for_timeout(2000)
+
+    def close_chat_history(self):
+        self.page.locator(self.HIDE_CHAT_HISTORY_BUTTON).click()
+        self.page.wait_for_load_state('networkidle')
+        self.page.wait_for_timeout(2000)
+    
+   
 
     def click_send_button(self):
         # Click on send button in question area
@@ -54,30 +84,17 @@ class HomePage(BasePage):
         response_raw_datetime = self.page.locator(self.ANSWER_TEXT).text_content()
         BasePage.compare_raw_date_time(self,response_raw_datetime,sidepanel_raw_datetime)
 
-    def click_on_save_chat_plus_icon(self):
-        self.page.wait_for_selector(self.SAVE_CHATHISTORY_PLUS_ICON)
-        self.page.locator(self.SAVE_CHATHISTORY_PLUS_ICON).click()
-        self.page.wait_for_timeout(1000)
 
     def click_on_show_chat_history_button(self):
         self.page.wait_for_selector(self.SHOW_CHAT_HISTORY_BUTTON)
         self.page.locator(self.SHOW_CHAT_HISTORY_BUTTON).click()
-        self.page.wait_for_timeout(1000)        
 
-    def click_send_button_for_chat_history_response(self):
-        # Click on send button in question area
-        self.page.locator(self.SEND_BUTTON).click() 
 
-    def click_on_saved_chat(self):
-        #click on saved chat in the show chat history section
-        self.page.wait_for_selector(self.SAVED_CHAT_LABEL)
-        self.page.locator(self.SAVED_CHAT_LABEL).click()
+    def has_reference_link(self):
+        # Get all assistant messages
+        assistant_messages = self.page.locator("div.chat-message.assistant")
+        last_assistant = assistant_messages.nth(assistant_messages.count() - 1)
 
-    def click_clear_chat_icon(self):
-        # Click on clear chat icon in question area
-        if self.page.locator(self.USER_CHAT_MESSAGE).is_visible():
-            self.page.locator(self.CLEAR_CHAT_ICON).click()
-
-    def click_hide_chat_history_button(self):
-        # Click on hide chat history button in question area
-        self.page.locator(self.HIDE_CHAT_HISTORY_BUTTON).click()
+        # Use XPath properly by prefixing with 'xpath='
+        reference_links = last_assistant.locator("xpath=.//span[@role='button' and contains(@class, 'citationContainer')]")
+        return reference_links.count() > 0
