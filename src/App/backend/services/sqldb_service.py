@@ -1,6 +1,5 @@
 # db.py
 import logging
-import os
 import struct
 
 import pyodbc

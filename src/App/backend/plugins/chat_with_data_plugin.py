@@ -66,7 +66,7 @@ class ChatWithDataPlugin:
         """
         if not ClientId or not ClientId.strip():
             return "Error: ClientId is required"
-        
+
         if not input or not input.strip():
             return "Error: Query input is required"
 

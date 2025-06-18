@@ -1,6 +1,7 @@
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
 from backend.common.event_utils import track_event_if_configured
+
 
 @patch("backend.common.event_utils.track_event")
 @patch("backend.common.event_utils.config")
@@ -44,7 +45,9 @@ def test_track_event_when_not_configured(mock_logging, mock_config, mock_track_e
 def test_track_event_attribute_error(mock_logging, mock_config, mock_track_event):
     # Setup
     mock_config.APPLICATIONINSIGHTS_CONNECTION_STRING = "mock_connection_string"
-    mock_track_event.side_effect = AttributeError("ProxyLogger has no attribute 'resource'")
+    mock_track_event.side_effect = AttributeError(
+        "ProxyLogger has no attribute 'resource'"
+    )
     event_name = "test_event"
     event_data = {"key": "value"}
 

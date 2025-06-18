@@ -1,9 +1,10 @@
 import dataclasses
 import json
 import logging
-import os
-from backend.common.config import config
+
 import requests
+
+from backend.common.config import config
 
 DEBUG = config.DEBUG
 if DEBUG.lower() == "true":

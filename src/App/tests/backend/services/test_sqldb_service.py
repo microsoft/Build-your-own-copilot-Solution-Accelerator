@@ -15,7 +15,9 @@ sql_db.mid_id = "mock_mid_id"  # Managed identity client ID if needed
 
 
 @patch("backend.services.sqldb_service.pyodbc.connect")  # Mock pyodbc.connect
-@patch("backend.services.sqldb_service.DefaultAzureCredential")  # Mock DefaultAzureCredential
+@patch(
+    "backend.services.sqldb_service.DefaultAzureCredential"
+)  # Mock DefaultAzureCredential
 def test_get_connection(mock_credential_class, mock_connect):
     # Mock the DefaultAzureCredential and get_token method
     mock_credential = MagicMock()
@@ -56,7 +58,9 @@ def test_get_connection(mock_credential_class, mock_connect):
 
 
 @patch("backend.services.sqldb_service.pyodbc.connect")  # Mock pyodbc.connect
-@patch("backend.services.sqldb_service.DefaultAzureCredential")  # Mock DefaultAzureCredential
+@patch(
+    "backend.services.sqldb_service.DefaultAzureCredential"
+)  # Mock DefaultAzureCredential
 def test_get_connection_token_failure(mock_credential_class, mock_connect):
     # Mock the DefaultAzureCredential and get_token method
     mock_credential = MagicMock()
@@ -171,7 +175,9 @@ def test_get_client_name_from_db_exception(mock_get_connection):
 @patch.object(sql_db, "update_sample_data")
 @patch.object(sql_db, "dict_cursor")
 @patch.object(sql_db, "get_connection")
-def test_get_client_data_success_no_update_needed(mock_get_connection, mock_dict_cursor, mock_update_sample_data):
+def test_get_client_data_success_no_update_needed(
+    mock_get_connection, mock_dict_cursor, mock_update_sample_data
+):
     """Test successful retrieval of client data when update is not needed."""
     # Setup mocks
     mock_conn = MagicMock()
@@ -236,7 +242,9 @@ def test_get_client_data_success_no_update_needed(mock_get_connection, mock_dict
 @patch.object(sql_db, "update_sample_data")
 @patch.object(sql_db, "dict_cursor")
 @patch.object(sql_db, "get_connection")
-def test_get_client_data_success_with_update(mock_get_connection, mock_dict_cursor, mock_update_sample_data):
+def test_get_client_data_success_with_update(
+    mock_get_connection, mock_dict_cursor, mock_update_sample_data
+):
     """Test successful retrieval of client data when update is needed."""
     # Setup mocks
     mock_conn = MagicMock()
@@ -271,7 +279,9 @@ def test_get_client_data_success_with_update(mock_get_connection, mock_dict_curs
 
     # Verify function calls
     mock_get_connection.assert_called_once()
-    mock_update_sample_data.assert_called_once_with(mock_conn)  # Should be called when <= 6 records
+    mock_update_sample_data.assert_called_once_with(
+        mock_conn
+    )  # Should be called when <= 6 records
     mock_conn.close.assert_called_once()
 
 

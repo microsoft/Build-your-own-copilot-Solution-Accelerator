@@ -31,7 +31,9 @@ class Config:
 
         # Application Insights Instrumentation Key
         self.INSTRUMENTATION_KEY = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
-        self.APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+        self.APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
+            "APPLICATIONINSIGHTS_CONNECTION_STRING"
+        )
 
         self.DEBUG = os.environ.get("DEBUG", "false")
 
