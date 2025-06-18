@@ -20,6 +20,8 @@ class HomePage(BasePage):
     HIDE_CHAT_HISTORY_BUTTON = "//span[text()='Hide chat history']"
     USER_CHAT_MESSAGE = "(//div[contains(@class,'chatMessageUserMessage')])[1]"
     STOP_GENERATING_LABEL = "//span[text()='Stop generating']"
+    # # SHOW_CHAT_HISTORY_BUTTON = "//button[normalize-space()='Show Chat History']"
+    # HIDE_CHAT_HISTORY_BUTTON = "//button[.//span[text()='Hide chat history']]"
     CHAT_HISTORY_NAME = "//div[contains(@class, 'ChatHistoryListItemCell_chatTitle')]"
     CLEAR_CHAT_HISTORY_MENU = "//button[@id='moreButton']"
     CLEAR_CHAT_HISTORY = "//button[@role='menuitem']"
@@ -88,7 +90,21 @@ class HomePage(BasePage):
     def click_on_show_chat_history_button(self):
         self.page.wait_for_selector(self.SHOW_CHAT_HISTORY_BUTTON)
         self.page.locator(self.SHOW_CHAT_HISTORY_BUTTON).click()
+        self.page.wait_for_timeout(1000)        
 
+    def click_send_button_for_chat_history_response(self):
+        # Click on send button in question area
+        self.page.locator(self.SEND_BUTTON).click() 
+
+
+    def click_clear_chat_icon(self):
+        # Click on clear chat icon in question area
+        if self.page.locator(self.USER_CHAT_MESSAGE).is_visible():
+            self.page.locator(self.CLEAR_CHAT_ICON).click()
+
+    def click_hide_chat_history_button(self):
+        # Click on hide chat history button in question area
+        self.page.locator(self.HIDE_CHAT_HISTORY_BUTTON).click()
 
     def has_reference_link(self):
         # Get all assistant messages
