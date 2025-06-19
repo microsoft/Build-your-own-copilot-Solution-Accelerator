@@ -43,15 +43,15 @@ if [ -z "$SqlDatabaseName" ]; then
 fi
 
 if [ -z "$webAppManagedIdentityClientId" ]; then
-    webAppManagedIdentityClientId=$(azd env get-value MANAGEDINDENTITY_WEBAPP_CLIENTID)
+    webAppManagedIdentityClientId=$(azd env get-value MANAGEDIDENTITY_WEBAPP_CLIENTID)
 fi
 
 if [ -z "$webAppManagedIdentityDisplayName" ]; then
-    webAppManagedIdentityDisplayName=$(azd env get-value MANAGEDINDENTITY_WEBAPP_NAME)
+    webAppManagedIdentityDisplayName=$(azd env get-value MANAGEDIDENTITY_WEBAPP_NAME)
 fi
 
 if [ -z "$aiFoundryName" ]; then
-    aiFoundryName=$(azd env get-value AI_FOUNDARY_NAME)
+    aiFoundryName=$(azd env get-value AI_FOUNDRY_NAME)
 fi
 
 if [ -z "$aiSearchName" ]; then

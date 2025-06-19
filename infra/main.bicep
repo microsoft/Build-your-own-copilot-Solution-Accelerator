@@ -100,7 +100,7 @@ var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports
   If no data is available, state 'No relevant data found for previous meetings.'''
 
 var functionAppStreamTextSystemPrompt = '''The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.
-  If the user mentions no name, assume they are asking about '{SelectedClientName}'..
+  If the user mentions no name, assume they are asking about '{SelectedClientName}'.
   If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'
   If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.
   Always send clientId as '{client_id}'.'''
@@ -253,7 +253,7 @@ output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
 output RESOURCE_GROUP_NAME string = resourceGroup().name
 output SQLDB_SERVER string = sqlDBModule.outputs.sqlServerName
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
-output MANAGEDINDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
-output MANAGEDINDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
-output AI_FOUNDARY_NAME string = aifoundry.outputs.aiFoundryName
+output MANAGEDIDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
+output MANAGEDIDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
+output AI_FOUNDRY_NAME string = aifoundry.outputs.aiFoundryName
 output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService

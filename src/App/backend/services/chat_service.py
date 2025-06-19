@@ -55,7 +55,7 @@ async def stream_response_from_wealth_assistant(query: str, client_id: str):
                         continue
                     yield chunk.content  # just the deltaText
             finally:
-                thread = chunk.thread
+                thread = chunk.thread if chunk else None
                 await thread.delete() if thread else None
 
         return generate
