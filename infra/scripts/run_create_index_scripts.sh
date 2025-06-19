@@ -7,6 +7,8 @@ baseUrl="$2"
 managedIdentityClientId="$3"
 resourceGroupName="$4"
 sqlServerName="$5"
+aiFoundryName="$6"
+aiSearchName="$7"
 
 echo "Script Started"
 
@@ -41,6 +43,8 @@ else
     # echo "Getting signed in user id"
     # signed_user_id=$(az ad signed-in-user show --query id -o tsv)
 
+    ### Assign Key Vault Administrator role to the signed in user ###
+
     echo "Getting key vault resource id"
     key_vault_resource_id=$(az keyvault show --name $keyvaultName --query id --output tsv)
 
@@ -59,6 +63,50 @@ else
     else
         echo "User already has the Key Vault Administrator role."
     fi
+
+    ### Assign Azure AI User role to the signed in user ###
+
+    echo "Getting Azure AI resource id"
+    aif_resource_id=$(az cognitiveservices account show --name $aiFoundryName --resource-group $resourceGroupName --query id --output tsv)
+
+    # Check if the user has the Azure AI User role
+    echo "Checking if user has the Azure AI User role"
+    role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --role 53ca6127-db72-4b80-b1b0-d745d6d5456d --scope $aif_resource_id --assignee $signed_user_id --query "[].roleDefinitionId" -o tsv)
+    if [ -z "$role_assignment" ]; then
+        echo "User does not have the Azure AI User role. Assigning the role."
+        MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role 53ca6127-db72-4b80-b1b0-d745d6d5456d --scope $aif_resource_id --output none
+        if [ $? -eq 0 ]; then
+            echo "Azure AI User role assigned successfully."
+        else
+            echo "Failed to assign Azure AI User role."
+            exit 1
+        fi
+    else
+        echo "User already has the Azure AI User role."
+    fi
+
+    ### Assign Search Index Data Contributor role to the signed in user ###
+
+    echo "Getting Azure Search resource id"
+    search_resource_id=$(az search service show --name $aiSearchName --resource-group $resourceGroupName --query id --output tsv)
+
+    # Check if the user has the Search Index Data Contributor role
+    echo "Checking if user has the Search Index Data Contributor role"
+    role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role 8ebe5a00-799e-43f5-93ac-243d3dce84a7 --scope $search_resource_id --query "[].roleDefinitionId" -o tsv)
+    if [ -z "$role_assignment" ]; then
+        echo "User does not have the Search Index Data Contributor role. Assigning the role."
+        MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role 8ebe5a00-799e-43f5-93ac-243d3dce84a7 --scope $search_resource_id --output none
+        if [ $? -eq 0 ]; then
+            echo "Search Index Data Contributor role assigned successfully."
+        else
+            echo "Failed to assign Search Index Data Contributor role."
+            exit 1
+        fi
+    else
+        echo "User already has the Search Index Data Contributor role."
+    fi
+
+    ### Assign signed in user as SQL Server Admin ###
 
     echo "Getting Azure SQL Server resource id"
     sql_server_resource_id=$(az sql server show --name $sqlServerName --resource-group $resourceGroupName --query id --output tsv)

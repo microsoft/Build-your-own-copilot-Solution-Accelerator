@@ -116,7 +116,7 @@ When you start the deployment, most parameters will have **default values**, but
 | **Embedding Model**                  | OpenAI embedding model used for vector similarity.                                                 | `text-embedding-ada-002` |
 | **Embedding Model Capacity**         | Set the capacity for **embedding models**. Choose based on usage and quota.                        | `80`                     |
 | **Image Tag**                        | The version of the Docker image to use (e.g., `latest`, `dev`, `hotfix`).                          | `latest`                 |
-| **Azure OpenAI API Version**         | Set the API version for OpenAI model deployments.                                                  | `2025-01-01-preview`     |
+| **Azure OpenAI API Version**         | Set the API version for OpenAI model deployments.                                                  | `2025-04-01-preview`     |
 | **AZURE\_LOCATION**                  | Sets the Azure region for resource deployment. | `japaneast`              |
 | **Existing Log Analytics Workspace** | To reuse an existing Log Analytics Workspace ID instead of creating a new one.                     | *(empty)*                |
 
@@ -211,7 +211,7 @@ This will rebuild the source code, package it into a container, and push it to t
     ```
     if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
     ```shell
-    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName>
+    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName> <aiFoundryResourceName> <aiSearchResourceName>
     ```
 
 2. **Add Authentication Provider**  

@@ -10,6 +10,8 @@ sqlServerName="$6"
 SqlDatabaseName="$7"
 webAppManagedIdentityClientId="$8"
 webAppManagedIdentityDisplayName="$9"
+aiFoundryName="${10}"
+aiSearchName="${11}"
 
 # get parameters from azd env, if not provided
 if [ -z "$resourceGroupName" ]; then
@@ -48,10 +50,17 @@ if [ -z "$webAppManagedIdentityDisplayName" ]; then
     webAppManagedIdentityDisplayName=$(azd env get-value MANAGEDINDENTITY_WEBAPP_NAME)
 fi
 
+if [ -z "$aiFoundryName" ]; then
+    aiFoundryName=$(azd env get-value AI_FOUNDARY_NAME)
+fi
+
+if [ -z "$aiSearchName" ]; then
+    aiSearchName=$(azd env get-value AI_SEARCH_SERVICE_NAME)
+fi
 
 # Check if all required arguments are provided
-if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$webAppManagedIdentityClientId" ] || [ -z "$webAppManagedIdentityDisplayName" ]; then
-    echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName>"
+if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$webAppManagedIdentityClientId" ] || [ -z "$webAppManagedIdentityDisplayName" ] || [ -z "$aiFoundryName" ] || [ -z "$aiSearchName" ]; then
+    echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName> <aiFoundryName> <aiSearchName>"
     exit 1
 fi
 
@@ -75,7 +84,7 @@ echo "copy_kb_files.sh completed successfully."
 
 # Call run_create_index_scripts.sh
 echo "Running run_create_index_scripts.sh"
-bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "" "$resourceGroupName" "$sqlServerName"
+bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "" "$resourceGroupName" "$sqlServerName" "$aiFoundryName" "$aiSearchName"
 if [ $? -ne 0 ]; then
     echo "Error: run_create_index_scripts.sh failed."
     exit 1

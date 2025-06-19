@@ -27,7 +27,7 @@ param deploymentType string = 'GlobalStandard'
 ])
 param gptModelName string = 'gpt-4o-mini'
 
-param azureOpenaiAPIVersion string = '2025-01-01-preview'
+param azureOpenaiAPIVersion string = '2025-04-01-preview'
 
 @minValue(10)
 @description('Capacity of the GPT deployment:')
@@ -99,12 +99,11 @@ var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports
   When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. 
   If no data is available, state 'No relevant data found for previous meetings.'''
 
-var functionAppStreamTextSystemPrompt = '''You are a helpful assistant to a Wealth Advisor. 
-  The currently selected client's name is '{SelectedClientName}', and any case-insensitive or partial mention should be understood as referring to this client.
-  If no name is provided, assume the question is about '{SelectedClientName}'.
-  If the query references a different client or includes comparative terms like 'compare' or 'other client', please respond with: 'Please only ask questions about the selected client or select another client.'
-  Otherwise, provide thorough answers using only data from SQL or call transcripts. 
-  If no data is found, please respond with 'No data found for that client.' Remove any client identifiers from the final response.'''
+var functionAppStreamTextSystemPrompt = '''The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.
+  If the user mentions no name, assume they are asking about '{SelectedClientName}'..
+  If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'
+  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.
+  Always send clientId as '{client_id}'.'''
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
@@ -142,7 +141,6 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     gptDeploymentCapacity: gptDeploymentCapacity
     embeddingModel: embeddingModel
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
-    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
     existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
   }
   scope: resourceGroup(resourceGroup().name)
@@ -154,7 +152,6 @@ module cosmosDBModule 'deploy_cosmos_db.bicep' = {
   params: {
     solutionLocation: cosmosLocation
     cosmosDBName:'${abbrs.databases.cosmosDBDatabase}${solutionPrefix}'
-    kvName: keyvaultModule.outputs.keyvaultName
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -201,7 +198,6 @@ module appserviceModule 'deploy_app_service.bicep' = {
     WebsiteName: '${abbrs.compute.webApp}${solutionPrefix}'
     AzureSearchService:aifoundry.outputs.aiSearchService
     AzureSearchIndex:'transcripts_index'
-    AzureSearchKey:keyVault.getSecret('AZURE-SEARCH-KEY')
     AzureSearchUseSemanticSearch:'True'
     AzureSearchSemanticSearchConfig:'my-semantic-config'
     AzureSearchTopK:'5'
@@ -209,10 +205,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchFilenameColumn:'chunk_id'
     AzureSearchTitleColumn:'client_id'
     AzureSearchUrlColumn:'sourceurl'
-    AzureOpenAIResource:aifoundry.outputs.aiServicesName
-    AzureOpenAIEndpoint:aifoundry.outputs.aiServicesTarget
+    AzureOpenAIResource:aifoundry.outputs.aiFoundryName
+    AzureOpenAIEndpoint:aifoundry.outputs.aoaiEndpoint
     AzureOpenAIModel:gptModelName
-    AzureOpenAIKey:keyVault.getSecret('AZURE-OPENAI-KEY')
     AzureOpenAITemperature:'0'
     AzureOpenAITopP:'1'
     AzureOpenAIMaxTokens:'1000'
@@ -225,13 +220,10 @@ module appserviceModule 'deploy_app_service.bicep' = {
     AzureSearchPermittedGroupsField:''
     AzureSearchStrictness:'3'
     AzureOpenAIEmbeddingName:embeddingModel
-    AzureOpenAIEmbeddingkey:keyVault.getSecret('AZURE-OPENAI-KEY')
-    AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aiServicesTarget
+    AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aoaiEndpoint
     USE_INTERNAL_STREAM:'True'
     SQLDB_SERVER:'${sqlDBModule.outputs.sqlServerName}.database.windows.net'
     SQLDB_DATABASE:sqlDBModule.outputs.sqlDbName
-    SQLDB_USERNAME:'sqladmin'
-    SQLDB_PASSWORD:keyVault.getSecret('SQLDB-PASSWORD')
     AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosAccountName
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosContainerName
     AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosDatabaseName
@@ -245,8 +237,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     sqlSystemPrompt: functionAppSqlPrompt
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
-    aiProjectConnectionString:keyVault.getSecret('AZURE-AI-PROJECT-CONN-STRING')
-    aiProjectName:aifoundry.outputs.aiProjectName
+    aiFoundryProjectName:aifoundry.outputs.aiFoundryProjectName
+    aiFoundryProjectEndpoint: aifoundry.outputs.aiFoundryProjectEndpoint
+    aiFoundryName: aifoundry.outputs.aiFoundryName
     applicationInsightsConnectionString:aifoundry.outputs.applicationInsightsConnectionString
   }
   scope: resourceGroup(resourceGroup().name)
@@ -262,3 +255,5 @@ output SQLDB_SERVER string = sqlDBModule.outputs.sqlServerName
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
 output MANAGEDINDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
 output MANAGEDINDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
+output AI_FOUNDARY_NAME string = aifoundry.outputs.aiFoundryName
+output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService

@@ -12,14 +12,6 @@ param sqlDBName string
 @description('Location for all resources.')
 param location string = solutionLocation
 
-@description('The administrator username of the SQL logical server.')
-@secure()
-param administratorLogin string = 'sqladmin'
-
-@description('The administrator password of the SQL logical server.')
-@secure()
-param administratorLoginPassword string = 'TestPassword_1234'
-
 
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   name: serverName
@@ -95,22 +87,6 @@ resource sqldbDatabaseEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-previe
   name: 'SQLDB-DATABASE'
   properties: {
     value: sqlDBName
-  }
-}
-
-resource sqldbDatabaseUsername 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'SQLDB-USERNAME'
-  properties: {
-    value: administratorLogin
-  }
-}
-
-resource sqldbDatabasePwd 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'SQLDB-PASSWORD'
-  properties: {
-    value: administratorLoginPassword
   }
 }
 
