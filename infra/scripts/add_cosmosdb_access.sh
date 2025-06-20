@@ -23,6 +23,16 @@ fi
 
 echo "Getting signed in user id"
 signed_user_id=$(az ad signed-in-user show --query id -o tsv)
+if [ $? -ne 0 ]; then
+    if [ -z "$managedIdentityClientId" ]; then
+        echo "Error: Failed to get signed in user id."
+        exit 1
+    else
+        signed_user_id=$managedIdentityClientId
+        signed_user_id=$(az ad sp show --id $managedIdentityClientId --query id -o tsv)
+
+    fi
+fi
 
 # Check if the user has the Cosmos DB Built-in Data Contributor role
 echo "Checking if user has the Cosmos DB Built-in Data Contributor role"

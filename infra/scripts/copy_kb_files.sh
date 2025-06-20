@@ -24,48 +24,57 @@ else
     echo "Not authenticated with Azure. Attempting to authenticate..."
 fi
 
+echo "Getting signed in user id"
+signed_user_id=$(az ad signed-in-user show --query id -o tsv)
+if [ $? -ne 0 ]; then
+    if [ -z "$managedIdentityClientId" ]; then
+        echo "Error: Failed to get signed in user id."
+        exit 1
+    else
+        signed_user_id=$managedIdentityClientId
+    fi
+fi
+
 # if using managed identity, skip role assignments as its already provided via bicep
-if [ -n "$managedIdentityClientId" ]; then
-    echo "Skipping role assignments as managed identity is used"
-else
-    echo "Getting signed in user id"
-    signed_user_id=$(az ad signed-in-user show --query id -o tsv)
 
-    echo "Getting storage account resource id"
-    storage_account_resource_id=$(az storage account show --name $storageAccount --query id --output tsv)
+# echo "Getting signed in user id"
+# signed_user_id=$(az ad signed-in-user show --query id -o tsv)
 
-    #check if user has the Storage Blob Data Contributor role, add it if not
-    echo "Checking if user has the Storage Blob Data Contributor role"
-    role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
-    if [ -z "$role_assignment" ]; then
-        echo "User does not have the Storage Blob Data Contributor role. Assigning the role."
-        MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --output none
-        if [ $? -eq 0 ]; then
-            echo "Role assignment completed successfully."
-            retries=3
-            while [ $retries -gt 0 ]; do
-                # Check if the role assignment was successful
-                role_assignment_check=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
-                if [ -n "$role_assignment_check" ]; then
-                    echo "Role assignment verified successfully."
-                    break
-                else
-                    echo "Role assignment not found, retrying..."
-                    ((retries--))
-                    sleep 10
-                fi
-            done
-            if [ $retries -eq 0 ]; then
-                echo "Error: Role assignment verification failed after multiple attempts. Try rerunning the script."
-                exit 1
+echo "Getting storage account resource id"
+storage_account_resource_id=$(az storage account show --name $storageAccount --query id --output tsv)
+
+#check if user has the Storage Blob Data Contributor role, add it if not
+echo "Checking if user has the Storage Blob Data Contributor role"
+role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
+if [ -z "$role_assignment" ]; then
+    echo "User does not have the Storage Blob Data Contributor role. Assigning the role."
+    MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --output none
+    if [ $? -eq 0 ]; then
+        echo "Role assignment completed successfully."
+        retries=3
+        while [ $retries -gt 0 ]; do
+            # Check if the role assignment was successful
+            role_assignment_check=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
+            if [ -n "$role_assignment_check" ]; then
+                echo "Role assignment verified successfully."
+                sleep 60
+                break
+            else
+                echo "Role assignment not found, retrying..."
+                ((retries--))
+                sleep 10
             fi
-        else
-            echo "Error: Role assignment failed."
+        done
+        if [ $retries -eq 0 ]; then
+            echo "Error: Role assignment verification failed after multiple attempts. Try rerunning the script."
             exit 1
         fi
     else
-        echo "User already has the Storage Blob Data Contributor role."
+        echo "Error: Role assignment failed."
+        exit 1
     fi
+else
+    echo "User already has the Storage Blob Data Contributor role."
 fi
 
 zipFileName1="clientdata.zip"
@@ -86,7 +95,7 @@ extractionPath1=""
 extractionPath2=""
 
 # Check if running in Azure Container App
-if !([ -z "$baseUrl" ] && [ -z "$managedIdentityClientId" ]); then
+if [ -n "$baseUrl" ] && [ -n "$managedIdentityClientId" ]; then
     extractionPath1="/mnt/azscripts/azscriptinput/$extractedFolder1"
     extractionPath2="/mnt/azscripts/azscriptinput/$extractedFolder2"
 

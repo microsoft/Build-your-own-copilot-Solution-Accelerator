@@ -4,7 +4,9 @@
 SqlServerName="$1"
 SqlDatabaseName="$2"
 UserRoleJSONArray="$3"
-ManagedIdentityClientId="$6"
+ManagedIdentityClientId="$4"
+
+echo "Script Started"
 
 # Function to check if a command exists or runs successfully
 function check_command() {
@@ -34,10 +36,25 @@ else
     echo "Not authenticated with Azure. Attempting to authenticate..."
 fi
 
+echo "Getting signed in user id"
+signed_user_id=$(az ad signed-in-user show --query id -o tsv)
+if [ $? -ne 0 ]; then
+    if [ -z "$ManagedIdentityClientId" ]; then
+        echo "Error: Failed to get signed in user id."
+        exit 1
+    else
+        signed_user_id=$ManagedIdentityClientId
+        # signed_user_id=$(az ad sp show --id $ManagedIdentityClientId --query id -o tsv)
+
+    fi
+fi
+
 SQL_QUERY=""
 #loop through the JSON array and create users and assign roles using grep and sed
 count=1
 while read -r json_object; do
+
+    echo "Processing JSON object: $json_object"
     # Extract fields from the JSON object using grep and sed
     clientId=$(echo "$json_object" | grep -o '"clientId": *"[^"]*"' | sed 's/"clientId": *"\([^"]*\)"/\1/')
     displayName=$(echo "$json_object" | grep -o '"displayName": *"[^"]*"' | sed 's/"displayName": *"\([^"]*\)"/\1/')
