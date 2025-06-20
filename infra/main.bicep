@@ -51,6 +51,8 @@ param embeddingDeploymentCapacity int = 80
 // param fabricWorkspaceId string
 param imageTag string = 'latest'
 
+param authEnabled bool = true
+
 //restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
 @allowed(['australiaeast','eastus', 'eastus2','francecentral','japaneast','swedencentral','uksouth', 'westus', 'westus3'])
 @description('Azure OpenAI Location')
@@ -193,6 +195,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
 module appserviceModule 'deploy_app_service.bicep' = {
   name: 'deploy_app_service'
   params: {
+    authEnabled: authEnabled
     solutionLocation: solutionLocation
     HostingPlanName: '${abbrs.compute.appServicePlan}${solutionPrefix}'
     WebsiteName: '${abbrs.compute.webApp}${solutionPrefix}'
