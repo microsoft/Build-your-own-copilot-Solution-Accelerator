@@ -9,6 +9,9 @@ param environmentName string
 @description('Optional: Existing Log Analytics Workspace Resource ID')
 param existingLogAnalyticsWorkspaceId string = ''
 
+@description('Use this parameter to use an existing AI project resource ID')
+param azureExistingAIProjectResourceId string = ''
+
 @description('CosmosDB Location')
 param cosmosLocation string
 
@@ -142,6 +145,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     embeddingModel: embeddingModel
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
     existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
+    azureExistingAIProjectResourceId: azureExistingAIProjectResourceId
   }
   scope: resourceGroup(resourceGroup().name)
 }
