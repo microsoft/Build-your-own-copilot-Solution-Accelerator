@@ -257,3 +257,5 @@ output MANAGEDIDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.manage
 output MANAGEDIDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
 output AI_FOUNDRY_NAME string = aifoundry.outputs.aiFoundryName
 output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService
+output WEB_APP_NAME string = appserviceModule.outputs.webAppName
+output AUTH_ENABLED bool = appserviceModule.outputs.authEnabled

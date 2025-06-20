@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 env:
-    url: ${{ vars.CLIENT_ADVISOR_URL }}
+    url: ${{ vars.CA_WEB_URL }}
     accelerator_name: "Client Advisor"
 
 jobs:

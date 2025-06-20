@@ -13,70 +13,79 @@ env:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    outputs:
+      RESOURCE_GROUP_NAME: ${{ steps.check_create_rg.outputs.RESOURCE_GROUP_NAME }}
+      WEBAPP_URL: ${{ steps.get_output.outputs.WEBAPP_URL }}
+      DEPLOYMENT_SUCCESS: ${{ steps.deployment_status.outputs.SUCCESS }}
+      AI_SERVICES_NAME: ${{ steps.get_ai_services_name.outputs.AI_SERVICES_NAME }}
+      KEYVAULTS: ${{ steps.list_keyvaults.outputs.KEYVAULTS }}
+      AZURE_LOCATION: ${{ steps.set_region.outputs.AZURE_LOCATION }}
+      SOLUTION_PREFIX: ${{ steps.generate_solution_prefix.outputs.SOLUTION_PREFIX }}
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
       
-      - name: Run Quota Check
-        id: quota-check
+      - name: Install ODBC Driver 18 for SQL Server
         run: |
-          export AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}
-          export AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
-          export AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}
-          export AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          export GPT_MIN_CAPACITY=${{ env.GPT_MIN_CAPACITY }}
-          export TEXT_EMBEDDING_MIN_CAPACITY=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }}
-          export AZURE_REGIONS="${{ vars.AZURE_REGIONS_CA }}"
-
-          chmod +x infra/scripts/checkquota.sh
-          if ! infra/scripts/checkquota.sh; then
-            # If quota check fails due to insufficient quota, set the flag
-            if grep -q "No region with sufficient quota found" infra/scripts/checkquota.sh; then
-              echo "QUOTA_FAILED=true" >> $GITHUB_ENV
-            fi
-            exit 1  # Fail the pipeline if any other failure occurs
-          fi
-  
-  
-      - name: Send Notification on Quota Failure
-        if: env.QUOTA_FAILED == 'true'
-        run: |
-          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          EMAIL_BODY=$(cat <<EOF
-          {
-            "body": "<p>Dear Team,</p><p>The quota check has failed, and the pipeline cannot proceed.</p><p><strong>Build URL:</strong> ${RUN_URL}</p><p>Please take necessary action.</p><p>Best regards,<br>Your Automation Team</p>"
-          }
-          EOF
-          )
-
-          curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "$EMAIL_BODY" || echo "Failed to send notification"
-
-      - name: Fail Pipeline if Quota Check Fails
-        if: env.QUOTA_FAILED == 'true'
-        run: exit 1
-      
-      - name: Set Deployment Region
-        run: |
-          echo "Deployment Region: $VALID_REGION"
-          echo "AZURE_LOCATION=$VALID_REGION" >> $GITHUB_ENV
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          sudo add-apt-repository "$(curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list)"
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+          sudo apt-get install -y unixodbc-dev
 
       - name: Setup Azure CLI
-        run: |
-          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-          az --version  # Verify installation
+        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
       - name: Login to Azure
         run: |
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run Quota Check
+        id: quota-check
+        run: |
+          export AZURE_CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
+          export AZURE_TENANT_ID="${{ secrets.AZURE_TENANT_ID }}"
+          export AZURE_CLIENT_SECRET="${{ secrets.AZURE_CLIENT_SECRET }}"
+          export AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          export GPT_MIN_CAPACITY="150"
+          export TEXT_EMBEDDING_MIN_CAPACITY="80"
+          export AZURE_REGIONS="${{ vars.AZURE_REGIONS_CA }}"
+          chmod +x infra/scripts/checkquota.sh
+          if ! infra/scripts/checkquota.sh; then
+            if grep -q "No region with sufficient quota found" infra/scripts/checkquota_ca.sh; then
+              echo "QUOTA_FAILED=true" >> $GITHUB_ENV
+            fi
+            exit 1
+          fi
+
+      - name: Notify on Quota Failure
+        if: env.QUOTA_FAILED == 'true'
+        run: |
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "subject": "CA Deployment - Quota Check Failed",
+              "body": "<p>The quota check failed for CA deployment.</p><p><a href=\"'${RUN_URL}'\">View run</a></p>"
+            }'
+
+      - name: Fail on Quota Check
+        if: env.QUOTA_FAILED == 'true'
+        run: exit 1
 
       - name: Install Bicep CLI
         run: az bicep install
+        
+      - name: Set Deployment Region
+        id: set_region
+        run: |
+          echo "Selected Region: $VALID_REGION"
+          echo "AZURE_LOCATION=$VALID_REGION" >> $GITHUB_ENV
+          echo "AZURE_LOCATION=$VALID_REGION" >> $GITHUB_OUTPUT
 
-      
       - name: Generate Resource Group Name
         id: generate_rg_name
         run: |
@@ -100,6 +109,8 @@ jobs:
           else
             echo "Resource group already exists."
           fi
+          # Set output for other jobs
+          echo "RESOURCE_GROUP_NAME=${{ env.RESOURCE_GROUP_NAME }}" >> $GITHUB_OUTPUT
       
       - name: Generate Unique Solution Prefix
         id: generate_solution_prefix
@@ -110,16 +121,115 @@ jobs:
           UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 3) 
           UNIQUE_SOLUTION_PREFIX="${COMMON_PART}${UPDATED_TIMESTAMP}"
           echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_ENV
+          echo "SOLUTION_PREFIX=${UNIQUE_SOLUTION_PREFIX}" >> $GITHUB_OUTPUT
           echo "Generated SOLUTION_PREFIX: ${UNIQUE_SOLUTION_PREFIX}"
-          
-      - name: Deploy Bicep Template
-        id: deploy
+
+      - name: Determine Tag
+        id: determine_tag
+        run: |
+          BRANCH=${{ github.ref_name }}
+          if [[ "$BRANCH" == "main" ]]; then TAG="latest"
+          elif [[ "$BRANCH" == "dev" ]]; then TAG="dev"
+          elif [[ "$BRANCH" == "demo" ]]; then TAG="demo"
+          else TAG="default"; fi
+          echo "tagname=$TAG" >> $GITHUB_OUTPUT
+      
+      - name: Get Deployment Output and extract Values
+        id: get_output
         run: |
           set -e
-          az deployment group create \
+          echo "Fetching deployment output..."
+          # Install azd (Azure Developer CLI) - required by process_sample_data.sh
+          curl -fsSL https://aka.ms/install-azd.sh | bash
+
+          DEPLOY_OUTPUT=$(az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2 gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} \
+            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} \
+            --query "properties.outputs" -o json)
+
+          echo "Deployment output: $DEPLOY_OUTPUT"
+          if [[ -z "$DEPLOY_OUTPUT" ]]; then
+            echo "Error: Deployment output is empty. Please check the deployment logs."
+            exit 1
+          fi
+
+          export COSMOS_DB_ACCOUNT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.cosmosdB_ACCOUNT_NAME.value')
+          echo "COSMOS_DB_ACCOUNT_NAME=$COSMOS_DB_ACCOUNT_NAME" >> $GITHUB_ENV
+          export STORAGE_ACCOUNT=$(echo "$DEPLOY_OUTPUT" | jq -r '.storagE_ACCOUNT_NAME.value')
+          echo "STORAGE_ACCOUNT=$STORAGE_ACCOUNT" >> $GITHUB_ENV
+          export STORAGE_CONTAINER=$(echo "$DEPLOY_OUTPUT" | jq -r '.storagE_CONTAINER_NAME.value')
+          echo "STORAGE_CONTAINER=$STORAGE_CONTAINER" >> $GITHUB_ENV
+          export KEYVAULT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.keY_VAULT_NAME.value')
+          echo "KEYVAULT_NAME=$KEYVAULT_NAME" >> $GITHUB_ENV
+          export SQL_SERVER=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_SERVER.value')
+          echo "SQL_SERVER=$SQL_SERVER" >> $GITHUB_ENV
+          export SQL_DATABASE=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_DATABASE.value')
+          echo "SQL_DATABASE=$SQL_DATABASE" >> $GITHUB_ENV
+          export CLIENT_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedindentitY_WEBAPP_CLIENTID.value')
+          echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
+          export CLIENT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedindentitY_WEBAPP_NAME.value')
+          echo "CLIENT_NAME=$CLIENT_NAME" >> $GITHUB_ENV
+          export RG_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.resourcE_GROUP_NAME.value')
+          echo "RG_NAME=$RG_NAME" >> $GITHUB_ENV
+          WEBAPP_URL=$(echo $DEPLOY_OUTPUT | jq -r '.weB_APP_URL.value')
+          echo "WEBAPP_URL=$WEBAPP_URL" >> $GITHUB_OUTPUT
+          WEB_APP_NAME=$(echo $DEPLOY_OUTPUT | jq -r '.weB_APP_NAME.value')
+          echo "WEB_APP_NAME=$WEB_APP_NAME" >> $GITHUB_ENV
+          AUTH_ENABLED=$(echo $DEPLOY_OUTPUT | jq -r '.autH_ENABLED.value')
+          echo "AUTH_ENABLED=$AUTH_ENABLED" >> $GITHUB_ENV
+          echo "Deployment output: $DEPLOY_OUTPUT"
+
+          export CLIENT_OBJECT_ID=$(az identity show \
+                  --name "$CLIENT_NAME" \
+                  --resource-group "$RG_NAME" \
+                  --query 'principalId' -o tsv)
+          echo "CLIENT_OBJECT_ID=$CLIENT_OBJECT_ID" >> $GITHUB_ENV
+
+      - name: Deploy Infra and Import Sample Data 
+        run: |
+          set -e
+          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+
+          # Fixed Cosmos DB role assignment - using correct variable names
+          az cosmosdb sql role assignment create \
+            --account-name "${{ env.COSMOS_DB_ACCOUNT_NAME }}" \
+            --resource-group "${{ env.RG_NAME }}" \
+            --role-definition-name "Cosmos DB Built-in Data Contributor" \
+            --scope "/" \
+            --principal-id "${{ env.CLIENT_OBJECT_ID }}"
+
+          echo "Running post-deployment script..."
+          bash ./infra/scripts/add_cosmosdb_access.sh \
+            "${{ env.RG_NAME }}" \
+            "${{ env.COSMOS_DB_ACCOUNT_NAME }}" \
+            "${{ secrets.AZURE_CLIENT_ID }}"
+          bash ./infra/scripts/copy_kb_files.sh \
+            "${{ env.STORAGE_ACCOUNT }}" \
+            "${{ env.STORAGE_CONTAINER }}" \
+            "" \
+            "${{ secrets.AZURE_CLIENT_ID }}"
+          bash ./infra/scripts/run_create_index_scripts.sh \
+            "${{ env.KEYVAULT_NAME }}" \
+            "" \
+            "${{ secrets.AZURE_CLIENT_ID }}" \
+            "${{ env.RG_NAME }}" \
+            "${{ env.SQL_SERVER }}" 
+
+
+          user_roles_json='[
+            {"clientId":"${{ env.CLIENT_ID }}","displayName":"${{ env.CLIENT_NAME }}","role":"db_datareader"},
+            {"clientId":"${{ env.CLIENT_ID }}","displayName":"${{ env.CLIENT_NAME }}","role":"db_owner"}
+          ]'
+
+          bash ./infra/scripts/add_user_scripts/create_sql_user_and_role.sh \
+            "${{ env.SQL_SERVER }}.database.windows.net" \
+            "${{ env.SQL_DATABASE }}" \
+            "$user_roles_json" \
+            "${{ secrets.AZURE_CLIENT_ID }}"
+          
+          echo "=== Post-Deployment Script Completed Successfully ==="
+            
 
       - name: Get AI Services name and store in variable
         if: always() && steps.check_create_rg.outcome == 'success'
@@ -131,9 +241,9 @@ jobs:
           ai_services_name=$(az cognitiveservices account list -g ${{ env.RESOURCE_GROUP_NAME }} --query "[0].name" -o tsv)
           if [ -z "$ai_services_name" ]; then
             echo "No AI Services resource found in the resource group."
-            echo "AI_SERVICES_NAME=" >> $GITHUB_ENV
+            echo "AI_SERVICES_NAME=" >> $GITHUB_OUTPUT
           else
-            echo "AI_SERVICES_NAME=${ai_services_name}" >> $GITHUB_ENV
+            echo "AI_SERVICES_NAME=${ai_services_name}" >> $GITHUB_OUTPUT
             echo "Found AI Services resource: $ai_services_name"
           fi
 
@@ -141,16 +251,15 @@ jobs:
         if: always() && steps.check_create_rg.outcome == 'success'
         id: list_keyvaults
         run: |
-
           set -e
-          echo "Listing all KeyVaults in the resource group ${RESOURCE_GROUP_NAME}..."
+          echo "Listing all KeyVaults in the resource group ${{ env.RESOURCE_GROUP_NAME }}..."
           
           # Get the list of KeyVaults in the specified resource group
           keyvaults=$(az resource list --resource-group ${{ env.RESOURCE_GROUP_NAME }} --query "[?type=='Microsoft.KeyVault/vaults'].name" -o tsv)
 
           if [ -z "$keyvaults" ]; then
-            echo "No KeyVaults found in resource group ${RESOURCE_GROUP_NAME}."
-            echo "KEYVAULTS=[]" >> $GITHUB_ENV  # If no KeyVaults found, set an empty array
+            echo "No KeyVaults found in resource group ${{ env.RESOURCE_GROUP_NAME }}."
+            echo "KEYVAULTS=[]" >> $GITHUB_OUTPUT  # If no KeyVaults found, set an empty array
           else
             echo "KeyVaults found: $keyvaults"
 
@@ -167,67 +276,104 @@ jobs:
             done
             keyvault_array="$keyvault_array]"
 
-            # Output the formatted array and save it to the environment variable
-            echo "KEYVAULTS=$keyvault_array" >> $GITHUB_ENV
+            # Output the formatted array and save it to the job output
+            echo "KEYVAULTS=$keyvault_array" >> $GITHUB_OUTPUT
           fi
           
-      # - name: Update PowerBI URL
-      #   if: success()
-      #   run: |
-      #     set -e
+      - name: Set Deployment Status
+        id: deployment_status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "SUCCESS=true" >> $GITHUB_OUTPUT
+          else
+            echo "SUCCESS=false" >> $GITHUB_OUTPUT
+          fi
 
-      #     COMMON_PART="-app-service"
-      #     application_name="${{ env.SOLUTION_PREFIX }}${COMMON_PART}"
-      #     echo "Updating application: $application_name"
-          
-      #     # Log the Power BI URL being set
-      #     echo "Setting Power BI URL: ${{ vars.VITE_POWERBI_EMBED_URL }}"
-          
-      #     # Update the application settings
-      #     az webapp config appsettings set --name "$application_name" --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --settings VITE_POWERBI_EMBED_URL="${{ vars.VITE_POWERBI_EMBED_URL }}"
+      - name: Logout
+        if: always()
+        run: az logout
 
-      #     # Restart the web app
-      #     az webapp restart --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --name "$application_name"
+  e2e-test:
+    needs: deploy
+    if: needs.deploy.outputs.DEPLOYMENT_SUCCESS == 'true'
+    uses: ./.github/workflows/test_automation.yml
+    with:
+      CA_WEB_URL: ${{ needs.deploy.outputs.WEBAPP_URL }}
+    secrets: inherit
 
-      #     echo "Power BI URL updated successfully for application: $application_name."
+  cleanup:
+    if: always() 
+    needs: [deploy, e2e-test]
+    runs-on: ubuntu-latest
+    env:
+      RESOURCE_GROUP_NAME: ${{ needs.deploy.outputs.RESOURCE_GROUP_NAME }}
+      AI_SERVICES_NAME: ${{ needs.deploy.outputs.AI_SERVICES_NAME }}
+      KEYVAULTS: ${{ needs.deploy.outputs.KEYVAULTS }}
+      AZURE_LOCATION: ${{ needs.deploy.outputs.AZURE_LOCATION }}
+      SOLUTION_PREFIX: ${{ needs.deploy.outputs.SOLUTION_PREFIX }}
+    steps:
+      - name: Setup Azure CLI
+        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+      - name: Login to Azure
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Delete Bicep Deployment
         if: always()
         run: |
           set -e  
           echo "Checking if resource group exists..."
-          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+          echo "Resource group name: ${{ env.RESOURCE_GROUP_NAME }}"
+          
+          if [ -z "${{ env.RESOURCE_GROUP_NAME }}" ]; then
+            echo "Resource group name is empty. Skipping deletion."
+            exit 0
+          fi
+          
+          rg_exists=$(az group exists --name "${{ env.RESOURCE_GROUP_NAME }}")
           if [ "$rg_exists" = "true" ]; then
-            echo "Resource group exist. Cleaning..."
+            echo "Resource group exists. Cleaning..."
             az group delete \
-                --name ${{ env.RESOURCE_GROUP_NAME }} \
+                --name "${{ env.RESOURCE_GROUP_NAME }}" \
                 --yes \
                 --no-wait
-            echo "Resource group deleted...  ${{ env.RESOURCE_GROUP_NAME }}"
+            echo "Resource group deletion initiated: ${{ env.RESOURCE_GROUP_NAME }}"
           else
-            echo "Resource group does not exists."
+            echo "Resource group does not exist."
           fi
 
       - name: Wait for resource deletion to complete
-        if: always() && steps.check_create_rg.outcome == 'success'
+        if: always()
         run: |
+          # Check if resource group name is available
+          if [ -z "${{ env.RESOURCE_GROUP_NAME }}" ]; then
+            echo "Resource group name is empty. Skipping resource check."
+            exit 0
+          fi
 
           # List of keyvaults 
           KEYVAULTS="${{ env.KEYVAULTS }}"
 
-          # Remove the surrounding square brackets, if they exist
-          stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g')
+          # Remove the surrounding square brackets and quotes, if they exist
+          stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g' | sed 's/"//g')
           
           # Convert the comma-separated string into an array
           IFS=',' read -r -a resources_to_check <<< "$stripped_keyvaults"
           
-          # Append new resources to the array
-          # resources_to_check+=("${{ env.SOLUTION_PREFIX }}-openai" "${{ env.SOLUTION_PREFIX }}-cogser")
-
           echo "List of resources to check: ${resources_to_check[@]}"
          
+          # Check if resource group still exists before listing resources
+          rg_exists=$(az group exists --name "${{ env.RESOURCE_GROUP_NAME }}")
+          if [ "$rg_exists" = "false" ]; then
+            echo "Resource group no longer exists. Skipping resource check."
+            exit 0
+          fi
+
           # Get the list of resources in YAML format
-          resource_list=$(az resource list --resource-group ${{ env.RESOURCE_GROUP_NAME }} --output yaml)
+          resource_list=$(az resource list --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --output yaml || echo "")
 
           # Maximum number of retries
           max_retries=3
@@ -240,8 +386,20 @@ jobs:
           while true; do
             resource_found=false
 
+            # Check if resource group still exists
+            rg_exists=$(az group exists --name "${{ env.RESOURCE_GROUP_NAME }}")
+            if [ "$rg_exists" = "false" ]; then
+              echo "Resource group no longer exists. Exiting resource check."
+              break
+            fi
+
             # Iterate through the resources to check
             for resource in "${resources_to_check[@]}"; do
+              # Skip empty resource names
+              if [ -z "$resource" ]; then
+                continue
+              fi
+              
               echo "Checking resource: $resource"
               if echo "$resource_list" | grep -q "name: $resource"; then
                 echo "Resource '$resource' exists in the resource group."
@@ -261,6 +419,8 @@ jobs:
                 # Wait for the appropriate interval for the current retry
                 echo "Waiting for ${retry_intervals[$retries-1]} seconds before retrying..."
                 sleep ${retry_intervals[$retries-1]}
+                # Refresh resource list
+                resource_list=$(az resource list --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --output yaml || echo "")
               fi
             else
               echo "No resources found. Exiting."
@@ -269,60 +429,51 @@ jobs:
           done
 
       - name: Purging the Resources
-        if: always() && steps.check_create_rg.outcome == 'success'
+        if: always()
         run: |
-
           set -e 
-          # Define variables
-          # OPENAI_COMMON_PART="-openai"
-          # openai_name="${{ env.SOLUTION_PREFIX }}${OPENAI_COMMON_PART}"
-          # echo "Azure OpenAI: $openai_name"
 
-          # MULTISERVICE_COMMON_PART="-cogser"
-          # multiservice_account_name="${{ env.SOLUTION_PREFIX }}${MULTISERVICE_COMMON_PART}"
-          # echo "Azure MultiService Account: $multiservice_account_name"
-
-          # # Purge OpenAI Resource
-          # echo "Purging the OpenAI Resource..."
-          # if ! az resource delete --ids /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.CognitiveServices/locations/uksouth/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/deletedAccounts/$openai_name --verbose; then
-          #   echo "Failed to purge openai resource: $openai_name"
-          # else
-          #   echo "Purged the openai resource: $openai_name"
-          # fi
-   
-          # # Purge MultiService Account Resource
-          # echo "Purging the MultiService Account Resource..."
-          # if ! az resource delete --ids /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.CognitiveServices/locations/uksouth/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/deletedAccounts/$multiservice_account_name --verbose; then
-          #   echo "Failed to purge multiService account resource: $multiservice_account_name"
-          # else
-          #   echo "Purged the multiService account resource: $multiservice_account_name"
-          # fi
+          # Check if resource group name is available
+          if [ -z "${{ env.RESOURCE_GROUP_NAME }}" ]; then
+            echo "Resource group name is empty. Skipping resource purging."
+            exit 0
+          fi
 
           # Purge AI Services
           if [ -z "${{ env.AI_SERVICES_NAME }}" ]; then
-            echo "AI_SERVICES_NAME is not set. Skipping purge."
+            echo "AI_SERVICES_NAME is not set. Skipping AI Services purge."
           else
             echo "Purging AI Services..."
-            if [ -n "$(az cognitiveservices account list-deleted --query "[?name=='${{env.AI_SERVICES_NAME}}']" -o tsv)" ]; then
-              echo "AI Services '${{env.AI_SERVICES_NAME}}' is soft-deleted. Proceeding to purge..."
-              az cognitiveservices account purge --location ${{ env.AZURE_LOCATION }} --resource-group ${{env.RESOURCE_GROUP_NAME}} --name ${{ env.AI_SERVICES_NAME }}
+            if [ -n "$(az cognitiveservices account list-deleted --query "[?name=='${{ env.AI_SERVICES_NAME }}']" -o tsv)" ]; then
+              echo "AI Services '${{ env.AI_SERVICES_NAME }}' is soft-deleted. Proceeding to purge..."
+              az cognitiveservices account purge --location "${{ env.AZURE_LOCATION }}" --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --name "${{ env.AI_SERVICES_NAME }}"
             else
-              echo "AI Services '${{env.AI_SERVICES_NAME}}' is not soft-deleted. No action taken."
+              echo "AI Services '${{ env.AI_SERVICES_NAME }}' is not soft-deleted. No action taken."
             fi
           fi
-
 
           # Ensure KEYVAULTS is properly formatted as a comma-separated string
           KEYVAULTS="${{ env.KEYVAULTS }}"
 
-          # Remove the surrounding square brackets, if they exist
-          stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g')
+          # Check if KEYVAULTS is empty or null
+          if [ -z "$KEYVAULTS" ] || [ "$KEYVAULTS" = "[]" ]; then
+            echo "No KeyVaults to purge."
+            exit 0
+          fi
+
+          # Remove the surrounding square brackets and quotes, if they exist
+          stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g' | sed 's/"//g')
           
           # Convert the comma-separated string into an array
           IFS=',' read -r -a keyvault_array <<< "$stripped_keyvaults"
 
           echo "Using KeyVaults Array..."
           for keyvault_name in "${keyvault_array[@]}"; do
+            # Skip empty keyvault names
+            if [ -z "$keyvault_name" ]; then
+              continue
+            fi
+            
             echo "Processing KeyVault: $keyvault_name"
             # Check if the KeyVault is soft-deleted
             deleted_vaults=$(az keyvault list-deleted --query "[?name=='$keyvault_name']" -o json --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }})
@@ -337,22 +488,18 @@ jobs:
           done
 
           echo "Resource purging completed successfully"
-      
-      - name: Send Notification on Failure
-        if: failure()
-        run: |
 
+      - name: Logout
+        if: always()
+        run: az logout
+
+      - name: Notify on Failure
+        if: failure() || needs.deploy.result == 'failure' || needs.e2e-test.result == 'failure'
+        run: |
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-      
-          # Construct the email body
-          EMAIL_BODY=$(cat <<EOF
-          {
-            "body": "<p>Dear Team,</p><p>We would like to inform you that the Client Advisor Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
-          }
-          EOF
-          )
-      
-          # Send the notification
           curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \
-            -d "$EMAIL_BODY" || echo "Failed to send notification"
+            -d '{
+              "subject": "CA Deployment Failed",
+              "body": "<p>The CA Deployment pipeline failed.</p><p><a href=\"'${RUN_URL}'\">View Run</a></p>"
+            }'
