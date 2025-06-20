@@ -91,7 +91,6 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 
-var storageAccountKeys = listKeys(storageAccounts_resource.id, '2021-04-01')
 //var storageAccountString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccounts_resource.name};AccountKey=${storageAccounts_resource.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
@@ -111,14 +110,6 @@ resource adlsAccountContainerEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01
   name: 'ADLS-ACCOUNT-CONTAINER'
   properties: {
     value: 'data'
-  }
-}
-
-resource adlsAccountKeyEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  parent: keyVault
-  name: 'ADLS-ACCOUNT-KEY'
-  properties: {
-    value: storageAccountKeys.keys[0].value
   }
 }
 
