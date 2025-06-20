@@ -9,6 +9,6 @@ param gptDeploymentCapacity = int(readEnvironmentVariable('AZURE_ENV_MODEL_CAPAC
 param embeddingModel = readEnvironmentVariable('AZURE_ENV_EMBEDDING_MODEL_NAME', 'text-embedding-ada-002')
 param embeddingDeploymentCapacity = int(readEnvironmentVariable('AZURE_ENV_EMBEDDING_MODEL_CAPACITY', '80'))
 param imageTag = readEnvironmentVariable('AZURE_ENV_IMAGETAG', 'latest')
-param AzureOpenAILocation = readEnvironmentVariable('AZURE_ENV_OPENAI_LOCATION', 'eastus2')
+// param aideploymentlocation = readEnvironmentVariable('AZURE_ENV_OPENAI_LOCATION', 'eastus2')
 param AZURE_LOCATION = readEnvironmentVariable('AZURE_LOCATION', '')
 param existingLogAnalyticsWorkspaceId = readEnvironmentVariable('AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID', '')

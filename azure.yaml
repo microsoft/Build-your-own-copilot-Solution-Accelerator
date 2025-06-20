@@ -7,22 +7,6 @@ metadata:
   name: build-your-own-copilot-solution-accelerator@1.0
 
 hooks:
-  preprovision:
-    posix:
-      shell: sh
-      run: >
-        chmod u+r+x ./infra/scripts/validate_model_deployment_quota.sh; chmod u+r+x ./infra/scripts/validate_model_quota.sh; ./infra/scripts/validate_model_deployment_quota.sh --SubscriptionId "$AZURE_SUBSCRIPTION_ID" --Location "${AZURE_ENV_OPENAI_LOCATION:-japaneast}" --ModelsParameter "aiModelDeployments"
-      interactive: true
-      continueOnError: false
-
-    windows:
-      shell: pwsh
-      run: >
-        $location = if ($env:AZURE_ENV_OPENAI_LOCATION) { $env:AZURE_ENV_OPENAI_LOCATION } else { "uksouth" };
-        ./infra/scripts/validate_model_deployment_quota.ps1 -SubscriptionId $env:AZURE_SUBSCRIPTION_ID -Location $location -ModelsParameter "aiModelDeployments"
-      interactive: true
-      continueOnError: false
-
   postprovision:
     windows:
       run: |

@@ -4,6 +4,9 @@ targetScope = 'resourceGroup'
 @minLength(3)
 @maxLength(20)
 @description('A unique prefix for all resources in this deployment. This should be 3-20 characters long:')
+
+
+
 param environmentName string
 
 @description('Optional: Existing Log Analytics Workspace Resource ID')
@@ -61,6 +64,19 @@ param AZURE_LOCATION string=''
 var solutionLocation = empty(AZURE_LOCATION) ? resourceGroup().location : AZURE_LOCATION
 
 var uniqueId = toLower(uniqueString(environmentName, subscription().id, solutionLocation))
+
+@metadata({
+  azd:{
+    type: 'location'
+    usageName: [
+      'OpenAI.GlobalStandard.gpt-4o-mini,200'
+      'OpenAI.Standard.text-embedding-ada-002,80'
+    ]
+  }
+})
+@description('Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed.')
+param AZURE_AI_SERVICE_LOCATION string
+
 var solutionPrefix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
 
 // Load the abbrevations file required to name the azure resources.
@@ -134,7 +150,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
   name: 'deploy_ai_foundry'
   params: {
     solutionName: solutionPrefix
-    solutionLocation: AzureOpenAILocation
+    solutionLocation: AZURE_AI_SERVICE_LOCATION
     keyVaultName: keyvaultModule.outputs.keyvaultName
     deploymentType: deploymentType
     gptModelName: gptModelName
