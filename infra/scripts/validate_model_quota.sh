@@ -139,8 +139,10 @@ check_fallback_regions() {
             IFS=',' read -r _ _ _ _ embed_avail <<< "$embed"
 
             ALL_RESULTS+=("$result")
+            echo "✅ Quota found in '$region': GPT-4o = $gpt_avail, Embedding = $embed_avail"
 
             if (( gpt_avail >= GPT4O_CAPACITY && embed_avail >= EMBEDDING_CAPACITY )); then
+                echo "✅ Sufficient quota in '$region'."
                 ELIGIBLE_FALLBACKS+=("$region")
             fi
         fi
@@ -148,21 +150,17 @@ check_fallback_regions() {
 
     if (( ${#ELIGIBLE_FALLBACKS[@]} > 0 )); then
         show_table
-        echo -e "\n👉 Eligible fallback regions:"
+        echo -e "\n👉 Eligible regions:"
         for region in "${ELIGIBLE_FALLBACKS[@]}"; do
             echo "  - $region"
         done
 
-        if confirm_action "❓ Proceed with manual region '$manual_region'?"; then
-            set_deployment_values "$manual_region" "$gpt_cap" "$embed_cap"
-            echo "✅ Deployment values set. Exiting."
-            exit 0
-        else
+        if confirm_action "❓ Do you want to proceed with one of these regions?"; then
             manual_prompt
             return
         fi
     else
-        echo "❌ No eligible fallback regions found."
+        echo "❌ No eligible other regions found."
         echo "🔁 Let's try again..."
         manual_prompt
         return
@@ -227,8 +225,8 @@ manual_prompt() {
         read -rp "Enter region: " manual_region
         [[ -z "$manual_region" ]] && echo "❌ No region entered. Exiting." && exit 1
 
-        read -rp "Enter GPT-4o capacity: " gpt_cap
-        read -rp "Enter Embedding capacity: " embed_cap
+        read -rp "Enter GPT-4o capacity (tokens): " gpt_cap
+        read -rp "Enter Embedding capacity (tokens): " embed_cap
 
         [[ ! "$gpt_cap" =~ ^[0-9]+$ || ! "$embed_cap" =~ ^[0-9]+$ ]] && echo "❌ Invalid input. Try again." && continue
 
