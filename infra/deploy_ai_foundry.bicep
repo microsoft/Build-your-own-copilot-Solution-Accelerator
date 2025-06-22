@@ -267,7 +267,7 @@ resource azureOpenAIEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-
   name: 'AZURE-OPENAI-ENDPOINT'
   properties: {
     // value: aiFoundry.properties.endpoints['OpenAI Language Model Instance API'] //aiServices_m.properties.endpoint
-    value: !empty(existingOpenAIEndpoint) ? existingOpenAIEndpoint : aiFoundry.properties.endpoints['AI Foundry API']
+    value: !empty(existingOpenAIEndpoint) ? existingOpenAIEndpoint : aiFoundry.properties.endpoints['OpenAI Language Model Instance API']
   }
 }
 
@@ -299,7 +299,7 @@ resource azureSearchIndexEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-pre
 output keyvaultName string = keyvaultName
 output keyvaultId string = keyVault.id
 
-output aiFoundryProjectEndpoint string = aiFoundryProject.properties.endpoints['AI Foundry API']
+output aiFoundryProjectEndpoint string = aiFoundryProject.properties.endpoints['OpenAI Language Model Instance API']
 output aiServicesTarget string = aiFoundry.properties.endpoint //aiServices_m.properties.endpoint
 output aoaiEndpoint string = aiFoundry.properties.endpoints['OpenAI Language Model Instance API'] //aiServices_m.properties.endpoint
 output aiFoundryName string = aiFoundryName //aiServicesName_m
@@ -315,5 +315,5 @@ output applicationInsightsId string = applicationInsights.id
 output logAnalyticsWorkspaceResourceName string = useExisting ? existingLogAnalyticsWorkspace.name : logAnalytics.name
 output logAnalyticsWorkspaceResourceGroup string = useExisting ? existingLawResourceGroup : resourceGroup().name
 
-output projectEndpoint string = !empty(existingProjEndpoint) ? existingProjEndpoint : aiFoundry.properties.endpoints['AI Foundry API']
+output projectEndpoint string = !empty(existingProjEndpoint) ? existingProjEndpoint : aiFoundry.properties.endpoints['OpenAI Language Model Instance API']
 output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString

@@ -149,6 +149,12 @@ param applicationInsightsConnectionString string
 
 var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${imageTag}'
 
+param azureExistingAIProjectResourceId string = ''
+
+var existingAIServiceSubscription = !empty(azureExistingAIProjectResourceId) ? split(azureExistingAIProjectResourceId, '/')[2] : subscription().subscriptionId
+var existingAIServiceResourceGroup = !empty(azureExistingAIProjectResourceId) ? split(azureExistingAIProjectResourceId, '/')[4] : resourceGroup().name
+var existingAIServicesName = !empty(azureExistingAIProjectResourceId) ? split(azureExistingAIProjectResourceId, '/')[8] : ''
+
 resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: HostingPlanName
   location: solutionLocation
@@ -392,6 +398,7 @@ module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
 
 resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: aiFoundryName
+  scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
 }
 
 resource aiFoundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' existing = {
@@ -407,7 +414,7 @@ resource aiUserRoleDefinitionFoundry 'Microsoft.Authorization/roleDefinitions@20
 
 resource aiUserRoleAssignmentFoundry 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(Website.id, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
-  scope: aiFoundry
+  // scope: aiFoundry
   properties: {
     roleDefinitionId: aiUserRoleDefinitionFoundry.id
     principalId: Website.identity.principalId
@@ -423,7 +430,7 @@ resource aiUserRoleDefinitionFoundryProject 'Microsoft.Authorization/roleDefinit
 
 resource aiUserRoleAssignmentFoundryProject 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(Website.id, aiFoundryProject.id, aiUserRoleDefinitionFoundryProject.id)
-  scope: aiFoundryProject
+  // scope: aiFoundryProject
   properties: {
     roleDefinitionId: aiUserRoleDefinitionFoundryProject.id
     principalId: Website.identity.principalId
