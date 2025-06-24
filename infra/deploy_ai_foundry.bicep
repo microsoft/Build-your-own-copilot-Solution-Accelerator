@@ -272,17 +272,17 @@ resource appInsightsFoundryConnection 'Microsoft.CognitiveServices/accounts/conn
   }
 }
 
-module existing_AIFoundry_AppInsightConnectionModule 'deploy_aifoundry_appinsight_connection.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
-  name: 'aiAppInsightConnectionDeployment'
-  scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
-  params: {
-    existingAIProjectName: existingAIProjectName
-    existingAIFoundryName: existingAIFoundryName
-    appInsightConnectionName: aiAppInsightConnectionName
-    appInsightId: applicationInsights.id
-    appInsightConnectionString: applicationInsights.properties.ConnectionString
-  }
-}
+// module existing_AIFoundry_AppInsightConnectionModule 'deploy_aifoundry_appinsight_connection.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
+//   name: 'aiAppInsightConnectionDeployment'
+//   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
+//   params: {
+//     existingAIProjectName: existingAIProjectName
+//     existingAIFoundryName: existingAIFoundryName
+//     appInsightConnectionName: aiAppInsightConnectionName
+//     appInsightId: applicationInsights.id
+//     appInsightConnectionString: applicationInsights.properties.ConnectionString
+//   }
+// }
 
 resource azureOpenAIApiVersionEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault

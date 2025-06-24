@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.30.23.60470",
-      "templateHash": "11491865443045136132"
+      "version": "0.36.1.42791",
+      "templateHash": "7563963004666467098"
     }
   },
   "parameters": {
@@ -387,8 +387,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "6770334200422488497"
+              "version": "0.36.1.42791",
+              "templateHash": "1287895326947269968"
             }
           },
           "parameters": {
@@ -501,8 +501,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "11492182988352694637"
+              "version": "0.36.1.42791",
+              "templateHash": "2457137526968921597"
             }
           },
           "parameters": {
@@ -726,8 +726,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "9292526297470243100"
+              "version": "0.36.1.42791",
+              "templateHash": "10360845696754545130"
             }
           },
           "parameters": {
@@ -1298,8 +1298,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.30.23.60470",
-                      "templateHash": "12720812319506370107"
+                      "version": "0.36.1.42791",
+                      "templateHash": "4784003223337407725"
                     }
                   },
                   "parameters": {
@@ -1344,88 +1344,6 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Search/searchServices', variables('aiSearchName'))]"
-              ]
-            },
-            {
-              "condition": "[not(empty(parameters('azureExistingAIProjectResourceId')))]",
-              "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
-              "name": "aiAppInsightConnectionDeployment",
-              "subscriptionId": "[variables('existingAIServiceSubscription')]",
-              "resourceGroup": "[variables('existingAIServiceResourceGroup')]",
-              "properties": {
-                "expressionEvaluationOptions": {
-                  "scope": "inner"
-                },
-                "mode": "Incremental",
-                "parameters": {
-                  "existingAIProjectName": {
-                    "value": "[variables('existingAIProjectName')]"
-                  },
-                  "existingAIFoundryName": {
-                    "value": "[variables('existingAIFoundryName')]"
-                  },
-                  "appInsightConnectionName": {
-                    "value": "[variables('aiAppInsightConnectionName')]"
-                  },
-                  "appInsightId": {
-                    "value": "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
-                  },
-                  "appInsightConnectionString": {
-                    "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').ConnectionString]"
-                  }
-                },
-                "template": {
-                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                  "contentVersion": "1.0.0.0",
-                  "metadata": {
-                    "_generator": {
-                      "name": "bicep",
-                      "version": "0.30.23.60470",
-                      "templateHash": "1914665911888620831"
-                    }
-                  },
-                  "parameters": {
-                    "existingAIProjectName": {
-                      "type": "string"
-                    },
-                    "existingAIFoundryName": {
-                      "type": "string"
-                    },
-                    "appInsightConnectionName": {
-                      "type": "string"
-                    },
-                    "appInsightId": {
-                      "type": "string"
-                    },
-                    "appInsightConnectionString": {
-                      "type": "string"
-                    }
-                  },
-                  "resources": [
-                    {
-                      "type": "Microsoft.CognitiveServices/accounts/projects/connections",
-                      "apiVersion": "2025-04-01-preview",
-                      "name": "[format('{0}/{1}/{2}', parameters('existingAIFoundryName'), parameters('existingAIProjectName'), parameters('appInsightConnectionName'))]",
-                      "properties": {
-                        "category": "AppInsights",
-                        "target": "[parameters('appInsightId')]",
-                        "authType": "ApiKey",
-                        "isSharedToAll": true,
-                        "credentials": {
-                          "key": "[parameters('appInsightConnectionString')]"
-                        },
-                        "metadata": {
-                          "ApiType": "Azure",
-                          "ResourceId": "[parameters('appInsightId')]"
-                        }
-                      }
-                    }
-                  ]
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
               ]
             }
           ],
@@ -1517,8 +1435,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "13262300981187077190"
+              "version": "0.36.1.42791",
+              "templateHash": "12179523327793839969"
             }
           },
           "parameters": {
@@ -1566,7 +1484,7 @@
           "resources": [
             {
               "copy": {
-                "name": "list",
+                "name": "database::list",
                 "count": "[length(parameters('containers'))]"
               },
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
@@ -1678,8 +1596,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "12985789945182665587"
+              "version": "0.36.1.42791",
+              "templateHash": "9019656445963157268"
             }
           },
           "parameters": {
@@ -1768,7 +1686,8 @@
                 "publicAccess": "None"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]"
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('saName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('saName'))]"
               ]
             },
             {
@@ -1851,8 +1770,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "6332438676296848275"
+              "version": "0.36.1.42791",
+              "templateHash": "6152102507143828636"
             }
           },
           "parameters": {
@@ -2149,8 +2068,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.30.23.60470",
-              "templateHash": "16979491698025914308"
+              "version": "0.36.1.42791",
+              "templateHash": "14953778303718528248"
             }
           },
           "parameters": {
@@ -2728,8 +2647,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.30.23.60470",
-                      "templateHash": "2622922268469466870"
+                      "version": "0.36.1.42791",
+                      "templateHash": "399023243105742355"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },
@@ -2792,8 +2711,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.30.23.60470",
-                      "templateHash": "7784918822301595319"
+                      "version": "0.36.1.42791",
+                      "templateHash": "2925963278128724941"
                     }
                   },
                   "parameters": {
