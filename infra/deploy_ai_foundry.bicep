@@ -76,6 +76,7 @@ var existingAIServiceResourceGroup = !empty(azureExistingAIProjectResourceId)
   ? split(azureExistingAIProjectResourceId, '/')[4]
   : ''
 var aiSearchConnectionName = 'foundry-search-connection-${solutionName}'
+var aiAppInsightConnectionName = 'foundry-app-insights-connection-${solutionName}'
 
 resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = if (useExisting) {
   name: existingLawName
@@ -253,23 +254,35 @@ module existing_AIProject_SearchConnectionModule 'deploy_aifp_aisearch_connectio
 // }
 
 //need to change 
-// resource appInsightsFoundryConnection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' = if (empty(azureExistingAIProjectResourceId)) {
-//   name: 'foundry-app-insights-connection'
-//   parent: aiFoundry
-//   properties: {
-//     category: 'AppInsights'
-//     target: applicationInsights.id
-//     authType: 'ApiKey'
-//     isSharedToAll: true
-//     credentials: {
-//       key: applicationInsights.properties.ConnectionString
-//     }
-//     metadata: {
-//       ApiType: 'Azure'
-//       ResourceId: applicationInsights.id
-//     }
-//   }
-// }
+resource appInsightsFoundryConnection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' = if (empty(azureExistingAIProjectResourceId)) {
+  name: aiAppInsightConnectionName
+  parent: aiFoundry
+  properties: {
+    category: 'AppInsights'
+    target: applicationInsights.id
+    authType: 'ApiKey'
+    isSharedToAll: true
+    credentials: {
+      key: applicationInsights.properties.ConnectionString
+    }
+    metadata: {
+      ApiType: 'Azure'
+      ResourceId: applicationInsights.id
+    }
+  }
+}
+
+module existing_AIFoundry_AppInsightConnectionModule 'deploy_aifoundry_appinsight_connection.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
+  name: 'aiAppInsightConnectionDeployment'
+  scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
+  params: {
+    existingAIProjectName: existingAIProjectName
+    existingAIFoundryName: existingAIFoundryName
+    appInsightConnectionName: aiAppInsightConnectionName
+    appInsightId: applicationInsights.id
+    appInsightConnectionString: applicationInsights.properties.ConnectionString
+  }
+}
 
 resource azureOpenAIApiVersionEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   parent: keyVault
