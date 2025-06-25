@@ -29,8 +29,8 @@ param enableForDiskEncryption bool = true
 @description('Enabled For Template Deployment. Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault.')
 param enableForTemplateDeployment bool = true
 
-@description('Enable Purge Protection. Property specifying whether protection against purge is enabled for this vault.')
-param enablePurgeProtection bool = false
+// @description('Enable Purge Protection. Property specifying whether protection against purge is enabled for this vault.')
+// param enablePurgeProtection bool = false
 
 @description('Enable RBAC Authorization. Property that controls how data actions are authorized.')
 param enableRBACAuthorization bool = true
@@ -117,7 +117,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
     enabledForDeployment: enableForDeployment
     enabledForDiskEncryption: enableForDiskEncryption
     enabledForTemplateDeployment: enableForTemplateDeployment
-    enablePurgeProtection: enablePurgeProtection
     enableRbacAuthorization: enableRBACAuthorization
     enableSoftDelete: enableSoftDelete
     softDeleteRetentionInDays: softDeleteRetentionInDays
