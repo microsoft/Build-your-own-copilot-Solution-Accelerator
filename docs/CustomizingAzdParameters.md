@@ -21,6 +21,7 @@ By default this template will use the environment name as the prefix to prevent 
 | `AZURE_ENV_OPENAI_LOCATION`       | string  | `eastus2`    | Location of the Azure OpenAI resource. Choose from (allowed values: `swedencentral`, `australiaeast`).   |
 | `AZURE_LOCATION`            | string  | `japaneast`         | Sets the Azure region for resource deployment.  |
 | `AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID`            | string  | `<Existing Workspace Id>`         | Reuses an existing Log Analytics Workspace instead of provisioning a new one.   |
+| `RESOURCE_GROUP_NAME_FOUNDRY`            | string  | `<Existing AI Foundry Project>`         | Reuses an existing AI Foundry Project instead of provisioning a new one.   |
 
 ## How to Set a Parameter
 To customize any of the above values, run the following command **before** `azd up`:

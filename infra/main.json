@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "7563963004666467098"
+      "templateHash": "2297614087018279591"
     }
   },
   "parameters": {
@@ -727,7 +727,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.1.42791",
-              "templateHash": "10360845696754545130"
+              "templateHash": "7446640170353068130"
             }
           },
           "parameters": {
@@ -1355,6 +1355,10 @@
             "keyvaultId": {
               "type": "string",
               "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            },
+            "resourceGroupNameFoundry": {
+              "type": "string",
+              "value": "[if(not(empty(variables('existingAIServiceResourceGroup'))), variables('existingAIServiceResourceGroup'), resourceGroup().name)]"
             },
             "aiFoundryProjectEndpoint": {
               "type": "string",
@@ -2790,6 +2794,10 @@
     "RESOURCE_GROUP_NAME": {
       "type": "string",
       "value": "[resourceGroup().name]"
+    },
+    "RESOURCE_GROUP_NAME_FOUNDRY": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.resourceGroupNameFoundry.value]"
     },
     "SQLDB_SERVER": {
       "type": "string",
