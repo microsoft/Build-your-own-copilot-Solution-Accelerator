@@ -330,6 +330,9 @@ resource azureSearchIndexEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-pre
 output keyvaultName string = keyvaultName
 output keyvaultId string = keyVault.id
 
+output resourceGroupNameFoundry string = !empty(existingAIServiceResourceGroup)
+  ? existingAIServiceResourceGroup
+  : resourceGroup().name
 output aiFoundryProjectEndpoint string = !empty(existingProjEndpoint)
   ? existingProjEndpoint
   : aiFoundryProject.properties.endpoints['AI Foundry API']
