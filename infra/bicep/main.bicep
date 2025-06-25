@@ -103,7 +103,7 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
     cogServiceEndpoint:azAIMultiServiceAccount.outputs.cogSearchOutput.cogServiceEndpoint
     cogServiceName:azAIMultiServiceAccount.outputs.cogSearchOutput.cogServiceName
     cogServiceKey:azAIMultiServiceAccount.outputs.cogSearchOutput.cogServiceKey
-    enableSoftDelete:false
+    enableSoftDelete:true
     kvName:'${abbrs.security.keyVault}${solutionPrefix}'
   }
   scope: resourceGroup(resourceGroup().name)

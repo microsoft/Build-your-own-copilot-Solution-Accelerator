@@ -30,16 +30,16 @@ param enableForDiskEncryption bool = true
 param enableForTemplateDeployment bool = true
 
 @description('Enable Purge Protection. Property specifying whether protection against purge is enabled for this vault.')
-param enablePurgeProtection bool = true
+param enablePurgeProtection bool = false
 
 @description('Enable RBAC Authorization. Property that controls how data actions are authorized.')
 param enableRBACAuthorization bool = true
 
 @description('Enable Soft Delete. Property to specify whether the "soft delete" functionality is enabled for this key vault.')
-param enableSoftDelete bool = false
+param enableSoftDelete bool = true
 
 @description('Soft Delete Retention in Days. softDelete data retention days. It accepts >=7 and <=90.')
-param softDeleteRetentionInDays int = 30
+param softDeleteRetentionInDays int = 7
 
 @description('Public Network Access, Property to specify whether the vault will accept traffic from public internet.')
 @allowed([
