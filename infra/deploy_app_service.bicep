@@ -142,7 +142,6 @@ param useAIProjectClientFlag string = 'false'
 param aiFoundryProjectName string
 param aiFoundryName string
 param applicationInsightsConnectionString string
-param authEnabled bool
 
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
@@ -319,9 +318,6 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         //{name: 'VITE_POWERBI_EMBED_URL'
         //  value: VITE_POWERBI_EMBED_URL
         //}
-        {name: 'AUTH_ENABLED'
-        value: authEnabled
-        }
         {
           name: 'SQLDB_USER_MID'
           value: userassignedIdentityClientId
@@ -437,4 +433,3 @@ resource aiUserRoleAssignmentFoundryProject 'Microsoft.Authorization/roleAssignm
 
 output webAppUrl string = 'https://${WebsiteName}.azurewebsites.net'
 output webAppName string = WebsiteName
-output authEnabled bool = authEnabled

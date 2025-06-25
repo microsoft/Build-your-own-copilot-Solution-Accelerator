@@ -8,8 +8,9 @@ on:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
 env:
-  GPT_MIN_CAPACITY: 10
-  TEXT_EMBEDDING_MIN_CAPACITY: 10
+  GPT_MIN_CAPACITY: 250
+  TEXT_EMBEDDING_MIN_CAPACITY: 40
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
   deploy:
@@ -145,8 +146,10 @@ jobs:
           DEPLOY_OUTPUT=$(az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} authEnabled=false \
+            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} \
             --query "properties.outputs" -o json)
+
+          
 
           echo "Deployment output: $DEPLOY_OUTPUT"
           if [[ -z "$DEPLOY_OUTPUT" ]]; then
@@ -154,6 +157,10 @@ jobs:
             exit 1
           fi
 
+          export AI_FOUNDARY_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.aI_FOUNDRY_NAME.value')
+          echo "AI_FOUNDARY_NAME=$AI_FOUNDARY_NAME" >> $GITHUB_ENV
+          export SEARCH_SERVICE_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.aI_SEARCH_SERVICE_NAME.value')
+          echo "SEARCH_SERVICE_NAME=$SEARCH_SERVICE_NAME" >> $GITHUB_ENV
           export COSMOS_DB_ACCOUNT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.cosmosdB_ACCOUNT_NAME.value')
           echo "COSMOS_DB_ACCOUNT_NAME=$COSMOS_DB_ACCOUNT_NAME" >> $GITHUB_ENV
           export STORAGE_ACCOUNT=$(echo "$DEPLOY_OUTPUT" | jq -r '.storagE_ACCOUNT_NAME.value')
@@ -166,9 +173,9 @@ jobs:
           echo "SQL_SERVER=$SQL_SERVER" >> $GITHUB_ENV
           export SQL_DATABASE=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_DATABASE.value')
           echo "SQL_DATABASE=$SQL_DATABASE" >> $GITHUB_ENV
-          export CLIENT_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedindentitY_WEBAPP_CLIENTID.value')
+          export CLIENT_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_WEBAPP_CLIENTID.value')
           echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
-          export CLIENT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedindentitY_WEBAPP_NAME.value')
+          export CLIENT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_WEBAPP_NAME.value')
           echo "CLIENT_NAME=$CLIENT_NAME" >> $GITHUB_ENV
           export RG_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.resourcE_GROUP_NAME.value')
           echo "RG_NAME=$RG_NAME" >> $GITHUB_ENV
@@ -176,9 +183,13 @@ jobs:
           echo "WEBAPP_URL=$WEBAPP_URL" >> $GITHUB_OUTPUT
           WEB_APP_NAME=$(echo $DEPLOY_OUTPUT | jq -r '.weB_APP_NAME.value')
           echo "WEB_APP_NAME=$WEB_APP_NAME" >> $GITHUB_ENV
-          AUTH_ENABLED=$(echo $DEPLOY_OUTPUT | jq -r '.autH_ENABLED.value')
-          echo "AUTH_ENABLED=$AUTH_ENABLED" >> $GITHUB_ENV
           echo "Deployment output: $DEPLOY_OUTPUT"
+
+
+          echo "🔧 Disabling AUTH_ENABLED for the web app..."
+          az webapp config appsettings set -g "$RG_NAME" -n "$WEB_APP_NAME" --settings AUTH_ENABLED=false
+
+          sleep 30
 
           export CLIENT_OBJECT_ID=$(az identity show \
                   --name "$CLIENT_NAME" \
@@ -186,18 +197,29 @@ jobs:
                   --query 'principalId' -o tsv)
           echo "CLIENT_OBJECT_ID=$CLIENT_OBJECT_ID" >> $GITHUB_ENV
 
+
+
       - name: Deploy Infra and Import Sample Data 
         run: |
           set -e
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          
+          export AZURE_CLIENT_OBJECT_ID=$(az ad sp show --id ${{ secrets.AZURE_CLIENT_ID }} --query id -o tsv)
+          echo "AZURE_CLIENT_OBJECT_ID=$AZURE_CLIENT_OBJECT_ID" >> $GITHUB_ENV
 
-          # Fixed Cosmos DB role assignment - using correct variable names
-          az cosmosdb sql role assignment create \
-            --account-name "${{ env.COSMOS_DB_ACCOUNT_NAME }}" \
-            --resource-group "${{ env.RG_NAME }}" \
-            --role-definition-name "Cosmos DB Built-in Data Contributor" \
-            --scope "/" \
-            --principal-id "${{ env.CLIENT_OBJECT_ID }}"
+          az role assignment create \
+            --assignee-object-id $AZURE_CLIENT_OBJECT_ID \
+            --assignee-principal-type ServicePrincipal \
+            --role "Cognitive Services OpenAI User" \
+            --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_NAME }}/providers/Microsoft.CognitiveServices/accounts/${{ env.AI_FOUNDARY_NAME }}
+
+          sleep 30
+
+          az role assignment create \
+            --assignee-object-id $AZURE_CLIENT_OBJECT_ID \
+            --assignee-principal-type ServicePrincipal \
+            --role "Search Index Data Contributor" \
+            --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_NAME }}/providers/Microsoft.Search/searchServices/${{ env.SEARCH_SERVICE_NAME }}
 
           echo "Running post-deployment script..."
           bash ./infra/scripts/add_cosmosdb_access.sh \
