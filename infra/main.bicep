@@ -33,7 +33,7 @@ param azureOpenaiAPIVersion string = '2025-01-01-preview'
 @description('Capacity of the GPT deployment:')
 // You can increase this, but capacity is limited per model/region, so you will get errors if you go over
 // https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits
-param gptDeploymentCapacity int = 30
+param gptDeploymentCapacity int = 200
 
 @minLength(1)
 @description('Name of the Text Embedding model to deploy:')
@@ -56,12 +56,6 @@ param imageTag string = 'latest'
 // @description('Azure OpenAI Location')
 // param AzureOpenAILocation string = 'eastus2'
 
-@description('Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default.')
-param AZURE_LOCATION string=''
-var solutionLocation = empty(AZURE_LOCATION) ? resourceGroup().location : AZURE_LOCATION
-
-var uniqueId = toLower(uniqueString(environmentName, subscription().id, solutionLocation))
-
 @metadata({
   azd:{
     type: 'location'
@@ -73,6 +67,12 @@ var uniqueId = toLower(uniqueString(environmentName, subscription().id, solution
 })
 @description('Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed.')
 param aiDeploymentsLocation string
+
+@description('Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default.')
+param AZURE_LOCATION string=''
+var solutionLocation = empty(AZURE_LOCATION) ? resourceGroup().location : AZURE_LOCATION
+
+var uniqueId = toLower(uniqueString(environmentName, subscription().id, solutionLocation))
 
 var solutionPrefix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
 
