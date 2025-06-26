@@ -13,7 +13,7 @@ param environmentName string
 param existingLogAnalyticsWorkspaceId string = ''
 
 @description('CosmosDB Location')
-param cosmosLocation string
+param cosmosLocation string = 'eastus2'
 
 @minLength(1)
 @description('GPT model deployment type:')
@@ -75,7 +75,7 @@ var uniqueId = toLower(uniqueString(environmentName, subscription().id, solution
   }
 })
 @description('Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed.')
-param AZURE_AI_SERVICE_LOCATION string
+param aiDeploymentsLocation string
 
 var solutionPrefix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
 
@@ -149,7 +149,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
   name: 'deploy_ai_foundry'
   params: {
     solutionName: solutionPrefix
-    solutionLocation: AZURE_AI_SERVICE_LOCATION
+    solutionLocation: aiDeploymentsLocation
     keyVaultName: keyvaultModule.outputs.keyvaultName
     deploymentType: deploymentType
     gptModelName: gptModelName
