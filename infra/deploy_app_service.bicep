@@ -415,7 +415,7 @@ module assignAiUserRoleToAiProject 'deploy_foundry_role_assignment.bicep' = {
     principalId: Website.identity.principalId
     roleDefinitionId: aiUserRoleDefinitionFoundry.id
     roleAssignmentName: guid(Website.name, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
-    aiServicesName: !empty(azureExistingAIProjectResourceId) ? existingAIServicesName : aiFoundryName
+    aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIServicesName : aiFoundryName
   }
 }
 
