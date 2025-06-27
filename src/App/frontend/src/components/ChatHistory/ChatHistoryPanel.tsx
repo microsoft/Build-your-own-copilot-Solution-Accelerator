@@ -87,6 +87,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
 
   const onClearAllChatHistory = async () => {
     setClearing(true)
+    appStateContext?.dispatch({ type: 'TOGGLE_LOADER' });
     const response = await historyDeleteAll()
     if (!response.ok) {
       setClearingError(true)
@@ -94,6 +95,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
       appStateContext?.dispatch({ type: 'DELETE_CHAT_HISTORY' })
       toggleClearAllDialog()
     }
+    appStateContext?.dispatch({ type: 'TOGGLE_LOADER' });
     setClearing(false)
   }
 
