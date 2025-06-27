@@ -72,6 +72,9 @@ class Config:
             "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN"
         )
         self.AZURE_SEARCH_STRICTNESS = os.environ.get("AZURE_SEARCH_STRICTNESS", 3)
+        self.AZURE_SEARCH_CONNECTION_NAME = os.environ.get(
+            "AZURE_SEARCH_CONNECTION_NAME", "foundry-search-connection"
+        )
 
         # AOAI Integration Settings
         self.AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")

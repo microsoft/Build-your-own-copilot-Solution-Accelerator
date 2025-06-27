@@ -37,7 +37,7 @@ async def stream_response_from_wealth_assistant(query: str, client_id: str):
             "{client_id}", client_id
         )
 
-        agent: AzureAIAgent = current_app.agent
+        agent: AzureAIAgent = current_app.wealth_advisor_agent
 
         thread: AzureAIAgentThread = None
         message = ChatMessageContent(role=AuthorRole.USER, content=query)

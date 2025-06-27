@@ -243,12 +243,12 @@ resource searchIndexDataReaderRoleDefinition 'Microsoft.Authorization/roleDefini
   name: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
 }
 
-resource searchIndexDataReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (empty(azureExistingAIProjectResourceId)) {
-  name: guid(aiSearch.id, aiFoundry.id, searchIndexDataReaderRoleDefinition.id)
+resource searchIndexDataReaderRoleAssignmentToAIFP 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (empty(azureExistingAIProjectResourceId)) {
+  name: guid(aiSearch.id, aiFoundryProject.id, searchIndexDataReaderRoleDefinition.id)
   scope: aiSearch
   properties: {
     roleDefinitionId: searchIndexDataReaderRoleDefinition.id
-    principalId: aiFoundry.identity.principalId
+    principalId: aiFoundryProject.identity.principalId
     principalType: 'ServicePrincipal'
   }
 }
@@ -257,7 +257,7 @@ resource assignSearchIndexDataReaderToExistingAiProject 'Microsoft.Authorization
   scope: aiSearch
   properties: {
     roleDefinitionId: searchIndexDataReaderRoleDefinition.id
-    principalId: assignOpenAIRoleToAISearch.outputs.aiServicesPrincipalId
+    principalId: assignOpenAIRoleToAISearch.outputs.aiProjectPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
@@ -268,12 +268,12 @@ resource searchServiceContributorRoleDefinition 'Microsoft.Authorization/roleDef
   name: '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
 }
 
-resource searchServiceContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (empty(azureExistingAIProjectResourceId)) {
-  name: guid(aiSearch.id, aiFoundry.id, searchServiceContributorRoleDefinition.id)
+resource searchServiceContributorRoleAssignmentToAIFP 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (empty(azureExistingAIProjectResourceId)) {
+  name: guid(aiSearch.id, aiFoundryProject.id, searchServiceContributorRoleDefinition.id)
   scope: aiSearch
   properties: {
     roleDefinitionId: searchServiceContributorRoleDefinition.id
-    principalId: aiFoundry.identity.principalId
+    principalId: aiFoundryProject.identity.principalId
     principalType: 'ServicePrincipal'
   }
 }
@@ -283,7 +283,7 @@ resource searchServiceContributorRoleAssignmentExisting 'Microsoft.Authorization
   scope: aiSearch
   properties: {
     roleDefinitionId: searchServiceContributorRoleDefinition.id
-    principalId: assignOpenAIRoleToAISearch.outputs.aiServicesPrincipalId
+    principalId: assignOpenAIRoleToAISearch.outputs.aiProjectPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
@@ -374,3 +374,5 @@ output logAnalyticsWorkspaceResourceName string = useExisting ? existingLogAnaly
 output logAnalyticsWorkspaceResourceGroup string = useExisting ? existingLawResourceGroup : resourceGroup().name
 
 output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
+
+output aiSearchFoundryConnectionName string = aiSearchConnectionName

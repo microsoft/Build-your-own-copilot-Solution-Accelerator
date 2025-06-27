@@ -138,6 +138,7 @@ param useAIProjectClientFlag string = 'false'
 
 param aiFoundryName string
 param applicationInsightsConnectionString string
+param aiSearchProjectConnectionName string
 
 // var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
@@ -361,6 +362,10 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'AZURE_AI_AGENT_API_VERSION'
           value: AzureOpenAIApiVersion
+        }
+        {
+          name: 'AZURE_SEARCH_CONNECTION_NAME'
+          value: aiSearchProjectConnectionName
         }
       ]
       linuxFxVersion: WebAppImageName

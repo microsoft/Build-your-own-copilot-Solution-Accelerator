@@ -266,6 +266,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     aiFoundryName: aifoundry.outputs.aiFoundryName
     applicationInsightsConnectionString: aifoundry.outputs.applicationInsightsConnectionString
     azureExistingAIProjectResourceId: azureExistingAIProjectResourceId
+    aiSearchProjectConnectionName: aifoundry.outputs.aiSearchFoundryConnectionName
   }
   scope: resourceGroup(resourceGroup().name)
 }
