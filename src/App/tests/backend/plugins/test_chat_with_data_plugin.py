@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from backend.plugins.chat_with_data_plugin import ChatWithDataPlugin
 
 
@@ -10,8 +12,9 @@ class TestChatWithDataPlugin:
         """Setup method to initialize plugin instance for each test."""
         self.plugin = ChatWithDataPlugin()
 
+    @pytest.mark.asyncio
     @patch.object(ChatWithDataPlugin, "get_openai_client")
-    def test_greeting_returns_response(self, mock_get_openai_client):
+    async def test_greeting_returns_response(self, mock_get_openai_client):
         """Test that greeting method calls OpenAI and returns response."""
         # Setup mock
         mock_client = MagicMock()
@@ -24,7 +27,7 @@ class TestChatWithDataPlugin:
         )
         mock_client.chat.completions.create.return_value = mock_completion
 
-        result = self.plugin.greeting("Hello")
+        result = await self.plugin.greeting("Hello")
 
         assert result == "Hello! I'm your Wealth Assistant. How can I help you today?"
         mock_client.chat.completions.create.assert_called_once()
@@ -97,9 +100,10 @@ class TestChatWithDataPlugin:
             api_version="2025-04-01-preview"
         )
 
+    @pytest.mark.asyncio
     @patch("backend.plugins.chat_with_data_plugin.get_connection")
     @patch.object(ChatWithDataPlugin, "get_openai_client")
-    def test_get_sql_response_success(
+    async def test_get_sql_response_success(
         self, mock_get_openai_client, mock_get_connection
     ):
         """Test successful SQL response generation with AAD authentication."""
@@ -122,7 +126,7 @@ class TestChatWithDataPlugin:
         mock_connection.cursor.return_value = mock_cursor
         mock_get_connection.return_value = mock_connection
 
-        result = self.plugin.get_SQL_Response("Find client details", "client123")
+        result = await self.plugin.get_SQL_Response("Find client details", "client123")
 
         # Verify the result
         assert "John Doe" in result
@@ -138,9 +142,10 @@ class TestChatWithDataPlugin:
         mock_cursor.fetchall.assert_called_once()
         mock_connection.close.assert_called_once()
 
+    @pytest.mark.asyncio
     @patch("backend.plugins.chat_with_data_plugin.get_connection")
     @patch.object(ChatWithDataPlugin, "get_openai_client")
-    def test_get_sql_response_database_error(
+    async def test_get_sql_response_database_error(
         self, mock_get_openai_client, mock_get_connection
     ):
         """Test SQL response when database connection fails."""
@@ -155,13 +160,14 @@ class TestChatWithDataPlugin:
         # Simulate database connection error
         mock_get_connection.side_effect = Exception("Database connection failed")
 
-        result = self.plugin.get_SQL_Response("Get all clients", "client123")
+        result = await self.plugin.get_SQL_Response("Get all clients", "client123")
 
         assert "Error retrieving data from SQL" in result
         assert "Database connection failed" in result
 
+    @pytest.mark.asyncio
     @patch.object(ChatWithDataPlugin, "get_openai_client")
-    def test_get_sql_response_openai_error(self, mock_get_openai_client):
+    async def test_get_sql_response_openai_error(self, mock_get_openai_client):
         """Test SQL response when OpenAI call fails."""
         mock_client = MagicMock()
         mock_get_openai_client.return_value = mock_client
@@ -169,27 +175,50 @@ class TestChatWithDataPlugin:
         # Simulate OpenAI error
         mock_client.chat.completions.create.side_effect = Exception("OpenAI API error")
 
-        result = self.plugin.get_SQL_Response("Get client data", "client123")
+        result = await self.plugin.get_SQL_Response("Get client data", "client123")
 
         assert "Error retrieving data from SQL" in result
         assert "OpenAI API error" in result
 
-    @patch.object(ChatWithDataPlugin, "get_openai_client")
-    def test_get_answers_from_calltranscripts_success(self, mock_get_openai_client):
-        """Test successful retrieval of answers from call transcripts using AAD authentication."""
-        # Setup mocks
-        mock_client = MagicMock()
-        mock_get_openai_client.return_value = mock_client
+    @pytest.mark.asyncio
+    @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
+    async def test_get_answers_from_calltranscripts_success(self, mock_get_search_agent):
+        """Test successful retrieval of answers from call transcripts using AI Search Agent."""
+        # Setup mocks for agent factory
+        mock_agent = MagicMock()
+        mock_agent.id = "test-agent-id"
+        
+        mock_project_client = MagicMock()
+        mock_get_search_agent.return_value = {
+            "agent": mock_agent,
+            "client": mock_project_client
+        }
 
-        # Mock OpenAI response (this method uses extra_body with data_sources)
-        mock_completion = MagicMock()
-        mock_completion.choices = [MagicMock()]
-        mock_completion.choices[0].message.content = (
-            "Based on call transcripts, the customer discussed investment options and risk tolerance."
-        )
-        mock_client.chat.completions.create.return_value = mock_completion
+        # Mock project index creation
+        mock_index = MagicMock()
+        mock_index.name = "project-index-test"
+        mock_index.version = "1"
+        mock_project_client.indexes.create_or_update.return_value = mock_index
 
-        result = self.plugin.get_answers_from_calltranscripts(
+        # Mock agent update
+        mock_project_client.agents.update_agent.return_value = mock_agent
+
+        # Mock thread creation
+        mock_thread = MagicMock()
+        mock_thread.id = "test-thread-id"
+        mock_project_client.agents.threads.create.return_value = mock_thread
+
+        # Mock run creation and processing
+        mock_run = MagicMock()
+        mock_run.status = "completed"
+        mock_project_client.agents.runs.create_and_process.return_value = mock_run
+
+        # Mock message response
+        mock_message = MagicMock()
+        mock_message.text.value = "Based on call transcripts, the customer discussed investment options and risk tolerance."
+        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = mock_message
+
+        result = await self.plugin.get_answers_from_calltranscripts(
             "What did the customer discuss?", "client123"
         )
 
@@ -197,80 +226,220 @@ class TestChatWithDataPlugin:
         assert "Based on call transcripts" in result
         assert "investment options" in result
 
-        # Verify OpenAI was called with data_sources for Azure Search
-        mock_client.chat.completions.create.assert_called_once()
-        call_args = mock_client.chat.completions.create.call_args
-        assert "extra_body" in call_args[1]
-        assert "data_sources" in call_args[1]["extra_body"]
+        # Verify agent factory was called
+        mock_get_search_agent.assert_called_once()
 
-        # Verify the filter contains the client ID
-        data_sources = call_args[1]["extra_body"]["data_sources"]
-        assert len(data_sources) > 0
-        assert "client_id eq 'client123'" in data_sources[0]["parameters"]["filter"]
+        # Verify project index was created/updated
+        mock_project_client.indexes.create_or_update.assert_called_once()
 
-    @patch.object(ChatWithDataPlugin, "get_openai_client")
-    def test_get_answers_from_calltranscripts_no_results(self, mock_get_openai_client):
+        # Verify agent was updated with search tool
+        mock_project_client.agents.update_agent.assert_called_once()
+
+        # Verify thread was created and deleted
+        mock_project_client.agents.threads.create.assert_called_once()
+        mock_project_client.agents.threads.delete.assert_called_once_with("test-thread-id")
+
+        # Verify message was created and run was processed
+        mock_project_client.agents.messages.create.assert_called_once()
+        mock_project_client.agents.runs.create_and_process.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
+    async def test_get_answers_from_calltranscripts_no_results(self, mock_get_search_agent):
         """Test call transcripts search with no results."""
-        mock_client = MagicMock()
-        mock_get_openai_client.return_value = mock_client
+        # Setup mocks for agent factory
+        mock_agent = MagicMock()
+        mock_agent.id = "test-agent-id"
+        
+        mock_project_client = MagicMock()
+        mock_get_search_agent.return_value = {
+            "agent": mock_agent,
+            "client": mock_project_client
+        }
 
-        # Mock empty response
-        mock_completion = MagicMock()
-        mock_completion.choices = []
-        mock_client.chat.completions.create.return_value = mock_completion
+        # Mock project index creation
+        mock_index = MagicMock()
+        mock_index.name = "project-index-test"
+        mock_index.version = "1"
+        mock_project_client.indexes.create_or_update.return_value = mock_index
 
-        result = self.plugin.get_answers_from_calltranscripts(
+        # Mock agent update
+        mock_project_client.agents.update_agent.return_value = mock_agent
+
+        # Mock thread creation
+        mock_thread = MagicMock()
+        mock_thread.id = "test-thread-id"
+        mock_project_client.agents.threads.create.return_value = mock_thread
+
+        # Mock run creation and processing
+        mock_run = MagicMock()
+        mock_run.status = "completed"
+        mock_project_client.agents.runs.create_and_process.return_value = mock_run
+
+        # Mock empty message response
+        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = None
+
+        result = await self.plugin.get_answers_from_calltranscripts(
             "Nonexistent query", "client123"
         )
 
         assert "No data found for that client." in result
 
-    @patch.object(ChatWithDataPlugin, "get_openai_client")
-    def test_get_answers_from_calltranscripts_openai_error(
-        self, mock_get_openai_client
+    @pytest.mark.asyncio
+    @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
+    async def test_get_answers_from_calltranscripts_openai_error(
+        self, mock_get_search_agent
     ):
-        """Test call transcripts with OpenAI processing error."""
-        mock_client = MagicMock()
-        mock_get_openai_client.return_value = mock_client
+        """Test call transcripts with AI Search processing error."""
+        # Setup mocks for agent factory
+        mock_agent = MagicMock()
+        mock_agent.id = "test-agent-id"
+        
+        mock_project_client = MagicMock()
+        mock_get_search_agent.return_value = {
+            "agent": mock_agent,
+            "client": mock_project_client
+        }
 
-        # Simulate OpenAI error
-        mock_client.chat.completions.create.side_effect = Exception(
-            "OpenAI processing failed"
+        # Mock project index creation
+        mock_index = MagicMock()
+        mock_index.name = "project-index-test"
+        mock_index.version = "1"
+        mock_project_client.indexes.create_or_update.return_value = mock_index
+
+        # Mock agent update
+        mock_project_client.agents.update_agent.return_value = mock_agent
+
+        # Mock thread creation
+        mock_thread = MagicMock()
+        mock_thread.id = "test-thread-id"
+        mock_project_client.agents.threads.create.return_value = mock_thread
+
+        # Simulate AI Search error
+        mock_project_client.agents.runs.create_and_process.side_effect = Exception(
+            "AI Search processing failed"
         )
 
-        result = self.plugin.get_answers_from_calltranscripts("Test query", "client123")
+        result = await self.plugin.get_answers_from_calltranscripts("Test query", "client123")
 
         assert "Error retrieving data from call transcripts" in result
-        assert "OpenAI processing failed" in result
 
-    def test_get_sql_response_missing_client_id(self):
+    @pytest.mark.asyncio
+    @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
+    async def test_get_answers_from_calltranscripts_failed_run(
+        self, mock_get_search_agent
+    ):
+        """Test call transcripts with failed AI Search run."""
+        # Setup mocks for agent factory
+        mock_agent = MagicMock()
+        mock_agent.id = "test-agent-id"
+        
+        mock_project_client = MagicMock()
+        mock_get_search_agent.return_value = {
+            "agent": mock_agent,
+            "client": mock_project_client
+        }
+
+        # Mock project index creation
+        mock_index = MagicMock()
+        mock_index.name = "project-index-test"
+        mock_index.version = "1"
+        mock_project_client.indexes.create_or_update.return_value = mock_index
+
+        # Mock agent update
+        mock_project_client.agents.update_agent.return_value = mock_agent
+
+        # Mock thread creation
+        mock_thread = MagicMock()
+        mock_thread.id = "test-thread-id"
+        mock_project_client.agents.threads.create.return_value = mock_thread
+
+        # Mock failed run
+        mock_run = MagicMock()
+        mock_run.status = "failed"
+        mock_run.last_error = "AI Search run failed"
+        mock_project_client.agents.runs.create_and_process.return_value = mock_run
+
+        result = await self.plugin.get_answers_from_calltranscripts("Test query", "client123")
+
+        assert "Error retrieving data from call transcripts" in result
+
+    @pytest.mark.asyncio
+    @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
+    async def test_get_answers_from_calltranscripts_empty_response(
+        self, mock_get_search_agent
+    ):
+        """Test call transcripts with empty response text."""
+        # Setup mocks for agent factory
+        mock_agent = MagicMock()
+        mock_agent.id = "test-agent-id"
+        
+        mock_project_client = MagicMock()
+        mock_get_search_agent.return_value = {
+            "agent": mock_agent,
+            "client": mock_project_client
+        }
+
+        # Mock project index creation
+        mock_index = MagicMock()
+        mock_index.name = "project-index-test"
+        mock_index.version = "1"
+        mock_project_client.indexes.create_or_update.return_value = mock_index
+
+        # Mock agent update
+        mock_project_client.agents.update_agent.return_value = mock_agent
+
+        # Mock thread creation
+        mock_thread = MagicMock()
+        mock_thread.id = "test-thread-id"
+        mock_project_client.agents.threads.create.return_value = mock_thread
+
+        # Mock run creation and processing
+        mock_run = MagicMock()
+        mock_run.status = "completed"
+        mock_project_client.agents.runs.create_and_process.return_value = mock_run
+
+        # Mock message with empty response
+        mock_message = MagicMock()
+        mock_message.text.value = "   "  # Empty/whitespace response
+        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = mock_message
+
+        result = await self.plugin.get_answers_from_calltranscripts("Test query", "client123")
+
+        assert "No data found for that client." in result
+
+    @pytest.mark.asyncio
+    async def test_get_sql_response_missing_client_id(self):
         """Test SQL response with missing ClientId."""
-        result = self.plugin.get_SQL_Response("Test query", "")
+        result = await self.plugin.get_SQL_Response("Test query", "")
         assert "Error: ClientId is required" in result
 
-        result = self.plugin.get_SQL_Response("Test query", None)
+        result = await self.plugin.get_SQL_Response("Test query", None)
         assert "Error: ClientId is required" in result
 
-    def test_get_sql_response_missing_input(self):
+    @pytest.mark.asyncio
+    async def test_get_sql_response_missing_input(self):
         """Test SQL response with missing input query."""
-        result = self.plugin.get_SQL_Response("", "client123")
+        result = await self.plugin.get_SQL_Response("", "client123")
         assert "Error: Query input is required" in result
 
-        result = self.plugin.get_SQL_Response(None, "client123")
+        result = await self.plugin.get_SQL_Response(None, "client123")
         assert "Error: Query input is required" in result
 
-    def test_get_answers_from_calltranscripts_missing_client_id(self):
+    @pytest.mark.asyncio
+    async def test_get_answers_from_calltranscripts_missing_client_id(self):
         """Test call transcripts search with missing ClientId."""
-        result = self.plugin.get_answers_from_calltranscripts("Test query", "")
+        result = await self.plugin.get_answers_from_calltranscripts("Test query", "")
         assert "Error: ClientId is required" in result
 
-        result = self.plugin.get_answers_from_calltranscripts("Test query", None)
+        result = await self.plugin.get_answers_from_calltranscripts("Test query", None)
         assert "Error: ClientId is required" in result
 
-    def test_get_answers_from_calltranscripts_missing_question(self):
+    @pytest.mark.asyncio
+    async def test_get_answers_from_calltranscripts_missing_question(self):
         """Test call transcripts search with missing question."""
-        result = self.plugin.get_answers_from_calltranscripts("", "client123")
+        result = await self.plugin.get_answers_from_calltranscripts("", "client123")
         assert "Error: Question input is required" in result
 
-        result = self.plugin.get_answers_from_calltranscripts(None, "client123")
+        result = await self.plugin.get_answers_from_calltranscripts(None, "client123")
         assert "Error: Question input is required" in result
