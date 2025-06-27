@@ -12,10 +12,15 @@ webAppManagedIdentityClientId="$8"
 webAppManagedIdentityDisplayName="$9"
 aiFoundryName="${10}"
 aiSearchName="${11}"
+resourceGroupNameFoundry="${12}"
 
 # get parameters from azd env, if not provided
 if [ -z "$resourceGroupName" ]; then
     resourceGroupName=$(azd env get-value RESOURCE_GROUP_NAME)
+fi
+
+if [ -z "$resourceGroupNameFoundry" ]; then
+    resourceGroupNameFoundry=$(azd env get-value RESOURCE_GROUP_NAME_FOUNDRY)
 fi
 
 if [ -z "$cosmosDbAccountName" ]; then
@@ -59,7 +64,7 @@ if [ -z "$aiSearchName" ]; then
 fi
 
 # Check if all required arguments are provided
-if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$webAppManagedIdentityClientId" ] || [ -z "$webAppManagedIdentityDisplayName" ] || [ -z "$aiFoundryName" ] || [ -z "$aiSearchName" ]; then
+if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$webAppManagedIdentityClientId" ] || [ -z "$webAppManagedIdentityDisplayName" ] || [ -z "$aiFoundryName" ] || [ -z "$aiSearchName" ] || [ -z "$resourceGroupNameFoundry"]; then
     echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName> <aiFoundryName> <aiSearchName>"
     exit 1
 fi
@@ -84,7 +89,7 @@ echo "copy_kb_files.sh completed successfully."
 
 # Call run_create_index_scripts.sh
 echo "Running run_create_index_scripts.sh"
-bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "" "$resourceGroupName" "$sqlServerName" "$aiFoundryName" "$aiSearchName"
+bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "" "$resourceGroupName" "$sqlServerName" "$aiFoundryName" "$aiSearchName" "$resourceGroupNameFoundry"
 if [ $? -ne 0 ]; then
     echo "Error: run_create_index_scripts.sh failed."
     exit 1
