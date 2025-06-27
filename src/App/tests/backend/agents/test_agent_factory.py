@@ -51,12 +51,14 @@ class TestAgentFactory:
         mock_client.agents.create_agent.assert_called_once_with(
             model="test-model",
             name="WealthAdvisor",
-            instructions="You are a helpful assistant to a Wealth Advisor."
+            instructions="You are a helpful assistant to a Wealth Advisor.",
         )
         mock_agent.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_wealth_advisor_agent_returns_existing_agent(self, reset_singleton):
+    async def test_get_wealth_advisor_agent_returns_existing_agent(
+        self, reset_singleton
+    ):
         """Test that get_wealth_advisor_agent returns existing agent when one exists."""
         # Arrange
         mock_instance = AsyncMock()
@@ -80,7 +82,7 @@ class TestAgentFactory:
         mock_config.CALL_TRANSCRIPT_SYSTEM_PROMPT = "Test search agent instructions"
         mock_config.AI_PROJECT_ENDPOINT = "https://test.ai.endpoint.com"
         mock_config.AZURE_OPENAI_MODEL = "test-search-model"
-        
+
         mock_project_client_instance = MagicMock()
         mock_ai_project_client.return_value = mock_project_client_instance
         mock_agent = MagicMock()
@@ -98,12 +100,12 @@ class TestAgentFactory:
         mock_ai_project_client.assert_called_once_with(
             endpoint="https://test.ai.endpoint.com",
             credential=mock_credential_sync.return_value,
-            api_version="2025-05-01"
+            api_version="2025-05-01",
         )
         mock_project_client_instance.agents.create_agent.assert_called_once_with(
             model="test-search-model",
             instructions="Test search agent instructions",
-            name="CallTranscriptSearchAgent"
+            name="CallTranscriptSearchAgent",
         )
 
     @pytest.mark.asyncio
@@ -118,7 +120,7 @@ class TestAgentFactory:
         mock_config.CALL_TRANSCRIPT_SYSTEM_PROMPT = None
         mock_config.AI_PROJECT_ENDPOINT = "https://test.ai.endpoint.com"
         mock_config.AZURE_OPENAI_MODEL = "test-search-model"
-        
+
         mock_project_client_instance = MagicMock()
         mock_ai_project_client.return_value = mock_project_client_instance
         mock_agent = MagicMock()
@@ -138,7 +140,7 @@ class TestAgentFactory:
         mock_project_client_instance.agents.create_agent.assert_called_once_with(
             model="test-search-model",
             instructions=expected_default_instructions,
-            name="CallTranscriptSearchAgent"
+            name="CallTranscriptSearchAgent",
         )
 
     @pytest.mark.asyncio
@@ -155,7 +157,9 @@ class TestAgentFactory:
         assert result is mock_agent_dict
 
     @pytest.mark.asyncio
-    async def test_multiple_calls_return_same_wealth_advisor_instance(self, reset_singleton):
+    async def test_multiple_calls_return_same_wealth_advisor_instance(
+        self, reset_singleton
+    ):
         """Test that multiple calls to get_wealth_advisor_agent return the same instance."""
         # Arrange
         mock_client = AsyncMock()
@@ -180,19 +184,25 @@ class TestAgentFactory:
         assert instance1 is instance2
 
     @pytest.mark.asyncio
-    async def test_multiple_calls_return_same_search_agent_instance(self, reset_singleton):
+    async def test_multiple_calls_return_same_search_agent_instance(
+        self, reset_singleton
+    ):
         """Test that multiple calls to get_search_agent return the same instance."""
         with patch("backend.agents.agent_factory.config") as mock_config:
-            with patch("backend.agents.agent_factory.AIProjectClient") as mock_ai_project_client:
+            with patch(
+                "backend.agents.agent_factory.AIProjectClient"
+            ) as mock_ai_project_client:
                 with patch("backend.agents.agent_factory.DefaultAzureCredentialSync"):
                     mock_config.CALL_TRANSCRIPT_SYSTEM_PROMPT = "Test instructions"
                     mock_config.AI_PROJECT_ENDPOINT = "https://test.endpoint.com"
                     mock_config.AZURE_OPENAI_MODEL = "test-model"
-                    
+
                     mock_project_client_instance = MagicMock()
                     mock_ai_project_client.return_value = mock_project_client_instance
                     mock_agent = MagicMock()
-                    mock_project_client_instance.agents.create_agent.return_value = mock_agent
+                    mock_project_client_instance.agents.create_agent.return_value = (
+                        mock_agent
+                    )
 
                     # Act
                     instance1 = await AgentFactory.get_search_agent()
@@ -216,7 +226,9 @@ class TestAgentFactory:
         assert AgentFactory._search_agent is None
 
     @pytest.mark.asyncio
-    async def test_delete_all_agent_instance_removes_existing_agents(self, reset_singleton):
+    async def test_delete_all_agent_instance_removes_existing_agents(
+        self, reset_singleton
+    ):
         """Test that delete_all_agent_instance properly removes existing agents."""
         # Arrange
         mock_wealth_advisor_agent = AsyncMock()
@@ -227,7 +239,10 @@ class TestAgentFactory:
         mock_search_client = MagicMock()
         mock_search_agent = MagicMock()
         mock_search_agent.id = "test-search-agent-id"
-        AgentFactory._search_agent = {"agent": mock_search_agent, "client": mock_search_client}
+        AgentFactory._search_agent = {
+            "agent": mock_search_agent,
+            "client": mock_search_client,
+        }
 
         # Act
         await AgentFactory.delete_all_agent_instance()
@@ -238,11 +253,15 @@ class TestAgentFactory:
         mock_wealth_advisor_agent.client.agents.delete_agent.assert_called_once_with(
             "test-wealth-advisor-id"
         )
-        mock_search_client.agents.delete_agent.assert_called_once_with("test-search-agent-id")
+        mock_search_client.agents.delete_agent.assert_called_once_with(
+            "test-search-agent-id"
+        )
         mock_search_client.close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_delete_all_agent_instance_handles_only_wealth_advisor(self, reset_singleton):
+    async def test_delete_all_agent_instance_handles_only_wealth_advisor(
+        self, reset_singleton
+    ):
         """Test that delete_all_agent_instance handles when only wealth advisor exists."""
         # Arrange
         mock_wealth_advisor_agent = AsyncMock()
@@ -262,14 +281,19 @@ class TestAgentFactory:
         )
 
     @pytest.mark.asyncio
-    async def test_delete_all_agent_instance_handles_only_search_agent(self, reset_singleton):
+    async def test_delete_all_agent_instance_handles_only_search_agent(
+        self, reset_singleton
+    ):
         """Test that delete_all_agent_instance handles when only search agent exists."""
         # Arrange
         mock_search_client = MagicMock()
         mock_search_agent = MagicMock()
         mock_search_agent.id = "test-search-agent-id"
         AgentFactory._wealth_advisor_agent = None
-        AgentFactory._search_agent = {"agent": mock_search_agent, "client": mock_search_client}
+        AgentFactory._search_agent = {
+            "agent": mock_search_agent,
+            "client": mock_search_client,
+        }
 
         # Act
         await AgentFactory.delete_all_agent_instance()
@@ -277,5 +301,7 @@ class TestAgentFactory:
         # Assert
         assert AgentFactory._wealth_advisor_agent is None
         assert AgentFactory._search_agent is None
-        mock_search_client.agents.delete_agent.assert_called_once_with("test-search-agent-id")
+        mock_search_client.agents.delete_agent.assert_called_once_with(
+            "test-search-agent-id"
+        )
         mock_search_client.close.assert_called_once()

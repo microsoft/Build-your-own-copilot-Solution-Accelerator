@@ -3,8 +3,6 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from quart import Response
-
 from app import (
     create_app,
     delete_all_conversations,
@@ -13,6 +11,7 @@ from app import (
     init_openai_client,
     stream_chat_request,
 )
+from quart import Response
 
 # Constants for testing
 INVALID_API_VERSION = "2022-01-01"
