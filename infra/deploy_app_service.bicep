@@ -2,12 +2,10 @@
 targetScope = 'resourceGroup'
 
 @description('Solution Location')
- param solutionLocation string
+param solutionLocation string
 
 @description('The pricing tier for the App Service plan')
-@allowed(
-  ['F1', 'D1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P4','P0v3']
-)
+@allowed(['F1', 'D1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P4', 'P0v3'])
 param HostingPlanSku string = 'B2'
 
 param HostingPlanName string
@@ -77,9 +75,7 @@ param AzureOpenAIApiVersion string = '2024-02-15-preview'
 param AzureOpenAIStream string = 'True'
 
 @description('Azure Search Query Type')
-@allowed(
-  ['simple', 'semantic', 'vector', 'vectorSimpleHybrid', 'vectorSemanticHybrid']
-)
+@allowed(['simple', 'semantic', 'vector', 'vectorSimpleHybrid', 'vectorSemanticHybrid'])
 param AzureSearchQueryType string = 'simple'
 
 @description('Azure Search Vector Fields')
@@ -139,7 +135,7 @@ param streamTextSystemPrompt string
 
 param aiFoundryProjectEndpoint string
 param useAIProjectClientFlag string = 'false'
-param aiFoundryProjectName string
+
 param aiFoundryName string
 param applicationInsightsConnectionString string
 
@@ -148,6 +144,18 @@ param applicationInsightsConnectionString string
 // var WebAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
 
 var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${imageTag}'
+
+param azureExistingAIProjectResourceId string = ''
+
+var existingAIServiceSubscription = !empty(azureExistingAIProjectResourceId)
+  ? split(azureExistingAIProjectResourceId, '/')[2]
+  : subscription().subscriptionId
+var existingAIServiceResourceGroup = !empty(azureExistingAIProjectResourceId)
+  ? split(azureExistingAIProjectResourceId, '/')[4]
+  : resourceGroup().name
+var existingAIServicesName = !empty(azureExistingAIProjectResourceId)
+  ? split(azureExistingAIProjectResourceId, '/')[8]
+  : ''
 
 resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: HostingPlanName
@@ -377,7 +385,6 @@ resource contributorRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRol
   name: '${AZURE_COSMOSDB_ACCOUNT}/00000000-0000-0000-0000-000000000002'
 }
 
-
 module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
   name: 'cosmos-sql-user-role-${WebsiteName}'
   params: {
@@ -392,11 +399,7 @@ module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
 
 resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: aiFoundryName
-}
-
-resource aiFoundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' existing = {
-  parent: aiFoundry
-  name: aiFoundryProjectName
+  scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
 }
 
 @description('This is the built-in Azure AI User role.')
@@ -405,29 +408,14 @@ resource aiUserRoleDefinitionFoundry 'Microsoft.Authorization/roleDefinitions@20
   name: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
 }
 
-resource aiUserRoleAssignmentFoundry 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(Website.id, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
-  scope: aiFoundry
-  properties: {
+module assignAiUserRoleToAiProject 'deploy_foundry_role_assignment.bicep' = {
+  name: 'assignAiUserRoleToAiProject'
+  scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
+  params: {
+    principalId: Website.identity.principalId
     roleDefinitionId: aiUserRoleDefinitionFoundry.id
-    principalId: Website.identity.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-@description('This is the built-in Azure AI User role.')
-resource aiUserRoleDefinitionFoundryProject 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: aiFoundryProject
-  name: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
-}
-
-resource aiUserRoleAssignmentFoundryProject 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(Website.id, aiFoundryProject.id, aiUserRoleDefinitionFoundryProject.id)
-  scope: aiFoundryProject
-  properties: {
-    roleDefinitionId: aiUserRoleDefinitionFoundryProject.id
-    principalId: Website.identity.principalId
-    principalType: 'ServicePrincipal'
+    roleAssignmentName: guid(Website.name, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
+    aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIServicesName : aiFoundryName
   }
 }
 

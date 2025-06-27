@@ -9,6 +9,7 @@ resourceGroupName="$4"
 sqlServerName="$5"
 aiFoundryName="$6"
 aiSearchName="$7"
+resourceGroupNameFoundry="$8"
 
 echo "Script Started"
 
@@ -67,7 +68,8 @@ else
     ### Assign Azure AI User role to the signed in user ###
 
     echo "Getting Azure AI resource id"
-    aif_resource_id=$(az cognitiveservices account show --name $aiFoundryName --resource-group $resourceGroupName --query id --output tsv)
+    echo $resourceGroupNameFoundry
+    aif_resource_id=$(az cognitiveservices account show --name $aiFoundryName --resource-group $resourceGroupNameFoundry --query id --output tsv)
 
     # Check if the user has the Azure AI User role
     echo "Checking if user has the Azure AI User role"
