@@ -29,42 +29,24 @@ else
     echo "Not authenticated with Azure. Attempting to authenticate..."
 fi
 
-# if using managed identity, skip role assignments as its already provided via bicep
-if [ -n "$managedIdentityClientId" ]; then
-    echo "Skipping role assignments as managed identity is used"
-else
-    # Get signed in user and store the output
-    echo "Getting signed in user id and display name"
-    signed_user=$(az ad signed-in-user show --query "{id:id, displayName:displayName}" -o json)
 
-    # Extract id and displayName using grep and sed
-    signed_user_id=$(echo "$signed_user" | grep -oP '"id":\s*"\K[^"]+')
-    signed_user_display_name=$(echo "$signed_user" | grep -oP '"displayName":\s*"\K[^"]+')
+# Get signed in user and store the output
+echo "Getting signed in user id and display name"
+signed_user=$(az ad signed-in-user show --query "{id:id, displayName:displayName}" -o json)
 
-    # echo "Getting signed in user id"
-    # signed_user_id=$(az ad signed-in-user show --query id -o tsv)
+# Extract id and displayName using grep and sed
+signed_user_id=$(echo "$signed_user" | grep -oP '"id":\s*"\K[^"]+')
+signed_user_display_name=$(echo "$signed_user" | grep -oP '"displayName":\s*"\K[^"]+')
 
-    ### Assign Key Vault Administrator role to the signed in user ###
-
-    echo "Getting key vault resource id"
-    key_vault_resource_id=$(az keyvault show --name $keyvaultName --query id --output tsv)
-
-    # Check if the user has the Key Vault Administrator role
-    echo "Checking if user has the Key Vault Administrator role"
-    role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Key Vault Administrator" --scope $key_vault_resource_id --query "[].roleDefinitionId" -o tsv)
-    if [ -z "$role_assignment" ]; then
-        echo "User does not have the Key Vault Administrator role. Assigning the role."
-        MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role "Key Vault Administrator" --scope $key_vault_resource_id --output none
-        if [ $? -eq 0 ]; then
-            echo "Key Vault Administrator role assigned successfully."
-        else
-            echo "Failed to assign Key Vault Administrator role."
-            exit 1
-        fi
+if [ $? -ne 0 ]; then
+    if [ -z "$managedIdentityClientId" ]; then
+        echo "Error: Failed to get signed in user id."
+        exit 1
     else
+        signed_user_id=$managedIdentityClientId
+        signed_user_display_name=$(az ad sp show --id "$signed_user_id" --query displayName -o tsv)
         echo "User already has the Key Vault Administrator role."
     fi
-
     ### Assign Azure AI User role to the signed in user ###
 
     echo "Getting Azure AI resource id"
@@ -131,18 +113,62 @@ else
         fi
     fi
 fi
+# echo "Getting signed in user id"
+# signed_user_id=$(az ad signed-in-user show --query id -o tsv)
+
+echo "Getting key vault resource id"
+key_vault_resource_id=$(az keyvault show --name $keyvaultName --query id --output tsv)
+
+# Check if the user has the Key Vault Administrator role
+echo "Checking if user has the Key Vault Administrator role"
+role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Key Vault Administrator" --scope $key_vault_resource_id --query "[].roleDefinitionId" -o tsv)
+if [ -z "$role_assignment" ]; then
+    echo "User does not have the Key Vault Administrator role. Assigning the role."
+    MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role "Key Vault Administrator" --scope $key_vault_resource_id --output none
+    if [ $? -eq 0 ]; then
+        echo "Key Vault Administrator role assigned successfully."
+    else
+        echo "Failed to assign Key Vault Administrator role."
+        exit 1
+    fi
+else
+    echo "User already has the Key Vault Administrator role."
+fi
+
+echo "Getting Azure SQL Server resource id"
+sql_server_resource_id=$(az sql server show --name $sqlServerName --resource-group $resourceGroupName --query id --output tsv)
+
+# Check if the user is Azure SQL Server Admin
+echo "Checking if user is Azure SQL Server Admin"
+admin=$(MSYS_NO_PATHCONV=1 az sql server ad-admin list --ids $sql_server_resource_id --query "[?sid == '$signed_user_id']" -o tsv)
+
+# Check if the role exists
+if [ -n "$admin" ]; then
+    echo "User is already Azure SQL Server Admin"
+else
+    echo "User is not Azure SQL Server Admin. Assigning the role."
+    echo "signedin user: $signed_user_display_name"
+    MSYS_NO_PATHCONV=1 az sql server ad-admin create --display-name "$signed_user_display_name" --object-id $signed_user_id --resource-group $resourceGroupName --server $sqlServerName --output none
+    if [ $? -eq 0 ]; then
+        echo "Assigned user as Azure SQL Server Admin."
+    else
+        echo "Failed to assign Azure SQL Server Admin role."
+        exit 1
+    fi
+fi
+
 
 # RUN apt-get update
 # RUN apt-get install python3 python3-dev g++ unixodbc-dev unixodbc libpq-dev
 # apk add python3 python3-dev g++ unixodbc-dev unixodbc libpq-dev
  
 # # RUN apt-get install python3 python3-dev g++ unixodbc-dev unixodbc libpq-dev
-# pip install pyodbc
+pip install pyodbc
 
 pythonScriptPath="infra/scripts/index_scripts/"
 
 # Check if running in Azure Container App
-if !([ -z "$baseUrl" ] && [ -z "$managedIdentityClientId" ]); then
+if [ -n "$baseUrl" ] && [ -n "$managedIdentityClientId" ]; then
     requirementFile="requirements.txt"
     requirementFileUrl=${baseUrl}${pythonScriptPath}"requirements.txt"
 

@@ -420,3 +420,4 @@ module assignAiUserRoleToAiProject 'deploy_foundry_role_assignment.bicep' = {
 }
 
 output webAppUrl string = 'https://${WebsiteName}.azurewebsites.net'
+output webAppName string = WebsiteName
