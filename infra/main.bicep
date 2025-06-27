@@ -27,7 +27,7 @@ param deploymentType string = 'GlobalStandard'
 ])
 param gptModelName string = 'gpt-4o-mini'
 
-param azureOpenaiAPIVersion string = '2025-01-01-preview'
+param azureOpenaiAPIVersion string = '2025-04-01-preview'
 
 @minValue(10)
 @description('Capacity of the GPT deployment:')
