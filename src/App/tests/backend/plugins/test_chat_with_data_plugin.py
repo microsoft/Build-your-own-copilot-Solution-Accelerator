@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from backend.plugins.chat_with_data_plugin import ChatWithDataPlugin
 
 
@@ -182,16 +181,18 @@ class TestChatWithDataPlugin:
 
     @pytest.mark.asyncio
     @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
-    async def test_get_answers_from_calltranscripts_success(self, mock_get_search_agent):
+    async def test_get_answers_from_calltranscripts_success(
+        self, mock_get_search_agent
+    ):
         """Test successful retrieval of answers from call transcripts using AI Search Agent."""
         # Setup mocks for agent factory
         mock_agent = MagicMock()
         mock_agent.id = "test-agent-id"
-        
+
         mock_project_client = MagicMock()
         mock_get_search_agent.return_value = {
             "agent": mock_agent,
-            "client": mock_project_client
+            "client": mock_project_client,
         }
 
         # Mock project index creation
@@ -216,7 +217,9 @@ class TestChatWithDataPlugin:
         # Mock message response
         mock_message = MagicMock()
         mock_message.text.value = "Based on call transcripts, the customer discussed investment options and risk tolerance."
-        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = mock_message
+        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = (
+            mock_message
+        )
 
         result = await self.plugin.get_answers_from_calltranscripts(
             "What did the customer discuss?", "client123"
@@ -237,7 +240,9 @@ class TestChatWithDataPlugin:
 
         # Verify thread was created and deleted
         mock_project_client.agents.threads.create.assert_called_once()
-        mock_project_client.agents.threads.delete.assert_called_once_with("test-thread-id")
+        mock_project_client.agents.threads.delete.assert_called_once_with(
+            "test-thread-id"
+        )
 
         # Verify message was created and run was processed
         mock_project_client.agents.messages.create.assert_called_once()
@@ -245,16 +250,18 @@ class TestChatWithDataPlugin:
 
     @pytest.mark.asyncio
     @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
-    async def test_get_answers_from_calltranscripts_no_results(self, mock_get_search_agent):
+    async def test_get_answers_from_calltranscripts_no_results(
+        self, mock_get_search_agent
+    ):
         """Test call transcripts search with no results."""
         # Setup mocks for agent factory
         mock_agent = MagicMock()
         mock_agent.id = "test-agent-id"
-        
+
         mock_project_client = MagicMock()
         mock_get_search_agent.return_value = {
             "agent": mock_agent,
-            "client": mock_project_client
+            "client": mock_project_client,
         }
 
         # Mock project index creation
@@ -277,7 +284,9 @@ class TestChatWithDataPlugin:
         mock_project_client.agents.runs.create_and_process.return_value = mock_run
 
         # Mock empty message response
-        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = None
+        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = (
+            None
+        )
 
         result = await self.plugin.get_answers_from_calltranscripts(
             "Nonexistent query", "client123"
@@ -294,11 +303,11 @@ class TestChatWithDataPlugin:
         # Setup mocks for agent factory
         mock_agent = MagicMock()
         mock_agent.id = "test-agent-id"
-        
+
         mock_project_client = MagicMock()
         mock_get_search_agent.return_value = {
             "agent": mock_agent,
-            "client": mock_project_client
+            "client": mock_project_client,
         }
 
         # Mock project index creation
@@ -320,7 +329,9 @@ class TestChatWithDataPlugin:
             "AI Search processing failed"
         )
 
-        result = await self.plugin.get_answers_from_calltranscripts("Test query", "client123")
+        result = await self.plugin.get_answers_from_calltranscripts(
+            "Test query", "client123"
+        )
 
         assert "Error retrieving data from call transcripts" in result
 
@@ -333,11 +344,11 @@ class TestChatWithDataPlugin:
         # Setup mocks for agent factory
         mock_agent = MagicMock()
         mock_agent.id = "test-agent-id"
-        
+
         mock_project_client = MagicMock()
         mock_get_search_agent.return_value = {
             "agent": mock_agent,
-            "client": mock_project_client
+            "client": mock_project_client,
         }
 
         # Mock project index creation
@@ -360,7 +371,9 @@ class TestChatWithDataPlugin:
         mock_run.last_error = "AI Search run failed"
         mock_project_client.agents.runs.create_and_process.return_value = mock_run
 
-        result = await self.plugin.get_answers_from_calltranscripts("Test query", "client123")
+        result = await self.plugin.get_answers_from_calltranscripts(
+            "Test query", "client123"
+        )
 
         assert "Error retrieving data from call transcripts" in result
 
@@ -373,11 +386,11 @@ class TestChatWithDataPlugin:
         # Setup mocks for agent factory
         mock_agent = MagicMock()
         mock_agent.id = "test-agent-id"
-        
+
         mock_project_client = MagicMock()
         mock_get_search_agent.return_value = {
             "agent": mock_agent,
-            "client": mock_project_client
+            "client": mock_project_client,
         }
 
         # Mock project index creation
@@ -402,9 +415,13 @@ class TestChatWithDataPlugin:
         # Mock message with empty response
         mock_message = MagicMock()
         mock_message.text.value = "   "  # Empty/whitespace response
-        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = mock_message
+        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = (
+            mock_message
+        )
 
-        result = await self.plugin.get_answers_from_calltranscripts("Test query", "client123")
+        result = await self.plugin.get_answers_from_calltranscripts(
+            "Test query", "client123"
+        )
 
         assert "No data found for that client." in result
 
