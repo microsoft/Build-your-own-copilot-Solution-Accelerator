@@ -16,6 +16,7 @@ echo "Script Started"
 if az account show &> /dev/null; then
     echo "Already authenticated with Azure."
 else
+    echo "Not authenticated with Azure. Attempting to authenticate..."
     if [ -n "$managedIdentityClientId" ]; then
         # Use managed identity if running in Azure
         echo "Authenticating with Managed Identity..."
@@ -25,7 +26,6 @@ else
         echo "Authenticating with Azure CLI..."
         az login
     fi
-    echo "Not authenticated with Azure. Attempting to authenticate..."
 fi
 
 # Get signed in user and store the output
