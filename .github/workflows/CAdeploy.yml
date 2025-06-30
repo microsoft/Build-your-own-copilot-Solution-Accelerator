@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - psl-fixCAdeploy
   schedule:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
@@ -119,7 +120,7 @@ jobs:
           az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters AzureOpenAILocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2 gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} \
+            --parameters aiDeploymentsLocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=eastus2 gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} \
 
       - name: Get AI Services name and store in variable
         if: always() && steps.check_create_rg.outcome == 'success'
