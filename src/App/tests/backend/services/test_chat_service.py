@@ -31,9 +31,9 @@ class TestChatService:
         # Mock invoke_stream to return the async generator
         mock_agent.invoke_stream = MagicMock(return_value=mock_stream())
 
-        # Mock current_app.agent
+        # Mock current_app.wealth_advisor_agent
         mock_current_app = MagicMock()
-        mock_current_app.agent = mock_agent
+        mock_current_app.wealth_advisor_agent = mock_agent
 
         # Mock config
         mock_config = MagicMock()
@@ -79,7 +79,7 @@ class TestChatService:
         mock_agent.invoke_stream.side_effect = Exception("Test exception")
 
         mock_current_app = MagicMock()
-        mock_current_app.agent = mock_agent
+        mock_current_app.wealth_advisor_agent = mock_agent
 
         mock_config = MagicMock()
         mock_config.STREAM_TEXT_SYSTEM_PROMPT = "Test prompt"
@@ -116,7 +116,7 @@ class TestChatService:
         mock_agent.invoke_stream = MagicMock(return_value=mock_stream())
 
         mock_current_app = MagicMock()
-        mock_current_app.agent = mock_agent
+        mock_current_app.wealth_advisor_agent = mock_agent
 
         mock_config = MagicMock()
         mock_config.STREAM_TEXT_SYSTEM_PROMPT = ""
@@ -162,7 +162,7 @@ class TestChatService:
         mock_agent.invoke_stream = MagicMock(return_value=mock_stream())
 
         mock_current_app = MagicMock()
-        mock_current_app.agent = mock_agent
+        mock_current_app.wealth_advisor_agent = mock_agent
 
         mock_config = MagicMock()
         mock_config.STREAM_TEXT_SYSTEM_PROMPT = ""  # Empty, should use default

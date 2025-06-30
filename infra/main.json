@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "4179728355221853713"
+      "templateHash": "2202754856679562414"
     }
   },
   "parameters": {
@@ -33,6 +33,7 @@
     },
     "cosmosLocation": {
       "type": "string",
+      "defaultValue": "eastus2",
       "metadata": {
         "description": "CosmosDB Location"
       }
@@ -66,7 +67,7 @@
     },
     "gptDeploymentCapacity": {
       "type": "int",
-      "defaultValue": 30,
+      "defaultValue": 200,
       "minValue": 10,
       "metadata": {
         "description": "Capacity of the GPT deployment:"
@@ -95,9 +96,8 @@
       "type": "string",
       "defaultValue": "latest"
     },
-    "AzureOpenAILocation": {
+    "aiDeploymentsLocation": {
       "type": "string",
-      "defaultValue": "eastus2",
       "allowedValues": [
         "australiaeast",
         "eastus",
@@ -110,7 +110,14 @@
         "westus3"
       ],
       "metadata": {
-        "description": "Azure OpenAI Location"
+        "azd": {
+          "type": "location",
+          "usageName": [
+            "OpenAI.GlobalStandard.gpt-4o-mini,200",
+            "OpenAI.Standard.text-embedding-ada-002,80"
+          ]
+        },
+        "description": "Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed."
       }
     },
     "AZURE_LOCATION": {
@@ -355,9 +362,9 @@
     "uniqueId": "[toLower(uniqueString(parameters('environmentName'), subscription().id, variables('solutionLocation')))]",
     "solutionPrefix": "[format('ca{0}', padLeft(take(variables('uniqueId'), 12), 12, '0'))]",
     "abbrs": "[variables('$fxv#0')]",
-    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\r\n   1. Table: Clients\r\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\r\n   2. Table: InvestmentGoals\r\n   Columns: ClientId, InvestmentGoal\r\n   3. Table: Assets\r\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\r\n   4. Table: ClientSummaries\r\n   Columns: ClientId, ClientSummary\r\n   5. Table: InvestmentGoalsDetails\r\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\r\n   6. Table: Retirement\r\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\r\n   7. Table: ClientMeetings\r\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\r\n   Always use the Investment column from the Assets table as the value.\r\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n   Do not use client name in filters.\r\n   Do not include assets values unless asked for.\r\n   ALWAYS use ClientId = {clientid} in the query filter.\r\n   ALWAYS select Client Name (Column: Client) in the query.\r\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n   Only return the generated SQL query. Do not return anything else.",
-    "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \r\n  You have access to the client’s past meeting call transcripts. \r\n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \r\n  If no data is available, state 'No relevant data found for previous meetings.",
-    "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\r\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\r\n  If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\r\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\r\n  Always send clientId as '{client_id}'."
+    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\n   1. Table: Clients\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\n   2. Table: InvestmentGoals\n   Columns: ClientId, InvestmentGoal\n   3. Table: Assets\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\n   4. Table: ClientSummaries\n   Columns: ClientId, ClientSummary\n   5. Table: InvestmentGoalsDetails\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\n   6. Table: Retirement\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\n   7. Table: ClientMeetings\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\n   Always use the Investment column from the Assets table as the value.\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\n   Do not use client name in filters.\n   Do not include assets values unless asked for.\n   ALWAYS use ClientId = {clientid} in the query filter.\n   ALWAYS select Client Name (Column: Client) in the query.\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\n   Only return the generated SQL query. Do not return anything else.",
+    "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \n  You have access to the client’s past meeting call transcripts. \n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \n  If no data is available, state 'No relevant data found for previous meetings.",
+    "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\n  If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\n  Always send clientId as '{client_id}'."
   },
   "resources": [
     {
@@ -690,7 +697,7 @@
             "value": "[variables('solutionPrefix')]"
           },
           "solutionLocation": {
-            "value": "[parameters('AzureOpenAILocation')]"
+            "value": "[parameters('aiDeploymentsLocation')]"
           },
           "keyVaultName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_keyvault'), '2022-09-01').outputs.keyvaultName.value]"
@@ -727,7 +734,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.1.42791",
-              "templateHash": "16900640831178230420"
+              "templateHash": "13634339460279357495"
             }
           },
           "parameters": {
@@ -1196,14 +1203,14 @@
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2022-04-01",
               "scope": "[format('Microsoft.Search/searchServices/{0}', variables('aiSearchName'))]",
-              "name": "[guid(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName')), extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f'))]",
+              "name": "[guid(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')), extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f'))]",
               "properties": {
                 "roleDefinitionId": "[extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f')]",
-                "principalId": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName')), '2025-04-01-preview', 'full').identity.principalId]",
+                "principalId": "[reference(resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')), '2025-04-01-preview', 'full').identity.principalId]",
                 "principalType": "ServicePrincipal"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
+                "[resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName'))]",
                 "[resourceId('Microsoft.Search/searchServices', variables('aiSearchName'))]"
               ]
             },
@@ -1215,7 +1222,7 @@
               "name": "[guid(resourceGroup().id, variables('existingAIProjectName'), extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f'), 'Existing')]",
               "properties": {
                 "roleDefinitionId": "[extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f')]",
-                "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.Resources/deployments', 'assignOpenAIRoleToAISearch'), '2022-09-01').outputs.aiServicesPrincipalId.value]",
+                "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.Resources/deployments', 'assignOpenAIRoleToAISearch'), '2022-09-01').outputs.aiProjectPrincipalId.value]",
                 "principalType": "ServicePrincipal"
               },
               "dependsOn": [
@@ -1228,14 +1235,14 @@
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2022-04-01",
               "scope": "[format('Microsoft.Search/searchServices/{0}', variables('aiSearchName'))]",
-              "name": "[guid(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName')), extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0'))]",
+              "name": "[guid(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')), extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0'))]",
               "properties": {
                 "roleDefinitionId": "[extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')]",
-                "principalId": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName')), '2025-04-01-preview', 'full').identity.principalId]",
+                "principalId": "[reference(resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')), '2025-04-01-preview', 'full').identity.principalId]",
                 "principalType": "ServicePrincipal"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
+                "[resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName'))]",
                 "[resourceId('Microsoft.Search/searchServices', variables('aiSearchName'))]"
               ]
             },
@@ -1247,7 +1254,7 @@
               "name": "[guid(resourceGroup().id, variables('existingAIProjectName'), extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0'), 'Existing')]",
               "properties": {
                 "roleDefinitionId": "[extensionResourceId(resourceId('Microsoft.Search/searchServices', variables('aiSearchName')), 'Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')]",
-                "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.Resources/deployments', 'assignOpenAIRoleToAISearch'), '2022-09-01').outputs.aiServicesPrincipalId.value]",
+                "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.Resources/deployments', 'assignOpenAIRoleToAISearch'), '2022-09-01').outputs.aiProjectPrincipalId.value]",
                 "principalType": "ServicePrincipal"
               },
               "dependsOn": [
@@ -1553,6 +1560,10 @@
             "applicationInsightsConnectionString": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').ConnectionString]"
+            },
+            "aiSearchFoundryConnectionName": {
+              "type": "string",
+              "value": "[variables('aiSearchConnectionName')]"
             }
           }
         }
@@ -2210,6 +2221,9 @@
           },
           "azureExistingAIProjectResourceId": {
             "value": "[parameters('azureExistingAIProjectResourceId')]"
+          },
+          "aiSearchProjectConnectionName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchFoundryConnectionName.value]"
           }
         },
         "template": {
@@ -2219,7 +2233,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.1.42791",
-              "templateHash": "10062314742098383973"
+              "templateHash": "4144537398413637557"
             }
           },
           "parameters": {
@@ -2546,6 +2560,9 @@
             "applicationInsightsConnectionString": {
               "type": "string"
             },
+            "aiSearchProjectConnectionName": {
+              "type": "string"
+            },
             "azureExistingAIProjectResourceId": {
               "type": "string",
               "defaultValue": ""
@@ -2762,6 +2779,10 @@
                     {
                       "name": "AZURE_AI_AGENT_API_VERSION",
                       "value": "[parameters('AzureOpenAIApiVersion')]"
+                    },
+                    {
+                      "name": "AZURE_SEARCH_CONNECTION_NAME",
+                      "value": "[parameters('aiSearchProjectConnectionName')]"
                     }
                   ],
                   "linuxFxVersion": "[variables('WebAppImageName')]"
@@ -2918,6 +2939,10 @@
             "webAppUrl": {
               "type": "string",
               "value": "[format('https://{0}.azurewebsites.net', parameters('WebsiteName'))]"
+            },
+            "webAppName": {
+              "type": "string",
+              "value": "[parameters('WebsiteName')]"
             }
           }
         }
@@ -2982,6 +3007,10 @@
     "AI_SEARCH_SERVICE_NAME": {
       "type": "string",
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchService.value]"
+    },
+    "WEB_APP_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_app_service'), '2022-09-01').outputs.webAppName.value]"
     }
   }
 }

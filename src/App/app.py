@@ -78,14 +78,19 @@ def create_app():
     # Setup agent initialization and cleanup
     @app.before_serving
     async def startup():
-        app.agent = await AgentFactory.get_instance()
-        logging.info("Agent initialized during application startup")
+        app.wealth_advisor_agent = await AgentFactory.get_wealth_advisor_agent()
+        logging.info("Wealth Advisor Agent initialized during application startup")
+        app.search_agent = await AgentFactory.get_search_agent()
+        logging.info(
+            "Call Transcript Search Agent initialized during application startup"
+        )
 
     @app.after_serving
     async def shutdown():
-        await AgentFactory.delete_instance()
-        app.agent = None
-        logging.info("Agent cleaned up during application shutdown")
+        await AgentFactory.delete_all_agent_instance()
+        app.wealth_advisor_agent = None
+        app.search_agent = None
+        logging.info("Agents cleaned up during application shutdown")
 
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
