@@ -71,6 +71,22 @@ if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$stora
     exit 1
 fi
 
+# Authenticate with Azure
+if az account show &> /dev/null; then
+    echo "Already authenticated with Azure."
+else
+    echo "Not authenticated with Azure. Attempting to authenticate..."
+    if [ -n "$managedIdentityClientId" ]; then
+        # Use managed identity if running in Azure
+        echo "Authenticating with Managed Identity..."
+        az login --identity --client-id ${managedIdentityClientId}
+    else
+        # Use Azure CLI login if running locally
+        echo "Authenticating with Azure CLI..."
+        az login
+    fi
+fi
+
 #check if user has selected the correct subscription
 currentSubscriptionId=$(az account show --query id -o tsv)
 currentSubscriptionName=$(az account show --query name -o tsv)

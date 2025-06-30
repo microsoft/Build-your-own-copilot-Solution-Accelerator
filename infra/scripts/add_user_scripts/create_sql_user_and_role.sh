@@ -24,6 +24,7 @@ check_command "sqlcmd '-?'"
 if az account show &> /dev/null; then
     echo "Already authenticated with Azure."
 else
+    echo "Not authenticated with Azure. Attempting to authenticate..."
     if [ -n "$ManagedIdentityClientId" ]; then
         # Use managed identity if running in Azure
         echo "Authenticating with Managed Identity..."
@@ -33,7 +34,6 @@ else
         echo "Authenticating with Azure CLI..."
         az login
     fi
-    echo "Not authenticated with Azure. Attempting to authenticate..."
 fi
 
 echo "Getting signed in user id"
@@ -52,10 +52,10 @@ fi
 SQL_QUERY=""
 #loop through the JSON array and create users and assign roles using grep and sed
 count=1
+echo "Processing JSON object"
 while read -r json_object; do
 
     # echo "Processing JSON object: $json_object"
-    echo "Processing JSON object"
     # Extract fields from the JSON object using grep and sed
     clientId=$(echo "$json_object" | grep -o '"clientId": *"[^"]*"' | sed 's/"clientId": *"\([^"]*\)"/\1/')
     displayName=$(echo "$json_object" | grep -o '"displayName": *"[^"]*"' | sed 's/"displayName": *"\([^"]*\)"/\1/')
