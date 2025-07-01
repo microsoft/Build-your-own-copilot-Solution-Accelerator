@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "2202754856679562414"
+      "templateHash": "539400033229136375"
     }
   },
   "parameters": {
@@ -364,7 +364,7 @@
     "abbrs": "[variables('$fxv#0')]",
     "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\n   1. Table: Clients\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\n   2. Table: InvestmentGoals\n   Columns: ClientId, InvestmentGoal\n   3. Table: Assets\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\n   4. Table: ClientSummaries\n   Columns: ClientId, ClientSummary\n   5. Table: InvestmentGoalsDetails\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\n   6. Table: Retirement\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\n   7. Table: ClientMeetings\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\n   Always use the Investment column from the Assets table as the value.\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\n   Do not use client name in filters.\n   Do not include assets values unless asked for.\n   ALWAYS use ClientId = {clientid} in the query filter.\n   ALWAYS select Client Name (Column: Client) in the query.\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\n   Only return the generated SQL query. Do not return anything else.",
     "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \n  You have access to the client’s past meeting call transcripts. \n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \n  If no data is available, state 'No relevant data found for previous meetings.",
-    "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\n  If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\n  Always send clientId as '{client_id}'."
+    "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\n  If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\n  Always send clientId as '{client_id}'."
   },
   "resources": [
     {
