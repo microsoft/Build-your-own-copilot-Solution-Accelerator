@@ -7,28 +7,33 @@ and supports plugin integration.
 """
 
 import asyncio
+from typing import Optional
 
+from azure.ai.projects import AIProjectClient
+from azure.identity import DefaultAzureCredential as DefaultAzureCredentialSync
 from azure.identity.aio import DefaultAzureCredential
 from semantic_kernel.agents import AzureAIAgent, AzureAIAgentSettings
 
+from backend.common.config import config
 from backend.plugins.chat_with_data_plugin import ChatWithDataPlugin
 
 
 class AgentFactory:
     """
-    Singleton factory for creating and managing an AzureAIAgent instance.
+    Singleton factory for creating and managing an AzureAIAgent instances.
     """
 
-    _instance = None
     _lock = asyncio.Lock()
+    _wealth_advisor_agent: Optional[AzureAIAgent] = None
+    _search_agent: Optional[dict] = None
 
     @classmethod
-    async def get_instance(cls):
+    async def get_wealth_advisor_agent(cls):
         """
-        Get or create the singleton AzureAIAgent instance.
+        Get or create the singleton WealthAdvisor AzureAIAgent instance.
         """
         async with cls._lock:
-            if cls._instance is None:
+            if cls._wealth_advisor_agent is None:
                 ai_agent_settings = AzureAIAgentSettings()
                 creds = DefaultAzureCredential()
                 client = AzureAIAgent.create_client(
@@ -48,16 +53,55 @@ class AgentFactory:
                     definition=agent_definition,
                     plugins=[ChatWithDataPlugin()],
                 )
-                cls._instance = agent
-        return cls._instance
+                cls._wealth_advisor_agent = agent
+        return cls._wealth_advisor_agent
 
     @classmethod
-    async def delete_instance(cls):
+    async def get_search_agent(cls):
         """
-        Delete the singleton AzureAIAgent instance if it exists.
-        Also deletes all threads in ChatService.thread_cache.
+        Get or create the singleton CallTranscriptSearch AzureAIAgent instance.
         """
         async with cls._lock:
-            if cls._instance is not None:
-                await cls._instance.client.agents.delete_agent(cls._instance.id)
-                cls._instance = None
+            if cls._search_agent is None:
+
+                agent_instructions = config.CALL_TRANSCRIPT_SYSTEM_PROMPT
+                if not agent_instructions:
+                    agent_instructions = (
+                        "You are an assistant who supports wealth advisors in preparing for client meetings. "
+                        "You have access to the client's past meeting call transcripts via AI Search tool. "
+                        "When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. "
+                        "If no data is available, state 'No relevant data found for previous meetings.'"
+                    )
+
+                project_client = AIProjectClient(
+                    endpoint=config.AI_PROJECT_ENDPOINT,
+                    credential=DefaultAzureCredentialSync(),
+                    api_version="2025-05-01",
+                )
+
+                agent = project_client.agents.create_agent(
+                    model=config.AZURE_OPENAI_MODEL,
+                    instructions=agent_instructions,
+                    name="CallTranscriptSearchAgent",
+                )
+                cls._search_agent = {"agent": agent, "client": project_client}
+        return cls._search_agent
+
+    @classmethod
+    async def delete_all_agent_instance(cls):
+        """
+        Delete the singleton AzureAIAgent instances if it exists.
+        """
+        async with cls._lock:
+            if cls._wealth_advisor_agent is not None:
+                await cls._wealth_advisor_agent.client.agents.delete_agent(
+                    cls._wealth_advisor_agent.id
+                )
+                cls._wealth_advisor_agent = None
+
+            if cls._search_agent is not None:
+                cls._search_agent["client"].agents.delete_agent(
+                    cls._search_agent["agent"].id
+                )
+                cls._search_agent["client"].close()
+                cls._search_agent = None

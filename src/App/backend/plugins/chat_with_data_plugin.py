@@ -1,6 +1,13 @@
+import logging
 from typing import Annotated
 
 import openai
+from azure.ai.agents.models import (
+    Agent,
+    AzureAISearchQueryType,
+    AzureAISearchTool,
+    MessageRole,
+)
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
@@ -19,7 +26,7 @@ class ChatWithDataPlugin:
         name="GreetingsResponse",
         description="Respond to any greeting or general questions",
     )
-    def greeting(
+    async def greeting(
         self, input: Annotated[str, "the question"]
     ) -> Annotated[str, "The output is a string"]:
         """
@@ -55,7 +62,7 @@ class ChatWithDataPlugin:
         name="ChatWithSQLDatabase",
         description="Given a query about client assets, investments and scheduled meetings (including upcoming or next meeting dates/times), get details from the database based on the provided question and client id",
     )
-    def get_SQL_Response(
+    async def get_SQL_Response(
         self,
         input: Annotated[str, "the question"],
         ClientId: Annotated[str, "the ClientId"],
@@ -155,7 +162,7 @@ class ChatWithDataPlugin:
         name="ChatWithCallTranscripts",
         description="given a query about meetings summary or actions or notes, get answer from search index for a given ClientId",
     )
-    def get_answers_from_calltranscripts(
+    async def get_answers_from_calltranscripts(
         self,
         question: Annotated[str, "the question"],
         ClientId: Annotated[str, "the ClientId"],
@@ -169,73 +176,90 @@ class ChatWithDataPlugin:
             return "Error: Question input is required"
 
         try:
-            client = self.get_openai_client()
+            response_text = ""
 
-            system_message = config.CALL_TRANSCRIPT_SYSTEM_PROMPT
-            if not system_message:
-                system_message = (
-                    "You are an assistant who supports wealth advisors in preparing for client meetings. "
-                    "You have access to the client's past meeting call transcripts. "
-                    "When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. "
-                    "If no data is available, state 'No relevant data found for previous meetings.'"
+            from backend.agents.agent_factory import AgentFactory
+
+            agent_info: dict = await AgentFactory.get_search_agent()
+
+            agent: Agent = agent_info["agent"]
+            project_client: AIProjectClient = agent_info["client"]
+
+            try:
+                field_mapping = {
+                    "contentFields": ["content"],
+                    "urlField": "sourceurl",
+                    "titleField": "chunk_id",
+                    "vector_fields": ["contentVector"],
+                }
+
+                project_index = project_client.indexes.create_or_update(
+                    name=f"project-index-{config.AZURE_SEARCH_INDEX}",
+                    version="1",
+                    body={
+                        "connectionName": config.AZURE_SEARCH_CONNECTION_NAME,
+                        "indexName": config.AZURE_SEARCH_INDEX,
+                        "type": "AzureSearch",
+                        "fieldMapping": field_mapping,
+                    },
                 )
 
-            completion = client.chat.completions.create(
-                model=config.AZURE_OPENAI_MODEL,
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": question},
-                ],
-                seed=42,
-                temperature=0,
-                top_p=1,
-                n=1,
-                max_tokens=800,
-                extra_body={
-                    "data_sources": [
-                        {
-                            "type": "azure_search",
-                            "parameters": {
-                                "endpoint": config.AZURE_SEARCH_ENDPOINT,
-                                "index_name": "transcripts_index",
-                                "query_type": "vector_simple_hybrid",
-                                "fields_mapping": {
-                                    "content_fields_separator": "\n",
-                                    "content_fields": ["content"],
-                                    "filepath_field": "chunk_id",
-                                    "title_field": "",
-                                    "url_field": "sourceurl",
-                                    "vector_fields": ["contentVector"],
-                                },
-                                "semantic_configuration": "my-semantic-config",
-                                "in_scope": "true",
-                                # "role_information": system_message,
-                                "filter": f"client_id eq '{ClientId}'",
-                                "strictness": 3,
-                                "top_n_documents": 5,
-                                "authentication": {
-                                    "type": "system_assigned_managed_identity"
-                                },
-                                "embedding_dependency": {
-                                    "type": "deployment_name",
-                                    "deployment_name": "text-embedding-ada-002",
-                                },
-                            },
-                        }
-                    ]
-                },
-            )
+                ai_search_tool = AzureAISearchTool(
+                    index_asset_id=f"{project_index.name}/versions/{project_index.version}",
+                    index_connection_id=None,
+                    index_name=None,
+                    query_type=AzureAISearchQueryType.VECTOR_SIMPLE_HYBRID,
+                    filter=f"client_id eq '{ClientId}'",
+                )
 
-            if not completion.choices:
-                return "No data found for that client."
+                agent = project_client.agents.update_agent(
+                    agent_id=agent.id,
+                    tools=ai_search_tool.definitions,
+                    tool_resources=ai_search_tool.resources,
+                )
 
-            response_text = completion.choices[0].message.content
+                thread = project_client.agents.threads.create()
+
+                project_client.agents.messages.create(
+                    thread_id=thread.id,
+                    role=MessageRole.USER,
+                    content=question,
+                )
+
+                run = project_client.agents.runs.create_and_process(
+                    thread_id=thread.id,
+                    agent_id=agent.id,
+                    tool_choice={"type": "azure_ai_search"},
+                    temperature=0.0,
+                )
+
+                if run.status == "failed":
+                    logging.error(f"AI Search Agent Run failed: {run.last_error}")
+                    return "Error retrieving data from call transcripts"
+                else:
+                    message = (
+                        project_client.agents.messages.get_last_message_text_by_role(
+                            thread_id=thread.id, role=MessageRole.AGENT
+                        )
+                    )
+                    if message:
+                        response_text = message.text.value
+
+            except Exception as e:
+                logging.error(f"Error in AI Search Tool: {str(e)}")
+                return "Error retrieving data from call transcripts"
+
+            finally:
+                if thread:
+                    project_client.agents.threads.delete(thread.id)
+
             if not response_text.strip():
                 return "No data found for that client."
             return response_text
 
         except Exception as e:
-            return f"Error retrieving data from call transcripts: {str(e)}"
+            logging.error(f"Error in get_answers_from_calltranscripts: {str(e)}")
+            return "Error retrieving data from call transcripts"
 
     def get_openai_client(self):
         token_provider = get_bearer_token_provider(

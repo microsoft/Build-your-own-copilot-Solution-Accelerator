@@ -9,6 +9,9 @@ param environmentName string
 @description('Optional: Existing Log Analytics Workspace Resource ID')
 param existingLogAnalyticsWorkspaceId string = ''
 
+@description('Use this parameter to use an existing AI project resource ID')
+param azureExistingAIProjectResourceId string = ''
+
 @description('CosmosDB Location')
 param cosmosLocation string = 'eastus2'
 
@@ -42,7 +45,6 @@ param gptDeploymentCapacity int = 200
 ])
 param embeddingModel string = 'text-embedding-ada-002'
 
-
 @minValue(10)
 @description('Capacity of the Embedding Model deployment')
 param embeddingDeploymentCapacity int = 80
@@ -69,7 +71,7 @@ param imageTag string = 'latest'
 param aiDeploymentsLocation string
 
 @description('Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default.')
-param AZURE_LOCATION string=''
+param AZURE_LOCATION string = ''
 var solutionLocation = empty(AZURE_LOCATION) ? resourceGroup().location : AZURE_LOCATION
 
 var uniqueId = toLower(uniqueString(environmentName, subscription().id, solutionLocation))
@@ -83,7 +85,7 @@ var abbrs = loadJsonContent('./abbreviations.json')
 //var solutionLocation = resourceGroupLocation
 // var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/'
 
-var functionAppSqlPrompt ='''Generate a valid T-SQL query to find {query} for tables and columns provided below:
+var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for tables and columns provided below:
    1. Table: Clients
    Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents
    2. Table: InvestmentGoals
@@ -106,7 +108,7 @@ var functionAppSqlPrompt ='''Generate a valid T-SQL query to find {query} for ta
    ALWAYS select Client Name (Column: Client) in the query.
    Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
    Only return the generated SQL query. Do not return anything else.'''
-   
+
 var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports wealth advisors in preparing for client meetings. 
   You have access to the client’s past meeting call transcripts. 
   When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. 
@@ -114,7 +116,7 @@ var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports
 
 var functionAppStreamTextSystemPrompt = '''The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.
   If the user mentions no name, assume they are asking about '{SelectedClientName}'.
-  If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'
+  If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'
   If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.
   Always send clientId as '{client_id}'.'''
 
@@ -135,7 +137,7 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
   params: {
     solutionName: solutionPrefix
     solutionLocation: solutionLocation
-    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+    managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
     kvName: '${abbrs.security.keyVault}${solutionPrefix}'
   }
   scope: resourceGroup(resourceGroup().name)
@@ -155,6 +157,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     embeddingModel: embeddingModel
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
     existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
+    azureExistingAIProjectResourceId: azureExistingAIProjectResourceId
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -164,20 +167,19 @@ module cosmosDBModule 'deploy_cosmos_db.bicep' = {
   name: 'deploy_cosmos_db'
   params: {
     solutionLocation: cosmosLocation
-    cosmosDBName:'${abbrs.databases.cosmosDBDatabase}${solutionPrefix}'
+    cosmosDBName: '${abbrs.databases.cosmosDBDatabase}${solutionPrefix}'
   }
   scope: resourceGroup(resourceGroup().name)
 }
-
 
 // ========== Storage Account Module ========== //
 module storageAccountModule 'deploy_storage_account.bicep' = {
   name: 'deploy_storage_account'
   params: {
     solutionLocation: solutionLocation
-    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
+    managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
     saName: '${abbrs.storage.storageAccount}${solutionPrefix}'
-    keyVaultName:keyvaultModule.outputs.keyvaultName
+    keyVaultName: keyvaultModule.outputs.keyvaultName
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -187,9 +189,9 @@ module sqlDBModule 'deploy_sql_db.bicep' = {
   name: 'deploy_sql_db'
   params: {
     solutionLocation: solutionLocation
-    keyVaultName:keyvaultModule.outputs.keyvaultName
-    managedIdentityObjectId:managedIdentityModule.outputs.managedIdentityOutput.objectId
-    managedIdentityName:managedIdentityModule.outputs.managedIdentityOutput.name
+    keyVaultName: keyvaultModule.outputs.keyvaultName
+    managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
+    managedIdentityName: managedIdentityModule.outputs.managedIdentityOutput.name
     serverName: '${abbrs.databases.sqlDatabaseServer}${solutionPrefix}'
     sqlDBName: '${abbrs.databases.sqlDatabase}${solutionPrefix}'
   }
@@ -209,51 +211,53 @@ module appserviceModule 'deploy_app_service.bicep' = {
     solutionLocation: solutionLocation
     HostingPlanName: '${abbrs.compute.appServicePlan}${solutionPrefix}'
     WebsiteName: '${abbrs.compute.webApp}${solutionPrefix}'
-    AzureSearchService:aifoundry.outputs.aiSearchService
-    AzureSearchIndex:'transcripts_index'
-    AzureSearchUseSemanticSearch:'True'
-    AzureSearchSemanticSearchConfig:'my-semantic-config'
-    AzureSearchTopK:'5'
-    AzureSearchContentColumns:'content'
-    AzureSearchFilenameColumn:'chunk_id'
-    AzureSearchTitleColumn:'client_id'
-    AzureSearchUrlColumn:'sourceurl'
-    AzureOpenAIResource:aifoundry.outputs.aiFoundryName
-    AzureOpenAIEndpoint:aifoundry.outputs.aoaiEndpoint
-    AzureOpenAIModel:gptModelName
-    AzureOpenAITemperature:'0'
-    AzureOpenAITopP:'1'
-    AzureOpenAIMaxTokens:'1000'
-    AzureOpenAIStopSequence:''
-    AzureOpenAISystemMessage:'''You are a helpful Wealth Advisor assistant''' 
-    AzureOpenAIApiVersion:azureOpenaiAPIVersion
-    AzureOpenAIStream:'True'
-    AzureSearchQueryType:'simple'
-    AzureSearchVectorFields:'contentVector'
-    AzureSearchPermittedGroupsField:''
-    AzureSearchStrictness:'3'
-    AzureOpenAIEmbeddingName:embeddingModel
-    AzureOpenAIEmbeddingEndpoint:aifoundry.outputs.aoaiEndpoint
-    USE_INTERNAL_STREAM:'True'
-    SQLDB_SERVER:'${sqlDBModule.outputs.sqlServerName}.database.windows.net'
-    SQLDB_DATABASE:sqlDBModule.outputs.sqlDbName
+    AzureSearchService: aifoundry.outputs.aiSearchService
+    AzureSearchIndex: 'transcripts_index'
+    AzureSearchUseSemanticSearch: 'True'
+    AzureSearchSemanticSearchConfig: 'my-semantic-config'
+    AzureSearchTopK: '5'
+    AzureSearchContentColumns: 'content'
+    AzureSearchFilenameColumn: 'chunk_id'
+    AzureSearchTitleColumn: 'client_id'
+    AzureSearchUrlColumn: 'sourceurl'
+    AzureOpenAIResource: aifoundry.outputs.aiFoundryName
+    AzureOpenAIEndpoint: aifoundry.outputs.aoaiEndpoint
+    AzureOpenAIModel: gptModelName
+    AzureOpenAITemperature: '0'
+    AzureOpenAITopP: '1'
+    AzureOpenAIMaxTokens: '1000'
+    AzureOpenAIStopSequence: ''
+    AzureOpenAISystemMessage: '''You are a helpful Wealth Advisor assistant'''
+    AzureOpenAIApiVersion: azureOpenaiAPIVersion
+    AzureOpenAIStream: 'True'
+    AzureSearchQueryType: 'simple'
+    AzureSearchVectorFields: 'contentVector'
+    AzureSearchPermittedGroupsField: ''
+    AzureSearchStrictness: '3'
+    AzureOpenAIEmbeddingName: embeddingModel
+    AzureOpenAIEmbeddingEndpoint: aifoundry.outputs.aoaiEndpoint
+    USE_INTERNAL_STREAM: 'True'
+    SQLDB_SERVER: '${sqlDBModule.outputs.sqlServerName}.database.windows.net'
+    SQLDB_DATABASE: sqlDBModule.outputs.sqlDbName
     AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosAccountName
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosContainerName
     AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosDatabaseName
     AZURE_COSMOSDB_ENABLE_FEEDBACK: 'True'
     //VITE_POWERBI_EMBED_URL: 'TBD'
     imageTag: imageTag
-    userassignedIdentityClientId:managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
-    userassignedIdentityId:managedIdentityModule.outputs.managedIdentityWebAppOutput.id
+    userassignedIdentityClientId: managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
+    userassignedIdentityId: managedIdentityModule.outputs.managedIdentityWebAppOutput.id
     applicationInsightsId: aifoundry.outputs.applicationInsightsId
-    azureSearchServiceEndpoint:aifoundry.outputs.aiSearchTarget
+    azureSearchServiceEndpoint: aifoundry.outputs.aiSearchTarget
     sqlSystemPrompt: functionAppSqlPrompt
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
-    aiFoundryProjectName:aifoundry.outputs.aiFoundryProjectName
+    //aiFoundryProjectName:aifoundry.outputs.aiFoundryProjectName
     aiFoundryProjectEndpoint: aifoundry.outputs.aiFoundryProjectEndpoint
     aiFoundryName: aifoundry.outputs.aiFoundryName
-    applicationInsightsConnectionString:aifoundry.outputs.applicationInsightsConnectionString
+    applicationInsightsConnectionString: aifoundry.outputs.applicationInsightsConnectionString
+    azureExistingAIProjectResourceId: azureExistingAIProjectResourceId
+    aiSearchProjectConnectionName: aifoundry.outputs.aiSearchFoundryConnectionName
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -264,9 +268,11 @@ output STORAGE_CONTAINER_NAME string = storageAccountModule.outputs.storageConta
 output KEY_VAULT_NAME string = keyvaultModule.outputs.keyvaultName
 output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
 output RESOURCE_GROUP_NAME string = resourceGroup().name
+output RESOURCE_GROUP_NAME_FOUNDRY string = aifoundry.outputs.resourceGroupNameFoundry
 output SQLDB_SERVER string = sqlDBModule.outputs.sqlServerName
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
 output MANAGEDIDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
 output MANAGEDIDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
 output AI_FOUNDRY_NAME string = aifoundry.outputs.aiFoundryName
 output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService
+output WEB_APP_NAME string = appserviceModule.outputs.webAppName
