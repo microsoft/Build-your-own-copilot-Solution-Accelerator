@@ -54,21 +54,12 @@ param embeddingDeploymentCapacity int = 80
 param imageTag string = 'latest'
 
 //restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
-@allowed([
-  'australiaeast'
-  'eastus'
-  'eastus2'
-  'francecentral'
-  'japaneast'
-  'swedencentral'
-  'uksouth'
-  'westus'
-  'westus3'
-])
+@allowed(['australiaeast','eastus', 'eastus2','francecentral','japaneast','swedencentral','uksouth', 'westus', 'westus3'])
 // @description('Azure OpenAI Location')
 // param AzureOpenAILocation string = 'eastus2'
+
 @metadata({
-  azd: {
+  azd:{
     type: 'location'
     usageName: [
       'OpenAI.GlobalStandard.gpt-4o-mini,200'
