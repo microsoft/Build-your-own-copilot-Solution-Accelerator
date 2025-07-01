@@ -1,4 +1,4 @@
-[← Back to *DEPLOYMENT* guide](../docs/DeploymentGuide.md)
+[← Back to *DEPLOYMENT* guide](https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator/blob/psl-re-use-log-update-CA/docs/DeploymentGuide.md#deployment-options--steps)
 
 # Reusing an Existing Log Analytics Workspace
 To configure your environment to use an existing Log Analytics Workspace, follow these steps:
@@ -25,7 +25,7 @@ Run the following command in your terminal
 ```bash
 azd env set AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID '<Existing Log Analytics Workspace Id>'
 ```
-Replace `<Existing Log Analytics Workspace Id>` with the value   obtained from Step 3.
+Replace `<Existing Log Analytics Workspace Id>` with the value obtained from Step 3.
 
 ### 5. Continue Deployment
-Proceed with the next steps in the [deployment guide](../docs/DeploymentGuide.md).
+Proceed with the next steps in the [deployment guide](https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator/blob/psl-re-use-log-update-CA/docs/DeploymentGuide.md#deployment-options--steps).
