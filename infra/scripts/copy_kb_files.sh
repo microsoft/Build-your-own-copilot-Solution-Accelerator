@@ -12,6 +12,7 @@ echo "Script Started"
 if az account show &> /dev/null; then
     echo "Already authenticated with Azure."
 else
+    echo "Not authenticated with Azure. Attempting to authenticate..."
     if [ -n "$managedIdentityClientId" ]; then
         # Use managed identity if running in Azure
         echo "Authenticating with Managed Identity..."
@@ -21,51 +22,59 @@ else
         echo "Authenticating with Azure CLI..."
         az login
     fi
-    echo "Not authenticated with Azure. Attempting to authenticate..."
+fi
+
+echo "Getting signed in user id"
+signed_user_id=$(az ad signed-in-user show --query id -o tsv)
+if [ $? -ne 0 ]; then
+    if [ -z "$managedIdentityClientId" ]; then
+        echo "Error: Failed to get signed in user id."
+        exit 1
+    else
+        signed_user_id=$managedIdentityClientId
+    fi
 fi
 
 # if using managed identity, skip role assignments as its already provided via bicep
-if [ -n "$managedIdentityClientId" ]; then
-    echo "Skipping role assignments as managed identity is used"
-else
-    echo "Getting signed in user id"
-    signed_user_id=$(az ad signed-in-user show --query id -o tsv)
 
-    echo "Getting storage account resource id"
-    storage_account_resource_id=$(az storage account show --name $storageAccount --query id --output tsv)
+# echo "Getting signed in user id"
+# signed_user_id=$(az ad signed-in-user show --query id -o tsv)
 
-    #check if user has the Storage Blob Data Contributor role, add it if not
-    echo "Checking if user has the Storage Blob Data Contributor role"
-    role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
-    if [ -z "$role_assignment" ]; then
-        echo "User does not have the Storage Blob Data Contributor role. Assigning the role."
-        MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --output none
-        if [ $? -eq 0 ]; then
-            echo "Role assignment completed successfully."
-            retries=3
-            while [ $retries -gt 0 ]; do
-                # Check if the role assignment was successful
-                role_assignment_check=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
-                if [ -n "$role_assignment_check" ]; then
-                    echo "Role assignment verified successfully."
-                    break
-                else
-                    echo "Role assignment not found, retrying..."
-                    ((retries--))
-                    sleep 10
-                fi
-            done
-            if [ $retries -eq 0 ]; then
-                echo "Error: Role assignment verification failed after multiple attempts. Try rerunning the script."
-                exit 1
+echo "Getting storage account resource id"
+storage_account_resource_id=$(az storage account show --name $storageAccount --query id --output tsv)
+
+#check if user has the Storage Blob Data Contributor role, add it if not
+echo "Checking if user has the Storage Blob Data Contributor role"
+role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
+if [ -z "$role_assignment" ]; then
+    echo "User does not have the Storage Blob Data Contributor role. Assigning the role."
+    MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --output none
+    if [ $? -eq 0 ]; then
+        echo "Role assignment completed successfully."
+        retries=3
+        while [ $retries -gt 0 ]; do
+            # Check if the role assignment was successful
+            role_assignment_check=$(MSYS_NO_PATHCONV=1 az role assignment list --assignee $signed_user_id --role "Storage Blob Data Contributor" --scope $storage_account_resource_id --query "[].roleDefinitionId" -o tsv)
+            if [ -n "$role_assignment_check" ]; then
+                echo "Role assignment verified successfully."
+                sleep 60
+                break
+            else
+                echo "Role assignment not found, retrying..."
+                ((retries--))
+                sleep 10
             fi
-        else
-            echo "Error: Role assignment failed."
+        done
+        if [ $retries -eq 0 ]; then
+            echo "Error: Role assignment verification failed after multiple attempts. Try rerunning the script."
             exit 1
         fi
     else
-        echo "User already has the Storage Blob Data Contributor role."
+        echo "Error: Role assignment failed."
+        exit 1
     fi
+else
+    echo "User already has the Storage Blob Data Contributor role."
 fi
 
 zipFileName1="clientdata.zip"
@@ -86,7 +95,7 @@ extractionPath1=""
 extractionPath2=""
 
 # Check if running in Azure Container App
-if !([ -z "$baseUrl" ] && [ -z "$managedIdentityClientId" ]); then
+if [ -n "$baseUrl" ] && [ -n "$managedIdentityClientId" ]; then
     extractionPath1="/mnt/azscripts/azscriptinput/$extractedFolder1"
     extractionPath2="/mnt/azscripts/azscriptinput/$extractedFolder2"
 
@@ -110,8 +119,52 @@ else
     unzip -o $zipUrl2 -d $extractionPath2
 fi
 
+echo "Uploading files to Azure Blob Storage"
 # Using az storage blob upload-batch to upload files with managed identity authentication, as the az storage fs directory upload command is not working with managed identity authentication.
 az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder1" --source $extractionPath1 --auth-mode login --pattern '*' --overwrite --output none
+if [ $? -ne 0 ]; then
+    retries=3
+    sleepTime=10
+    echo "Error: Failed to upload files to Azure Blob Storage. Retrying upload...($((4 - retries)) of 3)"
+    while [ $retries -gt 0 ]; do
+        sleep $sleepTime
+        az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder1" --source $extractionPath1 --auth-mode login --pattern '*' --overwrite --output none
+        if [ $? -eq 0 ]; then
+            echo "Files uploaded successfully to Azure Blob Storage."
+            break
+        else
+            ((retries--))
+            echo "Retrying upload... ($((4 - retries)) of 3)"
+            sleepTime=$((sleepTime * 2))
+            sleep $sleepTime
+        fi
+    done
+    exit 1
+else
+    echo "Files uploaded successfully to Azure Blob Storage."
+fi
+
 az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder2" --source $extractionPath2 --auth-mode login --pattern '*' --overwrite --output none
+if [ $? -ne 0 ]; then
+    retries=3
+    sleepTime=10
+    echo "Error: Failed to upload files to Azure Blob Storage. Retrying upload...($((4 - retries)) of 3)"
+    while [ $retries -gt 0 ]; do
+        sleep $sleepTime
+        az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder2" --source $extractionPath2 --auth-mode login --pattern '*' --overwrite --output none
+        if [ $? -eq 0 ]; then
+            echo "Files uploaded successfully to Azure Blob Storage."
+            break
+        else
+            ((retries--))
+            echo "Retrying upload... ($((4 - retries)) of 3)"
+            sleepTime=$((sleepTime * 2))
+            sleep $sleepTime
+        fi
+    done
+    exit 1
+else
+    echo "Files uploaded successfully to Azure Blob Storage."
+fi
 # az storage fs directory upload -f "$fileSystem" --account-name "$storageAccount" -s "$extractedFolder1" --account-key "$accountKey" --recursive
 # az storage fs directory upload -f "$fileSystem" --account-name "$storageAccount" -s "$extractedFolder2" --account-key "$accountKey" --recursive
