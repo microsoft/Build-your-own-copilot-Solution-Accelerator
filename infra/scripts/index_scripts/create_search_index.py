@@ -22,6 +22,8 @@ from azure.search.documents.indexes.models import (
     SimpleField,
     VectorSearch,
     VectorSearchProfile,
+    AzureOpenAIVectorizer,
+    AzureOpenAIVectorizerParameters
 )
 from azure.storage.filedatalake import (
     DataLakeDirectoryClient,
@@ -93,8 +95,19 @@ vector_search = VectorSearch(
         VectorSearchProfile(
             name="myHnswProfile",
             algorithm_configuration_name="myHnsw",
+            vectorizer_name="aoai-ada-002-vectorizer",
         )
     ],
+    vectorizers= [
+        AzureOpenAIVectorizer(
+            vectorizer_name="aoai-ada-002-vectorizer",
+            parameters=AzureOpenAIVectorizerParameters(
+                resource_url=openai_api_base,
+                deployment_name=openai_embedding_model or "text-embedding-ada-002",
+                model_name=openai_embedding_model or "text-embedding-ada-002",
+            )
+        )
+    ]
 )
 
 semantic_config = SemanticConfiguration(
@@ -121,9 +134,7 @@ print(f" {result.name} created")
 
 # Function: Get Embeddings
 def get_embeddings(text: str, openai_api_base, openai_api_version, azure_token_provider):
-    model_id = (
-        openai_embedding_model if openai_embedding_model else "text-embedding-ada-002"
-    )
+    model_id = openai_embedding_model or "text-embedding-ada-002"
     client = AzureOpenAI(
         api_version=openai_api_version,
         azure_endpoint=openai_api_base,
@@ -201,7 +212,7 @@ paths = file_system_client.get_paths(path=directory_name)
 print(paths)
 
 search_client = SearchClient(search_endpoint, index_name, credential)
-index_client = SearchIndexClient(endpoint=search_endpoint, credential=credential)
+# index_client = SearchIndexClient(endpoint=search_endpoint, credential=credential)
 
 # metadata_filepath = f'Data/{foldername}/meeting_transcripts_metadata/transcripts_metadata.csv'
 # # df_metadata = spark.read.format("csv").option("header","true").option("multiLine", "true").option("quote", "\"").option("escape", "\"").load(metadata_filepath).toPandas()

@@ -24,7 +24,7 @@ async def stream_response_from_wealth_assistant(query: str, client_id: str):
             additional_instructions = (
                 "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client."
                 "If the user mentions no name, assume they are asking about '{SelectedClientName}'."
-                "If the user references a name that clearly differs from '{SelectedClientName}', respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts."
+                "If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts."
                 "If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response."
                 "Always send clientId as '{client_id}'."
             )
@@ -37,7 +37,7 @@ async def stream_response_from_wealth_assistant(query: str, client_id: str):
             "{client_id}", client_id
         )
 
-        agent: AzureAIAgent = current_app.agent
+        agent: AzureAIAgent = current_app.wealth_advisor_agent
 
         thread: AzureAIAgentThread = None
         message = ChatMessageContent(role=AuthorRole.USER, content=query)

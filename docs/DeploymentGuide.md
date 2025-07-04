@@ -119,6 +119,7 @@ When you start the deployment, most parameters will have **default values**, but
 | **Azure OpenAI API Version**         | Set the API version for OpenAI model deployments.                                                  | `2025-04-01-preview`     |
 | **AZURE\_LOCATION**                  | Sets the Azure region for resource deployment. | `japaneast`              |
 | **Existing Log Analytics Workspace** | To reuse an existing Log Analytics Workspace ID instead of creating a new one.                     | *(empty)*                |
+| **Existing AI Foundry Project Resource ID** | To reuse an existing AI Foundry Project Resource ID instead of creating a new one.                     | *(empty)*                |
 
 
 
