@@ -110,6 +110,7 @@ class ChatWithDataPlugin:
             ALWAYS use ClientId = {clientid} in the query filter.
             ALWAYS select Client Name (Column: Client) in the query.
             Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
+            When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.
             Only return the generated SQL query. Do not return anything else."""
 
         try:
