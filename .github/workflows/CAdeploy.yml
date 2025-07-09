@@ -519,9 +519,16 @@ jobs:
         if: failure() || needs.deploy.result == 'failure' || needs.e2e-test.result == 'failure'
         run: |
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      
+          # Construct the email body
+          EMAIL_BODY=$(cat <<EOF
+          {
+            "body": "<p>Dear Team,</p><p>We would like to inform you that the Build-your-own-copilot-Solution-Accelerator(Client Advisior) Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
+          }
+          EOF
+          )
+      
+          # Send the notification
           curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "subject": "CA Deployment Failed",
-              "body": "<p>The CA Deployment pipeline failed.</p><p><a href=\"'${RUN_URL}'\">View Run</a></p>"
-            }'
+            -d "$EMAIL_BODY" || echo "Failed to send notification"
