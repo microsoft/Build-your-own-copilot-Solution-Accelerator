@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+      - dev
+      - demo
+      - fix-deploy
   schedule:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
@@ -179,6 +182,8 @@ jobs:
           echo "CLIENT_NAME=$CLIENT_NAME" >> $GITHUB_ENV
           export RG_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.resourcE_GROUP_NAME.value')
           echo "RG_NAME=$RG_NAME" >> $GITHUB_ENV
+          export RESOURCE_GROUP_NAME_FOUNDRY=$(echo "$DEPLOY_OUTPUT" | jq -r '.resourcE_GROUP_NAME_FOUNDRY.value')
+          echo "RESOURCE_GROUP_NAME_FOUNDRY=$RESOURCE_GROUP_NAME_FOUNDRY" >> $GITHUB_ENV
           WEBAPP_URL=$(echo $DEPLOY_OUTPUT | jq -r '.weB_APP_URL.value')
           echo "WEBAPP_URL=$WEBAPP_URL" >> $GITHUB_OUTPUT
           WEB_APP_NAME=$(echo $DEPLOY_OUTPUT | jq -r '.weB_APP_NAME.value')
@@ -191,11 +196,11 @@ jobs:
 
           sleep 30
 
-          export CLIENT_OBJECT_ID=$(az identity show \
-                  --name "$CLIENT_NAME" \
-                  --resource-group "$RG_NAME" \
-                  --query 'principalId' -o tsv)
-          echo "CLIENT_OBJECT_ID=$CLIENT_OBJECT_ID" >> $GITHUB_ENV
+          # export CLIENT_OBJECT_ID=$(az identity show \
+          #         --name "$CLIENT_NAME" \
+          #         --resource-group "$RG_NAME" \
+          #         --query 'principalId' -o tsv)
+          # echo "CLIENT_OBJECT_ID=$CLIENT_OBJECT_ID" >> $GITHUB_ENV
 
 
 
@@ -204,22 +209,22 @@ jobs:
           set -e
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           
-          export AZURE_CLIENT_OBJECT_ID=$(az ad sp show --id ${{ secrets.AZURE_CLIENT_ID }} --query id -o tsv)
-          echo "AZURE_CLIENT_OBJECT_ID=$AZURE_CLIENT_OBJECT_ID" >> $GITHUB_ENV
+          # export AZURE_CLIENT_OBJECT_ID=$(az ad sp show --id ${{ secrets.AZURE_CLIENT_ID }} --query id -o tsv)
+          # echo "AZURE_CLIENT_OBJECT_ID=$AZURE_CLIENT_OBJECT_ID" >> $GITHUB_ENV
 
-          az role assignment create \
-            --assignee-object-id $AZURE_CLIENT_OBJECT_ID \
-            --assignee-principal-type ServicePrincipal \
-            --role "Cognitive Services OpenAI User" \
-            --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_NAME }}/providers/Microsoft.CognitiveServices/accounts/${{ env.AI_FOUNDARY_NAME }}
+          # az role assignment create \
+          #   --assignee-object-id $AZURE_CLIENT_OBJECT_ID \
+          #   --assignee-principal-type ServicePrincipal \
+          #   --role "Cognitive Services OpenAI User" \
+          #   --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_NAME }}/providers/Microsoft.CognitiveServices/accounts/${{ env.AI_FOUNDARY_NAME }}
 
-          sleep 30
+          # sleep 30
 
-          az role assignment create \
-            --assignee-object-id $AZURE_CLIENT_OBJECT_ID \
-            --assignee-principal-type ServicePrincipal \
-            --role "Search Index Data Contributor" \
-            --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_NAME }}/providers/Microsoft.Search/searchServices/${{ env.SEARCH_SERVICE_NAME }}
+          # az role assignment create \
+          #   --assignee-object-id $AZURE_CLIENT_OBJECT_ID \
+          #   --assignee-principal-type ServicePrincipal \
+          #   --role "Search Index Data Contributor" \
+          #   --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_NAME }}/providers/Microsoft.Search/searchServices/${{ env.SEARCH_SERVICE_NAME }}
 
           echo "Running post-deployment script..."
           bash ./infra/scripts/add_cosmosdb_access.sh \
@@ -236,7 +241,10 @@ jobs:
             "" \
             "${{ secrets.AZURE_CLIENT_ID }}" \
             "${{ env.RG_NAME }}" \
-            "${{ env.SQL_SERVER }}" 
+            "${{ env.SQL_SERVER }}" \
+            "${{ env.AI_FOUNDARY_NAME }}" \
+            "${{ env.SEARCH_SERVICE_NAME }}" \
+            "${{ env.RESOURCE_GROUP_NAME_FOUNDRY }}"
 
 
           user_roles_json='[
