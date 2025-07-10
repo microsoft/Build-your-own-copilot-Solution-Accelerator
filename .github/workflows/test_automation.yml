@@ -1,21 +1,16 @@
 name: Test Automation ClientAdvisor
 
 on:
-  push:
-    branches:
-      - main
-      - dev
-      
-    paths:
-      - 'tests/e2e-test/**'
-  schedule:
-      - cron: '0 13 * * *'  # Runs at 1 PM UTC 
-  workflow_dispatch:
+
   workflow_call: 
     inputs:
       CA_WEB_URL:
         required: true
         type: string
+    secrets:
+      EMAILNOTIFICATION_LOGICAPP_URL_TA:
+        required: false
+        description: "Logic App URL for email notifications"
 
 env:
     url: ${{ inputs.CA_WEB_URL }}
