@@ -6,7 +6,6 @@ on:
       - main
       - dev
       - demo
-      - fix-deploy
   schedule:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
@@ -215,7 +214,7 @@ jobs:
             "${{ env.STORAGE_CONTAINER }}" \
             "" \
             "${{ secrets.AZURE_CLIENT_ID }}"
-            
+
           bash ./infra/scripts/run_create_index_scripts.sh \
             "${{ env.KEYVAULT_NAME }}" \
             "" \
