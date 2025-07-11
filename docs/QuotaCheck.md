@@ -1,7 +1,7 @@
 ## Check Quota Availability Before Deployment
 
 Before deploying the accelerator, **ensure sufficient quota availability** for the required model.
-> **For Global Standard | GPT-4o-mini - increase the capacity to at least 150K tokens for optimal performance.**
+> **For Global Standard | GPT-35-turbo - increase the capacity to at least 50K tokens for optimal performance.**
 
 ### Login if you have not done so already
 ```
@@ -55,7 +55,7 @@ australiaeast, francecentral, japaneast, northcentralus, southcentralus, westus,
 ### **Sample Output**
 The final table lists regions with available quota. You can select any of these regions for deployment.
 
-![quota-check-ouput](images/readme/quota-check-output.png)
+![quota-check-ouput](images/readMe/quota-check-output.png)
 
 ---
 ### **If using Azure Portal and Cloud Shell**
