@@ -126,7 +126,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
   name: 'default'
   properties: {
     tags: {
-      templateName: 'Client Advisor'
+      TemplateName: 'Client Advisor'
     }
   }
 }

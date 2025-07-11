@@ -373,7 +373,7 @@
       "name": "default",
       "properties": {
         "tags": {
-          "templateName": "Client Advisor"
+          "TemplateName": "Client Advisor"
         }
       }
     },
