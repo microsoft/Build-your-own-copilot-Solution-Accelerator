@@ -43,13 +43,6 @@ The sample data is sourced from a select set of research published on [PubMed](h
 quick deploy
 </h2>
 
-<br/>
-
-> ⚠️ **Important: Check Azure OpenAI Quota Availability**
- <br/>To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./docs/QuotaCheck.md) before you deploy the solution.
-
-<br/>
-
 ### Prerequisites
 
 To use this solution accelerator, you will need access to an [Azure subscription](https://azure.microsoft.com/free/) with permission to create resource groups and resources. While not required, a prior understanding of Azure OpenAI, Azure AI Search and Microsoft Fabric will be helpful.
@@ -74,6 +67,13 @@ For additional training and support, please see:
 https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) and choose a region where Azure AI Search, Semantic Ranker, Azure OpenAI Service, and Azure AI Foundry are available. 
 
 2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
+
+   <br/>
+
+> ⚠️ **Important: Check Azure OpenAI Quota Availability**
+   <br/>To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./docs/QuotaCheck.md) before you deploy the solution.
+
+   <br/>
 
    [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fbyoc-researcher%2Finfra%2Fbicep%2Fmain.json)
 
