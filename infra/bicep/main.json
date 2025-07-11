@@ -260,7 +260,7 @@
       "name": "default",
       "properties": {
         "tags": {
-          "templateName": "Research Assistant"
+          "TemplateName": "Research Assistant"
         }
       }
     },
