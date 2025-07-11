@@ -43,6 +43,13 @@ The sample data is sourced from a select set of research published on [PubMed](h
 quick deploy
 </h2>
 
+<br/>
+
+> ⚠️ **Important: Check Azure OpenAI Quota Availability**
+ <br/>To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./docs/QuotaCheck.md) before you deploy the solution.
+
+<br/>
+
 ### Prerequisites
 
 To use this solution accelerator, you will need access to an [Azure subscription](https://azure.microsoft.com/free/) with permission to create resource groups and resources. While not required, a prior understanding of Azure OpenAI, Azure AI Search and Microsoft Fabric will be helpful.
