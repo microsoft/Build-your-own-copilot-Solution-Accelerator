@@ -66,14 +66,14 @@ For additional training and support, please see:
 1. Please check the link [Azure Products by Region](
 https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=all&regions=all) and choose a region where Azure AI Search, Semantic Ranker, Azure OpenAI Service, and Azure AI Foundry are available. 
 
-2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
-
-   <br/>
+<br/>
 
 > ⚠️ **Important: Check Azure OpenAI Quota Availability**
-   <br/>To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./docs/QuotaCheck.md) before you deploy the solution.
+ <br/>To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./docs/QuotaCheck.md) before you deploy the solution.
 
-   <br/>
+<br/>
+
+2. Click the following deployment button to create the required resources for this accelerator in your Azure Subscription.
 
    [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fbyoc-researcher%2Finfra%2Fbicep%2Fmain.json)
 
