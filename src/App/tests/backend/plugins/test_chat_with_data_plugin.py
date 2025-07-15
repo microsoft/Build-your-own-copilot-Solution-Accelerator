@@ -11,6 +11,7 @@ class TestChatWithDataPlugin:
     def setup_method(self):
         """Setup method to initialize plugin instance for each test."""
         self.plugin = ChatWithDataPlugin()
+
     @patch("backend.plugins.chat_with_data_plugin.config")
     @patch("backend.plugins.chat_with_data_plugin.openai.AzureOpenAI")
     @patch("backend.plugins.chat_with_data_plugin.get_bearer_token_provider")
