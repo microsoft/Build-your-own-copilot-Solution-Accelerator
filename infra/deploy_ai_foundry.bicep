@@ -78,6 +78,10 @@ var existingAIServiceResourceGroup = !empty(azureExistingAIProjectResourceId)
 var aiSearchConnectionName = 'foundry-search-connection-${solutionName}'
 var aiAppInsightConnectionName = 'foundry-app-insights-connection-${solutionName}'
 
+var existingAIServicesName = !empty(azureExistingAIProjectResourceId) ? split(azureExistingAIProjectResourceId, '/')[8] : ''
+
+
+
 resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = if (useExisting) {
   name: existingLawName
   scope: resourceGroup(existingLawSubscription, existingLawResourceGroup)
@@ -208,6 +212,15 @@ resource aiSearchFoundryConnection 'Microsoft.CognitiveServices/accounts/connect
   }
 }
 
+module existing_aiServicesModule 'existing_foundry_project.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
+  name: 'existing_foundry_project'
+  scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
+  params: {
+    aiServicesName: existingAIServicesName
+    aiProjectName: existingAIProjectName
+  }
+}
+
 module existing_AIProject_SearchConnectionModule 'deploy_aifp_aisearch_connection.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
   name: 'aiProjectSearchConnectionDeployment'
   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
@@ -234,6 +247,16 @@ module assignOpenAIRoleToAISearch 'deploy_foundry_role_assignment.bicep' = {
     aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIFoundryName : aiFoundryName
     aiProjectName: !empty(azureExistingAIProjectResourceId) ? existingAIProjectName : aiProjectName
     principalId: aiSearch.identity.principalId
+
+    aiLocation: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.location : solutionLocation
+    aiKind: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.kind : 'AIServices'
+    aiSkuName: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.skuName : 'S0'
+    customSubDomainName: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.customSubDomainName : aiFoundryName
+    publicNetworkAccess: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.publicNetworkAccess : 'Enabled'
+    enableSystemAssignedIdentity: true
+    defaultNetworkAction: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.defaultNetworkAction : 'Allow'
+    vnetRules: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.vnetRules : []
+    ipRules: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.ipRules : []
   }
 }
 

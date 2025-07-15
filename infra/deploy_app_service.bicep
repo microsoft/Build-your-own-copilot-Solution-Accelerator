@@ -157,6 +157,10 @@ var existingAIServiceResourceGroup = !empty(azureExistingAIProjectResourceId)
 var existingAIServicesName = !empty(azureExistingAIProjectResourceId)
   ? split(azureExistingAIProjectResourceId, '/')[8]
   : ''
+var existingAIProjectName = !empty(azureExistingAIProjectResourceId) 
+  ? split(azureExistingAIProjectResourceId, '/')[10] : ''
+
+
 
 resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: HostingPlanName
@@ -413,6 +417,15 @@ resource aiUserRoleDefinitionFoundry 'Microsoft.Authorization/roleDefinitions@20
   name: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
 }
 
+module existing_aiServicesModule 'existing_foundry_project.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
+  name: 'existing_foundry_project'
+  scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
+  params: {
+    aiServicesName: existingAIServicesName
+    aiProjectName: existingAIProjectName
+  }
+}
+
 module assignAiUserRoleToAiProject 'deploy_foundry_role_assignment.bicep' = {
   name: 'assignAiUserRoleToAiProject'
   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
@@ -421,6 +434,17 @@ module assignAiUserRoleToAiProject 'deploy_foundry_role_assignment.bicep' = {
     roleDefinitionId: aiUserRoleDefinitionFoundry.id
     roleAssignmentName: guid(Website.name, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
     aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIServicesName : aiFoundryName
+
+    aiProjectName: !empty(azureExistingAIProjectResourceId) ? split(azureExistingAIProjectResourceId, '/')[10] : ''
+    aiLocation: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.location : solutionLocation
+    aiKind: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.kind : 'AIServices'
+    aiSkuName: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.skuName : 'S0'
+    customSubDomainName: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.customSubDomainName : aiFoundryName
+    publicNetworkAccess: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.publicNetworkAccess : 'Enabled'
+    enableSystemAssignedIdentity: true
+    defaultNetworkAction: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.defaultNetworkAction : 'Allow'
+    vnetRules: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.vnetRules : []
+    ipRules: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.ipRules : []
   }
 }
 
