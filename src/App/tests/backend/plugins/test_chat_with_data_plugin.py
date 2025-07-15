@@ -14,23 +14,6 @@ class TestChatWithDataPlugin:
 
     @pytest.mark.asyncio
     @patch.object(ChatWithDataPlugin, "get_openai_client")
-    async def test_greeting_returns_response(self, mock_get_openai_client):
-        """Test that greeting method calls OpenAI and returns response."""
-        # Setup mock
-        mock_client = MagicMock()
-        mock_get_openai_client.return_value = mock_client
-
-        mock_completion = MagicMock()
-        mock_completion.choices = [MagicMock()]
-        mock_completion.choices[0].message.content = (
-            "Hello! I'm your Wealth Assistant. How can I help you today?"
-        )
-        mock_client.chat.completions.create.return_value = mock_completion
-
-        result = await self.plugin.greeting("Hello")
-
-        assert result == "Hello! I'm your Wealth Assistant. How can I help you today?"
-        mock_client.chat.completions.create.assert_called_once()
 
     @patch("backend.plugins.chat_with_data_plugin.config")
     @patch("backend.plugins.chat_with_data_plugin.openai.AzureOpenAI")

@@ -51,7 +51,8 @@ class TestAgentFactory:
         mock_client.agents.create_agent.assert_called_once_with(
             model="test-model",
             name="WealthAdvisor",
-            instructions="You are a helpful assistant to a Wealth Advisor.",
+            instructions='''You are a helpful assistant to a Wealth Advisor.
+                If the question is unrelated to data but is conversational (e.g., greetings or follow-ups), respond appropriately using context.''',
         )
         mock_agent.assert_called_once()
 
