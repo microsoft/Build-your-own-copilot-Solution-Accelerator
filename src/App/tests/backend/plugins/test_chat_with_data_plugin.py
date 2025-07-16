@@ -86,7 +86,7 @@ class TestChatWithDataPlugin:
     @patch("backend.agents.agent_factory.AgentFactory.get_sql_agent")
     async def test_get_sql_response_success(self, mock_get_sql_agent, mock_config, mock_get_connection):
         mock_config.AI_PROJECT_ENDPOINT = "https://dummy.endpoint"
-        mock_config.AZURE_OPENAI_MODEL = "gpt-4"
+        mock_config.AZURE_OPENAI_MODEL = "gpt-4o-mini"
         mock_config.SQL_SYSTEM_PROMPT = "Test prompt"
 
         mock_agent = MagicMock()
@@ -126,7 +126,7 @@ class TestChatWithDataPlugin:
     @patch("backend.agents.agent_factory.AgentFactory.get_sql_agent")
     async def test_get_sql_response_database_error(self, mock_get_sql_agent, mock_config, mock_get_connection):
         mock_config.AI_PROJECT_ENDPOINT = "https://dummy.endpoint"
-        mock_config.AZURE_OPENAI_MODEL = "gpt-4"
+        mock_config.AZURE_OPENAI_MODEL = "gpt-4o-mini"
 
         mock_agent = MagicMock()
         mock_agent.id = "mock-agent-id"
@@ -158,7 +158,7 @@ class TestChatWithDataPlugin:
     @patch("backend.agents.agent_factory.AgentFactory.get_sql_agent")
     async def test_get_sql_response_openai_error(self, mock_get_sql_agent, mock_config):
         mock_config.AI_PROJECT_ENDPOINT = "https://dummy.endpoint"
-        mock_config.AZURE_OPENAI_MODEL = "gpt-4"
+        mock_config.AZURE_OPENAI_MODEL = "gpt-4o-mini"
 
         mock_agent = MagicMock()
         mock_agent.id = "mock-agent-id"
