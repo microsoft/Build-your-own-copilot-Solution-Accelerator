@@ -83,7 +83,7 @@ class TestChatWithDataPlugin:
     @pytest.mark.asyncio
     @patch("backend.plugins.chat_with_data_plugin.get_connection")
     @patch("backend.plugins.chat_with_data_plugin.config")
-    @patch("backend.plugins.chat_with_data_plugin.AgentFactory.get_sql_agent")
+    @patch("backend.agents.agent_factory.AgentFactory.get_sql_agent")
     async def test_get_sql_response_success(self, mock_get_sql_agent, mock_config, mock_get_connection):
         mock_config.AI_PROJECT_ENDPOINT = "https://dummy.endpoint"
         mock_config.AZURE_OPENAI_MODEL = "gpt-4"
@@ -123,7 +123,7 @@ class TestChatWithDataPlugin:
     @pytest.mark.asyncio
     @patch("backend.plugins.chat_with_data_plugin.get_connection")
     @patch("backend.plugins.chat_with_data_plugin.config")
-    @patch("backend.plugins.chat_with_data_plugin.AgentFactory.get_sql_agent")
+    @patch("backend.agents.agent_factory.AgentFactory.get_sql_agent")
     async def test_get_sql_response_database_error(self, mock_get_sql_agent, mock_config, mock_get_connection):
         mock_config.AI_PROJECT_ENDPOINT = "https://dummy.endpoint"
         mock_config.AZURE_OPENAI_MODEL = "gpt-4"
@@ -155,7 +155,7 @@ class TestChatWithDataPlugin:
 
     @pytest.mark.asyncio
     @patch("backend.plugins.chat_with_data_plugin.config")
-    @patch("backend.plugins.chat_with_data_plugin.AgentFactory.get_sql_agent")
+    @patch("backend.agents.agent_factory.AgentFactory.get_sql_agent")
     async def test_get_sql_response_openai_error(self, mock_get_sql_agent, mock_config):
         mock_config.AI_PROJECT_ENDPOINT = "https://dummy.endpoint"
         mock_config.AZURE_OPENAI_MODEL = "gpt-4"
