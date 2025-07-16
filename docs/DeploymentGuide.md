@@ -77,7 +77,7 @@ If you're not using one of the above options for opening the project, then you'l
 
 1. Make sure the following tools are installed:
     - [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.5) <small>(v7.0+)</small> - available for Windows, macOS, and Linux.
-    - [Azure Developer CLI (azd)](https://aka.ms/install-azd)
+    - [Azure Developer CLI (azd)](https://aka.ms/install-azd) <small>(v1.15.0+)</small> - version
     - [Python 3.9 to 3.11](https://www.python.org/downloads/)
     - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     - [Git](https://git-scm.com/downloads)
@@ -107,7 +107,6 @@ When you start the deployment, most parameters will have **default values**, but
 
 | **Setting**                          | **Description**                                                                                    | **Default value**        |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------ |
-| **Azure OpenAI Location**            | The region where Azure OpenAI deploys. Choose from `swedencentral`, `australiaeast`, etc.        | `eastus2`                |
 | **Environment Name**                 | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources.      | `azdtemp`                |
 | **Cosmos Location**                  | A **less busy** region for **CosmosDB**, useful in case of availability constraints.               | `eastus2`                |
 | **Deployment Type**                  | Select from a drop-down list (`Standard`, `GlobalStandard`).                                       | `GlobalStandard`         |

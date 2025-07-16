@@ -18,10 +18,9 @@ By default this template will use the environment name as the prefix to prevent 
 | `AZURE_ENV_EMBEDDING_MODEL_NAME`            | string  | `text-embedding-ada-002`  | Set the model name used for embeddings.                                                              |
 | `AZURE_ENV_EMBEDDING_MODEL_CAPACITY` | integer | `80`              | Set the capacity for embedding model deployment.                                                     |
 | `AZURE_ENV_IMAGETAG`                  | string  | `latest`            | Set the image tag (allowed values: `latest`, `dev`, `hotfix`).                                             |
-| `AZURE_ENV_OPENAI_LOCATION`       | string  | `eastus2`    | Location of the Azure OpenAI resource. Choose from (allowed values: `swedencentral`, `australiaeast`).   |
 | `AZURE_LOCATION`            | string  | `japaneast`         | Sets the Azure region for resource deployment.  |
-| `AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID`            | string  | Guide to get your [Existing Workspace ID](/docs/re-use-log-analytics.md)          | Reuses an existing Log Analytics Workspace instead of provisioning a new one.   |
-| `RESOURCE_GROUP_NAME_FOUNDRY`            | string  | `<Existing AI Foundry Project>`         | Reuses an existing AI Foundry Project instead of provisioning a new one.   |
+| `AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID`            | string  | `<Existing Workspace Id>`         | Reuses an existing Log Analytics Workspace instead of provisioning a new one.   |
+| `AZURE_EXISTING_AI_PROJECT_RESOURCE_ID`            | string  | `<Existing AI Foundry Project Resource Id>`         | Reuses an existing AI Foundry Project Resource Id instead of provisioning a new one.   |
 
 
 ## How to Set a Parameter

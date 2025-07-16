@@ -107,6 +107,7 @@ var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for t
    ALWAYS use ClientId = {clientid} in the query filter.
    ALWAYS select Client Name (Column: Client) in the query.
    Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
+   When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.
    Only return the generated SQL query. Do not return anything else.'''
 
 var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports wealth advisors in preparing for client meetings. 
@@ -119,6 +120,16 @@ var functionAppStreamTextSystemPrompt = '''The currently selected client's name 
   If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'
   If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.
   Always send clientId as '{client_id}'.'''
+
+// ========== Resource Group Tag ========== //
+resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
+  name: 'default'
+  properties: {
+    tags: {
+      TemplateName: 'Client Advisor'
+    }
+  }
+}
 
 // ========== Managed Identity ========== //
 module managedIdentityModule 'deploy_managed_identity.bicep' = {

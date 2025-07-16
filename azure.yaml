@@ -2,6 +2,9 @@
 
 name: build-your-own-copilot-solution-accelerator
 
+requiredVersions:
+  azd: ">= 1.15.0"
+
 metadata:
   template: build-your-own-copilot-solution-accelerator@1.0
   name: build-your-own-copilot-solution-accelerator@1.0

@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - main
+      - dev
+      - demo
   schedule:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
 env:
-  GPT_MIN_CAPACITY: 250
-  TEXT_EMBEDDING_MIN_CAPACITY: 40
+  GPT_MIN_CAPACITY: 200
+  TEXT_EMBEDDING_MIN_CAPACITY: 80
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
@@ -51,8 +53,8 @@ jobs:
           export AZURE_TENANT_ID="${{ secrets.AZURE_TENANT_ID }}"
           export AZURE_CLIENT_SECRET="${{ secrets.AZURE_CLIENT_SECRET }}"
           export AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          export GPT_MIN_CAPACITY="150"
-          export TEXT_EMBEDDING_MIN_CAPACITY="80"
+          export GPT_MIN_CAPACITY="${{ env.GPT_MIN_CAPACITY }}"
+          export TEXT_EMBEDDING_MIN_CAPACITY="${{ env.TEXT_EMBEDDING_MIN_CAPACITY }}"
           export AZURE_REGIONS="${{ vars.AZURE_REGIONS_CA }}"
           chmod +x infra/scripts/checkquota.sh
           if ! infra/scripts/checkquota.sh; then
@@ -70,7 +72,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "subject": "CA Deployment - Quota Check Failed",
-              "body": "<p>The quota check failed for CA deployment.</p><p><a href=\"'${RUN_URL}'\">View run</a></p>"
+              "body": "<p>Dear Team,</p><p>We would like to inform you that the Build-your-own-copilot-Solution-Accelerator(Client Advisor) Deployment Automation process has encountered a quota issue. Hence, unable to proceed with the deployment.</p><p><a href=\"'${RUN_URL}'\">View run</a></p>"
             }'
 
       - name: Fail on Quota Check
@@ -132,10 +134,11 @@ jobs:
           if [[ "$BRANCH" == "main" ]]; then TAG="latest"
           elif [[ "$BRANCH" == "dev" ]]; then TAG="dev"
           elif [[ "$BRANCH" == "demo" ]]; then TAG="demo"
-          else TAG="default"; fi
-          echo "tagname=$TAG" >> $GITHUB_OUTPUT
+          else TAG="latest"; fi
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          echo "Image Tag: $TAG"
       
-      - name: Get Deployment Output and extract Values
+      - name: Deploy and extract values from deployment output
         id: get_output
         run: |
           set -e
@@ -146,7 +149,7 @@ jobs:
           DEPLOY_OUTPUT=$(az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters aiDeploymentsLocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} \
+            --parameters aiDeploymentsLocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} imageTag=${{ env.IMAGE_TAG }} \
             --query "properties.outputs" -o json)
 
           
@@ -179,23 +182,18 @@ jobs:
           echo "CLIENT_NAME=$CLIENT_NAME" >> $GITHUB_ENV
           export RG_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.resourcE_GROUP_NAME.value')
           echo "RG_NAME=$RG_NAME" >> $GITHUB_ENV
+          export RESOURCE_GROUP_NAME_FOUNDRY=$(echo "$DEPLOY_OUTPUT" | jq -r '.resourcE_GROUP_NAME_FOUNDRY.value')
+          echo "RESOURCE_GROUP_NAME_FOUNDRY=$RESOURCE_GROUP_NAME_FOUNDRY" >> $GITHUB_ENV
           WEBAPP_URL=$(echo $DEPLOY_OUTPUT | jq -r '.weB_APP_URL.value')
           echo "WEBAPP_URL=$WEBAPP_URL" >> $GITHUB_OUTPUT
           WEB_APP_NAME=$(echo $DEPLOY_OUTPUT | jq -r '.weB_APP_NAME.value')
           echo "WEB_APP_NAME=$WEB_APP_NAME" >> $GITHUB_ENV
           echo "Deployment output: $DEPLOY_OUTPUT"
 
-
           echo "🔧 Disabling AUTH_ENABLED for the web app..."
           az webapp config appsettings set -g "$RG_NAME" -n "$WEB_APP_NAME" --settings AUTH_ENABLED=false
 
           sleep 30
-
-          export CLIENT_OBJECT_ID=$(az identity show \
-                  --name "$CLIENT_NAME" \
-                  --resource-group "$RG_NAME" \
-                  --query 'principalId' -o tsv)
-          echo "CLIENT_OBJECT_ID=$CLIENT_OBJECT_ID" >> $GITHUB_ENV
 
 
 
@@ -203,40 +201,29 @@ jobs:
         run: |
           set -e
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          
-          export AZURE_CLIENT_OBJECT_ID=$(az ad sp show --id ${{ secrets.AZURE_CLIENT_ID }} --query id -o tsv)
-          echo "AZURE_CLIENT_OBJECT_ID=$AZURE_CLIENT_OBJECT_ID" >> $GITHUB_ENV
-
-          az role assignment create \
-            --assignee-object-id $AZURE_CLIENT_OBJECT_ID \
-            --assignee-principal-type ServicePrincipal \
-            --role "Cognitive Services OpenAI User" \
-            --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_NAME }}/providers/Microsoft.CognitiveServices/accounts/${{ env.AI_FOUNDARY_NAME }}
-
-          sleep 30
-
-          az role assignment create \
-            --assignee-object-id $AZURE_CLIENT_OBJECT_ID \
-            --assignee-principal-type ServicePrincipal \
-            --role "Search Index Data Contributor" \
-            --scope /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_NAME }}/providers/Microsoft.Search/searchServices/${{ env.SEARCH_SERVICE_NAME }}
 
           echo "Running post-deployment script..."
+
           bash ./infra/scripts/add_cosmosdb_access.sh \
             "${{ env.RG_NAME }}" \
             "${{ env.COSMOS_DB_ACCOUNT_NAME }}" \
             "${{ secrets.AZURE_CLIENT_ID }}"
+
           bash ./infra/scripts/copy_kb_files.sh \
             "${{ env.STORAGE_ACCOUNT }}" \
             "${{ env.STORAGE_CONTAINER }}" \
             "" \
             "${{ secrets.AZURE_CLIENT_ID }}"
+
           bash ./infra/scripts/run_create_index_scripts.sh \
             "${{ env.KEYVAULT_NAME }}" \
             "" \
             "${{ secrets.AZURE_CLIENT_ID }}" \
             "${{ env.RG_NAME }}" \
-            "${{ env.SQL_SERVER }}" 
+            "${{ env.SQL_SERVER }}" \
+            "${{ env.AI_FOUNDARY_NAME }}" \
+            "${{ env.SEARCH_SERVICE_NAME }}" \
+            "${{ env.RESOURCE_GROUP_NAME_FOUNDRY }}"
 
 
           user_roles_json='[
@@ -519,9 +506,16 @@ jobs:
         if: failure() || needs.deploy.result == 'failure' || needs.e2e-test.result == 'failure'
         run: |
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      
+          # Construct the email body
+          EMAIL_BODY=$(cat <<EOF
+          {
+            "body": "<p>Dear Team,</p><p>We would like to inform you that the Build-your-own-copilot-Solution-Accelerator(Client Advisior) Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
+          }
+          EOF
+          )
+      
+          # Send the notification
           curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "subject": "CA Deployment Failed",
-              "body": "<p>The CA Deployment pipeline failed.</p><p><a href=\"'${RUN_URL}'\">View Run</a></p>"
-            }'
+            -d "$EMAIL_BODY" || echo "Failed to send notification"
