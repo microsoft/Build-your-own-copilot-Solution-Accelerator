@@ -22,6 +22,7 @@ By default this template will use the environment name as the prefix to prevent 
 | `AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID`            | string  | `<Existing Workspace Id>`         | Reuses an existing Log Analytics Workspace instead of provisioning a new one.   |
 | `AZURE_EXISTING_AI_PROJECT_RESOURCE_ID`            | string  | `<Existing AI Foundry Project Resource Id>`         | Reuses an existing AI Foundry Project Resource Id instead of provisioning a new one.   |
 
+
 ## How to Set a Parameter
 To customize any of the above values, run the following command **before** `azd up`:
 
