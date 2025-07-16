@@ -43,7 +43,6 @@ class ChatWithDataPlugin:
 
         try:
             from backend.agents.agent_factory import AgentFactory
-            
             agent_info = await AgentFactory.get_sql_agent()
             agent = agent_info["agent"]
             project_client = agent_info["client"]
@@ -94,7 +93,6 @@ class ChatWithDataPlugin:
             conn.close()
 
             return result[:20000] if len(result) > 20000 else result
-        
         except Exception as e:
             logging.exception("Error in get_SQL_Response")
             return f"Error retrieving SQL data: {str(e)}"
