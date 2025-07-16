@@ -23,42 +23,6 @@ from backend.services.sqldb_service import get_connection
 class ChatWithDataPlugin:
 
     @kernel_function(
-        name="GreetingsResponse",
-        description="Respond to any greeting or general questions",
-    )
-    async def greeting(
-        self, input: Annotated[str, "the question"]
-    ) -> Annotated[str, "The output is a string"]:
-        """
-        Simple greeting handler using Azure OpenAI.
-        """
-        try:
-            if config.USE_AI_PROJECT_CLIENT:
-                client = self.get_project_openai_client()
-
-            else:
-                client = self.get_openai_client()
-
-            completion = client.chat.completions.create(
-                model=config.AZURE_OPENAI_MODEL,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant to respond to greetings or general questions.",
-                    },
-                    {"role": "user", "content": input},
-                ],
-                temperature=0,
-                top_p=1,
-                n=1,
-            )
-
-            answer = completion.choices[0].message.content
-        except Exception as e:
-            answer = f"Error retrieving greeting response: {str(e)}"
-        return answer
-
-    @kernel_function(
         name="ChatWithSQLDatabase",
         description="Given a query about client assets, investments and scheduled meetings (including upcoming or next meeting dates/times), get details from the database based on the provided question and client id",
     )
