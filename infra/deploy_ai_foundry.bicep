@@ -80,8 +80,6 @@ var aiAppInsightConnectionName = 'foundry-app-insights-connection-${solutionName
 
 var existingAIServicesName = !empty(azureExistingAIProjectResourceId) ? split(azureExistingAIProjectResourceId, '/')[8] : ''
 
-
-
 resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = if (useExisting) {
   name: existingLawName
   scope: resourceGroup(existingLawSubscription, existingLawResourceGroup)

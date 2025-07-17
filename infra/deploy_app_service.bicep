@@ -430,58 +430,5 @@ module assignAiUserRoleToAiProject 'deploy_foundry_roles.bicep' = {
   }
 }
 
-// module existing_aiServicesModule 'existing_foundry_project.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
-//   name: 'appServiceExistingFoundryProject'
-//   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
-//   params: {
-//     aiServicesName: existingAIServicesName
-//     aiProjectName: existingAIProjectName
-//   }
-// }
-
-// module assignAiUserRoleToNewAiProject 'deploy_foundry_role_assignment.bicep' =  if (empty(azureExistingAIProjectResourceId)) {
-//   name: 'assignAiUserRoleToAiProject'
-//   params: {
-//     principalId: Website.identity.principalId
-//     roleDefinitionId: aiUserRoleDefinitionFoundry.id
-//     roleAssignmentName: guid(Website.name, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
-//     aiFoundryName:  aiFoundryName
-
-//     aiProjectName: ''
-//     aiLocation: solutionLocation
-//     aiKind: 'AIServices'
-//     aiSkuName:  'S0'
-//     customSubDomainName: aiFoundryName
-//     publicNetworkAccess: 'Enabled'
-//     enableSystemAssignedIdentity: true
-//     defaultNetworkAction:  'Allow'
-//     vnetRules:  []
-//     ipRules:  []
-//   }
-// }
-
-
-// module assignAiUserRoleToExistingAiProject 'deploy_foundry_role_assignment.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
-//   name: 'assignAiUserRoleToAiProject'
-//   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
-//   params: {
-//     principalId: Website.identity.principalId
-//     roleDefinitionId: aiUserRoleDefinitionFoundry.id
-//     roleAssignmentName: guid(Website.name, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
-//     aiFoundryName: existingAIServicesName 
-
-//     aiProjectName:  split(azureExistingAIProjectResourceId, '/')[10] 
-//     aiLocation:  existing_aiServicesModule.?outputs.location 
-//     aiKind: existing_aiServicesModule.?outputs.kind 
-//     aiSkuName: existing_aiServicesModule.?outputs.skuName 
-//     customSubDomainName: existing_aiServicesModule.?outputs.customSubDomainName 
-//     publicNetworkAccess:  existing_aiServicesModule.?outputs.publicNetworkAccess 
-//     enableSystemAssignedIdentity: true
-//     defaultNetworkAction:  existing_aiServicesModule!.outputs.defaultNetworkAction 
-//     vnetRules:  existing_aiServicesModule.?outputs.vnetRules
-//     ipRules:  existing_aiServicesModule.?outputs.ipRules 
-//   }
-// }
-
 output webAppUrl string = 'https://${WebsiteName}.azurewebsites.net'
 output webAppName string = WebsiteName
