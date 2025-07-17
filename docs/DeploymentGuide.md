@@ -137,6 +137,14 @@ To adjust quota settings, follow these [steps](./AzureGPTQuotaSettings.md).
 
 </details>
 
+<details>
+
+  <summary><b>Reusing an Existing Log Analytics Workspace</b></summary>
+
+  Guide to get your [Existing Workspace ID](/docs/re-use-log-analytics.md)
+
+</details>
+
 ### Deploying with AZD
 
 Once you've opened the project in [Codespaces](#github-codespaces), [Dev Containers](#vs-code-dev-containers), or [locally](#local-environment), you can deploy it to Azure by following these steps:
