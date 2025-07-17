@@ -10,8 +10,8 @@ on:
     - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
 
 env:
-  GPT_MIN_CAPACITY: 250
-  TEXT_EMBEDDING_MIN_CAPACITY: 40
+  GPT_MIN_CAPACITY: 200
+  TEXT_EMBEDDING_MIN_CAPACITY: 80
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
