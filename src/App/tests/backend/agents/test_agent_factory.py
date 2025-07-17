@@ -52,7 +52,7 @@ class TestAgentFactory:
             model="test-model",
             name="WealthAdvisor",
             instructions='''You are a helpful assistant to a Wealth Advisor.
-                If the question is unrelated to data but is conversational (e.g., greetings or follow-ups), respond appropriately using context.''',
+                If the question is unrelated to data but is conversational (e.g., greetings or follow-ups), respond appropriately using context, do not use external tools or perform any web searches for these conversational inputs.''',
         )
         mock_agent.assert_called_once()
 

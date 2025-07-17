@@ -42,7 +42,7 @@ class AgentFactory:
 
                 agent_name = "WealthAdvisor"
                 agent_instructions = '''You are a helpful assistant to a Wealth Advisor.
-                If the question is unrelated to data but is conversational (e.g., greetings or follow-ups), respond appropriately using context.'''
+                If the question is unrelated to data but is conversational (e.g., greetings or follow-ups), respond appropriately using context, do not use external tools or perform any web searches for these conversational inputs.'''
 
                 agent_definition = await client.agents.create_agent(
                     model=ai_agent_settings.model_deployment_name,
