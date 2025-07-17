@@ -213,7 +213,7 @@ resource aiSearchFoundryConnection 'Microsoft.CognitiveServices/accounts/connect
 }
 
 module existing_aiServicesModule 'existing_foundry_project.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
-  name: 'existing_foundry_project'
+  name: 'existingFoundryProject'
   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
   params: {
     aiServicesName: existingAIServicesName
@@ -238,27 +238,50 @@ resource cognitiveServicesOpenAIUser 'Microsoft.Authorization/roleDefinitions@20
   name: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
 }
 
-module assignOpenAIRoleToAISearch 'deploy_foundry_role_assignment.bicep' = {
-  name: 'assignOpenAIRoleToAISearch'
+module assignOpenAIRoleToNewAISearch 'deploy_foundry_role_assignment.bicep' = if (empty(azureExistingAIProjectResourceId)) {
+  name: 'assignOpenAIRoleToNewAISearch'
+  params: {
+    roleDefinitionId: cognitiveServicesOpenAIUser.id
+    roleAssignmentName: guid(resourceGroup().id, aiSearch.id, cognitiveServicesOpenAIUser.id, 'openai-foundry')
+    aiFoundryName:  aiFoundryName
+    aiProjectName: aiProjectName
+    principalId: aiSearch.identity.principalId
+
+    aiLocation:  solutionLocation
+    aiKind:  'AIServices'
+    aiSkuName: 'S0'
+    customSubDomainName: aiFoundryName
+    publicNetworkAccess: 'Enabled'
+    enableSystemAssignedIdentity: true
+    defaultNetworkAction: 'Allow'
+    vnetRules:  []
+    ipRules: []
+  }
+}
+
+module assignOpenAIRoleToExistingAISearch 'deploy_foundry_role_assignment.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
+  name: 'assignOpenAIRoleToExistingAISearch'
   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
   params: {
     roleDefinitionId: cognitiveServicesOpenAIUser.id
     roleAssignmentName: guid(resourceGroup().id, aiSearch.id, cognitiveServicesOpenAIUser.id, 'openai-foundry')
-    aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIFoundryName : aiFoundryName
-    aiProjectName: !empty(azureExistingAIProjectResourceId) ? existingAIProjectName : aiProjectName
+    aiFoundryName:  existingAIFoundryName 
+    aiProjectName:  existingAIProjectName 
     principalId: aiSearch.identity.principalId
 
-    aiLocation: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.location : solutionLocation
-    aiKind: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.kind : 'AIServices'
-    aiSkuName: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.skuName : 'S0'
-    customSubDomainName: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.customSubDomainName : aiFoundryName
-    publicNetworkAccess: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.publicNetworkAccess : 'Enabled'
+    aiLocation: existing_aiServicesModule.?outputs.location 
+    aiKind: existing_aiServicesModule.?outputs.kind 
+    aiSkuName:  existing_aiServicesModule.?outputs.skuName 
+    customSubDomainName:  existing_aiServicesModule.?outputs.customSubDomainName 
+    publicNetworkAccess: existing_aiServicesModule.?outputs.publicNetworkAccess 
     enableSystemAssignedIdentity: true
-    defaultNetworkAction: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.defaultNetworkAction : 'Allow'
-    vnetRules: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.vnetRules : []
-    ipRules: !empty(azureExistingAIProjectResourceId) ? existing_aiServicesModule.outputs.ipRules : []
+    defaultNetworkAction: existing_aiServicesModule!.outputs.defaultNetworkAction 
+    vnetRules: existing_aiServicesModule.?outputs.vnetRules 
+    ipRules:  existing_aiServicesModule.?outputs.ipRules 
   }
 }
+
+var assignOpenAIRoleToAISearch = (!empty(azureExistingAIProjectResourceId)) ? assignOpenAIRoleToExistingAISearch : assignOpenAIRoleToNewAISearch
 
 @description('This is the built-in Search Index Data Reader role.')
 resource searchIndexDataReaderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
