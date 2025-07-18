@@ -125,6 +125,7 @@ When you start the deployment, most parameters will have **default values**, but
 
 </details>
 
+
 <details>
   <summary><b>[Optional] Quota Recommendations</b></summary>
 
@@ -142,6 +143,14 @@ To adjust quota settings, follow these [steps](./AzureGPTQuotaSettings.md).
   <summary><b>Reusing an Existing Log Analytics Workspace</b></summary>
 
   Guide to get your [Existing Workspace ID](/docs/re-use-log-analytics.md)
+
+</details>
+
+<details>
+
+  <summary><b>Reusing an Existing Azure AI Foundry Project</b></summary>
+
+  Guide to get your [Existing Project ID](/docs/re-use-foundry-project.md)
 
 </details>
 
