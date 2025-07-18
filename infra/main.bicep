@@ -63,7 +63,7 @@ param imageTag string = 'latest'
     type: 'location'
     usageName: [
       'OpenAI.GlobalStandard.gpt-4o-mini,200'
-      'OpenAI.Standard.text-embedding-ada-002,80'
+      'OpenAI.GlobalStandard.text-embedding-ada-002,80'
     ]
   }
 })
