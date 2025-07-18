@@ -47,7 +47,7 @@ resource accounts_byc_openai_name_text_embedding_ada_002 'Microsoft.CognitiveSer
   parent: accounts_byc_openai_name_resource
   name: 'text-embedding-ada-002'
   sku: {
-    name: 'Standard'
+    name: 'GlobalStandard'
     capacity: 45
   }
   properties: {
