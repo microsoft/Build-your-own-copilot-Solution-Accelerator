@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "10073710839554364739"
+      "templateHash": "5350056575239104697"
     }
   },
   "parameters": {
@@ -715,7 +715,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "14752098252088373470"
+              "templateHash": "670869423023255449"
             }
           },
           "parameters": {
@@ -780,7 +780,7 @@
               "apiVersion": "2023-05-01",
               "name": "[format('{0}/{1}', parameters('accounts_byc_openai_name'), 'text-embedding-ada-002')]",
               "sku": {
-                "name": "Standard",
+                "name": "GlobalStandard",
                 "capacity": 45
               },
               "properties": {
