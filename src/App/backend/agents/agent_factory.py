@@ -116,24 +116,7 @@ class AgentFactory:
         async with cls._lock:
             if not hasattr(cls, "_sql_agent") or cls._sql_agent is None:
 
-                agent_instructions = config.SQL_SYSTEM_PROMPT or """
-    You are an expert assistant in generating T-SQL queries based on user questions.
-    Always use the following schema:
-    1. Table: Clients (ClientId, Client, Email, Occupation, MaritalStatus, Dependents)
-    2. Table: InvestmentGoals (ClientId, InvestmentGoal)
-    3. Table: Assets (ClientId, AssetDate, Investment, ROI, Revenue, AssetType)
-    4. Table: ClientSummaries (ClientId, ClientSummary)
-    5. Table: InvestmentGoalsDetails (ClientId, InvestmentGoal, TargetAmount, Contribution)
-    6. Table: Retirement (ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress)
-    7. Table: ClientMeetings (ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail)
-
-    Rules:
-    - Always filter by ClientId = <provided>
-    - Do not use client name for filtering
-    - Assets table contains snapshots by date; do not sum values across dates
-    - Use StartTime for time-based filtering (meetings)
-    - Only return the raw T-SQL query. No explanations or comments.
-    """
+                agent_instructions = config.SQL_SYSTEM_PROMPT or config.SQL_AGENT_FALLBACK_PROMPT
 
                 project_client = AIProjectClient(
                     endpoint=config.AI_PROJECT_ENDPOINT,

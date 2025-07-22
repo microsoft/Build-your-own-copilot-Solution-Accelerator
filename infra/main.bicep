@@ -110,6 +110,24 @@ var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for t
    When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.
    Only return the generated SQL query. Do not return anything else.'''
 
+var sqlagentFallbackSystemPrompt = '''You are an expert assistant in generating T-SQL queries based on user questions.
+    Always use the following schema:
+    1. Table: Clients (ClientId, Client, Email, Occupation, MaritalStatus, Dependents)
+    2. Table: InvestmentGoals (ClientId, InvestmentGoal)
+    3. Table: Assets (ClientId, AssetDate, Investment, ROI, Revenue, AssetType)
+    4. Table: ClientSummaries (ClientId, ClientSummary)
+    5. Table: InvestmentGoalsDetails (ClientId, InvestmentGoal, TargetAmount, Contribution)
+    6. Table: Retirement (ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress)
+    7. Table: ClientMeetings (ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail)
+
+    Rules:
+    - Always filter by ClientId = <provided>
+    - Do not use client name for filtering
+    - Assets table contains snapshots by date; do not sum values across dates
+    - Use StartTime for time-based filtering (meetings)
+    - Only return the raw T-SQL query. No explanations or comments.
+    '''
+
 var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports wealth advisors in preparing for client meetings. 
   You have access to the client’s past meeting call transcripts. 
   When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. 
@@ -261,6 +279,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     applicationInsightsId: aifoundry.outputs.applicationInsightsId
     azureSearchServiceEndpoint: aifoundry.outputs.aiSearchTarget
     sqlSystemPrompt: functionAppSqlPrompt
+    sqlAgentFallbackSystemPrompt: sqlagentFallbackSystemPrompt
     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
     //aiFoundryProjectName:aifoundry.outputs.aiFoundryProjectName
