@@ -41,7 +41,8 @@ class AgentFactory:
                 )
 
                 agent_name = "WealthAdvisor"
-                agent_instructions = "You are a helpful assistant to a Wealth Advisor."
+                agent_instructions = '''You are a helpful assistant to a Wealth Advisor.
+                If the question is unrelated to data but is conversational (e.g., greetings or follow-ups), respond appropriately using context, do not use external tools or perform any web searches for these conversational inputs.'''
 
                 agent_definition = await client.agents.create_agent(
                     model=ai_agent_settings.model_deployment_name,
@@ -105,3 +106,46 @@ class AgentFactory:
                 )
                 cls._search_agent["client"].close()
                 cls._search_agent = None
+
+    @classmethod
+    async def get_sql_agent(cls) -> dict:
+        """
+        Get or create a singleton SQLQueryGenerator AzureAIAgent instance.
+        This agent is used to generate T-SQL queries from natural language input.
+        """
+        async with cls._lock:
+            if not hasattr(cls, "_sql_agent") or cls._sql_agent is None:
+
+                agent_instructions = config.SQL_SYSTEM_PROMPT or """
+    You are an expert assistant in generating T-SQL queries based on user questions.
+    Always use the following schema:
+    1. Table: Clients (ClientId, Client, Email, Occupation, MaritalStatus, Dependents)
+    2. Table: InvestmentGoals (ClientId, InvestmentGoal)
+    3. Table: Assets (ClientId, AssetDate, Investment, ROI, Revenue, AssetType)
+    4. Table: ClientSummaries (ClientId, ClientSummary)
+    5. Table: InvestmentGoalsDetails (ClientId, InvestmentGoal, TargetAmount, Contribution)
+    6. Table: Retirement (ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress)
+    7. Table: ClientMeetings (ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail)
+
+    Rules:
+    - Always filter by ClientId = <provided>
+    - Do not use client name for filtering
+    - Assets table contains snapshots by date; do not sum values across dates
+    - Use StartTime for time-based filtering (meetings)
+    - Only return the raw T-SQL query. No explanations or comments.
+    """
+
+                project_client = AIProjectClient(
+                    endpoint=config.AI_PROJECT_ENDPOINT,
+                    credential=DefaultAzureCredentialSync(),
+                    api_version="2025-05-01",
+                )
+
+                agent = project_client.agents.create_agent(
+                    model=config.AZURE_OPENAI_MODEL,
+                    instructions=agent_instructions,
+                    name="SQLQueryGeneratorAgent",
+                )
+
+                cls._sql_agent = {"agent": agent, "client": project_client}
+        return cls._sql_agent
