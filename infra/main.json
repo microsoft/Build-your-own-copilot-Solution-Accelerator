@@ -1489,7 +1489,8 @@
                       "name": "[parameters('roleAssignmentName')]",
                       "properties": {
                         "roleDefinitionId": "[parameters('roleDefinitionId')]",
-                        "principalId": "[parameters('principalId')]"
+                        "principalId": "[parameters('principalId')]",
+                        "principalType": "ServicePrincipal"
                       }
                     }
                   ],
@@ -2924,7 +2925,8 @@
                       "name": "[parameters('roleAssignmentName')]",
                       "properties": {
                         "roleDefinitionId": "[parameters('roleDefinitionId')]",
-                        "principalId": "[parameters('principalId')]"
+                        "principalId": "[parameters('principalId')]",
+                        "principalType": "ServicePrincipal"
                       }
                     }
                   ],
