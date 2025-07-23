@@ -128,6 +128,8 @@ param azureSearchServiceEndpoint string
 
 @description('Azure Function App SQL System Prompt')
 param sqlSystemPrompt string
+@description('Azure Function App SQL Agent System Prompt')
+param sqlAgentFallbackSystemPrompt string
 @description('Azure Function App CallTranscript System Prompt')
 param callTranscriptSystemPrompt string
 @description('Azure Function App Stream Text System Prompt')
@@ -338,6 +340,10 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'AZURE_SQL_SYSTEM_PROMPT'
           value: sqlSystemPrompt
+        }
+        {
+          name: 'SQL_AGENT_FALLBACK_PROMPT'
+          value: sqlAgentFallbackSystemPrompt
         }
         {
           name: 'AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT'
