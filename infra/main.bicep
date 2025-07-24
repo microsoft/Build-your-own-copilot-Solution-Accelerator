@@ -74,8 +74,7 @@ param aiDeploymentsLocation string
 param AZURE_LOCATION string = ''
 var solutionLocation = empty(AZURE_LOCATION) ? resourceGroup().location : AZURE_LOCATION
 
-var uniqueId = toLower(uniqueString(environmentName, subscription().id, solutionLocation))
-
+var uniqueId = toLower(uniqueString(environmentName, subscription().id, solutionLocation, resourceGroup().name))
 var solutionPrefix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
 
 // Load the abbrevations file required to name the azure resources.
