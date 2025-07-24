@@ -10,6 +10,7 @@ import uuid from 'react-uuid'
 import { isEmpty } from 'lodash-es'
 
 import styles from './Chat.module.css'
+import { AuthNotConfigure } from './AuthNotConfigure'
 
 import {
   type ChatMessage,
@@ -347,6 +348,9 @@ const Chat = ({ chatType }: Props) => {
 
   return (
     <div className={styles.container} role="main">
+      {showAuthMessage ? (
+        <AuthNotConfigure />
+      ) : (
         <Stack horizontal className={styles.chatRoot}>
             <div className={styles.chatContainer}>
                 <h2
@@ -529,8 +533,9 @@ const Chat = ({ chatType }: Props) => {
                         
                     </Stack.Item>
                     )}
-            </Stack>
-        </div>
+        </Stack>
+      )}
+    </div>
   )
 }
 
