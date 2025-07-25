@@ -1,4 +1,4 @@
-azure-identity
+azure-identity==1.23.0
 azure-keyvault-secrets
 azure-ai-resources
 azure-ai-ml==1.26.3
