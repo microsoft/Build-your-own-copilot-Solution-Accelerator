@@ -25,7 +25,7 @@ var aiSearchName = '${abbrs.ai.aiSearch}${solutionName}'
 var workspaceName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${solutionName}'
 var aiModelDeployments = [
   {
-    name: '${gptModelName}-deployment'
+    name: gptModelName
     model: gptModelName
     sku: {
       name: deploymentType
@@ -34,7 +34,7 @@ var aiModelDeployments = [
     raiPolicyName: 'Microsoft.Default'
   }
   {
-    name: '${embeddingModel}-deployment'
+    name: embeddingModel
     model: embeddingModel
     sku: {
       name: 'GlobalStandard'
