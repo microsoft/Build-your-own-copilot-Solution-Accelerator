@@ -432,17 +432,7 @@ module assignAiUserRoleToAiProjectExisting 'deploy_foundry_role_assignment.bicep
     roleDefinitionId: aiUserRoleDefinitionFoundry.id
     roleAssignmentName: guid(Website.name, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
     aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIServicesName : aiFoundryName
-    aiServicesName: existingAIServicesName
     aiProjectName: existingAIProjectName
-    enableSystemAssignedIdentity: !empty(azureExistingAIProjectResourceId) ? false : true
-    aiLocation: solutionLocation
-    aiKind: 'OpenAI'
-    aiSkuName: 'S0'
-    customSubDomainName: !empty(azureExistingAIProjectResourceId) ? '' : WebsiteName
-    publicNetworkAccess: 'Enabled'
-    defaultNetworkAction: 'Allow'
-    vnetRules: []
-    ipRules: []
   }
 }
 

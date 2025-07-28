@@ -247,18 +247,8 @@ module assignOpenAIRoleToAISearchExisting 'deploy_foundry_role_assignment.bicep'
     roleAssignmentName: guid(resourceGroup().id, aiSearch.id, cognitiveServicesOpenAIUser.id, 'openai-foundry')
     aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIFoundryName : aiFoundryName
     principalId: aiSearch.identity.principalId
-    aiServicesName: !empty(azureExistingAIProjectResourceId) ? existingAIServicesName : aiFoundryName
-    aiProjectName: !empty(azureExistingAIProjectResourceId) ? existingAIProjectName : aiProjectName
+aiProjectName: !empty(azureExistingAIProjectResourceId) ? existingAIProjectName : aiProjectName
     aiModelDeployments: aiModelDeployments
-    enableSystemAssignedIdentity: !empty(azureExistingAIProjectResourceId) ? false : true
-    aiLocation: location
-    aiKind: 'OpenAI'
-    aiSkuName: 'S0'
-    customSubDomainName: !empty(azureExistingAIProjectResourceId) ? '' : aiFoundryName
-    publicNetworkAccess: 'Enabled'
-    defaultNetworkAction: 'Allow'
-    vnetRules: []
-    ipRules: []
   }
 }
 
