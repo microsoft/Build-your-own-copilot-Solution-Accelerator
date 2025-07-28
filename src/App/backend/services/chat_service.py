@@ -1,3 +1,4 @@
+import logging
 from quart import current_app
 from semantic_kernel.agents import AzureAIAgent, AzureAIAgentThread
 from semantic_kernel.contents.chat_message_content import ChatMessageContent
@@ -12,6 +13,7 @@ async def stream_response_from_wealth_assistant(query: str, client_id: str):
     Streams real-time chat response from the Wealth Assistant.
     Uses Semantic Kernel agent with SQL and Azure Cognitive Search based on the client ID.
     """
+    thread: AzureAIAgentThread = None
     try:
         # Dynamically get the name from the database
         selected_client_name = get_client_name_from_db(
@@ -37,9 +39,9 @@ async def stream_response_from_wealth_assistant(query: str, client_id: str):
             "{client_id}", client_id
         )
 
+        # Use the singleton agent from app context
         agent: AzureAIAgent = current_app.wealth_advisor_agent
 
-        thread: AzureAIAgentThread = None
         message = ChatMessageContent(role=AuthorRole.USER, content=query)
         sk_response = agent.invoke_stream(
             messages=[message],
@@ -48,17 +50,32 @@ async def stream_response_from_wealth_assistant(query: str, client_id: str):
         )
 
         async def generate():
+            nonlocal thread
             try:
                 # yields deltaText strings one-by-one
                 async for chunk in sk_response:
                     if not chunk or not chunk.content:
                         continue
+                    # Capture thread from the first chunk
+                    if thread is None and chunk.thread:
+                        thread = chunk.thread
                     yield chunk.content  # just the deltaText
             finally:
-                thread = chunk.thread if chunk else None
-                await thread.delete() if thread else None
+                # Clean up thread after streaming is complete
+                if thread:
+                    try:
+                        await thread.delete()
+                        logging.info(f"Thread {thread.id} deleted successfully after chat")
+                    except Exception as e:
+                        logging.error(f"Error deleting thread {thread.id}: {str(e)}")
 
         return generate
     except Exception as e:
-        await thread.delete() if thread else None
+        # Clean up thread in case of exception
+        if thread:
+            try:
+                await thread.delete()
+                logging.info(f"Thread {thread.id} deleted after exception")
+            except Exception as cleanup_error:
+                logging.error(f"Error deleting thread during cleanup: {str(cleanup_error)}")
         raise e

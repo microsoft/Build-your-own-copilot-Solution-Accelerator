@@ -26,6 +26,7 @@ class AgentFactory:
     _lock = asyncio.Lock()
     _wealth_advisor_agent: Optional[AzureAIAgent] = None
     _search_agent: Optional[dict] = None
+    _sql_agent: Optional[dict] = None
 
     @classmethod
     async def get_wealth_advisor_agent(cls):
@@ -106,6 +107,13 @@ class AgentFactory:
                 )
                 cls._search_agent["client"].close()
                 cls._search_agent = None
+
+            if hasattr(cls, "_sql_agent") and cls._sql_agent is not None:
+                cls._sql_agent["client"].agents.delete_agent(
+                    cls._sql_agent["agent"].id
+                )
+                cls._sql_agent["client"].close()
+                cls._sql_agent = None
 
     @classmethod
     async def get_sql_agent(cls) -> dict:
