@@ -19,7 +19,7 @@ resource create_index 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     }
   }
   properties: {
-    azCliVersion: '2.74.0'
+    azCliVersion: '2.70.0'
     primaryScriptUri: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh' 
     arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}' // Specify any arguments for the script
     timeout: 'PT1H' // Specify the desired timeout duration
