@@ -48,7 +48,7 @@ class ChatWithDataPlugin:
             logging.info(f"Using AgentFactory directly for SQL agent for ClientId: {ClientId}")
             from backend.agents.agent_factory import AgentFactory
             agent_info = await AgentFactory.get_sql_agent()
-            
+
             logging.info(f"SQL agent retrieved: {agent_info is not None}")
             agent = agent_info["agent"]
             project_client = agent_info["client"]
@@ -143,7 +143,7 @@ class ChatWithDataPlugin:
                 agent_info = await AgentFactory.get_search_agent()
             else:
                 agent_info = current_app.search_agent
-                
+
             agent: Agent = agent_info["agent"]
             project_client: AIProjectClient = agent_info["client"]
 

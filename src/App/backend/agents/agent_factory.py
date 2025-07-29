@@ -97,7 +97,7 @@ class AgentFactory:
         """
         async with cls._lock:
             logging.info("Starting agent deletion process...")
-            
+
             # Delete Wealth Advisor Agent
             if cls._wealth_advisor_agent is not None:
                 try:
@@ -123,7 +123,7 @@ class AgentFactory:
                         # AIProjectClient.agents.delete_agent is synchronous, don't await it
                         cls._search_agent["client"].agents.delete_agent(agent_id)
                         logging.info("Search agent deleted successfully")
-                        
+
                         # Close the client if it has a close method
                         if hasattr(cls._search_agent["client"], "close"):
                             cls._search_agent["client"].close()
@@ -144,7 +144,7 @@ class AgentFactory:
                         # AIProjectClient.agents.delete_agent is synchronous, don't await it
                         cls._sql_agent["client"].agents.delete_agent(agent_id)
                         logging.info("SQL agent deleted successfully")
-                        
+
                         # Close the client if it has a close method
                         if hasattr(cls._sql_agent["client"], "close"):
                             cls._sql_agent["client"].close()
@@ -155,7 +155,7 @@ class AgentFactory:
                     logging.exception("Detailed SQL agent deletion error")
                 finally:
                     cls._sql_agent = None
-                
+
             logging.info("Agent deletion process completed")
 
     @classmethod
