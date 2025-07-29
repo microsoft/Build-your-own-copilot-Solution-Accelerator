@@ -196,7 +196,7 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-        
+
         # Mock config values
         mock_config.AZURE_SEARCH_INDEX = "test-index"
         mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
@@ -271,7 +271,7 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-        
+
         # Mock config values
         mock_config.AZURE_SEARCH_INDEX = "test-index"
         mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
@@ -323,7 +323,7 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-        
+
         # Mock config values
         mock_config.AZURE_SEARCH_INDEX = "test-index"
         mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
@@ -370,7 +370,7 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-        
+
         # Mock config values
         mock_config.AZURE_SEARCH_INDEX = "test-index"
         mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
@@ -418,7 +418,7 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-        
+
         # Mock config values
         mock_config.AZURE_SEARCH_INDEX = "test-index"
         mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
