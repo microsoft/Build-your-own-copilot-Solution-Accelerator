@@ -81,16 +81,25 @@ def create_app():
         app.wealth_advisor_agent = await AgentFactory.get_wealth_advisor_agent()
         logging.info("Wealth Advisor Agent initialized during application startup")
         app.search_agent = await AgentFactory.get_search_agent()
-        logging.info(
-            "Call Transcript Search Agent initialized during application startup"
-        )
+        logging.info("Call Transcript Search Agent initialized during application startup")
+        app.sql_agent = await AgentFactory.get_sql_agent()
+        logging.info("SQL Agent initialized during application startup")
 
     @app.after_serving
     async def shutdown():
-        await AgentFactory.delete_all_agent_instance()
-        app.wealth_advisor_agent = None
-        app.search_agent = None
-        logging.info("Agents cleaned up during application shutdown")
+        try:
+            logging.info("Application shutdown initiated...")
+            await AgentFactory.delete_all_agent_instance()
+            if hasattr(app, 'wealth_advisor_agent'):
+                app.wealth_advisor_agent = None
+            if hasattr(app, 'search_agent'):
+                app.search_agent = None
+            if hasattr(app, 'sql_agent'):
+                app.sql_agent = None
+            logging.info("Agents cleaned up successfully")
+        except Exception as e:
+            logging.error(f"Error during shutdown: {e}")
+            logging.exception("Detailed error during shutdown")
 
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
