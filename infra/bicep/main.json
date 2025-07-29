@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.33.93.31351",
-      "templateHash": "11265523479637142038"
+      "version": "0.36.177.2456",
+      "templateHash": "5350056575239104697"
     }
   },
   "parameters": {
@@ -255,6 +255,16 @@
   },
   "resources": [
     {
+      "type": "Microsoft.Resources/tags",
+      "apiVersion": "2021-04-01",
+      "name": "default",
+      "properties": {
+        "tags": {
+          "TemplateName": "Research Assistant"
+        }
+      }
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "deploy_managed_identity",
@@ -281,8 +291,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "3549852852043024047"
+              "version": "0.36.177.2456",
+              "templateHash": "5332626978409423867"
             }
           },
           "parameters": {
@@ -375,8 +385,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "8889843082343700750"
+              "version": "0.36.177.2456",
+              "templateHash": "17058490450155567892"
             }
           },
           "parameters": {
@@ -530,8 +540,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "8677612668500685472"
+              "version": "0.36.177.2456",
+              "templateHash": "8150060114150668487"
             }
           },
           "parameters": {
@@ -614,8 +624,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "7933821472451505808"
+              "version": "0.36.177.2456",
+              "templateHash": "9833067354967795959"
             }
           },
           "parameters": {
@@ -704,8 +714,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "2542745894645743448"
+              "version": "0.36.177.2456",
+              "templateHash": "670869423023255449"
             }
           },
           "parameters": {
@@ -770,7 +780,7 @@
               "apiVersion": "2023-05-01",
               "name": "[format('{0}/{1}', parameters('accounts_byc_openai_name'), 'text-embedding-ada-002')]",
               "sku": {
-                "name": "Standard",
+                "name": "GlobalStandard",
                 "capacity": 45
               },
               "properties": {
@@ -834,8 +844,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "11820826519517140279"
+              "version": "0.36.177.2456",
+              "templateHash": "7600099653925911474"
             }
           },
           "parameters": {
@@ -954,7 +964,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy_azure_ai_service'), '2022-09-01').outputs.cogSearchOutput.value.cogServiceKey]"
           },
           "enableSoftDelete": {
-            "value": false
+            "value": true
           },
           "kvName": {
             "value": "[format('{0}{1}', variables('abbrs').security.keyVault, parameters('solutionPrefix'))]"
@@ -966,8 +976,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "11754214044693385671"
+              "version": "0.36.177.2456",
+              "templateHash": "10856957659409783194"
             }
           },
           "parameters": {
@@ -1029,13 +1039,6 @@
                 "description": "Enabled For Template Deployment. Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
               }
             },
-            "enablePurgeProtection": {
-              "type": "bool",
-              "defaultValue": true,
-              "metadata": {
-                "description": "Enable Purge Protection. Property specifying whether protection against purge is enabled for this vault."
-              }
-            },
             "enableRBACAuthorization": {
               "type": "bool",
               "defaultValue": true,
@@ -1045,14 +1048,14 @@
             },
             "enableSoftDelete": {
               "type": "bool",
-              "defaultValue": false,
+              "defaultValue": true,
               "metadata": {
                 "description": "Enable Soft Delete. Property to specify whether the \"soft delete\" functionality is enabled for this key vault."
               }
             },
             "softDeleteRetentionInDays": {
               "type": "int",
-              "defaultValue": 30,
+              "defaultValue": 7,
               "metadata": {
                 "description": "Soft Delete Retention in Days. softDelete data retention days. It accepts >=7 and <=90."
               }
@@ -1166,7 +1169,6 @@
                 "enabledForDeployment": "[parameters('enableForDeployment')]",
                 "enabledForDiskEncryption": "[parameters('enableForDiskEncryption')]",
                 "enabledForTemplateDeployment": "[parameters('enableForTemplateDeployment')]",
-                "enablePurgeProtection": "[parameters('enablePurgeProtection')]",
                 "enableRbacAuthorization": "[parameters('enableRBACAuthorization')]",
                 "enableSoftDelete": "[parameters('enableSoftDelete')]",
                 "softDeleteRetentionInDays": "[parameters('softDeleteRetentionInDays')]",
@@ -1428,8 +1430,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "16955379019952955448"
+              "version": "0.36.177.2456",
+              "templateHash": "1868340155585734116"
             }
           },
           "parameters": {
@@ -1517,8 +1519,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "11770710119826170681"
+              "version": "0.36.177.2456",
+              "templateHash": "8680654928688163301"
             }
           },
           "parameters": {
@@ -1733,8 +1735,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.33.93.31351",
-              "templateHash": "152810904339282293"
+              "version": "0.36.177.2456",
+              "templateHash": "243417282923124605"
             }
           },
           "parameters": {
