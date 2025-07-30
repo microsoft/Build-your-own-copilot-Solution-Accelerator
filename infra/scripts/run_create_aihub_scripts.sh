@@ -21,6 +21,7 @@ echo "Download Started"
 
 # Download the create_index python files
 curl --output "create_ai_hub.py" ${baseUrl}"infra/scripts/aihub_scripts/create_ai_hub.py"
+curl --output "azure_credential_utils.py" "${baseUrl}infra/scripts/azure_credential_utils.py"
 
 # Download the requirement file
 curl --output "$requirementFile" "$requirementFileUrl"

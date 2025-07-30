@@ -16,6 +16,7 @@ curl --output "create_fabric_items.py" ${baseUrl}"infra/scripts/fabric_scripts/c
 curl --output "create_articles_index.ipynb" ${baseUrl}"infra/scripts/fabric_scripts/create_articles_index.ipynb"
 curl --output "create_grants_index.ipynb" ${baseUrl}"infra/scripts/fabric_scripts/create_grants_index.ipynb"
 curl --output "create_drafts_index.ipynb" ${baseUrl}"infra/scripts/fabric_scripts/create_drafts_index.ipynb"
+curl --output "azure_credential_utils.py" "${baseUrl}infra/scripts/azure_credential_utils.py"
 
 # Download the requirement file
 curl --output "$requirementFile" "$requirementFileUrl"

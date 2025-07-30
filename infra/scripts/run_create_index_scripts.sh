@@ -13,6 +13,7 @@ echo "Download Started"
 curl --output "create_articles_index.py" ${baseUrl}"infra/scripts/index_scripts/create_articles_index.py"
 curl --output "create_grants_index.py" ${baseUrl}"infra/scripts/index_scripts/create_grants_index.py"
 curl --output "create_drafts_index.py" ${baseUrl}"infra/scripts/index_scripts/create_drafts_index.py"
+curl --output "azure_credential_utils.py" "${baseUrl}infra/scripts/azure_credential_utils.py"
 
 # Download the requirement file
 curl --output "$requirementFile" "$requirementFileUrl"
