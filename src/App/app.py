@@ -8,7 +8,6 @@ from types import SimpleNamespace
 
 from azure.identity import get_bearer_token_provider
 from backend.helpers.azure_credential_utils import get_azure_credential
-from backend.helpers.azure_credential_utils import get_azure_credential_async
 from azure.monitor.opentelemetry import configure_azure_monitor
 
 # from quart.sessions import SecureCookieSessionInterface

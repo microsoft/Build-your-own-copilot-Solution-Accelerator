@@ -2,13 +2,13 @@ import pytest
 import sys
 import os
 from unittest.mock import patch, MagicMock
+import backend.helpers.azure_credential_utils as azure_credential_utils
 
 # Ensure src/backend is on the Python path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-import helpers.azure_credential_utils as azure_credential_utils
-
 # Synchronous tests
+
 
 @patch("helpers.azure_credential_utils.os.getenv")
 @patch("helpers.azure_credential_utils.DefaultAzureCredential")
@@ -25,6 +25,7 @@ def test_get_azure_credential_dev_env(mock_managed_identity_credential, mock_def
     mock_default_azure_credential.assert_called_once()
     mock_managed_identity_credential.assert_not_called()
     assert credential == mock_default_credential
+
 
 @patch("helpers.azure_credential_utils.os.getenv")
 @patch("helpers.azure_credential_utils.DefaultAzureCredential")
@@ -43,6 +44,7 @@ def test_get_azure_credential_non_dev_env(mock_managed_identity_credential, mock
 
 # Asynchronous tests
 
+
 @pytest.mark.asyncio
 @patch("helpers.azure_credential_utils.os.getenv")
 @patch("helpers.azure_credential_utils.AioDefaultAzureCredential")
@@ -59,6 +61,7 @@ async def test_get_azure_credential_async_dev_env(mock_aio_managed_identity_cred
     mock_aio_default_azure_credential.assert_called_once()
     mock_aio_managed_identity_credential.assert_not_called()
     assert credential == mock_aio_default_credential
+
 
 @pytest.mark.asyncio
 @patch("helpers.azure_credential_utils.os.getenv")
