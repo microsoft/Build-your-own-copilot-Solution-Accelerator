@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "14845328625030923504"
+      "templateHash": "7958843358988057198"
     }
   },
   "parameters": {
@@ -1520,33 +1520,51 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "1150269026782964342"
+              "templateHash": "18107238351841154817"
             }
           },
           "parameters": {
             "solutionLocation": {
               "type": "string",
               "metadata": {
-                "description": "Specifies the location for resources."
+                "description": "Specifies the location for resources (e.g. eastus, westus2)."
               }
             },
             "baseUrl": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Base URL of your GitHub repository containing deployment scripts. Provided for compatibility; not used when scriptContent is specified."
+              }
             },
             "keyVaultName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Key Vault. Not used in this inline script but retained for future enhancements."
+              }
             },
             "identity": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the user‑assigned managed identity that will execute the deployment script."
+              }
             },
             "solutionName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Solution prefix used to derive the hub and project names."
+              }
             },
             "resourceGroupName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Name of the resource group where the hub and project will be created."
+              }
             },
             "subscriptionId": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "ID of the subscription containing the resource group."
+              }
             }
           },
           "resources": [
@@ -1554,8 +1572,8 @@
               "type": "Microsoft.Resources/deploymentScripts",
               "apiVersion": "2020-10-01",
               "name": "create_aihub",
-              "kind": "AzureCLI",
               "location": "[parameters('solutionLocation')]",
+              "kind": "AzureCLI",
               "identity": {
                 "type": "UserAssigned",
                 "userAssignedIdentities": {
@@ -1564,7 +1582,7 @@
               },
               "properties": {
                 "azCliVersion": "2.70.0",
-                "primaryScriptUri": "[format('{0}infra/scripts/run_create_aihub_scripts.sh', parameters('baseUrl'))]",
+                "scriptContent": "      #!/bin/bash\r\n      set -euo pipefail\r\n\r\n      # Map arguments ($1..$6) to variables.  baseUrl and keyVaultName are unused.\r\n      baseUrl=\"$1\"\r\n      keyvaultName=\"$2\"\r\n      solutionName=\"$3\"\r\n      resourceGroupName=\"$4\"\r\n      subscriptionId=\"$5\"\r\n      solutionLocation=\"$6\"\r\n\r\n      # Ensure the Azure ML CLI extension is installed\r\n      if ! az extension show --name ml &>/dev/null; then\r\n        az extension add --name ml --yes\r\n      fi\r\n\r\n      az account set --subscription \"$subscriptionId\"\r\n      az configure --defaults group=\"$resourceGroupName\" location=\"$solutionLocation\"\r\n\r\n      hub_name=\"ai_hub_${solutionName}\"\r\n      project_name=\"ai_project_${solutionName}\"\r\n\r\n      echo \"Creating AI hub '$hub_name'...\"\r\n      az ml workspace create --kind hub --name \"$hub_name\" --resource-group \"$resourceGroupName\" --location \"$solutionLocation\"\r\n\r\n      hub_id=$(az ml workspace show --name \"$hub_name\" --resource-group \"$resourceGroupName\" --query id -o tsv)\r\n      if [ -z \"$hub_id\" ]; then\r\n        echo \"Failed to retrieve hub ID. Exiting.\" >&2\r\n        exit 1\r\n      fi\r\n\r\n      echo \"Creating AI project '$project_name' in hub '$hub_name'...\"\r\n      az ml workspace create --kind project --hub-id \"$hub_id\" --name \"$project_name\" --resource-group \"$resourceGroupName\" --location \"$solutionLocation\"\r\n\r\n      echo \"Hub and project creation completed successfully.\"\r\n    ",
                 "arguments": "[format('{0} {1} {2} {3} {4} {5}', parameters('baseUrl'), parameters('keyVaultName'), parameters('solutionName'), parameters('resourceGroupName'), parameters('subscriptionId'), parameters('solutionLocation'))]",
                 "timeout": "PT1H",
                 "retentionInterval": "PT1H",
