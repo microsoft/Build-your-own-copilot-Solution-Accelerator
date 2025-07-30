@@ -10,9 +10,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 # Synchronous tests
 
 
-@patch("helpers.azure_credential_utils.os.getenv")
-@patch("helpers.azure_credential_utils.DefaultAzureCredential")
-@patch("helpers.azure_credential_utils.ManagedIdentityCredential")
+@patch("backend.helpers.azure_credential_utils.os.getenv")
+@patch("backend.helpers.azure_credential_utils.DefaultAzureCredential")
+@patch("backend.helpers.azure_credential_utils.ManagedIdentityCredential")
 def test_get_azure_credential_dev_env(mock_managed_identity_credential, mock_default_azure_credential, mock_getenv):
     """Test get_azure_credential in dev environment."""
     mock_getenv.return_value = "dev"
@@ -27,9 +27,9 @@ def test_get_azure_credential_dev_env(mock_managed_identity_credential, mock_def
     assert credential == mock_default_credential
 
 
-@patch("helpers.azure_credential_utils.os.getenv")
-@patch("helpers.azure_credential_utils.DefaultAzureCredential")
-@patch("helpers.azure_credential_utils.ManagedIdentityCredential")
+@patch("backend.helpers.azure_credential_utils.os.getenv")
+@patch("backend.helpers.azure_credential_utils.DefaultAzureCredential")
+@patch("backend.helpers.azure_credential_utils.ManagedIdentityCredential")
 def test_get_azure_credential_non_dev_env(mock_managed_identity_credential, mock_default_azure_credential, mock_getenv):
     """Test get_azure_credential in non-dev environment."""
     mock_getenv.return_value = "prod"
@@ -46,9 +46,9 @@ def test_get_azure_credential_non_dev_env(mock_managed_identity_credential, mock
 
 
 @pytest.mark.asyncio
-@patch("helpers.azure_credential_utils.os.getenv")
-@patch("helpers.azure_credential_utils.AioDefaultAzureCredential")
-@patch("helpers.azure_credential_utils.AioManagedIdentityCredential")
+@patch("backend.helpers.azure_credential_utils.os.getenv")
+@patch("backend.helpers.azure_credential_utils.AioDefaultAzureCredential")
+@patch("backend.helpers.azure_credential_utils.AioManagedIdentityCredential")
 async def test_get_azure_credential_async_dev_env(mock_aio_managed_identity_credential, mock_aio_default_azure_credential, mock_getenv):
     """Test get_azure_credential_async in dev environment."""
     mock_getenv.return_value = "dev"
@@ -64,9 +64,9 @@ async def test_get_azure_credential_async_dev_env(mock_aio_managed_identity_cred
 
 
 @pytest.mark.asyncio
-@patch("helpers.azure_credential_utils.os.getenv")
-@patch("helpers.azure_credential_utils.AioDefaultAzureCredential")
-@patch("helpers.azure_credential_utils.AioManagedIdentityCredential")
+@patch("backend.helpers.azure_credential_utils.os.getenv")
+@patch("backend.helpers.azure_credential_utils.AioDefaultAzureCredential")
+@patch("backend.helpers.azure_credential_utils.AioManagedIdentityCredential")
 async def test_get_azure_credential_async_non_dev_env(mock_aio_managed_identity_credential, mock_aio_default_azure_credential, mock_getenv):
     """Test get_azure_credential_async in non-dev environment."""
     mock_getenv.return_value = "prod"
