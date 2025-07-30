@@ -3,7 +3,7 @@ import logging
 import struct
 
 import pyodbc
-from azure.identity import DefaultAzureCredential
+from backend.helpers.azure_credential_utils import get_azure_credential
 from dotenv import load_dotenv
 
 from backend.common.config import config
@@ -40,7 +40,7 @@ def get_connection():
 
     for attempt in range(max_retries):
         try:
-            credential = DefaultAzureCredential(managed_identity_client_id=mid_id)
+            credential = get_azure_credential(client_id=mid_id)
 
             token_bytes = credential.get_token(
                 "https://database.windows.net/.default"

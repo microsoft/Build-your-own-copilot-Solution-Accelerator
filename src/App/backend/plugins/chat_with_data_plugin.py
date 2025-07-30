@@ -9,7 +9,8 @@ from azure.ai.agents.models import (
     MessageRole,
 )
 from azure.ai.projects import AIProjectClient
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from azure.identity import get_bearer_token_provider
+from backend.helpers.azure_credential_utils import get_azure_credential
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 
 from backend.common.config import config
@@ -202,7 +203,7 @@ class ChatWithDataPlugin:
 
     def get_openai_client(self):
         token_provider = get_bearer_token_provider(
-            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+            get_azure_credential(), "https://cognitiveservices.azure.com/.default"
         )
         openai_client = openai.AzureOpenAI(
             azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
@@ -213,7 +214,7 @@ class ChatWithDataPlugin:
 
     def get_project_openai_client(self):
         project = AIProjectClient(
-            endpoint=config.AI_PROJECT_ENDPOINT, credential=DefaultAzureCredential()
+            endpoint=config.AI_PROJECT_ENDPOINT, credential=get_azure_credential()
         )
         openai_client = project.inference.get_azure_openai_client(
             api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION

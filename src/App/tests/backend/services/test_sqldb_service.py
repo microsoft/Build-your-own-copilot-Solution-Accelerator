@@ -16,7 +16,7 @@ sql_db.mid_id = "mock_mid_id"  # Managed identity client ID if needed
 
 @patch("backend.services.sqldb_service.pyodbc.connect")  # Mock pyodbc.connect
 @patch(
-    "backend.services.sqldb_service.DefaultAzureCredential"
+    "backend.services.sqldb_service.get_azure_credential"
 )  # Mock DefaultAzureCredential
 def test_get_connection(mock_credential_class, mock_connect):
     # Mock the DefaultAzureCredential and get_token method
@@ -34,7 +34,7 @@ def test_get_connection(mock_credential_class, mock_connect):
 
     # Assert that DefaultAzureCredential and get_token were called correctly
     mock_credential_class.assert_called_once_with(
-        managed_identity_client_id=sql_db.mid_id
+        client_id=sql_db.mid_id
     )
     mock_credential.get_token.assert_called_once_with(
         "https://database.windows.net/.default"
@@ -59,7 +59,7 @@ def test_get_connection(mock_credential_class, mock_connect):
 
 @patch("backend.services.sqldb_service.pyodbc.connect")  # Mock pyodbc.connect
 @patch(
-    "backend.services.sqldb_service.DefaultAzureCredential"
+    "backend.helpers.azure_credential_utils.get_azure_credential"
 )  # Mock DefaultAzureCredential
 def test_get_connection_token_failure(mock_credential_class, mock_connect):
     # Mock the DefaultAzureCredential and get_token method

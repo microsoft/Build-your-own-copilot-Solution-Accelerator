@@ -13,9 +13,7 @@ from azure.keyvault.secrets import SecretClient
 
 def get_secrets_from_kv(kv_name, secret_name):
     key_vault_name = kv_name  # Set the name of the Azure Key Vault
-    credential = DefaultAzureCredential(
-        managed_identity_client_id=managed_identity_client_id
-    )
+    credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id) # CodeQL [SM05139] Okay use of DefaultAzureCredential as it is only used in local environment.
     secret_client = SecretClient(
         vault_url=f"https://{key_vault_name}.vault.azure.net/", credential=credential
     )  # Create a secret client object using the credential and Key Vault name
@@ -27,9 +25,7 @@ database = get_secrets_from_kv(key_vault_name, "SQLDB-DATABASE")
 driver = "{ODBC Driver 18 for SQL Server}"
 
 
-credential = DefaultAzureCredential(
-    managed_identity_client_id=managed_identity_client_id
-)
+credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id) # CodeQL [SM05139] Okay use of DefaultAzureCredential as it is only used in local environment.
 
 token_bytes = credential.get_token(
     "https://database.windows.net/.default"
@@ -49,9 +45,7 @@ cursor = conn.cursor()
 from azure.storage.filedatalake import DataLakeServiceClient
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-credential = DefaultAzureCredential(
-    managed_identity_client_id=managed_identity_client_id
-)
+credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id) # CodeQL [SM05139] Okay use of DefaultAzureCredential as it is only used in local environment.
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 

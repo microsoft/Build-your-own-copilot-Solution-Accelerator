@@ -44,9 +44,7 @@ csv_file_name = (
     "clienttranscripts/meeting_transcripts_metadata/transcripts_metadata.csv"
 )
 
-credential = DefaultAzureCredential(
-    managed_identity_client_id=managed_identity_client_id
-)
+credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id) # CodeQL [SM05139] Okay use of DefaultAzureCredential as it is only used in local environment.
 token_provider = get_bearer_token_provider(
     credential,
     "https://cognitiveservices.azure.com/.default"
