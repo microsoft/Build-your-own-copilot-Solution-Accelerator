@@ -17,9 +17,9 @@ sql_db.mid_id = "mock_mid_id"  # Managed identity client ID if needed
 @patch("backend.services.sqldb_service.pyodbc.connect")  # Mock pyodbc.connect
 @patch(
     "backend.services.sqldb_service.get_azure_credential"
-)  # Mock DefaultAzureCredential
+)  # Mock AzureCliCredential
 def test_get_connection(mock_credential_class, mock_connect):
-    # Mock the DefaultAzureCredential and get_token method
+    # Mock the AzureCliCredential and get_token method
     mock_credential = MagicMock()
     mock_credential_class.return_value = mock_credential
     mock_token = MagicMock()
@@ -32,7 +32,7 @@ def test_get_connection(mock_credential_class, mock_connect):
     # Call the function
     conn = sql_db.get_connection()
 
-    # Assert that DefaultAzureCredential and get_token were called correctly
+    # Assert that AzureCliCredential and get_token were called correctly
     mock_credential_class.assert_called_once_with(
         client_id=sql_db.mid_id
     )
@@ -60,9 +60,9 @@ def test_get_connection(mock_credential_class, mock_connect):
 @patch("backend.services.sqldb_service.pyodbc.connect")  # Mock pyodbc.connect
 @patch(
     "backend.services.sqldb_service.get_azure_credential"
-)  # Mock DefaultAzureCredential
+)  # Mock AzureCliCredential
 def test_get_connection_token_failure(mock_credential_class, mock_connect):
-    # Mock the DefaultAzureCredential and get_token method
+    # Mock the AzureCliCredential and get_token method
     mock_credential = MagicMock()
     mock_credential_class.return_value = mock_credential
     mock_token = MagicMock()
