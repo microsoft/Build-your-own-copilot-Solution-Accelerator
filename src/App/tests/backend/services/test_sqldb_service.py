@@ -59,7 +59,7 @@ def test_get_connection(mock_credential_class, mock_connect):
 
 @patch("backend.services.sqldb_service.pyodbc.connect")  # Mock pyodbc.connect
 @patch(
-    "backend.helpers.azure_credential_utils.get_azure_credential"
+    "backend.services.sqldb_service.get_azure_credential"
 )  # Mock DefaultAzureCredential
 def test_get_connection_token_failure(mock_credential_class, mock_connect):
     # Mock the DefaultAzureCredential and get_token method
