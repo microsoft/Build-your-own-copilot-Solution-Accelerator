@@ -352,7 +352,7 @@ import pandas as pd
 
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-credential = azure_credential_utils()
+credential = get_azure_credential()
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 
