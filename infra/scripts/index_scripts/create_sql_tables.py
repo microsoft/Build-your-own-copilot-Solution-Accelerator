@@ -7,15 +7,13 @@ from datetime import datetime
 
 import pandas as pd
 import pyodbc
-from azure.identity import DefaultAzureCredential
+from azure.identity import AzureCliCredential
 from azure.keyvault.secrets import SecretClient
 
 
 def get_secrets_from_kv(kv_name, secret_name):
     key_vault_name = kv_name  # Set the name of the Azure Key Vault
-    credential = DefaultAzureCredential(
-        managed_identity_client_id=managed_identity_client_id
-    )
+    credential = AzureCliCredential()  # Use Azure CLI Credential
     secret_client = SecretClient(
         vault_url=f"https://{key_vault_name}.vault.azure.net/", credential=credential
     )  # Create a secret client object using the credential and Key Vault name
@@ -27,9 +25,7 @@ database = get_secrets_from_kv(key_vault_name, "SQLDB-DATABASE")
 driver = "{ODBC Driver 18 for SQL Server}"
 
 
-credential = DefaultAzureCredential(
-    managed_identity_client_id=managed_identity_client_id
-)
+credential = AzureCliCredential()  # Use Azure CLI Credential
 
 token_bytes = credential.get_token(
     "https://database.windows.net/.default"
@@ -49,9 +45,7 @@ cursor = conn.cursor()
 from azure.storage.filedatalake import DataLakeServiceClient
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-credential = DefaultAzureCredential(
-    managed_identity_client_id=managed_identity_client_id
-)
+credential = AzureCliCredential()  # Use Azure CLI Credential
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 

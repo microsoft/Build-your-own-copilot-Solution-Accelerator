@@ -6,7 +6,8 @@ import time
 import uuid
 from types import SimpleNamespace
 
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from azure.identity import get_bearer_token_provider
+from backend.helpers.azure_credential_utils import get_azure_credential
 from azure.monitor.opentelemetry import configure_azure_monitor
 
 # from quart.sessions import SecureCookieSessionInterface
@@ -194,7 +195,7 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
         if not aoai_api_key:
             logging.debug("No AZURE_OPENAI_KEY found, using Azure AD auth")
             ad_token_provider = get_bearer_token_provider(
-                DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+                get_azure_credential(), "https://cognitiveservices.azure.com/.default"
             )
 
         # Deployment
@@ -242,7 +243,7 @@ def init_cosmosdb_client():
             )
 
             if not config.AZURE_COSMOSDB_ACCOUNT_KEY:
-                credential = DefaultAzureCredential()
+                credential = get_azure_credential()
             else:
                 credential = config.AZURE_COSMOSDB_ACCOUNT_KEY
 

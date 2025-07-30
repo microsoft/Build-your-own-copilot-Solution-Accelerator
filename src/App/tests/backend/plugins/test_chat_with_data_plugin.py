@@ -15,7 +15,7 @@ class TestChatWithDataPlugin:
     @patch("backend.plugins.chat_with_data_plugin.config")
     @patch("backend.plugins.chat_with_data_plugin.openai.AzureOpenAI")
     @patch("backend.plugins.chat_with_data_plugin.get_bearer_token_provider")
-    @patch("backend.plugins.chat_with_data_plugin.DefaultAzureCredential")
+    @patch("backend.plugins.chat_with_data_plugin.get_azure_credential")
     def test_get_openai_client_success(
         self,
         mock_default_credential,
@@ -50,7 +50,7 @@ class TestChatWithDataPlugin:
 
     @patch("backend.plugins.chat_with_data_plugin.config")
     @patch("backend.plugins.chat_with_data_plugin.AIProjectClient")
-    @patch("backend.plugins.chat_with_data_plugin.DefaultAzureCredential")
+    @patch("backend.plugins.chat_with_data_plugin.get_azure_credential")
     def test_get_project_openai_client_success(
         self, mock_default_credential, mock_ai_project_client, mock_config
     ):
