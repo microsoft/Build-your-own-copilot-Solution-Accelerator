@@ -180,14 +180,12 @@ class TestChatWithDataPlugin:
         assert "OpenAI API error" in result
 
     @pytest.mark.asyncio
-    @patch("backend.plugins.chat_with_data_plugin.hasattr", return_value=False)
     @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
-    @patch("backend.plugins.chat_with_data_plugin.config")
     async def test_get_answers_from_calltranscripts_success(
-        self, mock_config, mock_get_search_agent, mock_hasattr
+        self, mock_get_search_agent
     ):
         """Test successful retrieval of answers from call transcripts using AI Search Agent."""
-        # Setup mocks for agent factory (fallback case when current_app.search_agent is None)
+        # Setup mocks for agent factory
         mock_agent = MagicMock()
         mock_agent.id = "test-agent-id"
 
@@ -196,10 +194,6 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-
-        # Mock config values
-        mock_config.AZURE_SEARCH_INDEX = "test-index"
-        mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
 
         # Mock project index creation
         mock_index = MagicMock()
@@ -235,7 +229,7 @@ class TestChatWithDataPlugin:
         assert "Based on call transcripts" in result
         assert "investment options" in result
 
-        # Verify agent factory was called (fallback case)
+        # Verify agent factory was called
         mock_get_search_agent.assert_called_once()
 
         # Verify project index was created/updated
@@ -255,11 +249,9 @@ class TestChatWithDataPlugin:
         mock_project_client.agents.runs.create_and_process.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("backend.plugins.chat_with_data_plugin.hasattr", return_value=False)
     @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
-    @patch("backend.plugins.chat_with_data_plugin.config")
     async def test_get_answers_from_calltranscripts_no_results(
-        self, mock_config, mock_get_search_agent, mock_hasattr
+        self, mock_get_search_agent
     ):
         """Test call transcripts search with no results."""
         # Setup mocks for agent factory
@@ -271,10 +263,6 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-
-        # Mock config values
-        mock_config.AZURE_SEARCH_INDEX = "test-index"
-        mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
 
         # Mock project index creation
         mock_index = MagicMock()
@@ -307,11 +295,9 @@ class TestChatWithDataPlugin:
         assert "No data found for that client." in result
 
     @pytest.mark.asyncio
-    @patch("backend.plugins.chat_with_data_plugin.hasattr", return_value=False)
     @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
-    @patch("backend.plugins.chat_with_data_plugin.config")
     async def test_get_answers_from_calltranscripts_openai_error(
-        self, mock_config, mock_get_search_agent, mock_hasattr
+        self, mock_get_search_agent
     ):
         """Test call transcripts with AI Search processing error."""
         # Setup mocks for agent factory
@@ -323,10 +309,6 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-
-        # Mock config values
-        mock_config.AZURE_SEARCH_INDEX = "test-index"
-        mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
 
         # Mock project index creation
         mock_index = MagicMock()
@@ -354,11 +336,9 @@ class TestChatWithDataPlugin:
         assert "Error retrieving data from call transcripts" in result
 
     @pytest.mark.asyncio
-    @patch("backend.plugins.chat_with_data_plugin.hasattr", return_value=False)
     @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
-    @patch("backend.plugins.chat_with_data_plugin.config")
     async def test_get_answers_from_calltranscripts_failed_run(
-        self, mock_config, mock_get_search_agent, mock_hasattr
+        self, mock_get_search_agent
     ):
         """Test call transcripts with failed AI Search run."""
         # Setup mocks for agent factory
@@ -370,10 +350,6 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-
-        # Mock config values
-        mock_config.AZURE_SEARCH_INDEX = "test-index"
-        mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
 
         # Mock project index creation
         mock_index = MagicMock()
@@ -402,11 +378,9 @@ class TestChatWithDataPlugin:
         assert "Error retrieving data from call transcripts" in result
 
     @pytest.mark.asyncio
-    @patch("backend.plugins.chat_with_data_plugin.hasattr", return_value=False)
     @patch("backend.agents.agent_factory.AgentFactory.get_search_agent")
-    @patch("backend.plugins.chat_with_data_plugin.config")
     async def test_get_answers_from_calltranscripts_empty_response(
-        self, mock_config, mock_get_search_agent, mock_hasattr
+        self, mock_get_search_agent
     ):
         """Test call transcripts with empty response text."""
         # Setup mocks for agent factory
@@ -418,10 +392,6 @@ class TestChatWithDataPlugin:
             "agent": mock_agent,
             "client": mock_project_client,
         }
-
-        # Mock config values
-        mock_config.AZURE_SEARCH_INDEX = "test-index"
-        mock_config.AZURE_SEARCH_CONNECTION_NAME = "test-connection"
 
         # Mock project index creation
         mock_index = MagicMock()
