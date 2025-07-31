@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "14845328625030923504"
+      "templateHash": "5350056575239104697"
     }
   },
   "parameters": {
@@ -1520,7 +1520,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "1150269026782964342"
+              "templateHash": "8680654928688163301"
             }
           },
           "parameters": {
@@ -1563,7 +1563,7 @@
                 }
               },
               "properties": {
-                "azCliVersion": "2.70.0",
+                "azCliVersion": "2.52.0",
                 "primaryScriptUri": "[format('{0}infra/scripts/run_create_aihub_scripts.sh', parameters('baseUrl'))]",
                 "arguments": "[format('{0} {1} {2} {3} {4} {5}', parameters('baseUrl'), parameters('keyVaultName'), parameters('solutionName'), parameters('resourceGroupName'), parameters('subscriptionId'), parameters('solutionLocation'))]",
                 "timeout": "PT1H",
