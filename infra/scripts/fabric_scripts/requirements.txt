@@ -1,3 +1,3 @@
 msal==1.31.1
-azure-identity
-pandas
+azure-identity==1.23.1
+pandas==2.3.0
