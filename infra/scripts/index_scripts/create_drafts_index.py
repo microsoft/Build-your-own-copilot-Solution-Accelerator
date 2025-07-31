@@ -13,7 +13,7 @@ num_pages = 10
 
 from azure.keyvault.secrets import SecretClient  
 
-from infra.scripts.azure_credential_utils import get_azure_credential
+from azure_credential_utils import get_azure_credential
 
 def get_secrets_from_kv(kv_name, secret_name):
     
