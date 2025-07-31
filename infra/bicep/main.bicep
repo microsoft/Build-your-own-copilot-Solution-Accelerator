@@ -14,7 +14,7 @@ var resourceGroupName = resourceGroup().name
 var subscriptionId  = subscription().subscriptionId
 
 var solutionLocation = resourceGroupLocation
-var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/sfi-rc/'
+var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/'
 
 // ========== Resource Group Tag ========== //
 resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
