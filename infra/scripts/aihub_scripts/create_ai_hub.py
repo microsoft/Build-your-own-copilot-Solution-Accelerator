@@ -11,7 +11,7 @@ from azure.ai.ml.entities import (
 )
 from azure.keyvault.secrets import SecretClient
 
-from infra.scripts.azure_credential_utils import get_azure_credential
+from azure_credential_utils import get_azure_credential
 
 def get_secrets_from_kv(kv_name, secret_name):
     # Set the name of the Azure Key Vault
