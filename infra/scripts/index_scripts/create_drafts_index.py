@@ -12,7 +12,8 @@ csv_file_name = '/metadata/completed_grants.csv'
 num_pages = 10
 
 from azure.keyvault.secrets import SecretClient  
-from azure.identity import DefaultAzureCredential  
+
+from infra.scripts.azure_credential_utils import get_azure_credential
 
 def get_secrets_from_kv(kv_name, secret_name):
     
@@ -20,7 +21,7 @@ def get_secrets_from_kv(kv_name, secret_name):
   key_vault_name = kv_name 
     
   # Create a credential object using the default Azure credentials  
-  credential = DefaultAzureCredential()
+  credential = get_azure_credential()
 
   # Create a secret client object using the credential and Key Vault name  
   secret_client = SecretClient(vault_url=f"https://{key_vault_name}.vault.azure.net/", credential=credential)  
@@ -342,7 +343,7 @@ import pandas as pd
 
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-credential = DefaultAzureCredential()
+credential = get_azure_credential()
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 

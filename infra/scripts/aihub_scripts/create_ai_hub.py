@@ -10,14 +10,15 @@ from azure.ai.ml.entities import (
     AzureOpenAIConnection,
 )
 from azure.keyvault.secrets import SecretClient
-from azure.identity import DefaultAzureCredential
+
+from infra.scripts.azure_credential_utils import get_azure_credential
 
 def get_secrets_from_kv(kv_name, secret_name):
     # Set the name of the Azure Key Vault
     key_vault_name = kv_name
 
     # Create a credential object using the default Azure credentials
-    credential = DefaultAzureCredential()
+    credential = get_azure_credential()
 
     # Create a secret client object using the credential and Key Vault name
     secret_client = SecretClient(
@@ -60,7 +61,7 @@ ai_search_res_name = (
 ai_search_key = get_secrets_from_kv(key_vault_name, "AZURE-SEARCH-KEY")
 
 # Credentials
-credential = DefaultAzureCredential()
+credential = get_azure_credential()
 
 # Create an ML client
 ml_client = MLClient(
