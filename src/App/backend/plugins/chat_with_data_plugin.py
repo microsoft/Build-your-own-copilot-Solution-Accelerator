@@ -12,7 +12,6 @@ from azure.ai.projects import AIProjectClient
 from azure.identity import get_bearer_token_provider
 from backend.helpers.azure_credential_utils import get_azure_credential
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
-from quart import current_app
 
 from backend.common.config import config
 from backend.services.sqldb_service import get_connection
@@ -43,14 +42,9 @@ class ChatWithDataPlugin:
         if not input or not input.strip():
             return "Error: Query input is required"
 
-        thread = None
         try:
-            # TEMPORARY: Use AgentFactory directly to debug the issue
-            logging.info(f"Using AgentFactory directly for SQL agent for ClientId: {ClientId}")
             from backend.agents.agent_factory import AgentFactory
             agent_info = await AgentFactory.get_sql_agent()
-
-            logging.info(f"SQL agent retrieved: {agent_info is not None}")
             agent = agent_info["agent"]
             project_client = agent_info["client"]
 
@@ -79,27 +73,23 @@ class ChatWithDataPlugin:
                 role=MessageRole.AGENT
             )
             sql_query = message.text.value.strip() if message else None
-            logging.info(f"Generated SQL query: {sql_query}")
 
             if not sql_query:
                 return "No SQL query was generated."
 
             # Clean up triple backticks (if any)
             sql_query = sql_query.replace("```sql", "").replace("```", "")
-            logging.info(f"Cleaned SQL query: {sql_query}")
 
             # Execute the query
             conn = get_connection()
             cursor = conn.cursor()
             cursor.execute(sql_query)
             rows = cursor.fetchall()
-            logging.info(f"Query returned {len(rows)} rows")
 
             if not rows:
                 result = "No data found for that client."
             else:
                 result = "\n".join(str(row) for row in rows)
-                logging.info(f"Result preview: {result[:200]}...")
 
             conn.close()
 
@@ -107,14 +97,6 @@ class ChatWithDataPlugin:
         except Exception as e:
             logging.exception("Error in get_SQL_Response")
             return f"Error retrieving SQL data: {str(e)}"
-        finally:
-            if thread:
-                try:
-                    logging.info(f"Attempting to delete thread {thread.id}")
-                    await project_client.agents.threads.delete(thread.id)
-                    logging.info(f"Thread {thread.id} deleted successfully")
-                except Exception as e:
-                    logging.error(f"Error deleting thread {thread.id}: {str(e)}")
 
     @kernel_function(
         name="ChatWithCallTranscripts",
@@ -133,17 +115,12 @@ class ChatWithDataPlugin:
         if not question or not question.strip():
             return "Error: Question input is required"
 
-        thread = None
         try:
             response_text = ""
 
-            # Use the singleton search agent from app context
-            if not hasattr(current_app, 'search_agent') or current_app.search_agent is None:
-                logging.error("Search agent not found in app context, falling back to AgentFactory")
-                from backend.agents.agent_factory import AgentFactory
-                agent_info = await AgentFactory.get_search_agent()
-            else:
-                agent_info = current_app.search_agent
+            from backend.agents.agent_factory import AgentFactory
+
+            agent_info: dict = await AgentFactory.get_search_agent()
 
             agent: Agent = agent_info["agent"]
             project_client: AIProjectClient = agent_info["client"]
@@ -214,11 +191,7 @@ class ChatWithDataPlugin:
 
             finally:
                 if thread:
-                    try:
-                        await project_client.agents.threads.delete(thread.id)
-                        logging.info(f"Thread {thread.id} deleted successfully")
-                    except Exception as e:
-                        logging.error(f"Error deleting thread {thread.id}: {str(e)}")
+                    project_client.agents.threads.delete(thread.id)
 
             if not response_text.strip():
                 return "No data found for that client."
