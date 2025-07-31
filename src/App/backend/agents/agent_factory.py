@@ -10,8 +10,8 @@ import asyncio
 from typing import Optional
 
 from azure.ai.projects import AIProjectClient
-from azure.identity import DefaultAzureCredential as DefaultAzureCredentialSync
-from azure.identity.aio import DefaultAzureCredential
+from backend.helpers.azure_credential_utils import get_azure_credential
+from backend.helpers.azure_credential_utils import get_azure_credential_async
 from semantic_kernel.agents import AzureAIAgent, AzureAIAgentSettings
 
 from backend.common.config import config
@@ -35,7 +35,7 @@ class AgentFactory:
         async with cls._lock:
             if cls._wealth_advisor_agent is None:
                 ai_agent_settings = AzureAIAgentSettings()
-                creds = DefaultAzureCredential()
+                creds = await get_azure_credential_async()
                 client = AzureAIAgent.create_client(
                     credential=creds, endpoint=ai_agent_settings.endpoint
                 )
@@ -76,7 +76,7 @@ class AgentFactory:
 
                 project_client = AIProjectClient(
                     endpoint=config.AI_PROJECT_ENDPOINT,
-                    credential=DefaultAzureCredentialSync(),
+                    credential=get_azure_credential(),
                     api_version="2025-05-01",
                 )
 
@@ -137,7 +137,7 @@ class AgentFactory:
 
                 project_client = AIProjectClient(
                     endpoint=config.AI_PROJECT_ENDPOINT,
-                    credential=DefaultAzureCredentialSync(),
+                    credential=get_azure_credential(),
                     api_version="2025-05-01",
                 )
 

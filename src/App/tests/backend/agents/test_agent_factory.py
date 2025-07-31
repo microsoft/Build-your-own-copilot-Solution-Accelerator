@@ -21,7 +21,7 @@ class TestAgentFactory:
 
     @pytest.mark.asyncio
     @patch("backend.agents.agent_factory.AzureAIAgent")
-    @patch("backend.agents.agent_factory.DefaultAzureCredential")
+    @patch("backend.agents.agent_factory.get_azure_credential_async")
     @patch("backend.agents.agent_factory.AzureAIAgentSettings")
     @patch("backend.agents.agent_factory.ChatWithDataPlugin")
     async def test_get_wealth_advisor_agent_creates_agent_when_none_exists(
@@ -74,7 +74,7 @@ class TestAgentFactory:
     @pytest.mark.asyncio
     @patch("backend.agents.agent_factory.config")
     @patch("backend.agents.agent_factory.AIProjectClient")
-    @patch("backend.agents.agent_factory.DefaultAzureCredentialSync")
+    @patch("backend.agents.agent_factory.get_azure_credential")
     async def test_get_search_agent_creates_agent_when_none_exists(
         self, mock_credential_sync, mock_ai_project_client, mock_config, reset_singleton
     ):
@@ -112,7 +112,7 @@ class TestAgentFactory:
     @pytest.mark.asyncio
     @patch("backend.agents.agent_factory.config")
     @patch("backend.agents.agent_factory.AIProjectClient")
-    @patch("backend.agents.agent_factory.DefaultAzureCredentialSync")
+    @patch("backend.agents.agent_factory.get_azure_credential")
     async def test_get_search_agent_with_default_instructions(
         self, mock_credential_sync, mock_ai_project_client, mock_config, reset_singleton
     ):
@@ -174,7 +174,7 @@ class TestAgentFactory:
             )
             mock_agent_class.return_value = mock_agent_instance
 
-            with patch("backend.agents.agent_factory.DefaultAzureCredential"):
+            with patch("backend.agents.agent_factory.get_azure_credential_async"):
                 with patch("backend.agents.agent_factory.AzureAIAgentSettings"):
                     with patch("backend.agents.agent_factory.ChatWithDataPlugin"):
                         # Act
@@ -193,7 +193,7 @@ class TestAgentFactory:
             with patch(
                 "backend.agents.agent_factory.AIProjectClient"
             ) as mock_ai_project_client:
-                with patch("backend.agents.agent_factory.DefaultAzureCredentialSync"):
+                with patch("backend.agents.agent_factory.get_azure_credential"):
                     mock_config.CALL_TRANSCRIPT_SYSTEM_PROMPT = "Test instructions"
                     mock_config.AI_PROJECT_ENDPOINT = "https://test.endpoint.com"
                     mock_config.AZURE_OPENAI_MODEL = "test-model"

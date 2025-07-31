@@ -3,10 +3,12 @@ import logging
 import struct
 
 import pyodbc
-from azure.identity import DefaultAzureCredential
+from backend.helpers.azure_credential_utils import get_azure_credential
 from dotenv import load_dotenv
 
 from backend.common.config import config
+
+import time
 
 load_dotenv()
 
@@ -33,33 +35,47 @@ def dict_cursor(cursor):
 
 
 def get_connection():
-    try:
-        credential = DefaultAzureCredential(managed_identity_client_id=mid_id)
+    max_retries = 5
+    retry_delay = 2
 
-        token_bytes = credential.get_token(
-            "https://database.windows.net/.default"
-        ).token.encode("utf-16-LE")
-        token_struct = struct.pack(
-            f"<I{len(token_bytes)}s", len(token_bytes), token_bytes
-        )
-        SQL_COPT_SS_ACCESS_TOKEN = (
-            1256  # This connection option is defined by Microsoft in msodbcsql.h
-        )
+    for attempt in range(max_retries):
+        try:
+            credential = get_azure_credential(client_id=mid_id)
 
-        # Set up the connection
-        connection_string = f"DRIVER={driver};SERVER={server};DATABASE={database};"
-        conn = pyodbc.connect(
-            connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
-        )
-        return conn
-    except pyodbc.Error as e:
-        logging.error(f"Failed with Default Credential: {str(e)}")
-        conn = pyodbc.connect(
-            f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}",
-            timeout=5,
-        )
-        logging.info("Connected using Username & Password")
-        return conn
+            token_bytes = credential.get_token(
+                "https://database.windows.net/.default"
+            ).token.encode("utf-16-LE")
+            token_struct = struct.pack(
+                f"<I{len(token_bytes)}s", len(token_bytes), token_bytes
+            )
+            SQL_COPT_SS_ACCESS_TOKEN = (
+                1256  # This connection option is defined by Microsoft in msodbcsql.h
+            )
+
+            # Set up the connection
+            connection_string = f"DRIVER={driver};SERVER={server};DATABASE={database};"
+            conn = pyodbc.connect(
+                connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+            )
+            return conn
+        except pyodbc.Error as e:
+            logging.error(f"Failed with Default Credential: {str(e)}")
+            try:
+                conn = pyodbc.connect(
+                    f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}",
+                    timeout=5,
+                )
+                logging.info("Connected using Username & Password")
+                return conn
+            except pyodbc.Error as e:
+                logging.error(f"Failed with Username & Password: {str(e)}")
+
+                if attempt < max_retries - 1:
+                    logging.info(f"Retrying in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                else:
+                    raise e
 
 
 def get_client_name_from_db(client_id: str) -> str:
