@@ -8,7 +8,7 @@ import pandas as pd
 
 # credential = DefaultAzureCredential()
 
-from azure_credential_utils import get_azure_credential
+from infra.scripts.azure_credential_utils import get_azure_credential
 credential = get_azure_credential()
 
 cred = credential.get_token('https://api.fabric.microsoft.com/.default')
