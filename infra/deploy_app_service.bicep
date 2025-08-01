@@ -424,7 +424,7 @@ resource assignAiUserRoleToAiProject 'Microsoft.Authorization/roleAssignments@20
   }
 }
 
-module assignAiUserRoleToAiProjectExisting 'deploy_foundry_role_assignment.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
+module assignAiUserRoleToAiProjectExisting 'deploy_foundry_model_role_assignment.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
   name: 'assignAiUserRoleToAiProjectExisting'
   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
   params: {

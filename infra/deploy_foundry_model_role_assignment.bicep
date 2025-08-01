@@ -1,11 +1,16 @@
+param principalId string = ''
+param roleDefinitionId string
+param roleAssignmentName string = ''
 param aiFoundryName string
 param aiProjectName string = ''
 param aiModelDeployments array = []
+
 
 resource aiServices 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: aiFoundryName
 }
 
+// Call the model deployments module
 @batchSize(1)
 resource aiServicesDeployments 'Microsoft.CognitiveServices/accounts/deployments@2025-04-01-preview' = [for aiModeldeployment in aiModelDeployments: if (!empty(aiModelDeployments)) {
   parent: aiServices
@@ -28,5 +33,15 @@ resource aiProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-pre
   parent: aiServices
 }
 
-output aiServices string = aiServices.identity.principalId
+resource roleAssignmentToFoundry 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: roleAssignmentName
+  scope: aiServices
+  properties: {
+    roleDefinitionId: roleDefinitionId
+    principalId: principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+output aiServicesPrincipalId string = aiServices.identity.principalId
 output aiProjectPrincipalId string = !empty(aiProjectName) ? aiProject.identity.principalId : ''

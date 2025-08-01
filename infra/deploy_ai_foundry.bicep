@@ -239,7 +239,7 @@ resource assignOpenAIRoleToAISearch 'Microsoft.Authorization/roleAssignments@202
   }
 }
 
-module assignOpenAIRoleToAISearchExisting 'deploy_foundry_role_assignment.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
+module assignOpenAIRoleToAISearchExisting 'deploy_foundry_model_role_assignment.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
   name: 'assignOpenAIRoleToAISearchExisting'
   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
   params: {
