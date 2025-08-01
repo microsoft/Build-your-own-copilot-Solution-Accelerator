@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "4417018826919204350"
+      "templateHash": "7434704573623874481"
     }
   },
   "parameters": {
@@ -359,7 +359,7 @@
       }
     },
     "solutionLocation": "[if(empty(parameters('AZURE_LOCATION')), resourceGroup().location, parameters('AZURE_LOCATION'))]",
-    "uniqueId": "[toLower(uniqueString(parameters('environmentName'), subscription().id, variables('solutionLocation')))]",
+    "uniqueId": "[toLower(uniqueString(parameters('environmentName'), subscription().id, variables('solutionLocation'), resourceGroup().name))]",
     "solutionPrefix": "[format('ca{0}', padLeft(take(variables('uniqueId'), 12), 12, '0'))]",
     "abbrs": "[variables('$fxv#0')]",
     "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\r\n   1. Table: Clients\r\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\r\n   2. Table: InvestmentGoals\r\n   Columns: ClientId, InvestmentGoal\r\n   3. Table: Assets\r\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\r\n   4. Table: ClientSummaries\r\n   Columns: ClientId, ClientSummary\r\n   5. Table: InvestmentGoalsDetails\r\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\r\n   6. Table: Retirement\r\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\r\n   7. Table: ClientMeetings\r\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\r\n   Always use the Investment column from the Assets table as the value.\r\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n   Do not use client name in filters.\r\n   Do not include assets values unless asked for.\r\n   ALWAYS use ClientId = {clientid} in the query filter.\r\n   ALWAYS select Client Name (Column: Client) in the query.\r\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n   When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.\r\n   Only return the generated SQL query. Do not return anything else.",
@@ -2300,7 +2300,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "3681696487679035168"
+              "templateHash": "14489288067602272519"
             }
           },
           "parameters": {
@@ -2672,6 +2672,10 @@
                 "serverFarmId": "[parameters('HostingPlanName')]",
                 "siteConfig": {
                   "appSettings": [
+                    {
+                      "name": "APP_ENV",
+                      "value": "Prod"
+                    },
                     {
                       "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
                       "value": "[reference(parameters('applicationInsightsId'), '2015-05-01').InstrumentationKey]"

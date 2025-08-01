@@ -5,7 +5,8 @@ import re
 import time
 
 import pandas as pd
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from azure.identity import get_bearer_token_provider
+from azure.identity import AzureCliCredential
 from azure.keyvault.secrets import SecretClient
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
@@ -44,9 +45,7 @@ csv_file_name = (
     "clienttranscripts/meeting_transcripts_metadata/transcripts_metadata.csv"
 )
 
-credential = DefaultAzureCredential(
-    managed_identity_client_id=managed_identity_client_id
-)
+credential = AzureCliCredential()
 token_provider = get_bearer_token_provider(
     credential,
     "https://cognitiveservices.azure.com/.default"

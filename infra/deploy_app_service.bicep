@@ -186,6 +186,10 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
     siteConfig: {
       appSettings: [
         {
+          name: 'APP_ENV'
+          value: 'Prod'
+        }
+        {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: reference(applicationInsightsId, '2015-05-01').InstrumentationKey
         }

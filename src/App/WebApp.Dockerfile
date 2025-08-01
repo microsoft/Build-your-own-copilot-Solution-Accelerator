@@ -36,4 +36,4 @@ COPY --from=frontend /home/node/app/static  /usr/src/app/static/
 WORKDIR /usr/src/app  
 EXPOSE 80  
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80", "--workers", "4", "--log-level", "info", "--access-log"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80", "--workers", "1", "--log-level", "info", "--access-log"]
