@@ -72,6 +72,9 @@ var existingAIProjectName = !empty(azureExistingAIProjectResourceId)
 var existingAIServiceSubscription = !empty(azureExistingAIProjectResourceId)
   ? split(azureExistingAIProjectResourceId, '/')[2]
   : ''
+var existingAIServicesName = !empty(azureExistingAIProjectResourceId)
+  ? split(azureExistingAIProjectResourceId, '/')[8]
+  : ''
 var existingAIServiceResourceGroup = !empty(azureExistingAIProjectResourceId)
   ? split(azureExistingAIProjectResourceId, '/')[4]
   : ''
@@ -225,15 +228,27 @@ resource cognitiveServicesOpenAIUser 'Microsoft.Authorization/roleDefinitions@20
   name: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
 }
 
-module assignOpenAIRoleToAISearch 'deploy_foundry_role_assignment.bicep' = {
-  name: 'assignOpenAIRoleToAISearch'
+
+resource assignOpenAIRoleToAISearch 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (empty(azureExistingAIProjectResourceId))  {
+  name: guid(resourceGroup().id, aiFoundry.id, cognitiveServicesOpenAIUser.id)
+  scope: aiFoundry
+  properties: {
+    principalId: aiSearch.identity.principalId
+    roleDefinitionId: cognitiveServicesOpenAIUser.id
+    principalType: 'ServicePrincipal'
+  }
+}
+
+module assignOpenAIRoleToAISearchExisting 'deploy_foundry_model_role_assignment.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
+  name: 'assignOpenAIRoleToAISearchExisting'
   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
   params: {
     roleDefinitionId: cognitiveServicesOpenAIUser.id
     roleAssignmentName: guid(resourceGroup().id, aiSearch.id, cognitiveServicesOpenAIUser.id, 'openai-foundry')
     aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIFoundryName : aiFoundryName
-    aiProjectName: !empty(azureExistingAIProjectResourceId) ? existingAIProjectName : aiProjectName
     principalId: aiSearch.identity.principalId
+aiProjectName: !empty(azureExistingAIProjectResourceId) ? existingAIProjectName : aiProjectName
+    aiModelDeployments: aiModelDeployments
   }
 }
 
@@ -257,7 +272,7 @@ resource assignSearchIndexDataReaderToExistingAiProject 'Microsoft.Authorization
   scope: aiSearch
   properties: {
     roleDefinitionId: searchIndexDataReaderRoleDefinition.id
-    principalId: assignOpenAIRoleToAISearch.outputs.aiProjectPrincipalId
+    principalId: assignOpenAIRoleToAISearchExisting.outputs.aiProjectPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
@@ -283,7 +298,7 @@ resource searchServiceContributorRoleAssignmentExisting 'Microsoft.Authorization
   scope: aiSearch
   properties: {
     roleDefinitionId: searchServiceContributorRoleDefinition.id
-    principalId: assignOpenAIRoleToAISearch.outputs.aiProjectPrincipalId
+    principalId: assignOpenAIRoleToAISearchExisting.outputs.aiProjectPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
@@ -376,3 +391,5 @@ output logAnalyticsWorkspaceResourceGroup string = useExisting ? existingLawReso
 output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
 
 output aiSearchFoundryConnectionName string = aiSearchConnectionName
+output aiAppInsightsFoundryConnectionName string = aiAppInsightConnectionName
+output aiModelDeployments array = aiModelDeployments

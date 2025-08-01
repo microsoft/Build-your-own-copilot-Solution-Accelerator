@@ -157,6 +157,7 @@ var existingAIServiceResourceGroup = !empty(azureExistingAIProjectResourceId)
 var existingAIServicesName = !empty(azureExistingAIProjectResourceId)
   ? split(azureExistingAIProjectResourceId, '/')[8]
   : ''
+var existingAIProjectName = !empty(azureExistingAIProjectResourceId) ? split(azureExistingAIProjectResourceId, '/')[10] : ''
 
 resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: HostingPlanName
@@ -417,14 +418,25 @@ resource aiUserRoleDefinitionFoundry 'Microsoft.Authorization/roleDefinitions@20
   name: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
 }
 
-module assignAiUserRoleToAiProject 'deploy_foundry_role_assignment.bicep' = {
-  name: 'assignAiUserRoleToAiProject'
+resource assignAiUserRoleToAiProject 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (empty(azureExistingAIProjectResourceId))  {
+  name: guid(resourceGroup().id, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
+  // scope: aiProject
+  properties: {
+    principalId: Website.identity.principalId
+    roleDefinitionId: aiUserRoleDefinitionFoundry.id
+    principalType: 'ServicePrincipal'
+  }
+}
+
+module assignAiUserRoleToAiProjectExisting 'deploy_foundry_model_role_assignment.bicep' = if (!empty(azureExistingAIProjectResourceId)) {
+  name: 'assignAiUserRoleToAiProjectExisting'
   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
   params: {
     principalId: Website.identity.principalId
     roleDefinitionId: aiUserRoleDefinitionFoundry.id
     roleAssignmentName: guid(Website.name, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
     aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIServicesName : aiFoundryName
+    aiProjectName: existingAIProjectName
   }
 }
 
