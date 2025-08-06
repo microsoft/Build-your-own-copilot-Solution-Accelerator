@@ -3,8 +3,6 @@ name: Build Docker and Optional Push - Client Advisor
 on:
   push:
     branches: [main, dev, demo]
-    paths:
-      - ClientAdvisor/**
   pull_request:
     branches: [main, dev, demo]
     types:
@@ -12,8 +10,6 @@ on:
       - ready_for_review
       - reopened
       - synchronize
-    paths:
-      - ClientAdvisor/**
   merge_group:
   workflow_dispatch:
 
@@ -23,10 +19,7 @@ jobs:
       matrix:
         include:
           - app_name: byc-wa-app
-            dockerfile: ClientAdvisor/App/WebApp.Dockerfile
-            password_secret: DOCKER_PASSWORD
-          - app_name: byc-wa-fn
-            dockerfile: ClientAdvisor/AzureFunction/Dockerfile
+            dockerfile: src/App/WebApp.Dockerfile
             password_secret: DOCKER_PASSWORD
 
     uses: ./.github/workflows/build-docker.yml

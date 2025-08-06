@@ -1,0 +1,5 @@
+msal==1.31.1
+azure-identity
+pandas
+azure-storage-file-datalake
+packaging

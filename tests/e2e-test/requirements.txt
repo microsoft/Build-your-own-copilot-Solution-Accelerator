@@ -1,0 +1,7 @@
+pytest-playwright
+pytest-html
+python-dotenv
+pytest-check
+pytest-reporter-html1
+py
+beautifulsoup4
