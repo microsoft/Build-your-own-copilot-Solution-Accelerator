@@ -7,6 +7,7 @@ and supports plugin integration.
 """
 
 import asyncio
+import logging
 from typing import Optional
 
 from azure.ai.projects import AIProjectClient
@@ -26,6 +27,7 @@ class AgentFactory:
     _lock = asyncio.Lock()
     _wealth_advisor_agent: Optional[AzureAIAgent] = None
     _search_agent: Optional[dict] = None
+    _sql_agent: Optional[dict] = None
 
     @classmethod
     async def get_wealth_advisor_agent(cls):
@@ -94,18 +96,67 @@ class AgentFactory:
         Delete the singleton AzureAIAgent instances if it exists.
         """
         async with cls._lock:
-            if cls._wealth_advisor_agent is not None:
-                await cls._wealth_advisor_agent.client.agents.delete_agent(
-                    cls._wealth_advisor_agent.id
-                )
-                cls._wealth_advisor_agent = None
+            logging.info("Starting agent deletion process...")
 
+            # Delete Wealth Advisor Agent
+            if cls._wealth_advisor_agent is not None:
+                try:
+                    agent_id = cls._wealth_advisor_agent.id
+                    logging.info(f"Deleting wealth advisor agent: {agent_id}")
+                    if hasattr(cls._wealth_advisor_agent, 'client') and cls._wealth_advisor_agent.client:
+                        await cls._wealth_advisor_agent.client.agents.delete_agent(agent_id)
+                        logging.info("Wealth advisor agent deleted successfully")
+                    else:
+                        logging.warning("Wealth advisor agent client is None")
+                except Exception as e:
+                    logging.error(f"Error deleting wealth advisor agent: {e}")
+                    logging.exception("Detailed wealth advisor agent deletion error")
+                finally:
+                    cls._wealth_advisor_agent = None
+
+            # Delete Search Agent
             if cls._search_agent is not None:
-                cls._search_agent["client"].agents.delete_agent(
-                    cls._search_agent["agent"].id
-                )
-                cls._search_agent["client"].close()
-                cls._search_agent = None
+                try:
+                    agent_id = cls._search_agent['agent'].id
+                    logging.info(f"Deleting search agent: {agent_id}")
+                    if cls._search_agent.get("client") and hasattr(cls._search_agent["client"], "agents"):
+                        # AIProjectClient.agents.delete_agent is synchronous, don't await it
+                        cls._search_agent["client"].agents.delete_agent(agent_id)
+                        logging.info("Search agent deleted successfully")
+
+                        # Close the client if it has a close method
+                        if hasattr(cls._search_agent["client"], "close"):
+                            cls._search_agent["client"].close()
+                    else:
+                        logging.warning("Search agent client is None or invalid")
+                except Exception as e:
+                    logging.error(f"Error deleting search agent: {e}")
+                    logging.exception("Detailed search agent deletion error")
+                finally:
+                    cls._search_agent = None
+
+            # Delete SQL Agent
+            if cls._sql_agent is not None:
+                try:
+                    agent_id = cls._sql_agent['agent'].id
+                    logging.info(f"Deleting SQL agent: {agent_id}")
+                    if cls._sql_agent.get("client") and hasattr(cls._sql_agent["client"], "agents"):
+                        # AIProjectClient.agents.delete_agent is synchronous, don't await it
+                        cls._sql_agent["client"].agents.delete_agent(agent_id)
+                        logging.info("SQL agent deleted successfully")
+
+                        # Close the client if it has a close method
+                        if hasattr(cls._sql_agent["client"], "close"):
+                            cls._sql_agent["client"].close()
+                    else:
+                        logging.warning("SQL agent client is None or invalid")
+                except Exception as e:
+                    logging.error(f"Error deleting SQL agent: {e}")
+                    logging.exception("Detailed SQL agent deletion error")
+                finally:
+                    cls._sql_agent = None
+
+            logging.info("Agent deletion process completed")
 
     @classmethod
     async def get_sql_agent(cls) -> dict:
@@ -114,7 +165,7 @@ class AgentFactory:
         This agent is used to generate T-SQL queries from natural language input.
         """
         async with cls._lock:
-            if not hasattr(cls, "_sql_agent") or cls._sql_agent is None:
+            if cls._sql_agent is None:
 
                 agent_instructions = config.SQL_SYSTEM_PROMPT or """
     You are an expert assistant in generating T-SQL queries based on user questions.
