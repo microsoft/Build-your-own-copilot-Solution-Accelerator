@@ -228,3 +228,7 @@ This will rebuild the source code, package it into a container, and push it to t
 3. **Deleting Resources After a Failed Deployment**  
 
      - Follow steps in [Delete Resource Group](DeleteResourceGroup.md) if your deployment fails and/or you need to clean up the resources.
+
+## For local Debugging
+
+To configure your environment, navigate to the `src\App` folder to create a `.env` file based on the `.env.sample`, fill it using deployment output or the Azure Portal under "Deployments" in your resource group, and ensure APP_ENV is set to "**dev**".
