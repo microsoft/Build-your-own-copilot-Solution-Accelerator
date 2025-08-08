@@ -1,38 +1,40 @@
 // Creates Azure dependent resources for Azure AI studio
-@minLength(3)
-@maxLength(15)
-@description('Solution Name')
+
+@description('Required. Solution Name')
 param solutionName string
 
-@description('Solution Location')
+@description('Required. Solution Location')
 param solutionLocation string
 
-@description('Contains Name of KeyVault.')
+@description('Required. Contains Name of KeyVault.')
 param keyVaultName string
 
-@description('Indicates the type of Deployment.')
+@description('Required. Indicates the type of Deployment.')
 param deploymentType string
 
-@description('GPT Model Name')
-param gptModelName string
+@description('Optional. GPT Model Name')
+param gptModelName string = 'gpt-4o-mini'
 
-@description('Azure OepnAI API Version.')
+@description('Required. Azure OepnAI API Version.')
 param azureOpenaiAPIVersion string
 
-@description('Param to get Deployment Capacity.')
+@description('Required. Param to get Deployment Capacity.')
 param gptDeploymentCapacity int
 
-@description('Embedding Model.')
-param embeddingModel string
+@description('Optional. Embedding Model.')
+param embeddingModel string = 'text-embedding-ada-002'
 
-@description('Info about Embedding Deployment Capacity.')
-param embeddingDeploymentCapacity int
+@description('Optional. Info about Embedding Deployment Capacity.')
+param embeddingDeploymentCapacity int = 80
 
-@description('Existing Log Analytics WorkspaceID.')
+@description('Optional. Existing Log Analytics WorkspaceID.')
 param existingLogAnalyticsWorkspaceId string = ''
 
-@description('Azure Existing AI Project ResourceID.')
+@description('Optional. Azure Existing AI Project ResourceID.')
 param azureExistingAIProjectResourceId string = ''
+
+@description('Required. The name of the AI Foundry AI Project resource in Azure.')
+param aiFoundryAiServicesAiProjectResourceName string
 
 @description('Optional. Tags to be applied to the resources.')
 param tags object = {}
@@ -44,7 +46,7 @@ var aiFoundryName = 'aif-${solutionName}'
 var applicationInsightsName = 'appi-${solutionName}'
 var keyvaultName = keyVaultName
 var location = solutionLocation //'eastus2'
-var aiProjectName = 'aifp-${solutionName}'
+var aiProjectName = '${aiFoundryAiServicesAiProjectResourceName}-${solutionName}'
 var aiProjectFriendlyName = aiProjectName
 var aiProjectDescription = 'AI Foundry Project'
 var aiSearchName = 'srch-${solutionName}'

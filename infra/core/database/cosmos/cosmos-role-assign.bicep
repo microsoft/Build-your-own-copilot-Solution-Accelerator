@@ -1,12 +1,12 @@
 metadata description = 'Creates a SQL role assignment under an Azure Cosmos DB account.'
 
-@description('Name of the Azure Cosmos DB account.')
+@description('Required. Name of the Azure Cosmos DB account.')
 param accountName string
 
-@description('ID of the Cosmos DB SQL role definition.')
+@description('Required. ID of the Cosmos DB SQL role definition.')
 param roleDefinitionId string
 
-@description('Principal ID to assign the role to.')
+@description('Otional. Principal ID to assign the role to.')
 param principalId string = ''
 
 resource role 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-05-15' = {

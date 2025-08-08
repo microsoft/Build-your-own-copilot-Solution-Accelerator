@@ -3,13 +3,13 @@ targetScope = 'resourceGroup'
 
 @minLength(3)
 @maxLength(15)
-@description('Name of the solution.')
+@description('Required. Name of the solution.')
 param solutionName string
 
-@description('Deployment location for the solution.')
+@description('Required. Deployment location for the solution.')
 param solutionLocation string
 
-@description('Name of the managed identity.')
+@description('Required. Name of the managed identity.')
 param miName string
 
 @description('Optional. Tags to be applied to the resources.')

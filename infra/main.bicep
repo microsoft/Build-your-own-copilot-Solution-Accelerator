@@ -40,7 +40,7 @@ param azureOpenaiAPIVersion string = '2025-04-01-preview'
 param gptDeploymentCapacity int = 200
 
 @minLength(1)
-@description('Name of the Text Embedding model to deploy:')
+@description('Optional. Name of the Text Embedding model to deploy:')
 @allowed([
   'text-embedding-ada-002'
 ])
@@ -68,7 +68,7 @@ param imageTag string = 'latest'
     ]
   }
 })
-@description('Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed.')
+@description('Rquired. Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed.')
 param aiDeploymentsLocation string
 
 @description('Optional. Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default.')
@@ -138,6 +138,8 @@ var functionAppStreamTextSystemPrompt = '''The currently selected client's name 
 @description('Optional. The tags to apply to all deployed Azure resources.')
 param tags resourceInput<'Microsoft.Resources/resourceGroups@2025-04-01'>.tags = {}
 
+var aiFoundryAiServicesAiProjectResourceName = 'proj-${solutionSuffix}'
+
 // ========== Resource Group Tag ========== //
 resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
   name: 'default'
@@ -189,6 +191,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
     existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
     azureExistingAIProjectResourceId: azureExistingAIProjectResourceId
+    aiFoundryAiServicesAiProjectResourceName : aiFoundryAiServicesAiProjectResourceName
     tags: tags
   }
   scope: resourceGroup(resourceGroup().name)

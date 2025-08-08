@@ -1,19 +1,19 @@
 
 @minLength(3)
 @maxLength(20)
-@description('Solution location.')
+@description('Required. Solution location.')
 param solutionLocation string
 
-@description('Name of the Azure Cosmos DB account.')
+@description('Required. Name of the Azure Cosmos DB account.')
 param cosmosDBName string
 
-@description('Name of the Cosmos DB database.')
+@description('Optional. Name of the Cosmos DB database.')
 param databaseName string = 'db_conversation_history'
 
-@description('Name of the Cosmos DB container (collection).')
+@description('Optional.Name of the Cosmos DB container (collection).')
 param collectionName string = 'conversations'
 
-@description('List of Cosmos DB containers to be created.')
+@description('Optional. List of Cosmos DB containers to be created.')
 param containers array = [
   {
     name: collectionName
@@ -22,7 +22,7 @@ param containers array = [
   }
 ]
 
-@description('The API kind of the Cosmos DB account.')
+@description('Optional. The API kind of the Cosmos DB account.')
 @allowed([ 'GlobalDocumentDB', 'MongoDB', 'Parse' ])
 param kind string = 'GlobalDocumentDB'
 

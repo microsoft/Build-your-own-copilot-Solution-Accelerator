@@ -1,22 +1,22 @@
-@description('Deployment location for the solution.')
+@description('Required. Deployment location for the solution.')
 param solutionLocation string
 
-@description('Name of the Azure Key Vault.')
+@description('Required. Name of the Azure Key Vault.')
 param keyVaultName string
 
-@description('Object ID of the managed identity.')
+@description('Required. Object ID of the managed identity.')
 param managedIdentityObjectId string
 
-@description('Name of the managed identity.')
+@description('Required. Name of the managed identity.')
 param managedIdentityName string
 
-@description('The name of the SQL logical server.')
+@description('Required. The name of the SQL logical server.')
 param serverName string
 
-@description('The name of the SQL Database.')
+@description('Required. The name of the SQL Database.')
 param sqlDBName string
 
-@description('Location for all resources.')
+@description('Required. Location for all resources.')
 param location string = solutionLocation
 
 @description('Optional. Tags to be applied to the resources.')

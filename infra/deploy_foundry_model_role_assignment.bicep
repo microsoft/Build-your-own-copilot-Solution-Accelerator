@@ -1,19 +1,19 @@
-@description('Principal ID to assign the role to.')
+@description('Optional. Principal ID to assign the role to.')
 param principalId string = ''
 
-@description('ID of the role definition to assign.')
+@description('Required. ID of the role definition to assign.')
 param roleDefinitionId string
 
-@description('Name of the role assignment.')
+@description('Optional. Name of the role assignment.')
 param roleAssignmentName string = ''
 
-@description('Name of the AI Foundry resource.')
+@description('Required. Name of the AI Foundry resource.')
 param aiFoundryName string
 
-@description('Name of the AI project.')
+@description('Optional. Name of the AI project.')
 param aiProjectName string = ''
 
-@description('List of AI model deployments.')
+@description('Optional. List of AI model deployments.')
 param aiModelDeployments array = []
 
 @description('Optional. Tags to be applied to the resources.')

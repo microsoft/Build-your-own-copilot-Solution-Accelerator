@@ -1,16 +1,16 @@
 // ========== Storage Account ========== //
 targetScope = 'resourceGroup'
 
-@description('Deployment location for the solution.')
+@description('Required. Deployment location for the solution.')
 param solutionLocation string
 
-@description('Name of the storage account.')
+@description('Required. Name of the storage account.')
 param saName string
 
-@description('Object ID of the managed identity.')
+@description('Required. Object ID of the managed identity.')
 param managedIdentityObjectId string
 
-@description('Name of the Azure Key Vault.')
+@description('Required. Name of the Azure Key Vault.')
 param keyVaultName string
 
 @description('Optional. Tags to be applied to the resources.')

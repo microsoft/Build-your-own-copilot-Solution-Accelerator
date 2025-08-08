@@ -1,163 +1,163 @@
 // ========== Key Vault ========== //
 targetScope = 'resourceGroup'
 
-@description('Solution Location')
+@description('Required. Solution Location')
 param solutionLocation string
 
-@description('The pricing tier for the App Service plan')
+@description('Optional. The pricing tier for the App Service plan')
 @allowed(['F1', 'D1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P4', 'P0v3'])
 param hostingPlanSku string = 'B2'
 
-@description('Name of App Service plan')
+@description('Required. Name of App Service plan')
 param hostingPlanName string
 
-@description('Name of Web App')
+@description('Required. Name of Web App')
 param websiteName string
 
 // @description('Name of Application Insights')
 // param ApplicationInsightsName string = '${ solutionName }-app-insights'
 
-@description('Name of Azure Search Service')
+@description('Optional. Name of Azure Search Service')
 param azureSearchService string = ''
 
-@description('Name of Azure Search Index')
+@description('Optional. Name of Azure Search Index')
 param azureSearchIndex string = ''
 
-@description('Use semantic search')
+@description('Optional. Use semantic search')
 param azureSearchUseSemanticSearch string = 'False'
 
-@description('Semantic search config')
+@description('Optional. Semantic search config')
 param azureSearchSemanticSearchConfig string = 'default'
 
-@description('Top K results')
+@description('Optional. Top K results')
 param azureSearchTopK string = '5'
 
-@description('Enable in domain')
+@description('Optional. Enable in domain')
 param azureSearchEnableInDomain string = 'False'
 
-@description('Content columns')
+@description('Optional. Content columns')
 param azureSearchContentColumns string = 'content'
 
-@description('Filename column')
+@description('Optional. Filename column')
 param azureSearchFilenameColumn string = 'filename'
 
-@description('Title column')
+@description('Optional. Title column')
 param azureSearchTitleColumn string = 'client_id'
 
-@description('Url column')
+@description('Optional. Url column')
 param azureSearchUrlColumn string = 'sourceurl'
 
-@description('Name of Azure OpenAI Resource')
+@description('Required. Name of Azure OpenAI Resource')
 param azureOpenAIResource string
 
-@description('Azure OpenAI Model Deployment Name')
-param azureOpenAIModel string
+@description('Optional. Azure OpenAI Model Deployment Name')
+param azureOpenAIModel string = 'gpt-4o-mini'
 
-@description('Azure Open AI Endpoint')
+@description('Optional. Azure Open AI Endpoint')
 param azureOpenAIEndpoint string = ''
 
-@description('Azure OpenAI Temperature')
+@description('Optional. Azure OpenAI Temperature')
 param azureOpenAITemperature string = '0'
 
-@description('Azure OpenAI Top P')
+@description('Optional. Azure OpenAI Top P')
 param azureOpenAITopP string = '1'
 
-@description('Azure OpenAI Max Tokens')
+@description('Optional. Azure OpenAI Max Tokens')
 param azureOpenAIMaxTokens string = '1000'
 
-@description('Azure OpenAI Stop Sequence')
+@description('Optional. Azure OpenAI Stop Sequence')
 param azureOpenAIStopSequence string = '\n'
 
-@description('Azure OpenAI System Message')
+@description('Optional. Azure OpenAI System Message')
 param azureOpenAISystemMessage string = 'You are an AI assistant that helps people find information.'
 
-@description('Azure OpenAI Api Version')
+@description('Optional. Azure OpenAI Api Version')
 param azureOpenAIApiVersion string = '2024-02-15-preview'
 
-@description('Whether or not to stream responses from Azure OpenAI')
+@description('Optional. Whether or not to stream responses from Azure OpenAI')
 param azureOpenAIStream string = 'True'
 
-@description('Azure Search Query Type')
+@description('Optional. Azure Search Query Type')
 @allowed(['simple', 'semantic', 'vector', 'vectorSimpleHybrid', 'vectorSemanticHybrid'])
 param azureSearchQueryType string = 'simple'
 
-@description('Azure Search Vector Fields')
+@description('Optional. Azure Search Vector Fields')
 param azureSearchVectorFields string = 'contentVector'
 
-@description('Azure Search Permitted Groups Field')
+@description('Optional. Azure Search Permitted Groups Field')
 param azureSearchPermittedGroupsField string = ''
 
-@description('Azure Search Strictness')
+@description('Optional. Azure Search Strictness')
 @allowed(['1', '2', '3', '4', '5'])
 param azureSearchStrictness string = '3'
 
-@description('Azure OpenAI Embedding Deployment Name')
+@description('Optional. Azure OpenAI Embedding Deployment Name')
 param azureOpenAIEmbeddingName string = ''
 
-@description('Azure Open AI Embedding Endpoint')
+@description('Optional. Azure Open AI Embedding Endpoint')
 param azureOpenAIEmbeddingEndpoint string = ''
 
-@description('Use Azure Function')
+@description('Optional. Use Azure Function')
 param USE_INTERNAL_STREAM string = 'True'
 
-@description('SQL Database Server Name')
+@description('Optional. SQL Database Server Name')
 param SQLDB_SERVER string = ''
 
-@description('SQL Database Name')
+@description('Optional. SQL Database Name')
 param SQLDB_DATABASE string = ''
 
-@description('Azure Cosmos DB Account')
+@description('Optional. Azure Cosmos DB Account')
 param AZURE_COSMOSDB_ACCOUNT string = ''
 
-@description('Azure Cosmos DB Conversations Container')
+@description('Optional. Azure Cosmos DB Conversations Container')
 param AZURE_COSMOSDB_CONVERSATIONS_CONTAINER string = ''
 
-@description('Azure Cosmos DB Database')
+@description('Optional. Azure Cosmos DB Database')
 param AZURE_COSMOSDB_DATABASE string = ''
 
-@description('Enable feedback in Cosmos DB')
+@description('Optional. Enable feedback in Cosmos DB')
 param AZURE_COSMOSDB_ENABLE_FEEDBACK string = 'True'
 
 //@description('Power BI Embed URL')
 //param VITE_POWERBI_EMBED_URL string = ''
 
-@description('The container image tag to be deployed')
+@description('Required. The container image tag to be deployed')
 param imageTag string
 
-@description('The resource ID of the user-assigned managed identity to be used by the deployed resources.')
+@description('Required. The resource ID of the user-assigned managed identity to be used by the deployed resources.')
 param userassignedIdentityId string
 
-@description('The client ID of the user-assigned managed identity.')
+@description('Required. The client ID of the user-assigned managed identity.')
 param userassignedIdentityClientId string
 
-@description('The Instrumentation Key or Resource ID of the Application Insights resource used for monitoring.')
+@description('Required. The Instrumentation Key or Resource ID of the Application Insights resource used for monitoring.')
 param applicationInsightsId string
 
-@description('The endpoint URL of the Azure Cognitive Search service.')
+@description('Required. The endpoint URL of the Azure Cognitive Search service.')
 param azureSearchServiceEndpoint string
 
-@description('Azure Function App SQL System Prompt')
+@description('Required. Azure Function App SQL System Prompt')
 param sqlSystemPrompt string
 
-@description('Azure Function App CallTranscript System Prompt')
+@description('Required. Azure Function App CallTranscript System Prompt')
 param callTranscriptSystemPrompt string
 
-@description('Azure Function App Stream Text System Prompt')
+@description('Required. Azure Function App Stream Text System Prompt')
 param streamTextSystemPrompt string
 
-@description('AI Foundry project endpoint URL.')
+@description('Required. AI Foundry project endpoint URL.')
 param aiFoundryProjectEndpoint string
 
-@description('Flag to enable AI project client.')
+@description('Optional. Flag to enable AI project client.')
 param useAIProjectClientFlag string = 'false'
 
-@description('Name of the AI Foundry project.')
+@description('Required. Name of the AI Foundry project.')
 param aiFoundryName string
 
-@description('Application Insights connection string.')
+@description('Required. Application Insights connection string.')
 param applicationInsightsConnectionString string
 
-@description('Connection name for Azure Cognitive Search.')
+@description('Required. Connection name for Azure Cognitive Search.')
 param aiSearchProjectConnectionName string
 
 @description('Optional. Tags to be applied to the resources.')
@@ -169,7 +169,7 @@ param tags object = {}
 
 var webAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${imageTag}'
 
-@description('Resource ID of the existing AI Foundry project.')
+@description('Optional. Resource ID of the existing AI Foundry project.')
 param azureExistingAIProjectResourceId string = ''
 
 var existingAIServiceSubscription = !empty(azureExistingAIProjectResourceId)
