@@ -9,12 +9,13 @@ param solutionName string
 @description('Solution Location')
 param solutionLocation string
 
+@description('Current UTC timestamp.')
 param utc string = utcNow()
 
-@description('Name')
+@description('Name of the Azure Key Vault.')
 param kvName string
 
-@description('Create Mode')
+@description('Specifies the create mode for the resource.')
 param createMode string = 'default'
 
 @description('Enabled For Deployment. Property to specify whether Azure Virtual Machines are permitted to retrieve certificates stored as secrets from the key vault.')
@@ -49,12 +50,17 @@ param sku string = 'standard'
 @description('Vault URI. The URI of the vault for performing operations on keys and secrets.')
 var vaultUri = 'https://${ kvName }.vault.azure.net/'
 
+@description('Object ID of the managed identity.')
 param managedIdentityObjectId string
+
+@description('Optional. Tags to be applied to the resources.')
+param tags object = {}
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: kvName
   location: solutionLocation
   tags: {
+    ...tags
     app: solutionName
     location: solutionLocation
   }
@@ -111,6 +117,9 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
+@description('Name of the Key Vault.')
 output keyvaultName string = keyVault.name
+
+@description('Resource ID of the Key Vault.')
 output keyvaultId string = keyVault.id
 

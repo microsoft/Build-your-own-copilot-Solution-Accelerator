@@ -3,20 +3,20 @@ targetScope = 'resourceGroup'
 
 @minLength(3)
 @maxLength(20)
-@description('A unique prefix for all resources in this deployment. This should be 3-20 characters long:')
-param environmentName string
+@description('Required. A unique prefix for all resources in this deployment. This should be 3-20 characters long:')
+param solutionName  string = 'clientadvisor'
 
-@description('Optional: Existing Log Analytics Workspace Resource ID')
+@description('Optional. Existing Log Analytics Workspace Resource ID')
 param existingLogAnalyticsWorkspaceId string = ''
 
-@description('Use this parameter to use an existing AI project resource ID')
+@description('Optional. Use this parameter to use an existing AI project resource ID')
 param azureExistingAIProjectResourceId string = ''
 
-@description('CosmosDB Location')
+@description('Optional. CosmosDB Location')
 param cosmosLocation string = 'eastus2'
 
 @minLength(1)
-@description('GPT model deployment type:')
+@description('Optional. GPT model deployment type:')
 @allowed([
   'Standard'
   'GlobalStandard'
@@ -24,16 +24,17 @@ param cosmosLocation string = 'eastus2'
 param deploymentType string = 'GlobalStandard'
 
 @minLength(1)
-@description('Name of the GPT model to deploy:')
+@description('Optional. Name of the GPT model to deploy:')
 @allowed([
   'gpt-4o-mini'
 ])
 param gptModelName string = 'gpt-4o-mini'
 
+@description('Optional. API version for the Azure OpenAI service.')
 param azureOpenaiAPIVersion string = '2025-04-01-preview'
 
 @minValue(10)
-@description('Capacity of the GPT deployment:')
+@description('Optional. Capacity of the GPT deployment:')
 // You can increase this, but capacity is limited per model/region, so you will get errors if you go over
 // https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits
 param gptDeploymentCapacity int = 200
@@ -46,7 +47,7 @@ param gptDeploymentCapacity int = 200
 param embeddingModel string = 'text-embedding-ada-002'
 
 @minValue(10)
-@description('Capacity of the Embedding Model deployment')
+@description('Optional. Capacity of the Embedding Model deployment')
 param embeddingDeploymentCapacity int = 80
 
 // @description('Fabric Workspace Id if you have one, else leave it empty. ')
@@ -70,15 +71,29 @@ param imageTag string = 'latest'
 @description('Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed.')
 param aiDeploymentsLocation string
 
-@description('Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default.')
+@description('Optional. Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default.')
 param AZURE_LOCATION string = ''
 var solutionLocation = empty(AZURE_LOCATION) ? resourceGroup().location : AZURE_LOCATION
 
-var uniqueId = toLower(uniqueString(environmentName, subscription().id, solutionLocation, resourceGroup().name))
-var solutionPrefix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
+//var uniqueId = toLower(uniqueString(solutionName , subscription().id, solutionLocation, resourceGroup().name))
+//var solutionSuffix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
+ 
+@maxLength(5)
+@description('Optional. A unique token for the solution. This is used to ensure resource names are unique for global resources. Defaults to a 5-character substring of the unique string generated from the subscription ID, resource group name, and solution name.')
+param solutionUniqueToken string = substring(uniqueString(subscription().id, resourceGroup().name, solutionName), 0, 5)
+ 
+var solutionSuffix= toLower(trim(replace(
+  replace(
+    replace(replace(replace(replace('${solutionName}${solutionUniqueToken}', '-', ''), '_', ''), '.', ''), '/', ''),
+    ' ',
+    ''
+  ),
+  '*',
+  ''
+)))
 
 // Load the abbrevations file required to name the azure resources.
-var abbrs = loadJsonContent('./abbreviations.json')
+//var abbrs = loadJsonContent('./abbreviations.json')
 
 //var resourceGroupLocation = resourceGroup().location
 //var solutionLocation = resourceGroupLocation
@@ -120,11 +135,15 @@ var functionAppStreamTextSystemPrompt = '''The currently selected client's name 
   If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.
   Always send clientId as '{client_id}'.'''
 
+@description('Optional. The tags to apply to all deployed Azure resources.')
+param tags resourceInput<'Microsoft.Resources/resourceGroups@2025-04-01'>.tags = {}
+
 // ========== Resource Group Tag ========== //
 resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
   name: 'default'
   properties: {
     tags: {
+      ...tags
       TemplateName: 'Client Advisor'
     }
   }
@@ -134,9 +153,10 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
 module managedIdentityModule 'deploy_managed_identity.bicep' = {
   name: 'deploy_managed_identity'
   params: {
-    solutionName: solutionPrefix
+    solutionName: solutionSuffix
     solutionLocation: solutionLocation
-    miName: '${abbrs.security.managedIdentity}${solutionPrefix}'
+    miName: 'id-${solutionSuffix}'
+    tags: tags
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -145,10 +165,11 @@ module managedIdentityModule 'deploy_managed_identity.bicep' = {
 module keyvaultModule 'deploy_keyvault.bicep' = {
   name: 'deploy_keyvault'
   params: {
-    solutionName: solutionPrefix
+    solutionName: solutionSuffix
     solutionLocation: solutionLocation
     managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
-    kvName: '${abbrs.security.keyVault}${solutionPrefix}'
+    kvName: 'kv-${solutionSuffix}'
+    tags: tags
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -157,7 +178,7 @@ module keyvaultModule 'deploy_keyvault.bicep' = {
 module aifoundry 'deploy_ai_foundry.bicep' = {
   name: 'deploy_ai_foundry'
   params: {
-    solutionName: solutionPrefix
+    solutionName: solutionSuffix
     solutionLocation: aiDeploymentsLocation
     keyVaultName: keyvaultModule.outputs.keyvaultName
     deploymentType: deploymentType
@@ -168,6 +189,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
     embeddingDeploymentCapacity: embeddingDeploymentCapacity
     existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
     azureExistingAIProjectResourceId: azureExistingAIProjectResourceId
+    tags: tags
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -177,7 +199,8 @@ module cosmosDBModule 'deploy_cosmos_db.bicep' = {
   name: 'deploy_cosmos_db'
   params: {
     solutionLocation: cosmosLocation
-    cosmosDBName: '${abbrs.databases.cosmosDBDatabase}${solutionPrefix}'
+    cosmosDBName: 'cosmos-${solutionSuffix}'
+    tags: tags
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -188,8 +211,9 @@ module storageAccountModule 'deploy_storage_account.bicep' = {
   params: {
     solutionLocation: solutionLocation
     managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
-    saName: '${abbrs.storage.storageAccount}${solutionPrefix}'
+    saName: 'st${solutionSuffix}'
     keyVaultName: keyvaultModule.outputs.keyvaultName
+    tags: tags
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -202,8 +226,9 @@ module sqlDBModule 'deploy_sql_db.bicep' = {
     keyVaultName: keyvaultModule.outputs.keyvaultName
     managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
     managedIdentityName: managedIdentityModule.outputs.managedIdentityOutput.name
-    serverName: '${abbrs.databases.sqlDatabaseServer}${solutionPrefix}'
-    sqlDBName: '${abbrs.databases.sqlDatabase}${solutionPrefix}'
+    serverName: 'sql-${solutionSuffix}'
+    sqlDBName: 'sqldb-${solutionSuffix}'
+    tags: tags
   }
   scope: resourceGroup(resourceGroup().name)
 }
@@ -219,33 +244,33 @@ module appserviceModule 'deploy_app_service.bicep' = {
   name: 'deploy_app_service'
   params: {
     solutionLocation: solutionLocation
-    HostingPlanName: '${abbrs.compute.appServicePlan}${solutionPrefix}'
-    WebsiteName: '${abbrs.compute.webApp}${solutionPrefix}'
-    AzureSearchService: aifoundry.outputs.aiSearchService
-    AzureSearchIndex: 'transcripts_index'
-    AzureSearchUseSemanticSearch: 'True'
-    AzureSearchSemanticSearchConfig: 'my-semantic-config'
-    AzureSearchTopK: '5'
-    AzureSearchContentColumns: 'content'
-    AzureSearchFilenameColumn: 'chunk_id'
-    AzureSearchTitleColumn: 'client_id'
-    AzureSearchUrlColumn: 'sourceurl'
-    AzureOpenAIResource: aifoundry.outputs.aiFoundryName
-    AzureOpenAIEndpoint: aifoundry.outputs.aoaiEndpoint
-    AzureOpenAIModel: gptModelName
-    AzureOpenAITemperature: '0'
-    AzureOpenAITopP: '1'
-    AzureOpenAIMaxTokens: '1000'
-    AzureOpenAIStopSequence: ''
-    AzureOpenAISystemMessage: '''You are a helpful Wealth Advisor assistant'''
-    AzureOpenAIApiVersion: azureOpenaiAPIVersion
-    AzureOpenAIStream: 'True'
-    AzureSearchQueryType: 'simple'
-    AzureSearchVectorFields: 'contentVector'
-    AzureSearchPermittedGroupsField: ''
-    AzureSearchStrictness: '3'
-    AzureOpenAIEmbeddingName: embeddingModel
-    AzureOpenAIEmbeddingEndpoint: aifoundry.outputs.aoaiEndpoint
+    hostingPlanName: 'asp-${solutionSuffix}'
+    websiteName: 'app-${solutionSuffix}'
+    azureSearchService: aifoundry.outputs.aiSearchService
+    azureSearchIndex: 'transcripts_index'
+    azureSearchUseSemanticSearch: 'True'
+    azureSearchSemanticSearchConfig: 'my-semantic-config'
+    azureSearchTopK: '5'
+    azureSearchContentColumns: 'content'
+    azureSearchFilenameColumn: 'chunk_id'
+    azureSearchTitleColumn: 'client_id'
+    azureSearchUrlColumn: 'sourceurl'
+    azureOpenAIResource: aifoundry.outputs.aiFoundryName
+    azureOpenAIEndpoint: aifoundry.outputs.aoaiEndpoint
+    azureOpenAIModel: gptModelName
+    azureOpenAITemperature: '0'
+    azureOpenAITopP: '1'
+    azureOpenAIMaxTokens: '1000'
+    azureOpenAIStopSequence: ''
+    azureOpenAISystemMessage: '''You are a helpful Wealth Advisor assistant'''
+    azureOpenAIApiVersion: azureOpenaiAPIVersion
+    azureOpenAIStream: 'True'
+    azureSearchQueryType: 'simple'
+    azureSearchVectorFields: 'contentVector'
+    azureSearchPermittedGroupsField: ''
+    azureSearchStrictness: '3'
+    azureOpenAIEmbeddingName: embeddingModel
+    azureOpenAIEmbeddingEndpoint: aifoundry.outputs.aoaiEndpoint
     USE_INTERNAL_STREAM: 'True'
     SQLDB_SERVER: '${sqlDBModule.outputs.sqlServerName}.database.windows.net'
     SQLDB_DATABASE: sqlDBModule.outputs.sqlDbName
@@ -268,21 +293,50 @@ module appserviceModule 'deploy_app_service.bicep' = {
     applicationInsightsConnectionString: aifoundry.outputs.applicationInsightsConnectionString
     azureExistingAIProjectResourceId: azureExistingAIProjectResourceId
     aiSearchProjectConnectionName: aifoundry.outputs.aiSearchFoundryConnectionName
+     tags: tags
   }
   scope: resourceGroup(resourceGroup().name)
 }
 
+@description('URL of the deployed web application.')
 output WEB_APP_URL string = appserviceModule.outputs.webAppUrl
+
+@description('Name of the storage account.')
 output STORAGE_ACCOUNT_NAME string = storageAccountModule.outputs.storageName
+
+@description('Name of the storage container.')
 output STORAGE_CONTAINER_NAME string = storageAccountModule.outputs.storageContainer
+
+@description('Name of the Key Vault.')
 output KEY_VAULT_NAME string = keyvaultModule.outputs.keyvaultName
+
+@description('Name of the Cosmos DB account.')
 output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
+
+@description('Name of the resource group.')
 output RESOURCE_GROUP_NAME string = resourceGroup().name
+
+@description('Name of the resource group used by AI Foundry.')
 output RESOURCE_GROUP_NAME_FOUNDRY string = aifoundry.outputs.resourceGroupNameFoundry
+
+@description('Name of the SQL Database server.')
 output SQLDB_SERVER string = sqlDBModule.outputs.sqlServerName
+
+@description('Name of the SQL Database.')
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
+
+@description('Name of the managed identity used by the web app.')
 output MANAGEDIDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
+
+@description('Client ID of the managed identity used by the web app.')
 output MANAGEDIDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
+
+@description('Name of the AI Foundry resource.')
 output AI_FOUNDRY_NAME string = aifoundry.outputs.aiFoundryName
+
+@description('Name of the AI Search service.')
 output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService
+
+@description('Name of the deployed web application.')
 output WEB_APP_NAME string = appserviceModule.outputs.webAppName
+

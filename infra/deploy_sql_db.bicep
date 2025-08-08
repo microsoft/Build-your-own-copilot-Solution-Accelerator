@@ -1,6 +1,13 @@
+@description('Deployment location for the solution.')
 param solutionLocation string
+
+@description('Name of the Azure Key Vault.')
 param keyVaultName string
+
+@description('Object ID of the managed identity.')
 param managedIdentityObjectId string
+
+@description('Name of the managed identity.')
 param managedIdentityName string
 
 @description('The name of the SQL logical server.')
@@ -12,6 +19,8 @@ param sqlDBName string
 @description('Location for all resources.')
 param location string = solutionLocation
 
+@description('Optional. Tags to be applied to the resources.')
+param tags object = {}
 
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   name: serverName
@@ -30,6 +39,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
         azureADOnlyAuthentication: true
       }
     }
+    tags: tags
 }
 
 resource firewallRule 'Microsoft.Sql/servers/firewallRules@2023-08-01-preview' = {
@@ -68,6 +78,7 @@ resource sqlDB 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
     readScale: 'Disabled'
     zoneRedundant: false
   }
+   tags: tags
 }
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
@@ -80,6 +91,7 @@ resource sqldbServerEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview'
   properties: {
     value: '${serverName}.database.windows.net'
   }
+   tags: tags
 }
 
 resource sqldbDatabaseEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
@@ -88,8 +100,11 @@ resource sqldbDatabaseEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-previe
   properties: {
     value: sqlDBName
   }
+   tags: tags
 }
-
+@description('Name of the SQL logical server.')
 output sqlServerName string = serverName
+
+@description('Name of the SQL database.')
 output sqlDbName string = sqlDBName
 // output sqlDbUser string = administratorLogin
