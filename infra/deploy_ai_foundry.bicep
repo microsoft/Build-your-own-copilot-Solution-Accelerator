@@ -385,6 +385,7 @@ output aiSearchService string = aiSearch.name
 output aiFoundryProjectName string = !empty(existingAIProjectName) ? existingAIProjectName : aiFoundryProject.name
 
 output applicationInsightsId string = applicationInsights.id
+output instrumentationKey string = applicationInsights.properties.InstrumentationKey
 output logAnalyticsWorkspaceResourceName string = useExisting ? existingLogAnalyticsWorkspace.name : logAnalytics.name
 output logAnalyticsWorkspaceResourceGroup string = useExisting ? existingLawResourceGroup : resourceGroup().name
 
