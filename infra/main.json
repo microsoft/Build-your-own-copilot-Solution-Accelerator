@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "7434704573623874481"
+      "templateHash": "8388189115253050142"
     }
   },
   "parameters": {
@@ -94,7 +94,10 @@
     },
     "imageTag": {
       "type": "string",
-      "defaultValue": "latest"
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "The Docker image tag to use for the application deployment."
+      }
     },
     "aiDeploymentsLocation": {
       "type": "string",
@@ -362,6 +365,31 @@
     "uniqueId": "[toLower(uniqueString(parameters('environmentName'), subscription().id, variables('solutionLocation'), resourceGroup().name))]",
     "solutionPrefix": "[format('ca{0}', padLeft(take(variables('uniqueId'), 12), 12, '0'))]",
     "abbrs": "[variables('$fxv#0')]",
+    "hostingPlanName": "[format('{0}{1}', variables('abbrs').compute.appServicePlan, variables('solutionPrefix'))]",
+    "websiteName": "[format('{0}{1}', variables('abbrs').compute.webApp, variables('solutionPrefix'))]",
+    "appEnvironment": "Prod",
+    "azureSearchIndex": "transcripts_index",
+    "azureSearchUseSemanticSearch": "True",
+    "azureSearchSemanticSearchConfig": "my-semantic-config",
+    "azureSearchTopK": "5",
+    "azureSearchContentColumns": "content",
+    "azureSearchFilenameColumn": "chunk_id",
+    "azureSearchTitleColumn": "client_id",
+    "azureSearchUrlColumn": "sourceurl",
+    "azureOpenAITemperature": "0",
+    "azureOpenAITopP": "1",
+    "azureOpenAIMaxTokens": "1000",
+    "azureOpenAIStopSequence": "\n",
+    "azureOpenAISystemMessage": "You are a helpful Wealth Advisor assistant",
+    "azureOpenAIStream": "True",
+    "azureSearchQueryType": "simple",
+    "azureSearchVectorFields": "contentVector",
+    "azureSearchPermittedGroupsField": "",
+    "azureSearchStrictness": "3",
+    "azureSearchEnableInDomain": "False",
+    "azureCosmosDbEnableFeedback": "True",
+    "useInternalStream": "True",
+    "useAIProjectClientFlag": "False",
     "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\r\n   1. Table: Clients\r\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\r\n   2. Table: InvestmentGoals\r\n   Columns: ClientId, InvestmentGoal\r\n   3. Table: Assets\r\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\r\n   4. Table: ClientSummaries\r\n   Columns: ClientId, ClientSummary\r\n   5. Table: InvestmentGoalsDetails\r\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\r\n   6. Table: Retirement\r\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\r\n   7. Table: ClientMeetings\r\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\r\n   Always use the Investment column from the Assets table as the value.\r\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n   Do not use client name in filters.\r\n   Do not include assets values unless asked for.\r\n   ALWAYS use ClientId = {clientid} in the query filter.\r\n   ALWAYS select Client Name (Column: Client) in the query.\r\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n   When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.\r\n   Only return the generated SQL query. Do not return anything else.",
     "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \r\n  You have access to the client’s past meeting call transcripts. \r\n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \r\n  If no data is available, state 'No relevant data found for previous meetings.",
     "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\r\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\r\n  If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\r\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\r\n  Always send clientId as '{client_id}'."
@@ -744,7 +772,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "13609803072209612016"
+              "templateHash": "5605479917210969670"
             }
           },
           "parameters": {
@@ -1608,6 +1636,10 @@
               "type": "string",
               "value": "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
             },
+            "instrumentationKey": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').InstrumentationKey]"
+            },
             "logAnalyticsWorkspaceResourceName": {
               "type": "string",
               "value": "[if(variables('useExisting'), variables('existingLawName'), variables('workspaceName'))]"
@@ -2152,37 +2184,40 @@
             "value": "[variables('solutionLocation')]"
           },
           "HostingPlanName": {
-            "value": "[format('{0}{1}', variables('abbrs').compute.appServicePlan, variables('solutionPrefix'))]"
+            "value": "[variables('hostingPlanName')]"
           },
           "WebsiteName": {
-            "value": "[format('{0}{1}', variables('abbrs').compute.webApp, variables('solutionPrefix'))]"
+            "value": "[variables('websiteName')]"
+          },
+          "AppEnvironment": {
+            "value": "[variables('appEnvironment')]"
           },
           "AzureSearchService": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchService.value]"
           },
           "AzureSearchIndex": {
-            "value": "transcripts_index"
+            "value": "[variables('azureSearchIndex')]"
           },
           "AzureSearchUseSemanticSearch": {
-            "value": "True"
+            "value": "[variables('azureSearchUseSemanticSearch')]"
           },
           "AzureSearchSemanticSearchConfig": {
-            "value": "my-semantic-config"
+            "value": "[variables('azureSearchSemanticSearchConfig')]"
           },
           "AzureSearchTopK": {
-            "value": "5"
+            "value": "[variables('azureSearchTopK')]"
           },
           "AzureSearchContentColumns": {
-            "value": "content"
+            "value": "[variables('azureSearchContentColumns')]"
           },
           "AzureSearchFilenameColumn": {
-            "value": "chunk_id"
+            "value": "[variables('azureSearchFilenameColumn')]"
           },
           "AzureSearchTitleColumn": {
-            "value": "client_id"
+            "value": "[variables('azureSearchTitleColumn')]"
           },
           "AzureSearchUrlColumn": {
-            "value": "sourceurl"
+            "value": "[variables('azureSearchUrlColumn')]"
           },
           "AzureOpenAIResource": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryName.value]"
@@ -2194,37 +2229,37 @@
             "value": "[parameters('gptModelName')]"
           },
           "AzureOpenAITemperature": {
-            "value": "0"
+            "value": "[variables('azureOpenAITemperature')]"
           },
           "AzureOpenAITopP": {
-            "value": "1"
+            "value": "[variables('azureOpenAITopP')]"
           },
           "AzureOpenAIMaxTokens": {
-            "value": "1000"
+            "value": "[variables('azureOpenAIMaxTokens')]"
           },
           "AzureOpenAIStopSequence": {
-            "value": ""
+            "value": "[variables('azureOpenAIStopSequence')]"
           },
           "AzureOpenAISystemMessage": {
-            "value": "You are a helpful Wealth Advisor assistant"
+            "value": "[variables('azureOpenAISystemMessage')]"
           },
           "AzureOpenAIApiVersion": {
             "value": "[parameters('azureOpenaiAPIVersion')]"
           },
           "AzureOpenAIStream": {
-            "value": "True"
+            "value": "[variables('azureOpenAIStream')]"
           },
           "AzureSearchQueryType": {
-            "value": "simple"
+            "value": "[variables('azureSearchQueryType')]"
           },
           "AzureSearchVectorFields": {
-            "value": "contentVector"
+            "value": "[variables('azureSearchVectorFields')]"
           },
           "AzureSearchPermittedGroupsField": {
-            "value": ""
+            "value": "[variables('azureSearchPermittedGroupsField')]"
           },
           "AzureSearchStrictness": {
-            "value": "3"
+            "value": "[variables('azureSearchStrictness')]"
           },
           "AzureOpenAIEmbeddingName": {
             "value": "[parameters('embeddingModel')]"
@@ -2233,7 +2268,7 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aoaiEndpoint.value]"
           },
           "USE_INTERNAL_STREAM": {
-            "value": "True"
+            "value": "[variables('useInternalStream')]"
           },
           "SQLDB_SERVER": {
             "value": "[format('{0}.database.windows.net', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value)]"
@@ -2251,7 +2286,7 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosDatabaseName.value]"
           },
           "AZURE_COSMOSDB_ENABLE_FEEDBACK": {
-            "value": "True"
+            "value": "[variables('azureCosmosDbEnableFeedback')]"
           },
           "imageTag": {
             "value": "[parameters('imageTag')]"
@@ -2300,7 +2335,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "14489288067602272519"
+              "templateHash": "17855260504239152628"
             }
           },
           "parameters": {
@@ -2336,6 +2371,9 @@
               "type": "string"
             },
             "WebsiteName": {
+              "type": "string"
+            },
+            "AppEnvironment": {
               "type": "string"
             },
             "AzureSearchService": {
@@ -2674,7 +2712,7 @@
                   "appSettings": [
                     {
                       "name": "APP_ENV",
-                      "value": "Prod"
+                      "value": "[parameters('AppEnvironment')]"
                     },
                     {
                       "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -3102,7 +3140,7 @@
       "type": "string",
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.resourceGroupNameFoundry.value]"
     },
-    "SQLDB_SERVER": {
+    "SQLDB_SERVER_NAME": {
       "type": "string",
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value]"
     },
@@ -3129,6 +3167,186 @@
     "WEB_APP_NAME": {
       "type": "string",
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_app_service'), '2022-09-01').outputs.webAppName.value]"
+    },
+    "APP_ENV": {
+      "type": "string",
+      "value": "[variables('appEnvironment')]"
+    },
+    "APPINSIGHTS_INSTRUMENTATIONKEY": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.instrumentationKey.value]"
+    },
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.applicationInsightsConnectionString.value]"
+    },
+    "AZURE_AI_AGENT_API_VERSION": {
+      "type": "string",
+      "value": "[parameters('azureOpenaiAPIVersion')]"
+    },
+    "AZURE_AI_AGENT_ENDPOINT": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryProjectEndpoint.value]"
+    },
+    "AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME": {
+      "type": "string",
+      "value": "[parameters('gptModelName')]"
+    },
+    "AZURE_AI_SEARCH_ENDPOINT": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchTarget.value]"
+    },
+    "AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT": {
+      "type": "string",
+      "value": "[variables('functionAppCallTranscriptSystemPrompt')]"
+    },
+    "AZURE_COSMOSDB_ACCOUNT": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosAccountName.value]"
+    },
+    "AZURE_COSMOSDB_CONVERSATIONS_CONTAINER": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosContainerName.value]"
+    },
+    "AZURE_COSMOSDB_DATABASE": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosDatabaseName.value]"
+    },
+    "AZURE_COSMOSDB_ENABLE_FEEDBACK": {
+      "type": "string",
+      "value": "[variables('azureCosmosDbEnableFeedback')]"
+    },
+    "AZURE_OPENAI_EMBEDDING_ENDPOINT": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aoaiEndpoint.value]"
+    },
+    "AZURE_OPENAI_EMBEDDING_NAME": {
+      "type": "string",
+      "value": "[parameters('embeddingModel')]"
+    },
+    "AZURE_OPENAI_ENDPOINT": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aoaiEndpoint.value]"
+    },
+    "AZURE_OPENAI_MAX_TOKENS": {
+      "type": "string",
+      "value": "[variables('azureOpenAIMaxTokens')]"
+    },
+    "AZURE_OPENAI_MODEL": {
+      "type": "string",
+      "value": "[parameters('gptModelName')]"
+    },
+    "AZURE_OPENAI_PREVIEW_API_VERSION": {
+      "type": "string",
+      "value": "[parameters('azureOpenaiAPIVersion')]"
+    },
+    "AZURE_OPENAI_RESOURCE": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryName.value]"
+    },
+    "AZURE_OPENAI_STOP_SEQUENCE": {
+      "type": "string",
+      "value": "[variables('azureOpenAIStopSequence')]"
+    },
+    "AZURE_OPENAI_STREAM": {
+      "type": "string",
+      "value": "[variables('azureOpenAIStream')]"
+    },
+    "AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT": {
+      "type": "string",
+      "value": "[variables('functionAppStreamTextSystemPrompt')]"
+    },
+    "AZURE_OPENAI_SYSTEM_MESSAGE": {
+      "type": "string",
+      "value": "[variables('azureOpenAISystemMessage')]"
+    },
+    "AZURE_OPENAI_TEMPERATURE": {
+      "type": "string",
+      "value": "[variables('azureOpenAITemperature')]"
+    },
+    "AZURE_OPENAI_TOP_P": {
+      "type": "string",
+      "value": "[variables('azureOpenAITopP')]"
+    },
+    "AZURE_SEARCH_CONNECTION_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchFoundryConnectionName.value]"
+    },
+    "AZURE_SEARCH_CONTENT_COLUMNS": {
+      "type": "string",
+      "value": "[variables('azureSearchContentColumns')]"
+    },
+    "AZURE_SEARCH_ENABLE_IN_DOMAIN": {
+      "type": "string",
+      "value": "[variables('azureSearchEnableInDomain')]"
+    },
+    "AZURE_SEARCH_FILENAME_COLUMN": {
+      "type": "string",
+      "value": "[variables('azureSearchFilenameColumn')]"
+    },
+    "AZURE_SEARCH_INDEX": {
+      "type": "string",
+      "value": "[variables('azureSearchIndex')]"
+    },
+    "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN": {
+      "type": "string",
+      "value": "[variables('azureSearchPermittedGroupsField')]"
+    },
+    "AZURE_SEARCH_QUERY_TYPE": {
+      "type": "string",
+      "value": "[variables('azureSearchQueryType')]"
+    },
+    "AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG": {
+      "type": "string",
+      "value": "[variables('azureSearchSemanticSearchConfig')]"
+    },
+    "AZURE_SEARCH_SERVICE": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchService.value]"
+    },
+    "AZURE_SEARCH_STRICTNESS": {
+      "type": "string",
+      "value": "[variables('azureSearchStrictness')]"
+    },
+    "AZURE_SEARCH_TITLE_COLUMN": {
+      "type": "string",
+      "value": "[variables('azureSearchTitleColumn')]"
+    },
+    "AZURE_SEARCH_TOP_K": {
+      "type": "string",
+      "value": "[variables('azureSearchTopK')]"
+    },
+    "AZURE_SEARCH_URL_COLUMN": {
+      "type": "string",
+      "value": "[variables('azureSearchUrlColumn')]"
+    },
+    "AZURE_SEARCH_USE_SEMANTIC_SEARCH": {
+      "type": "string",
+      "value": "[variables('azureSearchUseSemanticSearch')]"
+    },
+    "AZURE_SEARCH_VECTOR_COLUMNS": {
+      "type": "string",
+      "value": "[variables('azureSearchVectorFields')]"
+    },
+    "AZURE_SQL_SYSTEM_PROMPT": {
+      "type": "string",
+      "value": "[variables('functionAppSqlPrompt')]"
+    },
+    "SQLDB_SERVER": {
+      "type": "string",
+      "value": "[format('{0}.database.windows.net', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value)]"
+    },
+    "SQLDB_USER_MID": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.clientId]"
+    },
+    "USE_AI_PROJECT_CLIENT": {
+      "type": "string",
+      "value": "[variables('useAIProjectClientFlag')]"
+    },
+    "USE_INTERNAL_STREAM": {
+      "type": "string",
+      "value": "[variables('useInternalStream')]"
     }
   }
 }

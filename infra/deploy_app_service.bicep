@@ -10,6 +10,7 @@ param HostingPlanSku string = 'B2'
 
 param HostingPlanName string
 param WebsiteName string
+param AppEnvironment string
 
 // @description('Name of Application Insights')
 // param ApplicationInsightsName string = '${ solutionName }-app-insights'
@@ -187,7 +188,7 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
       appSettings: [
         {
           name: 'APP_ENV'
-          value: 'Prod'
+          value: AppEnvironment
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
