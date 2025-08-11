@@ -146,6 +146,7 @@ class Config:
 
         # System Prompts
         self.SQL_SYSTEM_PROMPT = os.environ.get("AZURE_SQL_SYSTEM_PROMPT")
+        self.SQL_AGENT_FALLBACK_PROMPT=os.environ.get('SQL_AGENT_FALLBACK_PROMPT')
         self.CALL_TRANSCRIPT_SYSTEM_PROMPT = os.environ.get(
             "AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT"
         )
