@@ -31,7 +31,7 @@ updates:
           
   # 3. Python dependencies – Fabric Scripts
   - package-ecosystem: "pip"
-    directory: "/src/infra/scripts/fabric_scripts"
+    directory: "/infra/scripts/fabric_scripts"
     schedule:
       interval: "monthly"
     commit-message:
@@ -45,7 +45,7 @@ updates:
 
   # 4. Python dependencies – Index Scripts
   - package-ecosystem: "pip"
-    directory: "/src/infra/scripts/index_scripts"
+    directory: "/infra/scripts/index_scripts"
     schedule:
       interval: "monthly"
     commit-message:
