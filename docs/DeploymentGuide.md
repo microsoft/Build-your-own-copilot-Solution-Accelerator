@@ -144,6 +144,13 @@ To adjust quota settings, follow these [steps](./AzureGPTQuotaSettings.md).
   Guide to get your [Existing Workspace ID](/docs/re-use-log-analytics.md)
 
 </details>
+<details>
+
+  <summary><b>Reusing an Existing Azure AI Foundry Project</b></summary>
+
+  Guide to get your [Existing Project ID](/docs/re-use-foundry-project.md)
+
+</details>
 
 ### Deploying with AZD
 
