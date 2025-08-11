@@ -52,6 +52,7 @@ param embeddingDeploymentCapacity int = 80
 
 // @description('Fabric Workspace Id if you have one, else leave it empty. ')
 // param fabricWorkspaceId string
+@description('The Docker image tag to use for the application deployment.')
 param imageTag string = 'latest'
 
 //restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
@@ -98,6 +99,34 @@ var solutionSuffix= toLower(trim(replace(
 //var resourceGroupLocation = resourceGroup().location
 //var solutionLocation = resourceGroupLocation
 // var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/'
+
+var hostingPlanName = 'asp-${solutionSuffix}'
+var websiteName = 'app-${solutionSuffix}'
+var appEnvironment = 'Prod'
+var azureSearchIndex = 'transcripts_index'
+var azureSearchUseSemanticSearch = 'True'
+var azureSearchSemanticSearchConfig = 'my-semantic-config'
+var azureSearchTopK = '5'
+var azureSearchContentColumns = 'content'
+var azureSearchFilenameColumn = 'chunk_id'
+var azureSearchTitleColumn = 'client_id'
+var azureSearchUrlColumn = 'sourceurl'
+var azureOpenAITemperature = '0'
+var azureOpenAITopP = '1'
+var azureOpenAIMaxTokens = '1000'
+var azureOpenAIStopSequence = '\n'
+var azureOpenAISystemMessage = '''You are a helpful Wealth Advisor assistant'''
+var azureOpenAIStream = 'True'
+var azureSearchQueryType = 'simple'
+var azureSearchVectorFields = 'contentVector'
+var azureSearchPermittedGroupsField = ''
+var azureSearchStrictness = '3'
+var azureSearchEnableInDomain = 'False' // Set to 'True' if you want to enable in-domain search
+var azureCosmosDbEnableFeedback = 'True'
+var useInternalStream = 'True'
+var useAIProjectClientFlag = 'False'
+var sqlServerFqdn = '${sqlDBModule.outputs.sqlServerName}.database.windows.net'
+
 
 var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for tables and columns provided below:
    1. Table: Clients
@@ -247,40 +276,41 @@ module appserviceModule 'deploy_app_service.bicep' = {
   name: 'deploy_app_service'
   params: {
     solutionLocation: solutionLocation
-    hostingPlanName: 'asp-${solutionSuffix}'
-    websiteName: 'app-${solutionSuffix}'
+    hostingPlanName: hostingPlanName
+    websiteName: websiteName
+    appEnvironment: appEnvironment
     azureSearchService: aifoundry.outputs.aiSearchService
-    azureSearchIndex: 'transcripts_index'
-    azureSearchUseSemanticSearch: 'True'
-    azureSearchSemanticSearchConfig: 'my-semantic-config'
-    azureSearchTopK: '5'
-    azureSearchContentColumns: 'content'
-    azureSearchFilenameColumn: 'chunk_id'
-    azureSearchTitleColumn: 'client_id'
-    azureSearchUrlColumn: 'sourceurl'
+    azureSearchIndex: azureSearchIndex
+    azureSearchUseSemanticSearch: azureSearchUseSemanticSearch
+    azureSearchSemanticSearchConfig: azureSearchSemanticSearchConfig
+    azureSearchTopK: azureSearchTopK
+    azureSearchContentColumns: azureSearchContentColumns
+    azureSearchFilenameColumn: azureSearchFilenameColumn
+    azureSearchTitleColumn: azureSearchTitleColumn
+    azureSearchUrlColumn: azureSearchUrlColumn
     azureOpenAIResource: aifoundry.outputs.aiFoundryName
     azureOpenAIEndpoint: aifoundry.outputs.aoaiEndpoint
     azureOpenAIModel: gptModelName
-    azureOpenAITemperature: '0'
-    azureOpenAITopP: '1'
-    azureOpenAIMaxTokens: '1000'
-    azureOpenAIStopSequence: ''
-    azureOpenAISystemMessage: '''You are a helpful Wealth Advisor assistant'''
+    azureOpenAITemperature: azureOpenAITemperature
+    azureOpenAITopP: azureOpenAITopP
+    azureOpenAIMaxTokens: azureOpenAIMaxTokens
+    azureOpenAIStopSequence: azureOpenAIStopSequence
+    azureOpenAISystemMessage: azureOpenAISystemMessage
     azureOpenAIApiVersion: azureOpenaiAPIVersion
-    azureOpenAIStream: 'True'
-    azureSearchQueryType: 'simple'
-    azureSearchVectorFields: 'contentVector'
-    azureSearchPermittedGroupsField: ''
-    azureSearchStrictness: '3'
+    azureOpenAIStream: azureOpenAIStream
+    azureSearchQueryType: azureSearchQueryType
+    azureSearchVectorFields: azureSearchVectorFields
+    azureSearchPermittedGroupsField: azureSearchPermittedGroupsField
+    azureSearchStrictness: azureSearchStrictness
     azureOpenAIEmbeddingName: embeddingModel
     azureOpenAIEmbeddingEndpoint: aifoundry.outputs.aoaiEndpoint
-    USE_INTERNAL_STREAM: 'True'
-    SQLDB_SERVER: '${sqlDBModule.outputs.sqlServerName}.database.windows.net'
+    USE_INTERNAL_STREAM: useInternalStream
+    SQLDB_SERVER: sqlServerFqdn
     SQLDB_DATABASE: sqlDBModule.outputs.sqlDbName
     AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosAccountName
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosContainerName
     AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosDatabaseName
-    AZURE_COSMOSDB_ENABLE_FEEDBACK: 'True'
+    AZURE_COSMOSDB_ENABLE_FEEDBACK: azureCosmosDbEnableFeedback
     //VITE_POWERBI_EMBED_URL: 'TBD'
     imageTag: imageTag
     userassignedIdentityClientId: managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
@@ -323,7 +353,7 @@ output RESOURCE_GROUP_NAME string = resourceGroup().name
 output RESOURCE_GROUP_NAME_FOUNDRY string = aifoundry.outputs.resourceGroupNameFoundry
 
 @description('Name of the SQL Database server.')
-output SQLDB_SERVER string = sqlDBModule.outputs.sqlServerName
+output SQLDB_SERVER_NAME string = sqlDBModule.outputs.sqlServerName
 
 @description('Name of the SQL Database.')
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
@@ -342,4 +372,138 @@ output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService
 
 @description('Name of the deployed web application.')
 output WEB_APP_NAME string = appserviceModule.outputs.webAppName
+@description('Specifies the current application environment.')
+output APP_ENV string = appEnvironment
+
+@description('The Application Insights instrumentation key.')
+output APPINSIGHTS_INSTRUMENTATIONKEY string = aifoundry.outputs.instrumentationKey
+
+@description('The Application Insights connection string.')
+output APPLICATIONINSIGHTS_CONNECTION_STRING string = aifoundry.outputs.applicationInsightsConnectionString
+
+@description('The API version used for the Azure AI Agent service.')
+output AZURE_AI_AGENT_API_VERSION string = azureOpenaiAPIVersion
+
+@description('The endpoint URL of the Azure AI Agent project.')
+output AZURE_AI_AGENT_ENDPOINT string = aifoundry.outputs.aiFoundryProjectEndpoint
+
+@description('The deployment name of the GPT model for the Azure AI Agent.')
+output AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME string = gptModelName
+
+@description('The endpoint URL of the Azure AI Search service.')
+output AZURE_AI_SEARCH_ENDPOINT string = aifoundry.outputs.aiSearchTarget
+
+@description('The system prompt used for call transcript processing in Azure Functions.')
+output AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT string = functionAppCallTranscriptSystemPrompt
+
+@description('The name of the Azure Cosmos DB account.')
+output AZURE_COSMOSDB_ACCOUNT string = cosmosDBModule.outputs.cosmosAccountName
+
+@description('The name of the Azure Cosmos DB container for storing conversations.')
+output AZURE_COSMOSDB_CONVERSATIONS_CONTAINER string = cosmosDBModule.outputs.cosmosContainerName
+
+@description('The name of the Azure Cosmos DB database.')
+output AZURE_COSMOSDB_DATABASE string = cosmosDBModule.outputs.cosmosDatabaseName
+
+@description('Indicates whether feedback is enabled in Azure Cosmos DB.')
+output AZURE_COSMOSDB_ENABLE_FEEDBACK string = azureCosmosDbEnableFeedback
+
+@description('The endpoint URL for the Azure OpenAI Embedding model.')
+output AZURE_OPENAI_EMBEDDING_ENDPOINT string = aifoundry.outputs.aoaiEndpoint
+
+@description('The name of the Azure OpenAI Embedding model.')
+output AZURE_OPENAI_EMBEDDING_NAME string = embeddingModel
+
+@description('The endpoint URL for the Azure OpenAI service.')
+output AZURE_OPENAI_ENDPOINT string = aifoundry.outputs.aoaiEndpoint
+
+@description('The maximum number of tokens for Azure OpenAI responses.')
+output AZURE_OPENAI_MAX_TOKENS string = azureOpenAIMaxTokens
+
+@description('The name of the Azure OpenAI GPT model.')
+output AZURE_OPENAI_MODEL string = gptModelName
+
+@description('The preview API version for Azure OpenAI.')
+output AZURE_OPENAI_PREVIEW_API_VERSION string = azureOpenaiAPIVersion
+
+@description('The Azure OpenAI resource name.')
+output AZURE_OPENAI_RESOURCE string = aifoundry.outputs.aiFoundryName
+
+@description('The stop sequence(s) for Azure OpenAI responses.')
+output AZURE_OPENAI_STOP_SEQUENCE string = azureOpenAIStopSequence
+
+@description('Indicates whether streaming is enabled for Azure OpenAI responses.')
+output AZURE_OPENAI_STREAM string = azureOpenAIStream
+
+@description('The system prompt for streaming text responses in Azure Functions.')
+output AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT string = functionAppStreamTextSystemPrompt
+
+@description('The system message for Azure OpenAI requests.')
+output AZURE_OPENAI_SYSTEM_MESSAGE string = azureOpenAISystemMessage
+
+@description('The temperature setting for Azure OpenAI responses.')
+output AZURE_OPENAI_TEMPERATURE string = azureOpenAITemperature
+
+@description('The Top-P setting for Azure OpenAI responses.')
+output AZURE_OPENAI_TOP_P string = azureOpenAITopP
+
+@description('The name of the Azure AI Search connection.')
+output AZURE_SEARCH_CONNECTION_NAME string = aifoundry.outputs.aiSearchFoundryConnectionName
+
+@description('The columns in Azure AI Search that contain content.')
+output AZURE_SEARCH_CONTENT_COLUMNS string = azureSearchContentColumns
+
+@description('Indicates whether in-domain filtering is enabled for Azure AI Search.')
+output AZURE_SEARCH_ENABLE_IN_DOMAIN string = azureSearchEnableInDomain
+
+@description('The filename column used in Azure AI Search.')
+output AZURE_SEARCH_FILENAME_COLUMN string = azureSearchFilenameColumn
+
+@description('The name of the Azure AI Search index.')
+output AZURE_SEARCH_INDEX string = azureSearchIndex
+
+@description('The permitted groups field used in Azure AI Search.')
+output AZURE_SEARCH_PERMITTED_GROUPS_COLUMN string = azureSearchPermittedGroupsField
+
+@description('The query type for Azure AI Search.')
+output AZURE_SEARCH_QUERY_TYPE string = azureSearchQueryType
+
+@description('The semantic search configuration name in Azure AI Search.')
+output AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG string = azureSearchSemanticSearchConfig
+
+@description('The name of the Azure AI Search service.')
+output AZURE_SEARCH_SERVICE string = aifoundry.outputs.aiSearchService
+
+@description('The strictness setting for Azure AI Search semantic ranking.')
+output AZURE_SEARCH_STRICTNESS string = azureSearchStrictness
+
+@description('The title column used in Azure AI Search.')
+output AZURE_SEARCH_TITLE_COLUMN string = azureSearchTitleColumn
+
+@description('The number of top results (K) to return from Azure AI Search.')
+output AZURE_SEARCH_TOP_K string = azureSearchTopK
+
+@description('The URL column used in Azure AI Search.')
+output AZURE_SEARCH_URL_COLUMN string = azureSearchUrlColumn
+
+@description('Indicates whether semantic search is used in Azure AI Search.')
+output AZURE_SEARCH_USE_SEMANTIC_SEARCH string = azureSearchUseSemanticSearch
+
+@description('The vector fields used in Azure AI Search.')
+output AZURE_SEARCH_VECTOR_COLUMNS string = azureSearchVectorFields
+
+@description('The system prompt for SQL queries in Azure Functions.')
+output AZURE_SQL_SYSTEM_PROMPT string = functionAppSqlPrompt
+
+@description('The fully qualified domain name (FQDN) of the Azure SQL Server.')
+output SQLDB_SERVER string = sqlServerFqdn
+
+@description('The client ID of the managed identity for the web application.')
+output SQLDB_USER_MID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
+
+@description('Indicates whether the AI Project Client should be used.')
+output USE_AI_PROJECT_CLIENT string = useAIProjectClientFlag
+
+@description('Indicates whether the internal stream should be used.')
+output USE_INTERNAL_STREAM string = useInternalStream
 

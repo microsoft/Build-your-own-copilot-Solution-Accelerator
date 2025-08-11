@@ -13,7 +13,10 @@ Navigate to the `App` folder located in the `src` directory of the repository us
 
 ### 2. Configure Environment Variables
 - Copy the `.env.sample` file to a new file named `.env`.
-- Update the `.env` file with the required values from your Azure resource group.
+- Update the `.env` file with the required values from your Azure resource group in Azure Portal App Service environment variables.
+- Alternatively, if resources were
+provisioned using `azd provision` or `azd up`, a `.env` file is automatically generated in the `.azure/<env-name>/.env`
+file. To get your `<env-name>` run `azd env list` to see which env is default.
 
 ### 3. Start the Application
 - Run `start.cmd` (Windows) or `start.sh` (Linux/Mac) to:

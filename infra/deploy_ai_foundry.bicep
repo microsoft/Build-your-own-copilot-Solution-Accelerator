@@ -442,6 +442,8 @@ output aiFoundryProjectName string = !empty(existingAIProjectName) ? existingAIP
 
 @description('Contains Application Insights ID.')
 output applicationInsightsId string = applicationInsights.id
+@description('The Instrumentation Key for the Application Insights resource.')
+output instrumentationKey string = applicationInsights.properties.InstrumentationKey
 
 @description('Contains Log Analytics Workspace Resource Name.')
 output logAnalyticsWorkspaceResourceName string = useExisting ? existingLogAnalyticsWorkspace.name : logAnalytics.name

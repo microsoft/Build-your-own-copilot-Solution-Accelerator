@@ -40,7 +40,7 @@ if [ -z "$keyvaultName" ]; then
 fi
 
 if [ -z "$sqlServerName" ]; then
-    sqlServerName=$(azd env get-value SQLDB_SERVER)
+    sqlServerName=$(azd env get-value SQLDB_SERVER_NAME)
 fi
 
 if [ -z "$SqlDatabaseName" ]; then

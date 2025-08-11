@@ -14,6 +14,9 @@ param hostingPlanName string
 @description('Required. Name of Web App')
 param websiteName string
 
+@description('Specifies the application environment')
+param appEnvironment string
+
 // @description('Name of Application Insights')
 // param ApplicationInsightsName string = '${ solutionName }-app-insights'
 
@@ -212,7 +215,7 @@ resource website 'Microsoft.Web/sites@2020-06-01' = {
       appSettings: [
         {
           name: 'APP_ENV'
-          value: 'Prod'
+          value: appEnvironment
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
