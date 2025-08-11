@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.177.2456",
-      "templateHash": "8388189115253050142"
+      "templateHash": "11128400850485102096"
     }
   },
   "parameters": {
@@ -772,7 +772,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.177.2456",
-              "templateHash": "5605479917210969670"
+              "templateHash": "16824105341593554305"
             }
           },
           "parameters": {
@@ -1611,6 +1611,10 @@
             "aiFoundryName": {
               "type": "string",
               "value": "[if(not(empty(variables('existingAIFoundryName'))), variables('existingAIFoundryName'), variables('aiFoundryName'))]"
+            },
+            "aiFoundryId": {
+              "type": "string",
+              "value": "[if(not(empty(parameters('azureExistingAIProjectResourceId'))), extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', variables('existingAIFoundryName')), resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName')))]"
             },
             "aiSearchName": {
               "type": "string",
@@ -3136,9 +3140,9 @@
       "type": "string",
       "value": "[resourceGroup().name]"
     },
-    "RESOURCE_GROUP_NAME_FOUNDRY": {
+    "AI_FOUNDRY_RESOURCE_ID": {
       "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.resourceGroupNameFoundry.value]"
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryId.value]"
     },
     "SQLDB_SERVER_NAME": {
       "type": "string",
@@ -3155,10 +3159,6 @@
     "MANAGEDIDENTITY_WEBAPP_CLIENTID": {
       "type": "string",
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.clientId]"
-    },
-    "AI_FOUNDRY_NAME": {
-      "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryName.value]"
     },
     "AI_SEARCH_SERVICE_NAME": {
       "type": "string",

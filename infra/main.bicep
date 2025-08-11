@@ -55,12 +55,21 @@ param embeddingDeploymentCapacity int = 80
 param imageTag string = 'latest'
 
 //restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
-@allowed(['australiaeast','eastus', 'eastus2','francecentral','japaneast','swedencentral','uksouth', 'westus', 'westus3'])
+@allowed([
+  'australiaeast'
+  'eastus'
+  'eastus2'
+  'francecentral'
+  'japaneast'
+  'swedencentral'
+  'uksouth'
+  'westus'
+  'westus3'
+])
 // @description('Azure OpenAI Location')
 // param AzureOpenAILocation string = 'eastus2'
-
 @metadata({
-  azd:{
+  azd: {
     type: 'location'
     usageName: [
       'OpenAI.GlobalStandard.gpt-4o-mini,200'
@@ -111,7 +120,6 @@ var azureCosmosDbEnableFeedback = 'True'
 var useInternalStream = 'True'
 var useAIProjectClientFlag = 'False'
 var sqlServerFqdn = '${sqlDBModule.outputs.sqlServerName}.database.windows.net'
-
 
 var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for tables and columns provided below:
    1. Table: Clients
@@ -308,12 +316,11 @@ output STORAGE_CONTAINER_NAME string = storageAccountModule.outputs.storageConta
 output KEY_VAULT_NAME string = keyvaultModule.outputs.keyvaultName
 output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
 output RESOURCE_GROUP_NAME string = resourceGroup().name
-output RESOURCE_GROUP_NAME_FOUNDRY string = aifoundry.outputs.resourceGroupNameFoundry
+output AI_FOUNDRY_RESOURCE_ID string = aifoundry.outputs.aiFoundryId
 output SQLDB_SERVER_NAME string = sqlDBModule.outputs.sqlServerName
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
 output MANAGEDIDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
 output MANAGEDIDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
-output AI_FOUNDRY_NAME string = aifoundry.outputs.aiFoundryName
 output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService
 output WEB_APP_NAME string = appserviceModule.outputs.webAppName
 output APP_ENV string = appEnvironment
