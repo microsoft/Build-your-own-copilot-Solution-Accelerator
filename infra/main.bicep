@@ -121,7 +121,6 @@ var useInternalStream = 'True'
 var useAIProjectClientFlag = 'False'
 var sqlServerFqdn = '${sqlDBModule.outputs.sqlServerName}.database.windows.net'
 
-
 var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for tables and columns provided below:
    1. Table: Clients
    Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents
@@ -318,7 +317,7 @@ output KEY_VAULT_NAME string = keyvaultModule.outputs.keyvaultName
 output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
 output RESOURCE_GROUP_NAME string = resourceGroup().name
 output AI_FOUNDRY_RESOURCE_ID string = aifoundry.outputs.aiFoundryId
-output SQLDB_SERVER string = sqlDBModule.outputs.sqlServerName
+output SQLDB_SERVER_NAME string = sqlDBModule.outputs.sqlServerName
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
 output MANAGEDIDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
 output MANAGEDIDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
