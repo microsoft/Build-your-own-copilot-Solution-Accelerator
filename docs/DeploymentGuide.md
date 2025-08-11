@@ -228,3 +228,13 @@ This will rebuild the source code, package it into a container, and push it to t
 3. **Deleting Resources After a Failed Deployment**  
 
      - Follow steps in [Delete Resource Group](DeleteResourceGroup.md) if your deployment fails and/or you need to clean up the resources.
+
+## Environment configuration for local development & debugging
+> Set APP_ENV in your .env file to control Azure authentication. Set the environment variable to dev to use Azure CLI credentials, or to prod to use Managed Identity for production. **Ensure you're logged in via az login when using dev in local**.
+
+To configure your environment, follow these steps:
+
+	1. Navigate to the `src\App` folder.
+	2. Create a `.env` file based on the `.env.sample` file.
+	3. Fill in the `.env` file using the deployment output or by retrieving values from the Azure Portal under "Deployments" in your resource group.
+	4. Ensure that the `APP_ENV` variable is set to "**dev**".
