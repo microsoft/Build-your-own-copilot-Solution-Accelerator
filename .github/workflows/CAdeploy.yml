@@ -172,8 +172,8 @@ jobs:
           echo "STORAGE_CONTAINER=$STORAGE_CONTAINER" >> $GITHUB_ENV
           export KEYVAULT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.keY_VAULT_NAME.value')
           echo "KEYVAULT_NAME=$KEYVAULT_NAME" >> $GITHUB_ENV
-          export SQL_SERVER=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_SERVER.value')
-          echo "SQL_SERVER=$SQL_SERVER" >> $GITHUB_ENV
+          export SQL_SERVER_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_SERVER_NAME.value')
+          echo "SQL_SERVER_NAME=$SQL_SERVER_NAME" >> $GITHUB_ENV
           export SQL_DATABASE=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_DATABASE.value')
           echo "SQL_DATABASE=$SQL_DATABASE" >> $GITHUB_ENV
           export CLIENT_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_WEBAPP_CLIENTID.value')
@@ -220,7 +220,7 @@ jobs:
             "" \
             "${{ secrets.AZURE_CLIENT_ID }}" \
             "${{ env.RG_NAME }}" \
-            "${{ env.SQL_SERVER }}" \
+            "${{ env.SQL_SERVER_NAME }}" \
             "${{ env.AI_FOUNDARY_NAME }}" \
             "${{ env.SEARCH_SERVICE_NAME }}" \
             "${{ env.RESOURCE_GROUP_NAME_FOUNDRY }}"
@@ -232,7 +232,7 @@ jobs:
           ]'
 
           bash ./infra/scripts/add_user_scripts/create_sql_user_and_role.sh \
-            "${{ env.SQL_SERVER }}.database.windows.net" \
+            "${{ env.SQL_SERVER_NAME }}.database.windows.net" \
             "${{ env.SQL_DATABASE }}" \
             "$user_roles_json" \
             "${{ secrets.AZURE_CLIENT_ID }}"
