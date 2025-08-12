@@ -68,7 +68,7 @@ fi
 
 ### Assign Azure AI User role to the signed in user ###
 
-
+echo "Azure AI resource id: $aif_resource_id"
 # Check if the user has the Azure AI User role
 echo "Checking if user has the Azure AI User role"
 role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --role 53ca6127-db72-4b80-b1b0-d745d6d5456d --scope $aif_resource_id --assignee $signed_user_id --query "[].roleDefinitionId" -o tsv)
