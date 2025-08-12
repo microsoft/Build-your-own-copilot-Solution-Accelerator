@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.36.177.2456",
-      "templateHash": "11128400850485102096"
+      "version": "0.37.4.10188",
+      "templateHash": "4697605839482939008"
     }
   },
   "parameters": {
@@ -594,8 +594,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.36.177.2456",
-              "templateHash": "16824105341593554305"
+              "version": "0.37.4.10188",
+              "templateHash": "651349839825117270"
             }
           },
           "parameters": {
@@ -3116,6 +3116,9 @@
     },
     "AI_FOUNDRY_RESOURCE_ID": {
       "type": "string",
+      "metadata": {
+        "description": "The resource ID of the AI Foundry instance."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryId.value]"
     },
     "SQLDB_SERVER_NAME": {
