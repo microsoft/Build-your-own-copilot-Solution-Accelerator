@@ -56,12 +56,21 @@ param embeddingDeploymentCapacity int = 80
 param imageTag string = 'latest'
 
 //restricting to these regions because assistants api for gpt-4o-mini is available only in these regions
-@allowed(['australiaeast','eastus', 'eastus2','francecentral','japaneast','swedencentral','uksouth', 'westus', 'westus3'])
+@allowed([
+  'australiaeast'
+  'eastus'
+  'eastus2'
+  'francecentral'
+  'japaneast'
+  'swedencentral'
+  'uksouth'
+  'westus'
+  'westus3'
+])
 // @description('Azure OpenAI Location')
 // param AzureOpenAILocation string = 'eastus2'
-
 @metadata({
-  azd:{
+  azd: {
     type: 'location'
     usageName: [
       'OpenAI.GlobalStandard.gpt-4o-mini,200'
@@ -126,7 +135,6 @@ var azureCosmosDbEnableFeedback = 'True'
 var useInternalStream = 'True'
 var useAIProjectClientFlag = 'False'
 var sqlServerFqdn = '${sqlDBModule.outputs.sqlServerName}.database.windows.net'
-
 
 var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for tables and columns provided below:
    1. Table: Clients
@@ -349,8 +357,8 @@ output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
 @description('Name of the resource group.')
 output RESOURCE_GROUP_NAME string = resourceGroup().name
 
-@description('Name of the resource group used by AI Foundry.')
-output RESOURCE_GROUP_NAME_FOUNDRY string = aifoundry.outputs.resourceGroupNameFoundry
+@description('The resource ID of the AI Foundry instance.')
+output AI_FOUNDRY_RESOURCE_ID string = aifoundry.outputs.aiFoundryId
 
 @description('Name of the SQL Database server.')
 output SQLDB_SERVER_NAME string = sqlDBModule.outputs.sqlServerName
@@ -363,10 +371,6 @@ output MANAGEDIDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.manage
 
 @description('Client ID of the managed identity used by the web app.')
 output MANAGEDIDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
-
-@description('Name of the AI Foundry resource.')
-output AI_FOUNDRY_NAME string = aifoundry.outputs.aiFoundryName
-
 @description('Name of the AI Search service.')
 output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService
 

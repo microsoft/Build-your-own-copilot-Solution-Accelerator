@@ -177,6 +177,11 @@ resource aiFoundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04
   tags: tags
 }
 
+resource existingAiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = if (!empty(azureExistingAIProjectResourceId)) {
+  name: existingAIFoundryName
+  scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
+}
+
 @batchSize(1)
 resource aiFModelDeployments 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [
   for aiModeldeployment in aiModelDeployments: if (empty(azureExistingAIProjectResourceId)) {
@@ -260,8 +265,7 @@ resource cognitiveServicesOpenAIUser 'Microsoft.Authorization/roleDefinitions@20
   name: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
 }
 
-
-resource assignOpenAIRoleToAISearch 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (empty(azureExistingAIProjectResourceId))  {
+resource assignOpenAIRoleToAISearch 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (empty(azureExistingAIProjectResourceId)) {
   name: guid(resourceGroup().id, aiFoundry.id, cognitiveServicesOpenAIUser.id)
   scope: aiFoundry
   properties: {
@@ -424,6 +428,7 @@ output aoaiEndpoint string = !empty(existingOpenAIEndpoint)
 
 @description('Contains Name of AI Foundry.')  
 output aiFoundryName string = !empty(existingAIFoundryName) ? existingAIFoundryName : aiFoundryName //aiServicesName_m
+output aiFoundryId string = !empty(azureExistingAIProjectResourceId) ? existingAiFoundry.id : aiFoundry.id
 
 @description('Contains AI Search Name.')
 output aiSearchName string = aiSearchName

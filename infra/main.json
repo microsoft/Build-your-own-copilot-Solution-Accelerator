@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.37.4.10188",
-      "templateHash": "17838877322354490768"
+      "version": "0.36.177.2456",
+      "templateHash": "11128400850485102096"
     }
   },
   "parameters": {
@@ -594,8 +594,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.37.4.10188",
-              "templateHash": "12835630761460473235"
+              "version": "0.36.177.2456",
+              "templateHash": "16824105341593554305"
             }
           },
           "parameters": {
@@ -1333,6 +1333,10 @@
                 "description": "Contains Name of AI Foundry."
               },
               "value": "[if(not(empty(variables('existingAIFoundryName'))), variables('existingAIFoundryName'), variables('aiFoundryName'))]"
+            },
+            "aiFoundryId": {
+              "type": "string",
+              "value": "[if(not(empty(parameters('azureExistingAIProjectResourceId'))), extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', variables('existingAIFoundryName')), resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName')))]"
             },
             "aiSearchName": {
               "type": "string",
@@ -3110,12 +3114,9 @@
       },
       "value": "[resourceGroup().name]"
     },
-    "RESOURCE_GROUP_NAME_FOUNDRY": {
+    "AI_FOUNDRY_RESOURCE_ID": {
       "type": "string",
-      "metadata": {
-        "description": "Name of the resource group used by AI Foundry."
-      },
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.resourceGroupNameFoundry.value]"
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryId.value]"
     },
     "SQLDB_SERVER_NAME": {
       "type": "string",
@@ -3144,13 +3145,6 @@
         "description": "Client ID of the managed identity used by the web app."
       },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.clientId]"
-    },
-    "AI_FOUNDRY_NAME": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the AI Foundry resource."
-      },
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryName.value]"
     },
     "AI_SEARCH_SERVICE_NAME": {
       "type": "string",
