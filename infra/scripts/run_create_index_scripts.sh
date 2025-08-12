@@ -72,6 +72,9 @@ fi
 # Check if the user has the Azure AI User role
 echo "Checking if user has the Azure AI User role"
 role_assignment=$(MSYS_NO_PATHCONV=1 az role assignment list --role 53ca6127-db72-4b80-b1b0-d745d6d5456d --scope $aif_resource_id --assignee $signed_user_id --query "[].roleDefinitionId" -o tsv)
+echo "role_assignment: $role_assignment"
+echo "aif_resource_id: $aif_resource_id"
+echo "signed_user_id: $signed_user_id"
 if [ -z "$role_assignment" ]; then
     echo "User does not have the Azure AI User role. Assigning the role."
     MSYS_NO_PATHCONV=1 az role assignment create --assignee $signed_user_id --role 53ca6127-db72-4b80-b1b0-d745d6d5456d --scope $aif_resource_id --output none
