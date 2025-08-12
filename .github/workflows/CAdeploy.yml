@@ -154,7 +154,7 @@ jobs:
             exit 1
           fi
 
-          export AI_FOUNDRY_RESOURCE_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.AI_FOUNDRY_RESOURCE_ID.value')
+          export AI_FOUNDRY_RESOURCE_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.aI_FOUNDRY_RESOURCE_ID.value')
           echo "AI_FOUNDRY_RESOURCE_ID=$AI_FOUNDRY_RESOURCE_ID" >> $GITHUB_ENV
           export SEARCH_SERVICE_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.aI_SEARCH_SERVICE_NAME.value')
           echo "SEARCH_SERVICE_NAME=$SEARCH_SERVICE_NAME" >> $GITHUB_ENV
