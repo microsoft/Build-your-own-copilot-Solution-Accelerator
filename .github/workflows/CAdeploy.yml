@@ -148,7 +148,7 @@ jobs:
             --query "properties.outputs" -o json)
 
           echo "Deployment output: $DEPLOY_OUTPUT"
-          if [[ -z "$DEPLOY_OUTPUT" ]]; thenSOLUTION_PREFIX
+          if [[ -z "$DEPLOY_OUTPUT" ]]; then
             echo "Error: Deployment output is empty. Please check the deployment logs."
             exit 1
           fi
