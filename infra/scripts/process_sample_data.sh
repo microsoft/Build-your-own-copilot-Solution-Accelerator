@@ -51,10 +51,6 @@ if [ -z "$webAppManagedIdentityDisplayName" ]; then
     webAppManagedIdentityDisplayName=$(azd env get-value MANAGEDIDENTITY_WEBAPP_NAME)
 fi
 
-if [ -z "$aiFoundryName" ]; then
-    aiFoundryName=$(azd env get-value AI_FOUNDRY_NAME)
-fi
-
 if [ -z "$aiSearchName" ]; then
     aiSearchName=$(azd env get-value AI_SEARCH_SERVICE_NAME)
 fi
