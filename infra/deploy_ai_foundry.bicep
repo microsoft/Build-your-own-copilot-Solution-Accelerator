@@ -1,28 +1,56 @@
 // Creates Azure dependent resources for Azure AI studio
+
+@description('Required. Solution Name')
 param solutionName string
+
+@description('Required. Solution Location')
 param solutionLocation string
+
+@description('Required. Contains Name of KeyVault.')
 param keyVaultName string
+
+@description('Required. Indicates the type of Deployment.')
 param deploymentType string
-param gptModelName string
+
+@description('Optional. GPT Model Name')
+param gptModelName string = 'gpt-4o-mini'
+
+@description('Required. Azure OepnAI API Version.')
 param azureOpenaiAPIVersion string
+
+@description('Required. Param to get Deployment Capacity.')
 param gptDeploymentCapacity int
-param embeddingModel string
-param embeddingDeploymentCapacity int
+
+@description('Optional. Embedding Model.')
+param embeddingModel string = 'text-embedding-ada-002'
+
+@description('Optional. Info about Embedding Deployment Capacity.')
+param embeddingDeploymentCapacity int = 80
+
+@description('Optional. Existing Log Analytics WorkspaceID.')
 param existingLogAnalyticsWorkspaceId string = ''
+
+@description('Optional. Azure Existing AI Project ResourceID.')
 param azureExistingAIProjectResourceId string = ''
 
-// Load the abbrevations file required to name the azure resources.
-var abbrs = loadJsonContent('./abbreviations.json')
+@description('Required. The name of the AI Foundry AI Project resource in Azure.')
+param aiFoundryAiServicesAiProjectResourceName string
 
-var aiFoundryName = '${abbrs.ai.aiFoundry}${solutionName}'
-var applicationInsightsName = '${abbrs.managementGovernance.applicationInsights}${solutionName}'
+@description('Optional. Tags to be applied to the resources.')
+param tags object = {}
+
+// Load the abbrevations file required to name the azure resources.
+//var abbrs = loadJsonContent('./abbreviations.json')
+
+var aiFoundryName = 'aif-${solutionName}'
+var applicationInsightsName = 'appi-${solutionName}'
 var keyvaultName = keyVaultName
 var location = solutionLocation //'eastus2'
-var aiProjectName = '${abbrs.ai.aiFoundryProject}${solutionName}'
+var aiProjectName = '${aiFoundryAiServicesAiProjectResourceName}-${solutionName}'
 var aiProjectFriendlyName = aiProjectName
 var aiProjectDescription = 'AI Foundry Project'
-var aiSearchName = '${abbrs.ai.aiSearch}${solutionName}'
-var workspaceName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${solutionName}'
+var aiSearchName = 'srch-${solutionName}'
+var workspaceName = 'log-${solutionName}'
 var aiModelDeployments = [
   {
     name: gptModelName
@@ -89,7 +117,7 @@ resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (!useExisting) {
   name: workspaceName
   location: location
-  tags: {}
+  tags: tags
   properties: {
     retentionInDays: 30
     sku: {
@@ -108,6 +136,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
     publicNetworkAccessForQuery: 'Enabled'
     WorkspaceResourceId: useExisting ? existingLogAnalyticsWorkspace.id : logAnalytics.id
   }
+  tags: tags
 }
 
 resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = if (empty(azureExistingAIProjectResourceId)) {
@@ -131,6 +160,7 @@ resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = i
     publicNetworkAccess: 'Enabled'
     disableLocalAuth: false
   }
+  tags: tags
 }
 
 resource aiFoundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' = if (empty(azureExistingAIProjectResourceId)) {
@@ -144,6 +174,7 @@ resource aiFoundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04
     description: aiProjectDescription
     displayName: aiProjectFriendlyName
   }
+  tags: tags
 }
 
 resource existingAiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = if (!empty(azureExistingAIProjectResourceId)) {
@@ -198,6 +229,7 @@ resource aiSearch 'Microsoft.Search/searchServices@2025-02-01-preview' = {
     }
     semanticSearch: 'free'
   }
+  tags: tags
 }
 
 resource aiSearchFoundryConnection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' = if (empty(azureExistingAIProjectResourceId)) {
@@ -253,6 +285,7 @@ module assignOpenAIRoleToAISearchExisting 'deploy_foundry_model_role_assignment.
     principalId: aiSearch.identity.principalId
     aiProjectName: !empty(azureExistingAIProjectResourceId) ? existingAIProjectName : aiProjectName
     aiModelDeployments: aiModelDeployments
+    tags:tags
   }
 }
 
@@ -331,6 +364,7 @@ resource azureOpenAIApiVersionEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-0
   properties: {
     value: azureOpenaiAPIVersion //'2024-07-18'
   }
+  tags:tags
 }
 
 resource azureOpenAIEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
@@ -342,6 +376,7 @@ resource azureOpenAIEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-
       ? existingOpenAIEndpoint
       : aiFoundry.properties.endpoints['OpenAI Language Model Instance API']
   }
+  tags:tags
 }
 
 resource azureOpenAIEmbeddingModelEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
@@ -350,6 +385,7 @@ resource azureOpenAIEmbeddingModelEntry 'Microsoft.KeyVault/vaults/secrets@2021-
   properties: {
     value: embeddingModel
   }
+  tags:tags
 }
 
 resource azureSearchServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
@@ -358,6 +394,7 @@ resource azureSearchServiceEndpointEntry 'Microsoft.KeyVault/vaults/secrets@2021
   properties: {
     value: 'https://${aiSearch.name}.search.windows.net'
   }
+  tags:tags
 }
 
 resource azureSearchIndexEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
@@ -366,36 +403,67 @@ resource azureSearchIndexEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-pre
   properties: {
     value: 'transcripts_index'
   }
+  tags:tags
 }
-
+@description('Contains Name of KeyVault.')
 output keyvaultName string = keyvaultName
+
+@description('Contains KeyVault ID.')
 output keyvaultId string = keyVault.id
 
+@description('Contains AI Foundry ResourceGroup Name')
 output resourceGroupNameFoundry string = !empty(existingAIServiceResourceGroup)
   ? existingAIServiceResourceGroup
   : resourceGroup().name
-output aiFoundryProjectEndpoint string = !empty(existingProjEndpoint)
+
+  @description('Contains Name of AI Foundry Project Endpoint.')
+  output aiFoundryProjectEndpoint string = !empty(existingProjEndpoint)
   ? existingProjEndpoint
   : aiFoundryProject.properties.endpoints['AI Foundry API']
+
+@description('Contains AI Endpoint.')
 output aoaiEndpoint string = !empty(existingOpenAIEndpoint)
   ? existingOpenAIEndpoint
   : aiFoundry.properties.endpoints['OpenAI Language Model Instance API'] //aiServices_m.properties.endpoint
+
+@description('Contains Name of AI Foundry.')  
 output aiFoundryName string = !empty(existingAIFoundryName) ? existingAIFoundryName : aiFoundryName //aiServicesName_m
 output aiFoundryId string = !empty(azureExistingAIProjectResourceId) ? existingAiFoundry.id : aiFoundry.id
 
+@description('Contains AI Search Name.')
 output aiSearchName string = aiSearchName
+
+@description('Contains AI SearchID.')
 output aiSearchId string = aiSearch.id
+
+@description('Contains AI Search Target.')
 output aiSearchTarget string = 'https://${aiSearch.name}.search.windows.net'
+
+@description('Contains AI Search Service.')
 output aiSearchService string = aiSearch.name
+
+@description('Contains Name of AI Foundry Project.')
 output aiFoundryProjectName string = !empty(existingAIProjectName) ? existingAIProjectName : aiFoundryProject.name
 
+@description('Contains Application Insights ID.')
 output applicationInsightsId string = applicationInsights.id
+@description('The Instrumentation Key for the Application Insights resource.')
 output instrumentationKey string = applicationInsights.properties.InstrumentationKey
+
+@description('Contains Log Analytics Workspace Resource Name.')
 output logAnalyticsWorkspaceResourceName string = useExisting ? existingLogAnalyticsWorkspace.name : logAnalytics.name
+
+@description('Contains Log Analytics Workspace ResourceGroup Name.')
 output logAnalyticsWorkspaceResourceGroup string = useExisting ? existingLawResourceGroup : resourceGroup().name
 
+@description('Contains Application Insights Connection String.')
 output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
 
+@description('Contains AI Search Foundry Connection Name.')
 output aiSearchFoundryConnectionName string = aiSearchConnectionName
+
+@description('Contains AI Foundry App Insights Connection Name.')
 output aiAppInsightsFoundryConnectionName string = aiAppInsightConnectionName
+
+@description('Contains AI Model Deployments')
 output aiModelDeployments array = aiModelDeployments

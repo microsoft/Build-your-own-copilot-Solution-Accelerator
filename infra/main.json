@@ -4,38 +4,39 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.36.177.2456",
-      "templateHash": "11128400850485102096"
+      "version": "0.37.4.10188",
+      "templateHash": "4697605839482939008"
     }
   },
   "parameters": {
-    "environmentName": {
+    "solutionName": {
       "type": "string",
+      "defaultValue": "clientadvisor",
       "minLength": 3,
       "maxLength": 20,
       "metadata": {
-        "description": "A unique prefix for all resources in this deployment. This should be 3-20 characters long:"
+        "description": "Required. A unique prefix for all resources in this deployment. This should be 3-20 characters long:"
       }
     },
     "existingLogAnalyticsWorkspaceId": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Optional: Existing Log Analytics Workspace Resource ID"
+        "description": "Optional. Existing Log Analytics Workspace Resource ID"
       }
     },
     "azureExistingAIProjectResourceId": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Use this parameter to use an existing AI project resource ID"
+        "description": "Optional. Use this parameter to use an existing AI project resource ID"
       }
     },
     "cosmosLocation": {
       "type": "string",
       "defaultValue": "eastus2",
       "metadata": {
-        "description": "CosmosDB Location"
+        "description": "Optional. CosmosDB Location"
       }
     },
     "deploymentType": {
@@ -47,7 +48,7 @@
       ],
       "minLength": 1,
       "metadata": {
-        "description": "GPT model deployment type:"
+        "description": "Optional. GPT model deployment type:"
       }
     },
     "gptModelName": {
@@ -58,19 +59,22 @@
       ],
       "minLength": 1,
       "metadata": {
-        "description": "Name of the GPT model to deploy:"
+        "description": "Optional. Name of the GPT model to deploy:"
       }
     },
     "azureOpenaiAPIVersion": {
       "type": "string",
-      "defaultValue": "2025-04-01-preview"
+      "defaultValue": "2025-04-01-preview",
+      "metadata": {
+        "description": "Optional. API version for the Azure OpenAI service."
+      }
     },
     "gptDeploymentCapacity": {
       "type": "int",
       "defaultValue": 200,
       "minValue": 10,
       "metadata": {
-        "description": "Capacity of the GPT deployment:"
+        "description": "Optional. Capacity of the GPT deployment:"
       }
     },
     "embeddingModel": {
@@ -81,7 +85,7 @@
       ],
       "minLength": 1,
       "metadata": {
-        "description": "Name of the Text Embedding model to deploy:"
+        "description": "Optional. Name of the Text Embedding model to deploy:"
       }
     },
     "embeddingDeploymentCapacity": {
@@ -89,7 +93,7 @@
       "defaultValue": 80,
       "minValue": 10,
       "metadata": {
-        "description": "Capacity of the Embedding Model deployment"
+        "description": "Optional. Capacity of the Embedding Model deployment"
       }
     },
     "imageTag": {
@@ -120,253 +124,40 @@
             "OpenAI.GlobalStandard.text-embedding-ada-002,80"
           ]
         },
-        "description": "Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed."
+        "description": "Rquired. Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed."
       }
     },
     "AZURE_LOCATION": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default."
+        "description": "Optional. Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default."
       }
+    },
+    "solutionUniqueToken": {
+      "type": "string",
+      "defaultValue": "[substring(uniqueString(subscription().id, resourceGroup().name, parameters('solutionName')), 0, 5)]",
+      "maxLength": 5,
+      "metadata": {
+        "description": "Optional. A unique token for the solution. This is used to ensure resource names are unique for global resources. Defaults to a 5-character substring of the unique string generated from the subscription ID, resource group name, and solution name."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "metadata": {
+        "__bicep_resource_derived_type!": {
+          "source": "Microsoft.Resources/resourceGroups@2025-04-01#properties/tags"
+        },
+        "description": "Optional. The tags to apply to all deployed Azure resources."
+      },
+      "defaultValue": {}
     }
   },
   "variables": {
-    "$fxv#0": {
-      "ai": {
-        "aiSearch": "srch-",
-        "aiFoundry": "aif-",
-        "aiFoundryProject": "aifp-",
-        "aiServices": "aisa-",
-        "aiVideoIndexer": "avi-",
-        "machineLearningWorkspace": "mlw-",
-        "openAIService": "oai-",
-        "botService": "bot-",
-        "computerVision": "cv-",
-        "contentModerator": "cm-",
-        "contentSafety": "cs-",
-        "customVisionPrediction": "cstv-",
-        "customVisionTraining": "cstvt-",
-        "documentIntelligence": "di-",
-        "faceApi": "face-",
-        "healthInsights": "hi-",
-        "immersiveReader": "ir-",
-        "languageService": "lang-",
-        "speechService": "spch-",
-        "translator": "trsl-",
-        "aiHub": "aih-",
-        "aiHubProject": "aihp-"
-      },
-      "analytics": {
-        "analysisServicesServer": "as",
-        "databricksWorkspace": "dbw-",
-        "dataExplorerCluster": "dec",
-        "dataExplorerClusterDatabase": "dedb",
-        "dataFactory": "adf-",
-        "digitalTwin": "dt-",
-        "streamAnalytics": "asa-",
-        "synapseAnalyticsPrivateLinkHub": "synplh-",
-        "synapseAnalyticsSQLDedicatedPool": "syndp",
-        "synapseAnalyticsSparkPool": "synsp",
-        "synapseAnalyticsWorkspaces": "synw",
-        "dataLakeStoreAccount": "dls",
-        "dataLakeAnalyticsAccount": "dla",
-        "eventHubsNamespace": "evhns-",
-        "eventHub": "evh-",
-        "eventGridDomain": "evgd-",
-        "eventGridSubscriptions": "evgs-",
-        "eventGridTopic": "evgt-",
-        "eventGridSystemTopic": "egst-",
-        "hdInsightHadoopCluster": "hadoop-",
-        "hdInsightHBaseCluster": "hbase-",
-        "hdInsightKafkaCluster": "kafka-",
-        "hdInsightSparkCluster": "spark-",
-        "hdInsightStormCluster": "storm-",
-        "hdInsightMLServicesCluster": "mls-",
-        "iotHub": "iot-",
-        "provisioningServices": "provs-",
-        "provisioningServicesCertificate": "pcert-",
-        "powerBIEmbedded": "pbi-",
-        "timeSeriesInsightsEnvironment": "tsi-"
-      },
-      "compute": {
-        "appServiceEnvironment": "ase-",
-        "appServicePlan": "asp-",
-        "loadTesting": "lt-",
-        "availabilitySet": "avail-",
-        "arcEnabledServer": "arcs-",
-        "arcEnabledKubernetesCluster": "arck",
-        "batchAccounts": "ba-",
-        "cloudService": "cld-",
-        "communicationServices": "acs-",
-        "diskEncryptionSet": "des",
-        "functionApp": "func-",
-        "gallery": "gal",
-        "hostingEnvironment": "host-",
-        "imageTemplate": "it-",
-        "managedDiskOS": "osdisk",
-        "managedDiskData": "disk",
-        "notificationHubs": "ntf-",
-        "notificationHubsNamespace": "ntfns-",
-        "proximityPlacementGroup": "ppg-",
-        "restorePointCollection": "rpc-",
-        "snapshot": "snap-",
-        "staticWebApp": "stapp-",
-        "virtualMachine": "vm",
-        "virtualMachineScaleSet": "vmss-",
-        "virtualMachineMaintenanceConfiguration": "mc-",
-        "virtualMachineStorageAccount": "stvm",
-        "webApp": "app-"
-      },
-      "containers": {
-        "aksCluster": "aks-",
-        "aksSystemNodePool": "npsystem-",
-        "aksUserNodePool": "np-",
-        "containerApp": "ca-",
-        "containerAppsEnvironment": "cae-",
-        "containerRegistry": "cr",
-        "containerInstance": "ci",
-        "serviceFabricCluster": "sf-",
-        "serviceFabricManagedCluster": "sfmc-"
-      },
-      "databases": {
-        "cosmosDBDatabase": "cosmos-",
-        "cosmosDBApacheCassandra": "coscas-",
-        "cosmosDBMongoDB": "cosmon-",
-        "cosmosDBNoSQL": "cosno-",
-        "cosmosDBTable": "costab-",
-        "cosmosDBGremlin": "cosgrm-",
-        "cosmosDBPostgreSQL": "cospos-",
-        "cacheForRedis": "redis-",
-        "sqlDatabaseServer": "sql-",
-        "sqlDatabase": "sqldb-",
-        "sqlElasticJobAgent": "sqlja-",
-        "sqlElasticPool": "sqlep-",
-        "mariaDBServer": "maria-",
-        "mariaDBDatabase": "mariadb-",
-        "mySQLDatabase": "mysql-",
-        "postgreSQLDatabase": "psql-",
-        "sqlServerStretchDatabase": "sqlstrdb-",
-        "sqlManagedInstance": "sqlmi-"
-      },
-      "developerTools": {
-        "appConfigurationStore": "appcs-",
-        "mapsAccount": "map-",
-        "signalR": "sigr",
-        "webPubSub": "wps-"
-      },
-      "devOps": {
-        "managedGrafana": "amg-"
-      },
-      "integration": {
-        "apiManagementService": "apim-",
-        "integrationAccount": "ia-",
-        "logicApp": "logic-",
-        "serviceBusNamespace": "sbns-",
-        "serviceBusQueue": "sbq-",
-        "serviceBusTopic": "sbt-",
-        "serviceBusTopicSubscription": "sbts-"
-      },
-      "managementGovernance": {
-        "automationAccount": "aa-",
-        "applicationInsights": "appi-",
-        "monitorActionGroup": "ag-",
-        "monitorDataCollectionRules": "dcr-",
-        "monitorAlertProcessingRule": "apr-",
-        "blueprint": "bp-",
-        "blueprintAssignment": "bpa-",
-        "dataCollectionEndpoint": "dce-",
-        "logAnalyticsWorkspace": "log-",
-        "logAnalyticsQueryPacks": "pack-",
-        "managementGroup": "mg-",
-        "purviewInstance": "pview-",
-        "resourceGroup": "rg-",
-        "templateSpecsName": "ts-"
-      },
-      "migration": {
-        "migrateProject": "migr-",
-        "databaseMigrationService": "dms-",
-        "recoveryServicesVault": "rsv-"
-      },
-      "networking": {
-        "applicationGateway": "agw-",
-        "applicationSecurityGroup": "asg-",
-        "cdnProfile": "cdnp-",
-        "cdnEndpoint": "cdne-",
-        "connections": "con-",
-        "dnsForwardingRuleset": "dnsfrs-",
-        "dnsPrivateResolver": "dnspr-",
-        "dnsPrivateResolverInboundEndpoint": "in-",
-        "dnsPrivateResolverOutboundEndpoint": "out-",
-        "firewall": "afw-",
-        "firewallPolicy": "afwp-",
-        "expressRouteCircuit": "erc-",
-        "expressRouteGateway": "ergw-",
-        "frontDoorProfile": "afd-",
-        "frontDoorEndpoint": "fde-",
-        "frontDoorFirewallPolicy": "fdfp-",
-        "ipGroups": "ipg-",
-        "loadBalancerInternal": "lbi-",
-        "loadBalancerExternal": "lbe-",
-        "loadBalancerRule": "rule-",
-        "localNetworkGateway": "lgw-",
-        "natGateway": "ng-",
-        "networkInterface": "nic-",
-        "networkSecurityGroup": "nsg-",
-        "networkSecurityGroupSecurityRules": "nsgsr-",
-        "networkWatcher": "nw-",
-        "privateLink": "pl-",
-        "privateEndpoint": "pep-",
-        "publicIPAddress": "pip-",
-        "publicIPAddressPrefix": "ippre-",
-        "routeFilter": "rf-",
-        "routeServer": "rtserv-",
-        "routeTable": "rt-",
-        "serviceEndpointPolicy": "se-",
-        "trafficManagerProfile": "traf-",
-        "userDefinedRoute": "udr-",
-        "virtualNetwork": "vnet-",
-        "virtualNetworkGateway": "vgw-",
-        "virtualNetworkManager": "vnm-",
-        "virtualNetworkPeering": "peer-",
-        "virtualNetworkSubnet": "snet-",
-        "virtualWAN": "vwan-",
-        "virtualWANHub": "vhub-"
-      },
-      "security": {
-        "bastion": "bas-",
-        "keyVault": "kv-",
-        "keyVaultManagedHSM": "kvmhsm-",
-        "managedIdentity": "id-",
-        "sshKey": "sshkey-",
-        "vpnGateway": "vpng-",
-        "vpnConnection": "vcn-",
-        "vpnSite": "vst-",
-        "webApplicationFirewallPolicy": "waf",
-        "webApplicationFirewallPolicyRuleGroup": "wafrg"
-      },
-      "storage": {
-        "storSimple": "ssimp",
-        "backupVault": "bvault-",
-        "backupVaultPolicy": "bkpol-",
-        "fileShare": "share-",
-        "storageAccount": "st",
-        "storageSyncService": "sss-"
-      },
-      "virtualDesktop": {
-        "labServicesPlan": "lp-",
-        "virtualDesktopHostPool": "vdpool-",
-        "virtualDesktopApplicationGroup": "vdag-",
-        "virtualDesktopWorkspace": "vdws-",
-        "virtualDesktopScalingPlan": "vdscaling-"
-      }
-    },
     "solutionLocation": "[if(empty(parameters('AZURE_LOCATION')), resourceGroup().location, parameters('AZURE_LOCATION'))]",
-    "uniqueId": "[toLower(uniqueString(parameters('environmentName'), subscription().id, variables('solutionLocation'), resourceGroup().name))]",
-    "solutionPrefix": "[format('ca{0}', padLeft(take(variables('uniqueId'), 12), 12, '0'))]",
-    "abbrs": "[variables('$fxv#0')]",
-    "hostingPlanName": "[format('{0}{1}', variables('abbrs').compute.appServicePlan, variables('solutionPrefix'))]",
-    "websiteName": "[format('{0}{1}', variables('abbrs').compute.webApp, variables('solutionPrefix'))]",
+    "solutionSuffix": "[toLower(trim(replace(replace(replace(replace(replace(replace(format('{0}{1}', parameters('solutionName'), parameters('solutionUniqueToken')), '-', ''), '_', ''), '.', ''), '/', ''), ' ', ''), '*', '')))]",
+    "hostingPlanName": "[format('asp-{0}', variables('solutionSuffix'))]",
+    "websiteName": "[format('app-{0}', variables('solutionSuffix'))]",
     "appEnvironment": "Prod",
     "azureSearchIndex": "transcripts_index",
     "azureSearchUseSemanticSearch": "True",
@@ -392,7 +183,8 @@
     "useAIProjectClientFlag": "False",
     "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\r\n   1. Table: Clients\r\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\r\n   2. Table: InvestmentGoals\r\n   Columns: ClientId, InvestmentGoal\r\n   3. Table: Assets\r\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\r\n   4. Table: ClientSummaries\r\n   Columns: ClientId, ClientSummary\r\n   5. Table: InvestmentGoalsDetails\r\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\r\n   6. Table: Retirement\r\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\r\n   7. Table: ClientMeetings\r\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\r\n   Always use the Investment column from the Assets table as the value.\r\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n   Do not use client name in filters.\r\n   Do not include assets values unless asked for.\r\n   ALWAYS use ClientId = {clientid} in the query filter.\r\n   ALWAYS select Client Name (Column: Client) in the query.\r\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n   When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.\r\n   Only return the generated SQL query. Do not return anything else.",
     "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \r\n  You have access to the client’s past meeting call transcripts. \r\n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \r\n  If no data is available, state 'No relevant data found for previous meetings.",
-    "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\r\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\r\n  If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\r\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\r\n  Always send clientId as '{client_id}'."
+    "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\r\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\r\n  If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\r\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\r\n  Always send clientId as '{client_id}'.",
+    "aiFoundryAiServicesAiProjectResourceName": "[format('proj-{0}', variables('solutionSuffix'))]"
   },
   "resources": [
     {
@@ -400,9 +192,7 @@
       "apiVersion": "2021-04-01",
       "name": "default",
       "properties": {
-        "tags": {
-          "TemplateName": "Client Advisor"
-        }
+        "tags": "[shallowMerge(createArray(parameters('tags'), createObject('TemplateName', 'Client Advisor')))]"
       }
     },
     {
@@ -417,13 +207,16 @@
         "mode": "Incremental",
         "parameters": {
           "solutionName": {
-            "value": "[variables('solutionPrefix')]"
+            "value": "[variables('solutionSuffix')]"
           },
           "solutionLocation": {
             "value": "[variables('solutionLocation')]"
           },
           "miName": {
-            "value": "[format('{0}{1}', variables('abbrs').security.managedIdentity, variables('solutionPrefix'))]"
+            "value": "[format('id-{0}', variables('solutionSuffix'))]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
           }
         },
         "template": {
@@ -432,8 +225,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.36.177.2456",
-              "templateHash": "17366528426252264029"
+              "version": "0.37.4.10188",
+              "templateHash": "6639330323573416008"
             }
           },
           "parameters": {
@@ -442,19 +235,26 @@
               "minLength": 3,
               "maxLength": 15,
               "metadata": {
-                "description": "Solution Name"
+                "description": "Required. Name of the solution."
               }
             },
             "solutionLocation": {
               "type": "string",
               "metadata": {
-                "description": "Solution Location"
+                "description": "Required. Deployment location for the solution."
               }
             },
             "miName": {
               "type": "string",
               "metadata": {
-                "description": "Name"
+                "description": "Required. Name of the managed identity."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Optional. Tags to be applied to the resources."
               }
             }
           },
@@ -464,10 +264,7 @@
               "apiVersion": "2023-01-31",
               "name": "[parameters('miName')]",
               "location": "[parameters('solutionLocation')]",
-              "tags": {
-                "app": "[parameters('solutionName')]",
-                "location": "[parameters('solutionLocation')]"
-              }
+              "tags": "[shallowMerge(createArray(parameters('tags'), createObject('app', parameters('solutionName'), 'location', parameters('solutionLocation'))))]"
             },
             {
               "type": "Microsoft.Authorization/roleAssignments",
@@ -487,15 +284,15 @@
               "apiVersion": "2023-01-31",
               "name": "[format('{0}-webapp', parameters('miName'))]",
               "location": "[parameters('solutionLocation')]",
-              "tags": {
-                "app": "[parameters('solutionName')]",
-                "location": "[parameters('solutionLocation')]"
-              }
+              "tags": "[shallowMerge(createArray(parameters('tags'), createObject('app', parameters('solutionName'), 'location', parameters('solutionLocation'))))]"
             }
           ],
           "outputs": {
             "managedIdentityOutput": {
               "type": "object",
+              "metadata": {
+                "description": "Details of the managed identity resource."
+              },
               "value": {
                 "id": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('miName'))]",
                 "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('miName')), '2023-01-31').principalId]",
@@ -505,6 +302,9 @@
             },
             "managedIdentityWebAppOutput": {
               "type": "object",
+              "metadata": {
+                "description": "Details of the managed identity for the web app."
+              },
               "value": {
                 "id": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-webapp', parameters('miName')))]",
                 "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-webapp', parameters('miName'))), '2023-01-31').principalId]",
@@ -528,7 +328,7 @@
         "mode": "Incremental",
         "parameters": {
           "solutionName": {
-            "value": "[variables('solutionPrefix')]"
+            "value": "[variables('solutionSuffix')]"
           },
           "solutionLocation": {
             "value": "[variables('solutionLocation')]"
@@ -537,7 +337,10 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.objectId]"
           },
           "kvName": {
-            "value": "[format('{0}{1}', variables('abbrs').security.keyVault, variables('solutionPrefix'))]"
+            "value": "[format('kv-{0}', variables('solutionSuffix'))]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
           }
         },
         "template": {
@@ -546,75 +349,76 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.36.177.2456",
-              "templateHash": "18360475517235523175"
+              "version": "0.37.4.10188",
+              "templateHash": "12303448646842336311"
             }
           },
           "parameters": {
             "solutionName": {
               "type": "string",
-              "minLength": 3,
-              "maxLength": 15,
               "metadata": {
-                "description": "Solution Name"
+                "description": "Required. Solution Name"
               }
             },
             "solutionLocation": {
               "type": "string",
               "metadata": {
-                "description": "Solution Location"
+                "description": "Required. Solution Location"
               }
             },
             "utc": {
               "type": "string",
-              "defaultValue": "[utcNow()]"
+              "defaultValue": "[utcNow()]",
+              "metadata": {
+                "description": "Optional. Current UTC timestamp."
+              }
             },
             "kvName": {
               "type": "string",
               "metadata": {
-                "description": "Name"
+                "description": "Required. Name of the Azure Key Vault."
               }
             },
             "createMode": {
               "type": "string",
               "defaultValue": "default",
               "metadata": {
-                "description": "Create Mode"
+                "description": "Optional. Specifies the create mode for the resource."
               }
             },
             "enableForDeployment": {
               "type": "bool",
               "defaultValue": true,
               "metadata": {
-                "description": "Enabled For Deployment. Property to specify whether Azure Virtual Machines are permitted to retrieve certificates stored as secrets from the key vault."
+                "description": "Optional. Enabled For Deployment. Property to specify whether Azure Virtual Machines are permitted to retrieve certificates stored as secrets from the key vault."
               }
             },
             "enableForDiskEncryption": {
               "type": "bool",
               "defaultValue": true,
               "metadata": {
-                "description": "Enabled For Disk Encryption. Property to specify whether Azure Disk Encryption is permitted to retrieve secrets from the vault and unwrap keys."
+                "description": "Optional. Enabled For Disk Encryption. Property to specify whether Azure Disk Encryption is permitted to retrieve secrets from the vault and unwrap keys."
               }
             },
             "enableForTemplateDeployment": {
               "type": "bool",
               "defaultValue": true,
               "metadata": {
-                "description": "Enabled For Template Deployment. Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
+                "description": "Optional. Enabled For Template Deployment. Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
               }
             },
             "enableRBACAuthorization": {
               "type": "bool",
               "defaultValue": true,
               "metadata": {
-                "description": "Enable RBAC Authorization. Property that controls how data actions are authorized."
+                "description": "Optional. Enable RBAC Authorization. Property that controls how data actions are authorized."
               }
             },
             "softDeleteRetentionInDays": {
               "type": "int",
               "defaultValue": 7,
               "metadata": {
-                "description": "Soft Delete Retention in Days. softDelete data retention days. It accepts >=7 and <=90."
+                "description": "Optional. Soft Delete Retention in Days. softDelete data retention days. It accepts >=7 and <=90."
               }
             },
             "publicNetworkAccess": {
@@ -625,7 +429,7 @@
                 "disabled"
               ],
               "metadata": {
-                "description": "Public Network Access, Property to specify whether the vault will accept traffic from public internet."
+                "description": "Optional. Public Network Access, Property to specify whether the vault will accept traffic from public internet."
               }
             },
             "sku": {
@@ -636,11 +440,21 @@
                 "premium"
               ],
               "metadata": {
-                "description": "SKU"
+                "description": "Optional. SKU"
               }
             },
             "managedIdentityObjectId": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Object ID of the managed identity."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Optional. Tags to be applied to the resources."
+              }
             }
           },
           "variables": {
@@ -652,10 +466,7 @@
               "apiVersion": "2022-07-01",
               "name": "[parameters('kvName')]",
               "location": "[parameters('solutionLocation')]",
-              "tags": {
-                "app": "[parameters('solutionName')]",
-                "location": "[parameters('solutionLocation')]"
-              },
+              "tags": "[shallowMerge(createArray(parameters('tags'), createObject('app', parameters('solutionName'), 'location', parameters('solutionLocation'))))]",
               "properties": {
                 "accessPolicies": [
                   {
@@ -707,10 +518,16 @@
           "outputs": {
             "keyvaultName": {
               "type": "string",
+              "metadata": {
+                "description": "Name of the Key Vault."
+              },
               "value": "[parameters('kvName')]"
             },
             "keyvaultId": {
               "type": "string",
+              "metadata": {
+                "description": "Resource ID of the Key Vault."
+              },
               "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('kvName'))]"
             }
           }
@@ -732,7 +549,7 @@
         "mode": "Incremental",
         "parameters": {
           "solutionName": {
-            "value": "[variables('solutionPrefix')]"
+            "value": "[variables('solutionSuffix')]"
           },
           "solutionLocation": {
             "value": "[parameters('aiDeploymentsLocation')]"
@@ -763,6 +580,12 @@
           },
           "azureExistingAIProjectResourceId": {
             "value": "[parameters('azureExistingAIProjectResourceId')]"
+          },
+          "aiFoundryAiServicesAiProjectResourceName": {
+            "value": "[variables('aiFoundryAiServicesAiProjectResourceName')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
           }
         },
         "template": {
@@ -771,287 +594,106 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.36.177.2456",
-              "templateHash": "16824105341593554305"
+              "version": "0.37.4.10188",
+              "templateHash": "651349839825117270"
             }
           },
           "parameters": {
             "solutionName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Solution Name"
+              }
             },
             "solutionLocation": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Solution Location"
+              }
             },
             "keyVaultName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Contains Name of KeyVault."
+              }
             },
             "deploymentType": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Indicates the type of Deployment."
+              }
             },
             "gptModelName": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "gpt-4o-mini",
+              "metadata": {
+                "description": "Optional. GPT Model Name"
+              }
             },
             "azureOpenaiAPIVersion": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Azure OepnAI API Version."
+              }
             },
             "gptDeploymentCapacity": {
-              "type": "int"
+              "type": "int",
+              "metadata": {
+                "description": "Required. Param to get Deployment Capacity."
+              }
             },
             "embeddingModel": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "text-embedding-ada-002",
+              "metadata": {
+                "description": "Optional. Embedding Model."
+              }
             },
             "embeddingDeploymentCapacity": {
-              "type": "int"
+              "type": "int",
+              "defaultValue": 80,
+              "metadata": {
+                "description": "Optional. Info about Embedding Deployment Capacity."
+              }
             },
             "existingLogAnalyticsWorkspaceId": {
               "type": "string",
-              "defaultValue": ""
+              "defaultValue": "",
+              "metadata": {
+                "description": "Optional. Existing Log Analytics WorkspaceID."
+              }
             },
             "azureExistingAIProjectResourceId": {
               "type": "string",
-              "defaultValue": ""
+              "defaultValue": "",
+              "metadata": {
+                "description": "Optional. Azure Existing AI Project ResourceID."
+              }
+            },
+            "aiFoundryAiServicesAiProjectResourceName": {
+              "type": "string",
+              "metadata": {
+                "description": "Required. The name of the AI Foundry AI Project resource in Azure."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Optional. Tags to be applied to the resources."
+              }
             }
           },
           "variables": {
-            "$fxv#0": {
-              "ai": {
-                "aiSearch": "srch-",
-                "aiFoundry": "aif-",
-                "aiFoundryProject": "aifp-",
-                "aiServices": "aisa-",
-                "aiVideoIndexer": "avi-",
-                "machineLearningWorkspace": "mlw-",
-                "openAIService": "oai-",
-                "botService": "bot-",
-                "computerVision": "cv-",
-                "contentModerator": "cm-",
-                "contentSafety": "cs-",
-                "customVisionPrediction": "cstv-",
-                "customVisionTraining": "cstvt-",
-                "documentIntelligence": "di-",
-                "faceApi": "face-",
-                "healthInsights": "hi-",
-                "immersiveReader": "ir-",
-                "languageService": "lang-",
-                "speechService": "spch-",
-                "translator": "trsl-",
-                "aiHub": "aih-",
-                "aiHubProject": "aihp-"
-              },
-              "analytics": {
-                "analysisServicesServer": "as",
-                "databricksWorkspace": "dbw-",
-                "dataExplorerCluster": "dec",
-                "dataExplorerClusterDatabase": "dedb",
-                "dataFactory": "adf-",
-                "digitalTwin": "dt-",
-                "streamAnalytics": "asa-",
-                "synapseAnalyticsPrivateLinkHub": "synplh-",
-                "synapseAnalyticsSQLDedicatedPool": "syndp",
-                "synapseAnalyticsSparkPool": "synsp",
-                "synapseAnalyticsWorkspaces": "synw",
-                "dataLakeStoreAccount": "dls",
-                "dataLakeAnalyticsAccount": "dla",
-                "eventHubsNamespace": "evhns-",
-                "eventHub": "evh-",
-                "eventGridDomain": "evgd-",
-                "eventGridSubscriptions": "evgs-",
-                "eventGridTopic": "evgt-",
-                "eventGridSystemTopic": "egst-",
-                "hdInsightHadoopCluster": "hadoop-",
-                "hdInsightHBaseCluster": "hbase-",
-                "hdInsightKafkaCluster": "kafka-",
-                "hdInsightSparkCluster": "spark-",
-                "hdInsightStormCluster": "storm-",
-                "hdInsightMLServicesCluster": "mls-",
-                "iotHub": "iot-",
-                "provisioningServices": "provs-",
-                "provisioningServicesCertificate": "pcert-",
-                "powerBIEmbedded": "pbi-",
-                "timeSeriesInsightsEnvironment": "tsi-"
-              },
-              "compute": {
-                "appServiceEnvironment": "ase-",
-                "appServicePlan": "asp-",
-                "loadTesting": "lt-",
-                "availabilitySet": "avail-",
-                "arcEnabledServer": "arcs-",
-                "arcEnabledKubernetesCluster": "arck",
-                "batchAccounts": "ba-",
-                "cloudService": "cld-",
-                "communicationServices": "acs-",
-                "diskEncryptionSet": "des",
-                "functionApp": "func-",
-                "gallery": "gal",
-                "hostingEnvironment": "host-",
-                "imageTemplate": "it-",
-                "managedDiskOS": "osdisk",
-                "managedDiskData": "disk",
-                "notificationHubs": "ntf-",
-                "notificationHubsNamespace": "ntfns-",
-                "proximityPlacementGroup": "ppg-",
-                "restorePointCollection": "rpc-",
-                "snapshot": "snap-",
-                "staticWebApp": "stapp-",
-                "virtualMachine": "vm",
-                "virtualMachineScaleSet": "vmss-",
-                "virtualMachineMaintenanceConfiguration": "mc-",
-                "virtualMachineStorageAccount": "stvm",
-                "webApp": "app-"
-              },
-              "containers": {
-                "aksCluster": "aks-",
-                "aksSystemNodePool": "npsystem-",
-                "aksUserNodePool": "np-",
-                "containerApp": "ca-",
-                "containerAppsEnvironment": "cae-",
-                "containerRegistry": "cr",
-                "containerInstance": "ci",
-                "serviceFabricCluster": "sf-",
-                "serviceFabricManagedCluster": "sfmc-"
-              },
-              "databases": {
-                "cosmosDBDatabase": "cosmos-",
-                "cosmosDBApacheCassandra": "coscas-",
-                "cosmosDBMongoDB": "cosmon-",
-                "cosmosDBNoSQL": "cosno-",
-                "cosmosDBTable": "costab-",
-                "cosmosDBGremlin": "cosgrm-",
-                "cosmosDBPostgreSQL": "cospos-",
-                "cacheForRedis": "redis-",
-                "sqlDatabaseServer": "sql-",
-                "sqlDatabase": "sqldb-",
-                "sqlElasticJobAgent": "sqlja-",
-                "sqlElasticPool": "sqlep-",
-                "mariaDBServer": "maria-",
-                "mariaDBDatabase": "mariadb-",
-                "mySQLDatabase": "mysql-",
-                "postgreSQLDatabase": "psql-",
-                "sqlServerStretchDatabase": "sqlstrdb-",
-                "sqlManagedInstance": "sqlmi-"
-              },
-              "developerTools": {
-                "appConfigurationStore": "appcs-",
-                "mapsAccount": "map-",
-                "signalR": "sigr",
-                "webPubSub": "wps-"
-              },
-              "devOps": {
-                "managedGrafana": "amg-"
-              },
-              "integration": {
-                "apiManagementService": "apim-",
-                "integrationAccount": "ia-",
-                "logicApp": "logic-",
-                "serviceBusNamespace": "sbns-",
-                "serviceBusQueue": "sbq-",
-                "serviceBusTopic": "sbt-",
-                "serviceBusTopicSubscription": "sbts-"
-              },
-              "managementGovernance": {
-                "automationAccount": "aa-",
-                "applicationInsights": "appi-",
-                "monitorActionGroup": "ag-",
-                "monitorDataCollectionRules": "dcr-",
-                "monitorAlertProcessingRule": "apr-",
-                "blueprint": "bp-",
-                "blueprintAssignment": "bpa-",
-                "dataCollectionEndpoint": "dce-",
-                "logAnalyticsWorkspace": "log-",
-                "logAnalyticsQueryPacks": "pack-",
-                "managementGroup": "mg-",
-                "purviewInstance": "pview-",
-                "resourceGroup": "rg-",
-                "templateSpecsName": "ts-"
-              },
-              "migration": {
-                "migrateProject": "migr-",
-                "databaseMigrationService": "dms-",
-                "recoveryServicesVault": "rsv-"
-              },
-              "networking": {
-                "applicationGateway": "agw-",
-                "applicationSecurityGroup": "asg-",
-                "cdnProfile": "cdnp-",
-                "cdnEndpoint": "cdne-",
-                "connections": "con-",
-                "dnsForwardingRuleset": "dnsfrs-",
-                "dnsPrivateResolver": "dnspr-",
-                "dnsPrivateResolverInboundEndpoint": "in-",
-                "dnsPrivateResolverOutboundEndpoint": "out-",
-                "firewall": "afw-",
-                "firewallPolicy": "afwp-",
-                "expressRouteCircuit": "erc-",
-                "expressRouteGateway": "ergw-",
-                "frontDoorProfile": "afd-",
-                "frontDoorEndpoint": "fde-",
-                "frontDoorFirewallPolicy": "fdfp-",
-                "ipGroups": "ipg-",
-                "loadBalancerInternal": "lbi-",
-                "loadBalancerExternal": "lbe-",
-                "loadBalancerRule": "rule-",
-                "localNetworkGateway": "lgw-",
-                "natGateway": "ng-",
-                "networkInterface": "nic-",
-                "networkSecurityGroup": "nsg-",
-                "networkSecurityGroupSecurityRules": "nsgsr-",
-                "networkWatcher": "nw-",
-                "privateLink": "pl-",
-                "privateEndpoint": "pep-",
-                "publicIPAddress": "pip-",
-                "publicIPAddressPrefix": "ippre-",
-                "routeFilter": "rf-",
-                "routeServer": "rtserv-",
-                "routeTable": "rt-",
-                "serviceEndpointPolicy": "se-",
-                "trafficManagerProfile": "traf-",
-                "userDefinedRoute": "udr-",
-                "virtualNetwork": "vnet-",
-                "virtualNetworkGateway": "vgw-",
-                "virtualNetworkManager": "vnm-",
-                "virtualNetworkPeering": "peer-",
-                "virtualNetworkSubnet": "snet-",
-                "virtualWAN": "vwan-",
-                "virtualWANHub": "vhub-"
-              },
-              "security": {
-                "bastion": "bas-",
-                "keyVault": "kv-",
-                "keyVaultManagedHSM": "kvmhsm-",
-                "managedIdentity": "id-",
-                "sshKey": "sshkey-",
-                "vpnGateway": "vpng-",
-                "vpnConnection": "vcn-",
-                "vpnSite": "vst-",
-                "webApplicationFirewallPolicy": "waf",
-                "webApplicationFirewallPolicyRuleGroup": "wafrg"
-              },
-              "storage": {
-                "storSimple": "ssimp",
-                "backupVault": "bvault-",
-                "backupVaultPolicy": "bkpol-",
-                "fileShare": "share-",
-                "storageAccount": "st",
-                "storageSyncService": "sss-"
-              },
-              "virtualDesktop": {
-                "labServicesPlan": "lp-",
-                "virtualDesktopHostPool": "vdpool-",
-                "virtualDesktopApplicationGroup": "vdag-",
-                "virtualDesktopWorkspace": "vdws-",
-                "virtualDesktopScalingPlan": "vdscaling-"
-              }
-            },
-            "abbrs": "[variables('$fxv#0')]",
-            "aiFoundryName": "[format('{0}{1}', variables('abbrs').ai.aiFoundry, parameters('solutionName'))]",
-            "applicationInsightsName": "[format('{0}{1}', variables('abbrs').managementGovernance.applicationInsights, parameters('solutionName'))]",
+            "aiFoundryName": "[format('aif-{0}', parameters('solutionName'))]",
+            "applicationInsightsName": "[format('appi-{0}', parameters('solutionName'))]",
             "keyvaultName": "[parameters('keyVaultName')]",
             "location": "[parameters('solutionLocation')]",
-            "aiProjectName": "[format('{0}{1}', variables('abbrs').ai.aiFoundryProject, parameters('solutionName'))]",
+            "aiProjectName": "[format('{0}-{1}', parameters('aiFoundryAiServicesAiProjectResourceName'), parameters('solutionName'))]",
             "aiProjectFriendlyName": "[variables('aiProjectName')]",
             "aiProjectDescription": "AI Foundry Project",
-            "aiSearchName": "[format('{0}{1}', variables('abbrs').ai.aiSearch, parameters('solutionName'))]",
-            "workspaceName": "[format('{0}{1}', variables('abbrs').managementGovernance.logAnalyticsWorkspace, parameters('solutionName'))]",
+            "aiSearchName": "[format('srch-{0}', parameters('solutionName'))]",
+            "workspaceName": "[format('log-{0}', parameters('solutionName'))]",
             "aiModelDeployments": [
               {
                 "name": "[parameters('gptModelName')]",
@@ -1093,7 +735,7 @@
               "apiVersion": "2023-09-01",
               "name": "[variables('workspaceName')]",
               "location": "[variables('location')]",
-              "tags": {},
+              "tags": "[parameters('tags')]",
               "properties": {
                 "retentionInDays": 30,
                 "sku": {
@@ -1113,6 +755,7 @@
                 "publicNetworkAccessForQuery": "Enabled",
                 "WorkspaceResourceId": "[if(variables('useExisting'), extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingLawSubscription'), variables('existingLawResourceGroup')), 'Microsoft.OperationalInsights/workspaces', variables('existingLawName')), resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceName')))]"
               },
+              "tags": "[parameters('tags')]",
               "dependsOn": [
                 "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceName'))]"
               ]
@@ -1140,7 +783,8 @@
                 },
                 "publicNetworkAccess": "Enabled",
                 "disableLocalAuth": false
-              }
+              },
+              "tags": "[parameters('tags')]"
             },
             {
               "condition": "[empty(parameters('azureExistingAIProjectResourceId'))]",
@@ -1155,6 +799,7 @@
                 "description": "[variables('aiProjectDescription')]",
                 "displayName": "[variables('aiProjectFriendlyName')]"
               },
+              "tags": "[parameters('tags')]",
               "dependsOn": [
                 "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]"
               ]
@@ -1214,7 +859,8 @@
                   }
                 },
                 "semanticSearch": "free"
-              }
+              },
+              "tags": "[parameters('tags')]"
             },
             {
               "condition": "[empty(parameters('azureExistingAIProjectResourceId'))]",
@@ -1346,7 +992,8 @@
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'AZURE-OPENAI-PREVIEW-API-VERSION')]",
               "properties": {
                 "value": "[parameters('azureOpenaiAPIVersion')]"
-              }
+              },
+              "tags": "[parameters('tags')]"
             },
             {
               "type": "Microsoft.KeyVault/vaults/secrets",
@@ -1355,6 +1002,7 @@
               "properties": {
                 "value": "[if(not(empty(variables('existingOpenAIEndpoint'))), variables('existingOpenAIEndpoint'), reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName')), '2025-04-01-preview').endpoints['OpenAI Language Model Instance API'])]"
               },
+              "tags": "[parameters('tags')]",
               "dependsOn": [
                 "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]"
               ]
@@ -1365,7 +1013,8 @@
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'AZURE-OPENAI-EMBEDDING-MODEL')]",
               "properties": {
                 "value": "[parameters('embeddingModel')]"
-              }
+              },
+              "tags": "[parameters('tags')]"
             },
             {
               "type": "Microsoft.KeyVault/vaults/secrets",
@@ -1374,6 +1023,7 @@
               "properties": {
                 "value": "[format('https://{0}.search.windows.net', variables('aiSearchName'))]"
               },
+              "tags": "[parameters('tags')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Search/searchServices', variables('aiSearchName'))]"
               ]
@@ -1384,7 +1034,8 @@
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'AZURE-SEARCH-INDEX')]",
               "properties": {
                 "value": "transcripts_index"
-              }
+              },
+              "tags": "[parameters('tags')]"
             },
             {
               "condition": "[not(empty(parameters('azureExistingAIProjectResourceId')))]",
@@ -1424,28 +1075,46 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.36.177.2456",
-                      "templateHash": "11938772240348515861"
+                      "version": "0.37.4.10188",
+                      "templateHash": "6038840175458269917"
                     }
                   },
                   "parameters": {
                     "existingAIProjectName": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. Existing AI Project Name"
+                      }
                     },
                     "existingAIFoundryName": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. Existing AI Foundry Name"
+                      }
                     },
                     "aiSearchName": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. AI Search Name"
+                      }
                     },
                     "aiSearchResourceId": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. AI Search Resource ID"
+                      }
                     },
                     "aiSearchLocation": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. AI Search Location"
+                      }
                     },
                     "aiSearchConnectionName": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. AI Search Connection Name"
+                      }
                     }
                   },
                   "resources": [
@@ -1498,6 +1167,9 @@
                   "aiProjectName": "[if(not(empty(parameters('azureExistingAIProjectResourceId'))), createObject('value', variables('existingAIProjectName')), createObject('value', variables('aiProjectName')))]",
                   "aiModelDeployments": {
                     "value": "[variables('aiModelDeployments')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
                   }
                 },
                 "template": {
@@ -1506,32 +1178,57 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.36.177.2456",
-                      "templateHash": "9088273662782005929"
+                      "version": "0.37.4.10188",
+                      "templateHash": "14256377996349985323"
                     }
                   },
                   "parameters": {
                     "principalId": {
                       "type": "string",
-                      "defaultValue": ""
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Optional. Principal ID to assign the role to."
+                      }
                     },
                     "roleDefinitionId": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. ID of the role definition to assign."
+                      }
                     },
                     "roleAssignmentName": {
                       "type": "string",
-                      "defaultValue": ""
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Optional. Name of the role assignment."
+                      }
                     },
                     "aiFoundryName": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. Name of the AI Foundry resource."
+                      }
                     },
                     "aiProjectName": {
                       "type": "string",
-                      "defaultValue": ""
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Optional. Name of the AI project."
+                      }
                     },
                     "aiModelDeployments": {
                       "type": "array",
-                      "defaultValue": []
+                      "defaultValue": [],
+                      "metadata": {
+                        "description": "Optional. List of AI model deployments."
+                      }
+                    },
+                    "tags": {
+                      "type": "object",
+                      "defaultValue": {},
+                      "metadata": {
+                        "description": "Optional. Tags to be applied to the resources."
+                      }
                     }
                   },
                   "resources": [
@@ -1556,7 +1253,8 @@
                       "sku": {
                         "name": "[parameters('aiModelDeployments')[copyIndex()].sku.name]",
                         "capacity": "[parameters('aiModelDeployments')[copyIndex()].sku.capacity]"
-                      }
+                      },
+                      "tags": "[parameters('tags')]"
                     },
                     {
                       "type": "Microsoft.Authorization/roleAssignments",
@@ -1573,10 +1271,16 @@
                   "outputs": {
                     "aiServicesPrincipalId": {
                       "type": "string",
+                      "metadata": {
+                        "description": "Principal ID of the AI Services resource."
+                      },
                       "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), '2025-04-01-preview', 'full').identity.principalId]"
                     },
                     "aiProjectPrincipalId": {
                       "type": "string",
+                      "metadata": {
+                        "description": "Principal ID of the AI Project resource if defined."
+                      },
                       "value": "[if(not(empty(parameters('aiProjectName'))), reference(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiFoundryName'), parameters('aiProjectName')), '2025-04-01-preview', 'full').identity.principalId, '')]"
                     }
                   }
@@ -1590,26 +1294,44 @@
           "outputs": {
             "keyvaultName": {
               "type": "string",
+              "metadata": {
+                "description": "Contains Name of KeyVault."
+              },
               "value": "[variables('keyvaultName')]"
             },
             "keyvaultId": {
               "type": "string",
+              "metadata": {
+                "description": "Contains KeyVault ID."
+              },
               "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
             },
             "resourceGroupNameFoundry": {
               "type": "string",
+              "metadata": {
+                "description": "Contains AI Foundry ResourceGroup Name"
+              },
               "value": "[if(not(empty(variables('existingAIServiceResourceGroup'))), variables('existingAIServiceResourceGroup'), resourceGroup().name)]"
             },
             "aiFoundryProjectEndpoint": {
               "type": "string",
+              "metadata": {
+                "description": "Contains Name of AI Foundry Project Endpoint."
+              },
               "value": "[if(not(empty(variables('existingProjEndpoint'))), variables('existingProjEndpoint'), reference(resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')), '2025-04-01-preview').endpoints['AI Foundry API'])]"
             },
             "aoaiEndpoint": {
               "type": "string",
+              "metadata": {
+                "description": "Contains AI Endpoint."
+              },
               "value": "[if(not(empty(variables('existingOpenAIEndpoint'))), variables('existingOpenAIEndpoint'), reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName')), '2025-04-01-preview').endpoints['OpenAI Language Model Instance API'])]"
             },
             "aiFoundryName": {
               "type": "string",
+              "metadata": {
+                "description": "Contains Name of AI Foundry."
+              },
               "value": "[if(not(empty(variables('existingAIFoundryName'))), variables('existingAIFoundryName'), variables('aiFoundryName'))]"
             },
             "aiFoundryId": {
@@ -1618,54 +1340,93 @@
             },
             "aiSearchName": {
               "type": "string",
+              "metadata": {
+                "description": "Contains AI Search Name."
+              },
               "value": "[variables('aiSearchName')]"
             },
             "aiSearchId": {
               "type": "string",
+              "metadata": {
+                "description": "Contains AI SearchID."
+              },
               "value": "[resourceId('Microsoft.Search/searchServices', variables('aiSearchName'))]"
             },
             "aiSearchTarget": {
               "type": "string",
+              "metadata": {
+                "description": "Contains AI Search Target."
+              },
               "value": "[format('https://{0}.search.windows.net', variables('aiSearchName'))]"
             },
             "aiSearchService": {
               "type": "string",
+              "metadata": {
+                "description": "Contains AI Search Service."
+              },
               "value": "[variables('aiSearchName')]"
             },
             "aiFoundryProjectName": {
               "type": "string",
+              "metadata": {
+                "description": "Contains Name of AI Foundry Project."
+              },
               "value": "[if(not(empty(variables('existingAIProjectName'))), variables('existingAIProjectName'), variables('aiProjectName'))]"
             },
             "applicationInsightsId": {
               "type": "string",
+              "metadata": {
+                "description": "Contains Application Insights ID."
+              },
               "value": "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
             },
             "instrumentationKey": {
               "type": "string",
+              "metadata": {
+                "description": "The Instrumentation Key for the Application Insights resource."
+              },
               "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').InstrumentationKey]"
             },
             "logAnalyticsWorkspaceResourceName": {
               "type": "string",
+              "metadata": {
+                "description": "Contains Log Analytics Workspace Resource Name."
+              },
               "value": "[if(variables('useExisting'), variables('existingLawName'), variables('workspaceName'))]"
             },
             "logAnalyticsWorkspaceResourceGroup": {
               "type": "string",
+              "metadata": {
+                "description": "Contains Log Analytics Workspace ResourceGroup Name."
+              },
               "value": "[if(variables('useExisting'), variables('existingLawResourceGroup'), resourceGroup().name)]"
             },
             "applicationInsightsConnectionString": {
               "type": "string",
+              "metadata": {
+                "description": "Contains Application Insights Connection String."
+              },
               "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').ConnectionString]"
             },
             "aiSearchFoundryConnectionName": {
               "type": "string",
+              "metadata": {
+                "description": "Contains AI Search Foundry Connection Name."
+              },
               "value": "[variables('aiSearchConnectionName')]"
             },
             "aiAppInsightsFoundryConnectionName": {
               "type": "string",
+              "metadata": {
+                "description": "Contains AI Foundry App Insights Connection Name."
+              },
               "value": "[variables('aiAppInsightConnectionName')]"
             },
             "aiModelDeployments": {
               "type": "array",
+              "metadata": {
+                "description": "Contains AI Model Deployments"
+              },
               "value": "[variables('aiModelDeployments')]"
             }
           }
@@ -1690,7 +1451,10 @@
             "value": "[parameters('cosmosLocation')]"
           },
           "cosmosDBName": {
-            "value": "[format('{0}{1}', variables('abbrs').databases.cosmosDBDatabase, variables('solutionPrefix'))]"
+            "value": "[format('cosmos-{0}', variables('solutionSuffix'))]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
           }
         },
         "template": {
@@ -1699,27 +1463,38 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.36.177.2456",
-              "templateHash": "8645494058104543506"
+              "version": "0.37.4.10188",
+              "templateHash": "7830346183750605706"
             }
           },
           "parameters": {
             "solutionLocation": {
-              "type": "string"
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 20,
+              "metadata": {
+                "description": "Required. Solution location."
+              }
             },
             "cosmosDBName": {
               "type": "string",
               "metadata": {
-                "description": "Name"
+                "description": "Required. Name of the Azure Cosmos DB account."
               }
             },
             "databaseName": {
               "type": "string",
-              "defaultValue": "db_conversation_history"
+              "defaultValue": "db_conversation_history",
+              "metadata": {
+                "description": "Optional. Name of the Cosmos DB database."
+              }
             },
             "collectionName": {
               "type": "string",
-              "defaultValue": "conversations"
+              "defaultValue": "conversations",
+              "metadata": {
+                "description": "Optional.Name of the Cosmos DB container (collection)."
+              }
             },
             "containers": {
               "type": "array",
@@ -1729,7 +1504,10 @@
                   "id": "[parameters('collectionName')]",
                   "partitionKey": "/userId"
                 }
-              ]
+              ],
+              "metadata": {
+                "description": "Optional. List of Cosmos DB containers to be created."
+              }
             },
             "kind": {
               "type": "string",
@@ -1738,11 +1516,17 @@
                 "GlobalDocumentDB",
                 "MongoDB",
                 "Parse"
-              ]
+              ],
+              "metadata": {
+                "description": "Optional. The API kind of the Cosmos DB account."
+              }
             },
             "tags": {
               "type": "object",
-              "defaultValue": {}
+              "defaultValue": {},
+              "metadata": {
+                "description": "Optional. Tags to be applied to the resources."
+              }
             }
           },
           "resources": [
@@ -1808,6 +1592,7 @@
                   "id": "[parameters('databaseName')]"
                 }
               },
+              "tags": "[parameters('tags')]",
               "dependsOn": [
                 "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName'))]"
               ]
@@ -1816,14 +1601,23 @@
           "outputs": {
             "cosmosAccountName": {
               "type": "string",
+              "metadata": {
+                "description": "Name of the Cosmos DB account."
+              },
               "value": "[parameters('cosmosDBName')]"
             },
             "cosmosDatabaseName": {
               "type": "string",
+              "metadata": {
+                "description": "Name of the Cosmos DB database."
+              },
               "value": "[parameters('databaseName')]"
             },
             "cosmosContainerName": {
               "type": "string",
+              "metadata": {
+                "description": "Name of the Cosmos DB container."
+              },
               "value": "[parameters('collectionName')]"
             }
           }
@@ -1848,10 +1642,13 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.objectId]"
           },
           "saName": {
-            "value": "[format('{0}{1}', variables('abbrs').storage.storageAccount, variables('solutionPrefix'))]"
+            "value": "[format('st{0}', variables('solutionSuffix'))]"
           },
           "keyVaultName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_keyvault'), '2022-09-01').outputs.keyvaultName.value]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
           }
         },
         "template": {
@@ -1860,28 +1657,41 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.36.177.2456",
-              "templateHash": "15740867049667651602"
+              "version": "0.37.4.10188",
+              "templateHash": "3164769802823369019"
             }
           },
           "parameters": {
             "solutionLocation": {
               "type": "string",
               "metadata": {
-                "description": "Solution Location"
+                "description": "Required. Deployment location for the solution."
               }
             },
             "saName": {
               "type": "string",
               "metadata": {
-                "description": "Name"
+                "description": "Required. Name of the storage account."
               }
             },
             "managedIdentityObjectId": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Object ID of the managed identity."
+              }
             },
             "keyVaultName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Name of the Azure Key Vault."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Optional. Tags to be applied to the resources."
+              }
             }
           },
           "resources": [
@@ -1921,7 +1731,8 @@
                 },
                 "accessTier": "Hot",
                 "allowSharedKeyAccess": false
-              }
+              },
+              "tags": "[parameters('tags')]"
             },
             {
               "type": "Microsoft.Storage/storageAccounts/blobServices",
@@ -1970,7 +1781,8 @@
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'ADLS-ACCOUNT-NAME')]",
               "properties": {
                 "value": "[parameters('saName')]"
-              }
+              },
+              "tags": "[parameters('tags')]"
             },
             {
               "type": "Microsoft.KeyVault/vaults/secrets",
@@ -1978,16 +1790,23 @@
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'ADLS-ACCOUNT-CONTAINER')]",
               "properties": {
                 "value": "data"
-              }
+              },
+              "tags": "[parameters('tags')]"
             }
           ],
           "outputs": {
             "storageName": {
               "type": "string",
+              "metadata": {
+                "description": "Name of the storage account."
+              },
               "value": "[parameters('saName')]"
             },
             "storageContainer": {
               "type": "string",
+              "metadata": {
+                "description": "Name of the default storage container."
+              },
               "value": "data"
             }
           }
@@ -2022,10 +1841,13 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityOutput.value.name]"
           },
           "serverName": {
-            "value": "[format('{0}{1}', variables('abbrs').databases.sqlDatabaseServer, variables('solutionPrefix'))]"
+            "value": "[format('sql-{0}', variables('solutionSuffix'))]"
           },
           "sqlDBName": {
-            "value": "[format('{0}{1}', variables('abbrs').databases.sqlDatabase, variables('solutionPrefix'))]"
+            "value": "[format('sqldb-{0}', variables('solutionSuffix'))]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
           }
         },
         "template": {
@@ -2034,40 +1856,59 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.36.177.2456",
-              "templateHash": "17137003456218736893"
+              "version": "0.37.4.10188",
+              "templateHash": "16739666735476206580"
             }
           },
           "parameters": {
             "solutionLocation": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Deployment location for the solution."
+              }
             },
             "keyVaultName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Name of the Azure Key Vault."
+              }
             },
             "managedIdentityObjectId": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Object ID of the managed identity."
+              }
             },
             "managedIdentityName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Name of the managed identity."
+              }
             },
             "serverName": {
               "type": "string",
               "metadata": {
-                "description": "The name of the SQL logical server."
+                "description": "Required. The name of the SQL logical server."
               }
             },
             "sqlDBName": {
               "type": "string",
               "metadata": {
-                "description": "The name of the SQL Database."
+                "description": "Required. The name of the SQL Database."
               }
             },
             "location": {
               "type": "string",
               "defaultValue": "[parameters('solutionLocation')]",
               "metadata": {
-                "description": "Location for all resources."
+                "description": "Required. Location for all resources."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Optional. Tags to be applied to the resources."
               }
             }
           },
@@ -2090,7 +1931,8 @@
                   "administratorType": "ActiveDirectory",
                   "azureADOnlyAuthentication": true
                 }
-              }
+              },
+              "tags": "[parameters('tags')]"
             },
             {
               "type": "Microsoft.Sql/servers/firewallRules",
@@ -2135,6 +1977,7 @@
                 "readScale": "Disabled",
                 "zoneRedundant": false
               },
+              "tags": "[parameters('tags')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Sql/servers', parameters('serverName'))]"
               ]
@@ -2145,7 +1988,8 @@
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'SQLDB-SERVER')]",
               "properties": {
                 "value": "[format('{0}.database.windows.net', parameters('serverName'))]"
-              }
+              },
+              "tags": "[parameters('tags')]"
             },
             {
               "type": "Microsoft.KeyVault/vaults/secrets",
@@ -2153,16 +1997,23 @@
               "name": "[format('{0}/{1}', parameters('keyVaultName'), 'SQLDB-DATABASE')]",
               "properties": {
                 "value": "[parameters('sqlDBName')]"
-              }
+              },
+              "tags": "[parameters('tags')]"
             }
           ],
           "outputs": {
             "sqlServerName": {
               "type": "string",
+              "metadata": {
+                "description": "Name of the SQL logical server."
+              },
               "value": "[parameters('serverName')]"
             },
             "sqlDbName": {
               "type": "string",
+              "metadata": {
+                "description": "Name of the SQL database."
+              },
               "value": "[parameters('sqlDBName')]"
             }
           }
@@ -2187,88 +2038,88 @@
           "solutionLocation": {
             "value": "[variables('solutionLocation')]"
           },
-          "HostingPlanName": {
+          "hostingPlanName": {
             "value": "[variables('hostingPlanName')]"
           },
-          "WebsiteName": {
+          "websiteName": {
             "value": "[variables('websiteName')]"
           },
-          "AppEnvironment": {
+          "appEnvironment": {
             "value": "[variables('appEnvironment')]"
           },
-          "AzureSearchService": {
+          "azureSearchService": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchService.value]"
           },
-          "AzureSearchIndex": {
+          "azureSearchIndex": {
             "value": "[variables('azureSearchIndex')]"
           },
-          "AzureSearchUseSemanticSearch": {
+          "azureSearchUseSemanticSearch": {
             "value": "[variables('azureSearchUseSemanticSearch')]"
           },
-          "AzureSearchSemanticSearchConfig": {
+          "azureSearchSemanticSearchConfig": {
             "value": "[variables('azureSearchSemanticSearchConfig')]"
           },
-          "AzureSearchTopK": {
+          "azureSearchTopK": {
             "value": "[variables('azureSearchTopK')]"
           },
-          "AzureSearchContentColumns": {
+          "azureSearchContentColumns": {
             "value": "[variables('azureSearchContentColumns')]"
           },
-          "AzureSearchFilenameColumn": {
+          "azureSearchFilenameColumn": {
             "value": "[variables('azureSearchFilenameColumn')]"
           },
-          "AzureSearchTitleColumn": {
+          "azureSearchTitleColumn": {
             "value": "[variables('azureSearchTitleColumn')]"
           },
-          "AzureSearchUrlColumn": {
+          "azureSearchUrlColumn": {
             "value": "[variables('azureSearchUrlColumn')]"
           },
-          "AzureOpenAIResource": {
+          "azureOpenAIResource": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryName.value]"
           },
-          "AzureOpenAIEndpoint": {
+          "azureOpenAIEndpoint": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aoaiEndpoint.value]"
           },
-          "AzureOpenAIModel": {
+          "azureOpenAIModel": {
             "value": "[parameters('gptModelName')]"
           },
-          "AzureOpenAITemperature": {
+          "azureOpenAITemperature": {
             "value": "[variables('azureOpenAITemperature')]"
           },
-          "AzureOpenAITopP": {
+          "azureOpenAITopP": {
             "value": "[variables('azureOpenAITopP')]"
           },
-          "AzureOpenAIMaxTokens": {
+          "azureOpenAIMaxTokens": {
             "value": "[variables('azureOpenAIMaxTokens')]"
           },
-          "AzureOpenAIStopSequence": {
+          "azureOpenAIStopSequence": {
             "value": "[variables('azureOpenAIStopSequence')]"
           },
-          "AzureOpenAISystemMessage": {
+          "azureOpenAISystemMessage": {
             "value": "[variables('azureOpenAISystemMessage')]"
           },
-          "AzureOpenAIApiVersion": {
+          "azureOpenAIApiVersion": {
             "value": "[parameters('azureOpenaiAPIVersion')]"
           },
-          "AzureOpenAIStream": {
+          "azureOpenAIStream": {
             "value": "[variables('azureOpenAIStream')]"
           },
-          "AzureSearchQueryType": {
+          "azureSearchQueryType": {
             "value": "[variables('azureSearchQueryType')]"
           },
-          "AzureSearchVectorFields": {
+          "azureSearchVectorFields": {
             "value": "[variables('azureSearchVectorFields')]"
           },
-          "AzureSearchPermittedGroupsField": {
+          "azureSearchPermittedGroupsField": {
             "value": "[variables('azureSearchPermittedGroupsField')]"
           },
-          "AzureSearchStrictness": {
+          "azureSearchStrictness": {
             "value": "[variables('azureSearchStrictness')]"
           },
-          "AzureOpenAIEmbeddingName": {
+          "azureOpenAIEmbeddingName": {
             "value": "[parameters('embeddingModel')]"
           },
-          "AzureOpenAIEmbeddingEndpoint": {
+          "azureOpenAIEmbeddingEndpoint": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aoaiEndpoint.value]"
           },
           "USE_INTERNAL_STREAM": {
@@ -2330,6 +2181,9 @@
           },
           "aiSearchProjectConnectionName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchFoundryConnectionName.value]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
           }
         },
         "template": {
@@ -2338,18 +2192,18 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.36.177.2456",
-              "templateHash": "17855260504239152628"
+              "version": "0.37.4.10188",
+              "templateHash": "1598037199910826757"
             }
           },
           "parameters": {
             "solutionLocation": {
               "type": "string",
               "metadata": {
-                "description": "Solution Location"
+                "description": "Required. Solution Location"
               }
             },
-            "HostingPlanSku": {
+            "hostingPlanSku": {
               "type": "string",
               "defaultValue": "B2",
               "allowedValues": [
@@ -2368,157 +2222,167 @@
                 "P0v3"
               ],
               "metadata": {
-                "description": "The pricing tier for the App Service plan"
+                "description": "Optional. The pricing tier for the App Service plan"
               }
             },
-            "HostingPlanName": {
-              "type": "string"
+            "hostingPlanName": {
+              "type": "string",
+              "metadata": {
+                "description": "Required. Name of App Service plan"
+              }
             },
-            "WebsiteName": {
-              "type": "string"
+            "websiteName": {
+              "type": "string",
+              "metadata": {
+                "description": "Required. Name of Web App"
+              }
             },
-            "AppEnvironment": {
-              "type": "string"
+            "appEnvironment": {
+              "type": "string",
+              "metadata": {
+                "description": "Specifies the application environment"
+              }
             },
-            "AzureSearchService": {
+            "azureSearchService": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "Name of Azure Search Service"
+                "description": "Optional. Name of Azure Search Service"
               }
             },
-            "AzureSearchIndex": {
+            "azureSearchIndex": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "Name of Azure Search Index"
+                "description": "Optional. Name of Azure Search Index"
               }
             },
-            "AzureSearchUseSemanticSearch": {
+            "azureSearchUseSemanticSearch": {
               "type": "string",
               "defaultValue": "False",
               "metadata": {
-                "description": "Use semantic search"
+                "description": "Optional. Use semantic search"
               }
             },
-            "AzureSearchSemanticSearchConfig": {
+            "azureSearchSemanticSearchConfig": {
               "type": "string",
               "defaultValue": "default",
               "metadata": {
-                "description": "Semantic search config"
+                "description": "Optional. Semantic search config"
               }
             },
-            "AzureSearchTopK": {
+            "azureSearchTopK": {
               "type": "string",
               "defaultValue": "5",
               "metadata": {
-                "description": "Top K results"
+                "description": "Optional. Top K results"
               }
             },
-            "AzureSearchEnableInDomain": {
+            "azureSearchEnableInDomain": {
               "type": "string",
               "defaultValue": "False",
               "metadata": {
-                "description": "Enable in domain"
+                "description": "Optional. Enable in domain"
               }
             },
-            "AzureSearchContentColumns": {
+            "azureSearchContentColumns": {
               "type": "string",
               "defaultValue": "content",
               "metadata": {
-                "description": "Content columns"
+                "description": "Optional. Content columns"
               }
             },
-            "AzureSearchFilenameColumn": {
+            "azureSearchFilenameColumn": {
               "type": "string",
               "defaultValue": "filename",
               "metadata": {
-                "description": "Filename column"
+                "description": "Optional. Filename column"
               }
             },
-            "AzureSearchTitleColumn": {
+            "azureSearchTitleColumn": {
               "type": "string",
               "defaultValue": "client_id",
               "metadata": {
-                "description": "Title column"
+                "description": "Optional. Title column"
               }
             },
-            "AzureSearchUrlColumn": {
+            "azureSearchUrlColumn": {
               "type": "string",
               "defaultValue": "sourceurl",
               "metadata": {
-                "description": "Url column"
+                "description": "Optional. Url column"
               }
             },
-            "AzureOpenAIResource": {
+            "azureOpenAIResource": {
               "type": "string",
               "metadata": {
-                "description": "Name of Azure OpenAI Resource"
+                "description": "Required. Name of Azure OpenAI Resource"
               }
             },
-            "AzureOpenAIModel": {
+            "azureOpenAIModel": {
               "type": "string",
+              "defaultValue": "gpt-4o-mini",
               "metadata": {
-                "description": "Azure OpenAI Model Deployment Name"
+                "description": "Optional. Azure OpenAI Model Deployment Name"
               }
             },
-            "AzureOpenAIEndpoint": {
+            "azureOpenAIEndpoint": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "Azure Open AI Endpoint"
+                "description": "Optional. Azure Open AI Endpoint"
               }
             },
-            "AzureOpenAITemperature": {
+            "azureOpenAITemperature": {
               "type": "string",
               "defaultValue": "0",
               "metadata": {
-                "description": "Azure OpenAI Temperature"
+                "description": "Optional. Azure OpenAI Temperature"
               }
             },
-            "AzureOpenAITopP": {
+            "azureOpenAITopP": {
               "type": "string",
               "defaultValue": "1",
               "metadata": {
-                "description": "Azure OpenAI Top P"
+                "description": "Optional. Azure OpenAI Top P"
               }
             },
-            "AzureOpenAIMaxTokens": {
+            "azureOpenAIMaxTokens": {
               "type": "string",
               "defaultValue": "1000",
               "metadata": {
-                "description": "Azure OpenAI Max Tokens"
+                "description": "Optional. Azure OpenAI Max Tokens"
               }
             },
-            "AzureOpenAIStopSequence": {
+            "azureOpenAIStopSequence": {
               "type": "string",
               "defaultValue": "\n",
               "metadata": {
-                "description": "Azure OpenAI Stop Sequence"
+                "description": "Optional. Azure OpenAI Stop Sequence"
               }
             },
-            "AzureOpenAISystemMessage": {
+            "azureOpenAISystemMessage": {
               "type": "string",
               "defaultValue": "You are an AI assistant that helps people find information.",
               "metadata": {
-                "description": "Azure OpenAI System Message"
+                "description": "Optional. Azure OpenAI System Message"
               }
             },
-            "AzureOpenAIApiVersion": {
+            "azureOpenAIApiVersion": {
               "type": "string",
               "defaultValue": "2024-02-15-preview",
               "metadata": {
-                "description": "Azure OpenAI Api Version"
+                "description": "Optional. Azure OpenAI Api Version"
               }
             },
-            "AzureOpenAIStream": {
+            "azureOpenAIStream": {
               "type": "string",
               "defaultValue": "True",
               "metadata": {
-                "description": "Whether or not to stream responses from Azure OpenAI"
+                "description": "Optional. Whether or not to stream responses from Azure OpenAI"
               }
             },
-            "AzureSearchQueryType": {
+            "azureSearchQueryType": {
               "type": "string",
               "defaultValue": "simple",
               "allowedValues": [
@@ -2529,24 +2393,24 @@
                 "vectorSemanticHybrid"
               ],
               "metadata": {
-                "description": "Azure Search Query Type"
+                "description": "Optional. Azure Search Query Type"
               }
             },
-            "AzureSearchVectorFields": {
+            "azureSearchVectorFields": {
               "type": "string",
               "defaultValue": "contentVector",
               "metadata": {
-                "description": "Azure Search Vector Fields"
+                "description": "Optional. Azure Search Vector Fields"
               }
             },
-            "AzureSearchPermittedGroupsField": {
+            "azureSearchPermittedGroupsField": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "Azure Search Permitted Groups Field"
+                "description": "Optional. Azure Search Permitted Groups Field"
               }
             },
-            "AzureSearchStrictness": {
+            "azureSearchStrictness": {
               "type": "string",
               "defaultValue": "3",
               "allowedValues": [
@@ -2557,128 +2421,168 @@
                 "5"
               ],
               "metadata": {
-                "description": "Azure Search Strictness"
+                "description": "Optional. Azure Search Strictness"
               }
             },
-            "AzureOpenAIEmbeddingName": {
+            "azureOpenAIEmbeddingName": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "Azure OpenAI Embedding Deployment Name"
+                "description": "Optional. Azure OpenAI Embedding Deployment Name"
               }
             },
-            "AzureOpenAIEmbeddingEndpoint": {
+            "azureOpenAIEmbeddingEndpoint": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "Azure Open AI Embedding Endpoint"
+                "description": "Optional. Azure Open AI Embedding Endpoint"
               }
             },
             "USE_INTERNAL_STREAM": {
               "type": "string",
               "defaultValue": "True",
               "metadata": {
-                "description": "Use Azure Function"
+                "description": "Optional. Use Azure Function"
               }
             },
             "SQLDB_SERVER": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "SQL Database Server Name"
+                "description": "Optional. SQL Database Server Name"
               }
             },
             "SQLDB_DATABASE": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "SQL Database Name"
+                "description": "Optional. SQL Database Name"
               }
             },
             "AZURE_COSMOSDB_ACCOUNT": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "Azure Cosmos DB Account"
+                "description": "Optional. Azure Cosmos DB Account"
               }
             },
             "AZURE_COSMOSDB_CONVERSATIONS_CONTAINER": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "Azure Cosmos DB Conversations Container"
+                "description": "Optional. Azure Cosmos DB Conversations Container"
               }
             },
             "AZURE_COSMOSDB_DATABASE": {
               "type": "string",
               "defaultValue": "",
               "metadata": {
-                "description": "Azure Cosmos DB Database"
+                "description": "Optional. Azure Cosmos DB Database"
               }
             },
             "AZURE_COSMOSDB_ENABLE_FEEDBACK": {
               "type": "string",
               "defaultValue": "True",
               "metadata": {
-                "description": "Enable feedback in Cosmos DB"
+                "description": "Optional. Enable feedback in Cosmos DB"
               }
             },
             "imageTag": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. The container image tag to be deployed"
+              }
             },
             "userassignedIdentityId": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. The resource ID of the user-assigned managed identity to be used by the deployed resources."
+              }
             },
             "userassignedIdentityClientId": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. The client ID of the user-assigned managed identity."
+              }
             },
             "applicationInsightsId": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. The Instrumentation Key or Resource ID of the Application Insights resource used for monitoring."
+              }
             },
             "azureSearchServiceEndpoint": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. The endpoint URL of the Azure Cognitive Search service."
+              }
             },
             "sqlSystemPrompt": {
               "type": "string",
               "metadata": {
-                "description": "Azure Function App SQL System Prompt"
+                "description": "Required. Azure Function App SQL System Prompt"
               }
             },
             "callTranscriptSystemPrompt": {
               "type": "string",
               "metadata": {
-                "description": "Azure Function App CallTranscript System Prompt"
+                "description": "Required. Azure Function App CallTranscript System Prompt"
               }
             },
             "streamTextSystemPrompt": {
               "type": "string",
               "metadata": {
-                "description": "Azure Function App Stream Text System Prompt"
+                "description": "Required. Azure Function App Stream Text System Prompt"
               }
             },
             "aiFoundryProjectEndpoint": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. AI Foundry project endpoint URL."
+              }
             },
             "useAIProjectClientFlag": {
               "type": "string",
-              "defaultValue": "false"
+              "defaultValue": "false",
+              "metadata": {
+                "description": "Optional. Flag to enable AI project client."
+              }
             },
             "aiFoundryName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Name of the AI Foundry project."
+              }
             },
             "applicationInsightsConnectionString": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Application Insights connection string."
+              }
             },
             "aiSearchProjectConnectionName": {
-              "type": "string"
+              "type": "string",
+              "metadata": {
+                "description": "Required. Connection name for Azure Cognitive Search."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Optional. Tags to be applied to the resources."
+              }
             },
             "azureExistingAIProjectResourceId": {
               "type": "string",
-              "defaultValue": ""
+              "defaultValue": "",
+              "metadata": {
+                "description": "Optional. Resource ID of the existing AI Foundry project."
+              }
             }
           },
           "variables": {
-            "WebAppImageName": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:{0}', parameters('imageTag'))]",
+            "webAppImageName": "[format('DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:{0}', parameters('imageTag'))]",
             "existingAIServiceSubscription": "[if(not(empty(parameters('azureExistingAIProjectResourceId'))), split(parameters('azureExistingAIProjectResourceId'), '/')[2], subscription().subscriptionId)]",
             "existingAIServiceResourceGroup": "[if(not(empty(parameters('azureExistingAIProjectResourceId'))), split(parameters('azureExistingAIProjectResourceId'), '/')[4], resourceGroup().name)]",
             "existingAIServicesName": "[if(not(empty(parameters('azureExistingAIProjectResourceId'))), split(parameters('azureExistingAIProjectResourceId'), '/')[8], '')]",
@@ -2688,21 +2592,22 @@
             {
               "type": "Microsoft.Web/serverfarms",
               "apiVersion": "2020-06-01",
-              "name": "[parameters('HostingPlanName')]",
+              "name": "[parameters('hostingPlanName')]",
               "location": "[parameters('solutionLocation')]",
               "sku": {
-                "name": "[parameters('HostingPlanSku')]"
+                "name": "[parameters('hostingPlanSku')]"
               },
               "properties": {
-                "name": "[parameters('HostingPlanName')]",
+                "name": "[parameters('hostingPlanName')]",
                 "reserved": true
               },
-              "kind": "linux"
+              "kind": "linux",
+              "tags": "[parameters('tags')]"
             },
             {
               "type": "Microsoft.Web/sites",
               "apiVersion": "2020-06-01",
-              "name": "[parameters('WebsiteName')]",
+              "name": "[parameters('websiteName')]",
               "location": "[parameters('solutionLocation')]",
               "identity": {
                 "type": "SystemAssigned, UserAssigned",
@@ -2711,12 +2616,12 @@
                 }
               },
               "properties": {
-                "serverFarmId": "[parameters('HostingPlanName')]",
+                "serverFarmId": "[parameters('hostingPlanName')]",
                 "siteConfig": {
                   "appSettings": [
                     {
                       "name": "APP_ENV",
-                      "value": "[parameters('AppEnvironment')]"
+                      "value": "[parameters('appEnvironment')]"
                     },
                     {
                       "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -2728,107 +2633,107 @@
                     },
                     {
                       "name": "AZURE_SEARCH_SERVICE",
-                      "value": "[parameters('AzureSearchService')]"
+                      "value": "[parameters('azureSearchService')]"
                     },
                     {
                       "name": "AZURE_SEARCH_INDEX",
-                      "value": "[parameters('AzureSearchIndex')]"
+                      "value": "[parameters('azureSearchIndex')]"
                     },
                     {
                       "name": "AZURE_SEARCH_USE_SEMANTIC_SEARCH",
-                      "value": "[parameters('AzureSearchUseSemanticSearch')]"
+                      "value": "[parameters('azureSearchUseSemanticSearch')]"
                     },
                     {
                       "name": "AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG",
-                      "value": "[parameters('AzureSearchSemanticSearchConfig')]"
+                      "value": "[parameters('azureSearchSemanticSearchConfig')]"
                     },
                     {
                       "name": "AZURE_SEARCH_TOP_K",
-                      "value": "[parameters('AzureSearchTopK')]"
+                      "value": "[parameters('azureSearchTopK')]"
                     },
                     {
                       "name": "AZURE_SEARCH_ENABLE_IN_DOMAIN",
-                      "value": "[parameters('AzureSearchEnableInDomain')]"
+                      "value": "[parameters('azureSearchEnableInDomain')]"
                     },
                     {
                       "name": "AZURE_SEARCH_CONTENT_COLUMNS",
-                      "value": "[parameters('AzureSearchContentColumns')]"
+                      "value": "[parameters('azureSearchContentColumns')]"
                     },
                     {
                       "name": "AZURE_SEARCH_FILENAME_COLUMN",
-                      "value": "[parameters('AzureSearchFilenameColumn')]"
+                      "value": "[parameters('azureSearchFilenameColumn')]"
                     },
                     {
                       "name": "AZURE_SEARCH_TITLE_COLUMN",
-                      "value": "[parameters('AzureSearchTitleColumn')]"
+                      "value": "[parameters('azureSearchTitleColumn')]"
                     },
                     {
                       "name": "AZURE_SEARCH_URL_COLUMN",
-                      "value": "[parameters('AzureSearchUrlColumn')]"
+                      "value": "[parameters('azureSearchUrlColumn')]"
                     },
                     {
                       "name": "AZURE_OPENAI_RESOURCE",
-                      "value": "[parameters('AzureOpenAIResource')]"
+                      "value": "[parameters('azureOpenAIResource')]"
                     },
                     {
                       "name": "AZURE_OPENAI_MODEL",
-                      "value": "[parameters('AzureOpenAIModel')]"
+                      "value": "[parameters('azureOpenAIModel')]"
                     },
                     {
                       "name": "AZURE_OPENAI_ENDPOINT",
-                      "value": "[parameters('AzureOpenAIEndpoint')]"
+                      "value": "[parameters('azureOpenAIEndpoint')]"
                     },
                     {
                       "name": "AZURE_OPENAI_TEMPERATURE",
-                      "value": "[parameters('AzureOpenAITemperature')]"
+                      "value": "[parameters('azureOpenAITemperature')]"
                     },
                     {
                       "name": "AZURE_OPENAI_TOP_P",
-                      "value": "[parameters('AzureOpenAITopP')]"
+                      "value": "[parameters('azureOpenAITopP')]"
                     },
                     {
                       "name": "AZURE_OPENAI_MAX_TOKENS",
-                      "value": "[parameters('AzureOpenAIMaxTokens')]"
+                      "value": "[parameters('azureOpenAIMaxTokens')]"
                     },
                     {
                       "name": "AZURE_OPENAI_STOP_SEQUENCE",
-                      "value": "[parameters('AzureOpenAIStopSequence')]"
+                      "value": "[parameters('azureOpenAIStopSequence')]"
                     },
                     {
                       "name": "AZURE_OPENAI_SYSTEM_MESSAGE",
-                      "value": "[parameters('AzureOpenAISystemMessage')]"
+                      "value": "[parameters('azureOpenAISystemMessage')]"
                     },
                     {
                       "name": "AZURE_OPENAI_PREVIEW_API_VERSION",
-                      "value": "[parameters('AzureOpenAIApiVersion')]"
+                      "value": "[parameters('azureOpenAIApiVersion')]"
                     },
                     {
                       "name": "AZURE_OPENAI_STREAM",
-                      "value": "[parameters('AzureOpenAIStream')]"
+                      "value": "[parameters('azureOpenAIStream')]"
                     },
                     {
                       "name": "AZURE_SEARCH_QUERY_TYPE",
-                      "value": "[parameters('AzureSearchQueryType')]"
+                      "value": "[parameters('azureSearchQueryType')]"
                     },
                     {
                       "name": "AZURE_SEARCH_VECTOR_COLUMNS",
-                      "value": "[parameters('AzureSearchVectorFields')]"
+                      "value": "[parameters('azureSearchVectorFields')]"
                     },
                     {
                       "name": "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN",
-                      "value": "[parameters('AzureSearchPermittedGroupsField')]"
+                      "value": "[parameters('azureSearchPermittedGroupsField')]"
                     },
                     {
                       "name": "AZURE_SEARCH_STRICTNESS",
-                      "value": "[parameters('AzureSearchStrictness')]"
+                      "value": "[parameters('azureSearchStrictness')]"
                     },
                     {
                       "name": "AZURE_OPENAI_EMBEDDING_NAME",
-                      "value": "[parameters('AzureOpenAIEmbeddingName')]"
+                      "value": "[parameters('azureOpenAIEmbeddingName')]"
                     },
                     {
                       "name": "AZURE_OPENAI_EMBEDDING_ENDPOINT",
-                      "value": "[parameters('AzureOpenAIEmbeddingEndpoint')]"
+                      "value": "[parameters('azureOpenAIEmbeddingEndpoint')]"
                     },
                     {
                       "name": "SQLDB_SERVER",
@@ -2888,22 +2793,23 @@
                     },
                     {
                       "name": "AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME",
-                      "value": "[parameters('AzureOpenAIModel')]"
+                      "value": "[parameters('azureOpenAIModel')]"
                     },
                     {
                       "name": "AZURE_AI_AGENT_API_VERSION",
-                      "value": "[parameters('AzureOpenAIApiVersion')]"
+                      "value": "[parameters('azureOpenAIApiVersion')]"
                     },
                     {
                       "name": "AZURE_SEARCH_CONNECTION_NAME",
                       "value": "[parameters('aiSearchProjectConnectionName')]"
                     }
                   ],
-                  "linuxFxVersion": "[variables('WebAppImageName')]"
+                  "linuxFxVersion": "[variables('webAppImageName')]"
                 }
               },
+              "tags": "[parameters('tags')]",
               "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', parameters('HostingPlanName'))]"
+                "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
               ]
             },
             {
@@ -2912,18 +2818,18 @@
               "apiVersion": "2022-04-01",
               "name": "[guid(resourceGroup().id, extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), extensionResourceId(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), 'Microsoft.Authorization/roleDefinitions', '53ca6127-db72-4b80-b1b0-d745d6d5456d'))]",
               "properties": {
-                "principalId": "[reference(resourceId('Microsoft.Web/sites', parameters('WebsiteName')), '2020-06-01', 'full').identity.principalId]",
+                "principalId": "[reference(resourceId('Microsoft.Web/sites', parameters('websiteName')), '2020-06-01', 'full').identity.principalId]",
                 "roleDefinitionId": "[extensionResourceId(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), 'Microsoft.Authorization/roleDefinitions', '53ca6127-db72-4b80-b1b0-d745d6d5456d')]",
                 "principalType": "ServicePrincipal"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('websiteName'))]"
               ]
             },
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('cosmos-sql-user-role-{0}', parameters('WebsiteName'))]",
+              "name": "[format('cosmos-sql-user-role-{0}', parameters('websiteName'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -2937,7 +2843,7 @@
                     "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', split(format('{0}/00000000-0000-0000-0000-000000000002', parameters('AZURE_COSMOSDB_ACCOUNT')), '/')[0], split(format('{0}/00000000-0000-0000-0000-000000000002', parameters('AZURE_COSMOSDB_ACCOUNT')), '/')[1])]"
                   },
                   "principalId": {
-                    "value": "[reference(resourceId('Microsoft.Web/sites', parameters('WebsiteName')), '2020-06-01', 'full').identity.principalId]"
+                    "value": "[reference(resourceId('Microsoft.Web/sites', parameters('websiteName')), '2020-06-01', 'full').identity.principalId]"
                   }
                 },
                 "template": {
@@ -2946,21 +2852,30 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.36.177.2456",
-                      "templateHash": "9287160422728403181"
+                      "version": "0.37.4.10188",
+                      "templateHash": "13822905633352095375"
                     },
                     "description": "Creates a SQL role assignment under an Azure Cosmos DB account."
                   },
                   "parameters": {
                     "accountName": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. Name of the Azure Cosmos DB account."
+                      }
                     },
                     "roleDefinitionId": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. ID of the Cosmos DB SQL role definition."
+                      }
                     },
                     "principalId": {
                       "type": "string",
-                      "defaultValue": ""
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Otional. Principal ID to assign the role to."
+                      }
                     }
                   },
                   "resources": [
@@ -2978,7 +2893,7 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('websiteName'))]"
               ]
             },
             {
@@ -2995,17 +2910,20 @@
                 "mode": "Incremental",
                 "parameters": {
                   "principalId": {
-                    "value": "[reference(resourceId('Microsoft.Web/sites', parameters('WebsiteName')), '2020-06-01', 'full').identity.principalId]"
+                    "value": "[reference(resourceId('Microsoft.Web/sites', parameters('websiteName')), '2020-06-01', 'full').identity.principalId]"
                   },
                   "roleDefinitionId": {
                     "value": "[extensionResourceId(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), 'Microsoft.Authorization/roleDefinitions', '53ca6127-db72-4b80-b1b0-d745d6d5456d')]"
                   },
                   "roleAssignmentName": {
-                    "value": "[guid(parameters('WebsiteName'), extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), extensionResourceId(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), 'Microsoft.Authorization/roleDefinitions', '53ca6127-db72-4b80-b1b0-d745d6d5456d'))]"
+                    "value": "[guid(parameters('websiteName'), extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), extensionResourceId(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('existingAIServiceSubscription'), variables('existingAIServiceResourceGroup')), 'Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), 'Microsoft.Authorization/roleDefinitions', '53ca6127-db72-4b80-b1b0-d745d6d5456d'))]"
                   },
                   "aiFoundryName": "[if(not(empty(parameters('azureExistingAIProjectResourceId'))), createObject('value', variables('existingAIServicesName')), createObject('value', parameters('aiFoundryName')))]",
                   "aiProjectName": {
                     "value": "[variables('existingAIProjectName')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
                   }
                 },
                 "template": {
@@ -3014,32 +2932,57 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.36.177.2456",
-                      "templateHash": "9088273662782005929"
+                      "version": "0.37.4.10188",
+                      "templateHash": "14256377996349985323"
                     }
                   },
                   "parameters": {
                     "principalId": {
                       "type": "string",
-                      "defaultValue": ""
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Optional. Principal ID to assign the role to."
+                      }
                     },
                     "roleDefinitionId": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. ID of the role definition to assign."
+                      }
                     },
                     "roleAssignmentName": {
                       "type": "string",
-                      "defaultValue": ""
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Optional. Name of the role assignment."
+                      }
                     },
                     "aiFoundryName": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Required. Name of the AI Foundry resource."
+                      }
                     },
                     "aiProjectName": {
                       "type": "string",
-                      "defaultValue": ""
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Optional. Name of the AI project."
+                      }
                     },
                     "aiModelDeployments": {
                       "type": "array",
-                      "defaultValue": []
+                      "defaultValue": [],
+                      "metadata": {
+                        "description": "Optional. List of AI model deployments."
+                      }
+                    },
+                    "tags": {
+                      "type": "object",
+                      "defaultValue": {},
+                      "metadata": {
+                        "description": "Optional. Tags to be applied to the resources."
+                      }
                     }
                   },
                   "resources": [
@@ -3064,7 +3007,8 @@
                       "sku": {
                         "name": "[parameters('aiModelDeployments')[copyIndex()].sku.name]",
                         "capacity": "[parameters('aiModelDeployments')[copyIndex()].sku.capacity]"
-                      }
+                      },
+                      "tags": "[parameters('tags')]"
                     },
                     {
                       "type": "Microsoft.Authorization/roleAssignments",
@@ -3081,28 +3025,40 @@
                   "outputs": {
                     "aiServicesPrincipalId": {
                       "type": "string",
+                      "metadata": {
+                        "description": "Principal ID of the AI Services resource."
+                      },
                       "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('aiFoundryName')), '2025-04-01-preview', 'full').identity.principalId]"
                     },
                     "aiProjectPrincipalId": {
                       "type": "string",
+                      "metadata": {
+                        "description": "Principal ID of the AI Project resource if defined."
+                      },
                       "value": "[if(not(empty(parameters('aiProjectName'))), reference(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiFoundryName'), parameters('aiProjectName')), '2025-04-01-preview', 'full').identity.principalId, '')]"
                     }
                   }
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('WebsiteName'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('websiteName'))]"
               ]
             }
           ],
           "outputs": {
             "webAppUrl": {
               "type": "string",
-              "value": "[format('https://{0}.azurewebsites.net', parameters('WebsiteName'))]"
+              "metadata": {
+                "description": "URL of the deployed web application."
+              },
+              "value": "[format('https://{0}.azurewebsites.net', parameters('websiteName'))]"
             },
             "webAppName": {
               "type": "string",
-              "value": "[parameters('WebsiteName')]"
+              "metadata": {
+                "description": "Name of the deployed web application."
+              },
+              "value": "[parameters('websiteName')]"
             }
           }
         }
@@ -3118,234 +3074,408 @@
   "outputs": {
     "WEB_APP_URL": {
       "type": "string",
+      "metadata": {
+        "description": "URL of the deployed web application."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_app_service'), '2022-09-01').outputs.webAppUrl.value]"
     },
     "STORAGE_ACCOUNT_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the storage account."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageName.value]"
     },
     "STORAGE_CONTAINER_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the storage container."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_storage_account'), '2022-09-01').outputs.storageContainer.value]"
     },
     "KEY_VAULT_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the Key Vault."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_keyvault'), '2022-09-01').outputs.keyvaultName.value]"
     },
     "COSMOSDB_ACCOUNT_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the Cosmos DB account."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosAccountName.value]"
     },
     "RESOURCE_GROUP_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the resource group."
+      },
       "value": "[resourceGroup().name]"
     },
     "AI_FOUNDRY_RESOURCE_ID": {
       "type": "string",
+      "metadata": {
+        "description": "The resource ID of the AI Foundry instance."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryId.value]"
     },
     "SQLDB_SERVER_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the SQL Database server."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value]"
     },
     "SQLDB_DATABASE": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the SQL Database."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlDbName.value]"
     },
     "MANAGEDIDENTITY_WEBAPP_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the managed identity used by the web app."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.name]"
     },
     "MANAGEDIDENTITY_WEBAPP_CLIENTID": {
       "type": "string",
+      "metadata": {
+        "description": "Client ID of the managed identity used by the web app."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.clientId]"
     },
     "AI_SEARCH_SERVICE_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the AI Search service."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchService.value]"
     },
     "WEB_APP_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "Name of the deployed web application."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_app_service'), '2022-09-01').outputs.webAppName.value]"
     },
     "APP_ENV": {
       "type": "string",
+      "metadata": {
+        "description": "Specifies the current application environment."
+      },
       "value": "[variables('appEnvironment')]"
     },
     "APPINSIGHTS_INSTRUMENTATIONKEY": {
       "type": "string",
+      "metadata": {
+        "description": "The Application Insights instrumentation key."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.instrumentationKey.value]"
     },
     "APPLICATIONINSIGHTS_CONNECTION_STRING": {
       "type": "string",
+      "metadata": {
+        "description": "The Application Insights connection string."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.applicationInsightsConnectionString.value]"
     },
     "AZURE_AI_AGENT_API_VERSION": {
       "type": "string",
+      "metadata": {
+        "description": "The API version used for the Azure AI Agent service."
+      },
       "value": "[parameters('azureOpenaiAPIVersion')]"
     },
     "AZURE_AI_AGENT_ENDPOINT": {
       "type": "string",
+      "metadata": {
+        "description": "The endpoint URL of the Azure AI Agent project."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryProjectEndpoint.value]"
     },
     "AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "The deployment name of the GPT model for the Azure AI Agent."
+      },
       "value": "[parameters('gptModelName')]"
     },
     "AZURE_AI_SEARCH_ENDPOINT": {
       "type": "string",
+      "metadata": {
+        "description": "The endpoint URL of the Azure AI Search service."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchTarget.value]"
     },
     "AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT": {
       "type": "string",
+      "metadata": {
+        "description": "The system prompt used for call transcript processing in Azure Functions."
+      },
       "value": "[variables('functionAppCallTranscriptSystemPrompt')]"
     },
     "AZURE_COSMOSDB_ACCOUNT": {
       "type": "string",
+      "metadata": {
+        "description": "The name of the Azure Cosmos DB account."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosAccountName.value]"
     },
     "AZURE_COSMOSDB_CONVERSATIONS_CONTAINER": {
       "type": "string",
+      "metadata": {
+        "description": "The name of the Azure Cosmos DB container for storing conversations."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosContainerName.value]"
     },
     "AZURE_COSMOSDB_DATABASE": {
       "type": "string",
+      "metadata": {
+        "description": "The name of the Azure Cosmos DB database."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_cosmos_db'), '2022-09-01').outputs.cosmosDatabaseName.value]"
     },
     "AZURE_COSMOSDB_ENABLE_FEEDBACK": {
       "type": "string",
+      "metadata": {
+        "description": "Indicates whether feedback is enabled in Azure Cosmos DB."
+      },
       "value": "[variables('azureCosmosDbEnableFeedback')]"
     },
     "AZURE_OPENAI_EMBEDDING_ENDPOINT": {
       "type": "string",
+      "metadata": {
+        "description": "The endpoint URL for the Azure OpenAI Embedding model."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aoaiEndpoint.value]"
     },
     "AZURE_OPENAI_EMBEDDING_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "The name of the Azure OpenAI Embedding model."
+      },
       "value": "[parameters('embeddingModel')]"
     },
     "AZURE_OPENAI_ENDPOINT": {
       "type": "string",
+      "metadata": {
+        "description": "The endpoint URL for the Azure OpenAI service."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aoaiEndpoint.value]"
     },
     "AZURE_OPENAI_MAX_TOKENS": {
       "type": "string",
+      "metadata": {
+        "description": "The maximum number of tokens for Azure OpenAI responses."
+      },
       "value": "[variables('azureOpenAIMaxTokens')]"
     },
     "AZURE_OPENAI_MODEL": {
       "type": "string",
+      "metadata": {
+        "description": "The name of the Azure OpenAI GPT model."
+      },
       "value": "[parameters('gptModelName')]"
     },
     "AZURE_OPENAI_PREVIEW_API_VERSION": {
       "type": "string",
+      "metadata": {
+        "description": "The preview API version for Azure OpenAI."
+      },
       "value": "[parameters('azureOpenaiAPIVersion')]"
     },
     "AZURE_OPENAI_RESOURCE": {
       "type": "string",
+      "metadata": {
+        "description": "The Azure OpenAI resource name."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiFoundryName.value]"
     },
     "AZURE_OPENAI_STOP_SEQUENCE": {
       "type": "string",
+      "metadata": {
+        "description": "The stop sequence(s) for Azure OpenAI responses."
+      },
       "value": "[variables('azureOpenAIStopSequence')]"
     },
     "AZURE_OPENAI_STREAM": {
       "type": "string",
+      "metadata": {
+        "description": "Indicates whether streaming is enabled for Azure OpenAI responses."
+      },
       "value": "[variables('azureOpenAIStream')]"
     },
     "AZURE_OPENAI_STREAM_TEXT_SYSTEM_PROMPT": {
       "type": "string",
+      "metadata": {
+        "description": "The system prompt for streaming text responses in Azure Functions."
+      },
       "value": "[variables('functionAppStreamTextSystemPrompt')]"
     },
     "AZURE_OPENAI_SYSTEM_MESSAGE": {
       "type": "string",
+      "metadata": {
+        "description": "The system message for Azure OpenAI requests."
+      },
       "value": "[variables('azureOpenAISystemMessage')]"
     },
     "AZURE_OPENAI_TEMPERATURE": {
       "type": "string",
+      "metadata": {
+        "description": "The temperature setting for Azure OpenAI responses."
+      },
       "value": "[variables('azureOpenAITemperature')]"
     },
     "AZURE_OPENAI_TOP_P": {
       "type": "string",
+      "metadata": {
+        "description": "The Top-P setting for Azure OpenAI responses."
+      },
       "value": "[variables('azureOpenAITopP')]"
     },
     "AZURE_SEARCH_CONNECTION_NAME": {
       "type": "string",
+      "metadata": {
+        "description": "The name of the Azure AI Search connection."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchFoundryConnectionName.value]"
     },
     "AZURE_SEARCH_CONTENT_COLUMNS": {
       "type": "string",
+      "metadata": {
+        "description": "The columns in Azure AI Search that contain content."
+      },
       "value": "[variables('azureSearchContentColumns')]"
     },
     "AZURE_SEARCH_ENABLE_IN_DOMAIN": {
       "type": "string",
+      "metadata": {
+        "description": "Indicates whether in-domain filtering is enabled for Azure AI Search."
+      },
       "value": "[variables('azureSearchEnableInDomain')]"
     },
     "AZURE_SEARCH_FILENAME_COLUMN": {
       "type": "string",
+      "metadata": {
+        "description": "The filename column used in Azure AI Search."
+      },
       "value": "[variables('azureSearchFilenameColumn')]"
     },
     "AZURE_SEARCH_INDEX": {
       "type": "string",
+      "metadata": {
+        "description": "The name of the Azure AI Search index."
+      },
       "value": "[variables('azureSearchIndex')]"
     },
     "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN": {
       "type": "string",
+      "metadata": {
+        "description": "The permitted groups field used in Azure AI Search."
+      },
       "value": "[variables('azureSearchPermittedGroupsField')]"
     },
     "AZURE_SEARCH_QUERY_TYPE": {
       "type": "string",
+      "metadata": {
+        "description": "The query type for Azure AI Search."
+      },
       "value": "[variables('azureSearchQueryType')]"
     },
     "AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG": {
       "type": "string",
+      "metadata": {
+        "description": "The semantic search configuration name in Azure AI Search."
+      },
       "value": "[variables('azureSearchSemanticSearchConfig')]"
     },
     "AZURE_SEARCH_SERVICE": {
       "type": "string",
+      "metadata": {
+        "description": "The name of the Azure AI Search service."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_ai_foundry'), '2022-09-01').outputs.aiSearchService.value]"
     },
     "AZURE_SEARCH_STRICTNESS": {
       "type": "string",
+      "metadata": {
+        "description": "The strictness setting for Azure AI Search semantic ranking."
+      },
       "value": "[variables('azureSearchStrictness')]"
     },
     "AZURE_SEARCH_TITLE_COLUMN": {
       "type": "string",
+      "metadata": {
+        "description": "The title column used in Azure AI Search."
+      },
       "value": "[variables('azureSearchTitleColumn')]"
     },
     "AZURE_SEARCH_TOP_K": {
       "type": "string",
+      "metadata": {
+        "description": "The number of top results (K) to return from Azure AI Search."
+      },
       "value": "[variables('azureSearchTopK')]"
     },
     "AZURE_SEARCH_URL_COLUMN": {
       "type": "string",
+      "metadata": {
+        "description": "The URL column used in Azure AI Search."
+      },
       "value": "[variables('azureSearchUrlColumn')]"
     },
     "AZURE_SEARCH_USE_SEMANTIC_SEARCH": {
       "type": "string",
+      "metadata": {
+        "description": "Indicates whether semantic search is used in Azure AI Search."
+      },
       "value": "[variables('azureSearchUseSemanticSearch')]"
     },
     "AZURE_SEARCH_VECTOR_COLUMNS": {
       "type": "string",
+      "metadata": {
+        "description": "The vector fields used in Azure AI Search."
+      },
       "value": "[variables('azureSearchVectorFields')]"
     },
     "AZURE_SQL_SYSTEM_PROMPT": {
       "type": "string",
+      "metadata": {
+        "description": "The system prompt for SQL queries in Azure Functions."
+      },
       "value": "[variables('functionAppSqlPrompt')]"
     },
     "SQLDB_SERVER": {
       "type": "string",
+      "metadata": {
+        "description": "The fully qualified domain name (FQDN) of the Azure SQL Server."
+      },
       "value": "[format('{0}.database.windows.net', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_sql_db'), '2022-09-01').outputs.sqlServerName.value)]"
     },
     "SQLDB_USER_MID": {
       "type": "string",
+      "metadata": {
+        "description": "The client ID of the managed identity for the web application."
+      },
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, resourceGroup().name), 'Microsoft.Resources/deployments', 'deploy_managed_identity'), '2022-09-01').outputs.managedIdentityWebAppOutput.value.clientId]"
     },
     "USE_AI_PROJECT_CLIENT": {
       "type": "string",
+      "metadata": {
+        "description": "Indicates whether the AI Project Client should be used."
+      },
       "value": "[variables('useAIProjectClientFlag')]"
     },
     "USE_INTERNAL_STREAM": {
       "type": "string",
+      "metadata": {
+        "description": "Indicates whether the internal stream should be used."
+      },
       "value": "[variables('useInternalStream')]"
     }
   }

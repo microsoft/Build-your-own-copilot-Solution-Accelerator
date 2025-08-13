@@ -1,152 +1,178 @@
 // ========== Key Vault ========== //
 targetScope = 'resourceGroup'
 
-@description('Solution Location')
+@description('Required. Solution Location')
 param solutionLocation string
 
-@description('The pricing tier for the App Service plan')
+@description('Optional. The pricing tier for the App Service plan')
 @allowed(['F1', 'D1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P4', 'P0v3'])
-param HostingPlanSku string = 'B2'
+param hostingPlanSku string = 'B2'
 
-param HostingPlanName string
-param WebsiteName string
-param AppEnvironment string
+@description('Required. Name of App Service plan')
+param hostingPlanName string
+
+@description('Required. Name of Web App')
+param websiteName string
+
+@description('Specifies the application environment')
+param appEnvironment string
 
 // @description('Name of Application Insights')
 // param ApplicationInsightsName string = '${ solutionName }-app-insights'
 
-@description('Name of Azure Search Service')
-param AzureSearchService string = ''
+@description('Optional. Name of Azure Search Service')
+param azureSearchService string = ''
 
-@description('Name of Azure Search Index')
-param AzureSearchIndex string = ''
+@description('Optional. Name of Azure Search Index')
+param azureSearchIndex string = ''
 
-@description('Use semantic search')
-param AzureSearchUseSemanticSearch string = 'False'
+@description('Optional. Use semantic search')
+param azureSearchUseSemanticSearch string = 'False'
 
-@description('Semantic search config')
-param AzureSearchSemanticSearchConfig string = 'default'
+@description('Optional. Semantic search config')
+param azureSearchSemanticSearchConfig string = 'default'
 
-@description('Top K results')
-param AzureSearchTopK string = '5'
+@description('Optional. Top K results')
+param azureSearchTopK string = '5'
 
-@description('Enable in domain')
-param AzureSearchEnableInDomain string = 'False'
+@description('Optional. Enable in domain')
+param azureSearchEnableInDomain string = 'False'
 
-@description('Content columns')
-param AzureSearchContentColumns string = 'content'
+@description('Optional. Content columns')
+param azureSearchContentColumns string = 'content'
 
-@description('Filename column')
-param AzureSearchFilenameColumn string = 'filename'
+@description('Optional. Filename column')
+param azureSearchFilenameColumn string = 'filename'
 
-@description('Title column')
-param AzureSearchTitleColumn string = 'client_id'
+@description('Optional. Title column')
+param azureSearchTitleColumn string = 'client_id'
 
-@description('Url column')
-param AzureSearchUrlColumn string = 'sourceurl'
+@description('Optional. Url column')
+param azureSearchUrlColumn string = 'sourceurl'
 
-@description('Name of Azure OpenAI Resource')
-param AzureOpenAIResource string
+@description('Required. Name of Azure OpenAI Resource')
+param azureOpenAIResource string
 
-@description('Azure OpenAI Model Deployment Name')
-param AzureOpenAIModel string
+@description('Optional. Azure OpenAI Model Deployment Name')
+param azureOpenAIModel string = 'gpt-4o-mini'
 
-@description('Azure Open AI Endpoint')
-param AzureOpenAIEndpoint string = ''
+@description('Optional. Azure Open AI Endpoint')
+param azureOpenAIEndpoint string = ''
 
-@description('Azure OpenAI Temperature')
-param AzureOpenAITemperature string = '0'
+@description('Optional. Azure OpenAI Temperature')
+param azureOpenAITemperature string = '0'
 
-@description('Azure OpenAI Top P')
-param AzureOpenAITopP string = '1'
+@description('Optional. Azure OpenAI Top P')
+param azureOpenAITopP string = '1'
 
-@description('Azure OpenAI Max Tokens')
-param AzureOpenAIMaxTokens string = '1000'
+@description('Optional. Azure OpenAI Max Tokens')
+param azureOpenAIMaxTokens string = '1000'
 
-@description('Azure OpenAI Stop Sequence')
-param AzureOpenAIStopSequence string = '\n'
+@description('Optional. Azure OpenAI Stop Sequence')
+param azureOpenAIStopSequence string = '\n'
 
-@description('Azure OpenAI System Message')
-param AzureOpenAISystemMessage string = 'You are an AI assistant that helps people find information.'
+@description('Optional. Azure OpenAI System Message')
+param azureOpenAISystemMessage string = 'You are an AI assistant that helps people find information.'
 
-@description('Azure OpenAI Api Version')
-param AzureOpenAIApiVersion string = '2024-02-15-preview'
+@description('Optional. Azure OpenAI Api Version')
+param azureOpenAIApiVersion string = '2024-02-15-preview'
 
-@description('Whether or not to stream responses from Azure OpenAI')
-param AzureOpenAIStream string = 'True'
+@description('Optional. Whether or not to stream responses from Azure OpenAI')
+param azureOpenAIStream string = 'True'
 
-@description('Azure Search Query Type')
+@description('Optional. Azure Search Query Type')
 @allowed(['simple', 'semantic', 'vector', 'vectorSimpleHybrid', 'vectorSemanticHybrid'])
-param AzureSearchQueryType string = 'simple'
+param azureSearchQueryType string = 'simple'
 
-@description('Azure Search Vector Fields')
-param AzureSearchVectorFields string = 'contentVector'
+@description('Optional. Azure Search Vector Fields')
+param azureSearchVectorFields string = 'contentVector'
 
-@description('Azure Search Permitted Groups Field')
-param AzureSearchPermittedGroupsField string = ''
+@description('Optional. Azure Search Permitted Groups Field')
+param azureSearchPermittedGroupsField string = ''
 
-@description('Azure Search Strictness')
+@description('Optional. Azure Search Strictness')
 @allowed(['1', '2', '3', '4', '5'])
-param AzureSearchStrictness string = '3'
+param azureSearchStrictness string = '3'
 
-@description('Azure OpenAI Embedding Deployment Name')
-param AzureOpenAIEmbeddingName string = ''
+@description('Optional. Azure OpenAI Embedding Deployment Name')
+param azureOpenAIEmbeddingName string = ''
 
-@description('Azure Open AI Embedding Endpoint')
-param AzureOpenAIEmbeddingEndpoint string = ''
+@description('Optional. Azure Open AI Embedding Endpoint')
+param azureOpenAIEmbeddingEndpoint string = ''
 
-@description('Use Azure Function')
+@description('Optional. Use Azure Function')
 param USE_INTERNAL_STREAM string = 'True'
 
-@description('SQL Database Server Name')
+@description('Optional. SQL Database Server Name')
 param SQLDB_SERVER string = ''
 
-@description('SQL Database Name')
+@description('Optional. SQL Database Name')
 param SQLDB_DATABASE string = ''
 
-@description('Azure Cosmos DB Account')
+@description('Optional. Azure Cosmos DB Account')
 param AZURE_COSMOSDB_ACCOUNT string = ''
 
-@description('Azure Cosmos DB Conversations Container')
+@description('Optional. Azure Cosmos DB Conversations Container')
 param AZURE_COSMOSDB_CONVERSATIONS_CONTAINER string = ''
 
-@description('Azure Cosmos DB Database')
+@description('Optional. Azure Cosmos DB Database')
 param AZURE_COSMOSDB_DATABASE string = ''
 
-@description('Enable feedback in Cosmos DB')
+@description('Optional. Enable feedback in Cosmos DB')
 param AZURE_COSMOSDB_ENABLE_FEEDBACK string = 'True'
 
 //@description('Power BI Embed URL')
 //param VITE_POWERBI_EMBED_URL string = ''
 
+@description('Required. The container image tag to be deployed')
 param imageTag string
 
+@description('Required. The resource ID of the user-assigned managed identity to be used by the deployed resources.')
 param userassignedIdentityId string
+
+@description('Required. The client ID of the user-assigned managed identity.')
 param userassignedIdentityClientId string
+
+@description('Required. The Instrumentation Key or Resource ID of the Application Insights resource used for monitoring.')
 param applicationInsightsId string
 
+@description('Required. The endpoint URL of the Azure Cognitive Search service.')
 param azureSearchServiceEndpoint string
 
-@description('Azure Function App SQL System Prompt')
+@description('Required. Azure Function App SQL System Prompt')
 param sqlSystemPrompt string
-@description('Azure Function App CallTranscript System Prompt')
+
+@description('Required. Azure Function App CallTranscript System Prompt')
 param callTranscriptSystemPrompt string
-@description('Azure Function App Stream Text System Prompt')
+
+@description('Required. Azure Function App Stream Text System Prompt')
 param streamTextSystemPrompt string
 
+@description('Required. AI Foundry project endpoint URL.')
 param aiFoundryProjectEndpoint string
+
+@description('Optional. Flag to enable AI project client.')
 param useAIProjectClientFlag string = 'false'
 
+@description('Required. Name of the AI Foundry project.')
 param aiFoundryName string
+
+@description('Required. Application Insights connection string.')
 param applicationInsightsConnectionString string
+
+@description('Required. Connection name for Azure Cognitive Search.')
 param aiSearchProjectConnectionName string
 
-// var WebAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
+@description('Optional. Tags to be applied to the resources.')
+param tags object = {}
 
-// var WebAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
+// var webAppImageName = 'DOCKER|byoaiacontainer.azurecr.io/byoaia-app:latest'
 
-var WebAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${imageTag}'
+// var webAppImageName = 'DOCKER|ncwaappcontainerreg1.azurecr.io/ncqaappimage:v1.0.0'
 
+var webAppImageName = 'DOCKER|bycwacontainerreg.azurecr.io/byc-wa-app:${imageTag}'
+
+@description('Optional. Resource ID of the existing AI Foundry project.')
 param azureExistingAIProjectResourceId string = ''
 
 var existingAIServiceSubscription = !empty(azureExistingAIProjectResourceId)
@@ -160,21 +186,22 @@ var existingAIServicesName = !empty(azureExistingAIProjectResourceId)
   : ''
 var existingAIProjectName = !empty(azureExistingAIProjectResourceId) ? split(azureExistingAIProjectResourceId, '/')[10] : ''
 
-resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
-  name: HostingPlanName
+resource hostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
+  name: hostingPlanName
   location: solutionLocation
   sku: {
-    name: HostingPlanSku
+    name: hostingPlanSku
   }
   properties: {
-    name: HostingPlanName
+    name: hostingPlanName
     reserved: true
   }
   kind: 'linux'
+  tags: tags
 }
 
-resource Website 'Microsoft.Web/sites@2020-06-01' = {
-  name: WebsiteName
+resource website 'Microsoft.Web/sites@2020-06-01' = {
+  name: websiteName
   location: solutionLocation
   identity: {
     type: 'SystemAssigned, UserAssigned'
@@ -183,12 +210,12 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
     }
   }
   properties: {
-    serverFarmId: HostingPlanName
+    serverFarmId: hostingPlanName
     siteConfig: {
       appSettings: [
         {
           name: 'APP_ENV'
-          value: AppEnvironment
+          value: appEnvironment
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
@@ -200,107 +227,107 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         }
         {
           name: 'AZURE_SEARCH_SERVICE'
-          value: AzureSearchService
+          value: azureSearchService
         }
         {
           name: 'AZURE_SEARCH_INDEX'
-          value: AzureSearchIndex
+          value: azureSearchIndex
         }
         {
           name: 'AZURE_SEARCH_USE_SEMANTIC_SEARCH'
-          value: AzureSearchUseSemanticSearch
+          value: azureSearchUseSemanticSearch
         }
         {
           name: 'AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG'
-          value: AzureSearchSemanticSearchConfig
+          value: azureSearchSemanticSearchConfig
         }
         {
           name: 'AZURE_SEARCH_TOP_K'
-          value: AzureSearchTopK
+          value: azureSearchTopK
         }
         {
           name: 'AZURE_SEARCH_ENABLE_IN_DOMAIN'
-          value: AzureSearchEnableInDomain
+          value: azureSearchEnableInDomain
         }
         {
           name: 'AZURE_SEARCH_CONTENT_COLUMNS'
-          value: AzureSearchContentColumns
+          value: azureSearchContentColumns
         }
         {
           name: 'AZURE_SEARCH_FILENAME_COLUMN'
-          value: AzureSearchFilenameColumn
+          value: azureSearchFilenameColumn
         }
         {
           name: 'AZURE_SEARCH_TITLE_COLUMN'
-          value: AzureSearchTitleColumn
+          value: azureSearchTitleColumn
         }
         {
           name: 'AZURE_SEARCH_URL_COLUMN'
-          value: AzureSearchUrlColumn
+          value: azureSearchUrlColumn
         }
         {
           name: 'AZURE_OPENAI_RESOURCE'
-          value: AzureOpenAIResource
+          value: azureOpenAIResource
         }
         {
           name: 'AZURE_OPENAI_MODEL'
-          value: AzureOpenAIModel
+          value: azureOpenAIModel
         }
         {
           name: 'AZURE_OPENAI_ENDPOINT'
-          value: AzureOpenAIEndpoint
+          value: azureOpenAIEndpoint
         }
         {
           name: 'AZURE_OPENAI_TEMPERATURE'
-          value: AzureOpenAITemperature
+          value: azureOpenAITemperature
         }
         {
           name: 'AZURE_OPENAI_TOP_P'
-          value: AzureOpenAITopP
+          value: azureOpenAITopP
         }
         {
           name: 'AZURE_OPENAI_MAX_TOKENS'
-          value: AzureOpenAIMaxTokens
+          value: azureOpenAIMaxTokens
         }
         {
           name: 'AZURE_OPENAI_STOP_SEQUENCE'
-          value: AzureOpenAIStopSequence
+          value: azureOpenAIStopSequence
         }
         {
           name: 'AZURE_OPENAI_SYSTEM_MESSAGE'
-          value: AzureOpenAISystemMessage
+          value: azureOpenAISystemMessage
         }
         {
           name: 'AZURE_OPENAI_PREVIEW_API_VERSION'
-          value: AzureOpenAIApiVersion
+          value: azureOpenAIApiVersion
         }
         {
           name: 'AZURE_OPENAI_STREAM'
-          value: AzureOpenAIStream
+          value: azureOpenAIStream
         }
         {
           name: 'AZURE_SEARCH_QUERY_TYPE'
-          value: AzureSearchQueryType
+          value: azureSearchQueryType
         }
         {
           name: 'AZURE_SEARCH_VECTOR_COLUMNS'
-          value: AzureSearchVectorFields
+          value: azureSearchVectorFields
         }
         {
           name: 'AZURE_SEARCH_PERMITTED_GROUPS_COLUMN'
-          value: AzureSearchPermittedGroupsField
+          value: azureSearchPermittedGroupsField
         }
         {
           name: 'AZURE_SEARCH_STRICTNESS'
-          value: AzureSearchStrictness
+          value: azureSearchStrictness
         }
         {
           name: 'AZURE_OPENAI_EMBEDDING_NAME'
-          value: AzureOpenAIEmbeddingName
+          value: azureOpenAIEmbeddingName
         }
         {
           name: 'AZURE_OPENAI_EMBEDDING_ENDPOINT'
-          value: AzureOpenAIEmbeddingEndpoint
+          value: azureOpenAIEmbeddingEndpoint
         }
         {
           name: 'SQLDB_SERVER'
@@ -363,21 +390,22 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
         }
         {
           name: 'AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME'
-          value: AzureOpenAIModel
+          value: azureOpenAIModel
         }
         {
           name: 'AZURE_AI_AGENT_API_VERSION'
-          value: AzureOpenAIApiVersion
+          value: azureOpenAIApiVersion
         }
         {
           name: 'AZURE_SEARCH_CONNECTION_NAME'
           value: aiSearchProjectConnectionName
         }
       ]
-      linuxFxVersion: WebAppImageName
+      linuxFxVersion: webAppImageName
     }
   }
-  dependsOn: [HostingPlan]
+  tags: tags
+  dependsOn: [hostingPlan]
 }
 
 // resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
@@ -397,14 +425,14 @@ resource contributorRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRol
 }
 
 module cosmosUserRole 'core/database/cosmos/cosmos-role-assign.bicep' = {
-  name: 'cosmos-sql-user-role-${WebsiteName}'
+  name: 'cosmos-sql-user-role-${websiteName}'
   params: {
     accountName: AZURE_COSMOSDB_ACCOUNT
     roleDefinitionId: contributorRoleDefinition.id
-    principalId: Website.identity.principalId
+    principalId: website.identity.principalId
   }
   dependsOn: [
-    Website
+    website
   ]
 }
 
@@ -423,7 +451,7 @@ resource assignAiUserRoleToAiProject 'Microsoft.Authorization/roleAssignments@20
   name: guid(resourceGroup().id, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
   // scope: aiProject
   properties: {
-    principalId: Website.identity.principalId
+    principalId: website.identity.principalId
     roleDefinitionId: aiUserRoleDefinitionFoundry.id
     principalType: 'ServicePrincipal'
   }
@@ -433,13 +461,17 @@ module assignAiUserRoleToAiProjectExisting 'deploy_foundry_model_role_assignment
   name: 'assignAiUserRoleToAiProjectExisting'
   scope: resourceGroup(existingAIServiceSubscription, existingAIServiceResourceGroup)
   params: {
-    principalId: Website.identity.principalId
+    principalId: website.identity.principalId
     roleDefinitionId: aiUserRoleDefinitionFoundry.id
-    roleAssignmentName: guid(Website.name, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
+    roleAssignmentName: guid(website.name, aiFoundry.id, aiUserRoleDefinitionFoundry.id)
     aiFoundryName: !empty(azureExistingAIProjectResourceId) ? existingAIServicesName : aiFoundryName
     aiProjectName: existingAIProjectName
+    tags: tags
   }
 }
 
-output webAppUrl string = 'https://${WebsiteName}.azurewebsites.net'
-output webAppName string = WebsiteName
+@description('URL of the deployed web application.')
+output webAppUrl string = 'https://${websiteName}.azurewebsites.net'
+
+@description('Name of the deployed web application.')
+output webAppName string = websiteName
