@@ -116,7 +116,7 @@ When you start the deployment, most parameters will have **default values**, but
 | **Embedding Model Capacity**         | Set the capacity for **embedding models**. Choose based on usage and quota.                        | `80`                     |
 | **Image Tag**                        | The version of the Docker image to use (e.g., `latest`, `dev`, `hotfix`).                          | `latest`                 |
 | **Azure OpenAI API Version**         | Set the API version for OpenAI model deployments.                                                  | `2025-04-01-preview`     |
-| **AZURE\_LOCATION**                  | Sets the Azure region for resource deployment. | `<User selects during deployment>`              |
+| **AZURE_LOCATION**                  | Sets the Azure region for resource deployment. | `<User selects during deployment>`              |
 | **Existing Log Analytics Workspace** | To reuse an existing Log Analytics Workspace ID instead of creating a new one.                     | *(empty)*                |
 | **Existing AI Foundry Project Resource ID** | To reuse an existing AI Foundry Project Resource ID instead of creating a new one.                     | *(empty)*                |
 
