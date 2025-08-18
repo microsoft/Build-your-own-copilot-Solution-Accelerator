@@ -78,7 +78,7 @@ param imageTag string = 'latest'
     ]
   }
 })
-@description('Rquired. Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed.')
+@description('Required. Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed.')
 param aiDeploymentsLocation string
 
 @description('Optional. Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default.')
