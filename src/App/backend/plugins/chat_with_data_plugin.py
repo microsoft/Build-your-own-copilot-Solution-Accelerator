@@ -107,7 +107,7 @@ class ChatWithDataPlugin:
             logging.exception("Error in get_SQL_Response")
             return f"Error retrieving SQL data: {str(e)}"
         finally:
-            if thread and project_client:
+            if thread:
                 try:
                     logging.info(f"Attempting to delete thread {thread.id}")
                     await project_client.agents.threads.delete(thread.id)
