@@ -3,19 +3,23 @@ targetScope = 'resourceGroup'
 
 @minLength(3)
 @maxLength(15)
-@description('Solution Name')
+@description('Required. Name of the solution.')
 param solutionName string
 
-@description('Solution Location')
+@description('Required. Deployment location for the solution.')
 param solutionLocation string
 
-@description('Name')
+@description('Required. Name of the managed identity.')
 param miName string
+
+@description('Optional. Tags to be applied to the resources.')
+param tags object = {}
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: miName
   location: solutionLocation
   tags: {
+    ...tags
     app: solutionName
     location: solutionLocation
   }
@@ -40,6 +44,7 @@ resource managedIdentityWebApp 'Microsoft.ManagedIdentity/userAssignedIdentities
   name: '${miName}-webapp'
   location: solutionLocation
   tags: {
+    ...tags
     app: solutionName
     location: solutionLocation
   }
@@ -90,6 +95,7 @@ resource managedIdentityWebApp 'Microsoft.ManagedIdentity/userAssignedIdentities
 //   }
 // }
 
+@description('Details of the managed identity resource.')
 output managedIdentityOutput object = {
   id: managedIdentity.id
   objectId: managedIdentity.properties.principalId
@@ -97,6 +103,7 @@ output managedIdentityOutput object = {
   name: miName
 }
 
+@description('Details of the managed identity for the web app.')
 output managedIdentityWebAppOutput object = {
   id: managedIdentityWebApp.id
   objectId: managedIdentityWebApp.properties.principalId

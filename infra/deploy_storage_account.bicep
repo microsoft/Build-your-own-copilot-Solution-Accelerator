@@ -1,14 +1,20 @@
 // ========== Storage Account ========== //
 targetScope = 'resourceGroup'
 
-@description('Solution Location')
+@description('Required. Deployment location for the solution.')
 param solutionLocation string
 
-@description('Name')
+@description('Required. Name of the storage account.')
 param saName string
 
+@description('Required. Object ID of the managed identity.')
 param managedIdentityObjectId string
+
+@description('Required. Name of the Azure Key Vault.')
 param keyVaultName string
+
+@description('Optional. Tags to be applied to the resources.')
+param tags object = {}
 
 resource storageAccounts_resource 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: saName
@@ -45,6 +51,7 @@ resource storageAccounts_resource 'Microsoft.Storage/storageAccounts@2022-09-01'
     accessTier: 'Hot'
     allowSharedKeyAccess: false
   }
+  tags : tags
 }
 
 resource storageAccounts_default 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
@@ -103,6 +110,7 @@ resource adlsAccountNameEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-prev
   properties: {
     value: saName
   }
+  tags : tags
 }
 
 resource adlsAccountContainerEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
@@ -111,7 +119,11 @@ resource adlsAccountContainerEntry 'Microsoft.KeyVault/vaults/secrets@2021-11-01
   properties: {
     value: 'data'
   }
+  tags : tags
 }
 
+@description('Name of the storage account.')
 output storageName string = saName
+
+@description('Name of the default storage container.')
 output storageContainer string = 'data'

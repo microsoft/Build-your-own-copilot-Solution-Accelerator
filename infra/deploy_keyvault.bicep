@@ -1,60 +1,64 @@
 // ========== Key Vault ========== //
 targetScope = 'resourceGroup'
 
-@minLength(3)
-@maxLength(15)
-@description('Solution Name')
+@description('Required. Solution Name')
 param solutionName string
 
-@description('Solution Location')
+@description('Required. Solution Location')
 param solutionLocation string
 
+@description('Optional. Current UTC timestamp.')
 param utc string = utcNow()
 
-@description('Name')
+@description('Required. Name of the Azure Key Vault.')
 param kvName string
 
-@description('Create Mode')
+@description('Optional. Specifies the create mode for the resource.')
 param createMode string = 'default'
 
-@description('Enabled For Deployment. Property to specify whether Azure Virtual Machines are permitted to retrieve certificates stored as secrets from the key vault.')
+@description('Optional. Enabled For Deployment. Property to specify whether Azure Virtual Machines are permitted to retrieve certificates stored as secrets from the key vault.')
 param enableForDeployment bool = true
 
-@description('Enabled For Disk Encryption. Property to specify whether Azure Disk Encryption is permitted to retrieve secrets from the vault and unwrap keys.')
+@description('Optional. Enabled For Disk Encryption. Property to specify whether Azure Disk Encryption is permitted to retrieve secrets from the vault and unwrap keys.')
 param enableForDiskEncryption bool = true
 
-@description('Enabled For Template Deployment. Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault.')
+@description('Optional. Enabled For Template Deployment. Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault.')
 param enableForTemplateDeployment bool = true
 
-@description('Enable RBAC Authorization. Property that controls how data actions are authorized.')
+@description('Optional. Enable RBAC Authorization. Property that controls how data actions are authorized.')
 param enableRBACAuthorization bool = true
 
-@description('Soft Delete Retention in Days. softDelete data retention days. It accepts >=7 and <=90.')
+@description('Optional. Soft Delete Retention in Days. softDelete data retention days. It accepts >=7 and <=90.')
 param softDeleteRetentionInDays int = 7
 
-@description('Public Network Access, Property to specify whether the vault will accept traffic from public internet.')
+@description('Optional. Public Network Access, Property to specify whether the vault will accept traffic from public internet.')
 @allowed([
   'enabled'
   'disabled'
 ])
 param publicNetworkAccess string = 'enabled'
 
-@description('SKU')
+@description('Optional. SKU')
 @allowed([
   'standard'
   'premium'
 ])
 param sku string = 'standard'
 
-@description('Vault URI. The URI of the vault for performing operations on keys and secrets.')
+@description('Optional. Vault URI. The URI of the vault for performing operations on keys and secrets.')
 var vaultUri = 'https://${ kvName }.vault.azure.net/'
 
+@description('Required. Object ID of the managed identity.')
 param managedIdentityObjectId string
+
+@description('Optional. Tags to be applied to the resources.')
+param tags object = {}
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: kvName
   location: solutionLocation
   tags: {
+    ...tags
     app: solutionName
     location: solutionLocation
   }
@@ -111,6 +115,9 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
+@description('Name of the Key Vault.')
 output keyvaultName string = keyVault.name
+
+@description('Resource ID of the Key Vault.')
 output keyvaultId string = keyVault.id
 

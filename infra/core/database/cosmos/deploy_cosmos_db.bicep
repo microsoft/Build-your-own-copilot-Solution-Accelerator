@@ -1,14 +1,20 @@
-@minLength(3)
-@maxLength(15)
-@description('Solution Name')
+
+@description('Required. Name of the solution.')
 param solutionName string
+
+@description('Required. Deployment location for the solution.')
 param solutionLocation string
 
-@description('Name')
-param accountName string = '${ solutionName }-cosmos'
+@description('Otional. Name of the Cosmos DB account.')
+param accountName string = '${solutionName}-cosmos'
+
+@description('Otional. Name of the Cosmos DB database.')
 param databaseName string = 'db_conversation_history'
+
+@description('Otional. Name of the Cosmos DB container.')
 param collectionName string = 'conversations'
 
+@description('Otional. List of Cosmos DB containers to be created.')
 param containers array = [
   {
     name: collectionName
@@ -17,9 +23,11 @@ param containers array = [
   }
 ]
 
+@description('Otional. API kind of the Cosmos DB account.')
 @allowed([ 'GlobalDocumentDB', 'MongoDB', 'Parse' ])
 param kind string = 'GlobalDocumentDB'
 
+@description('Otional. Resource tags to apply.')
 param tags object = {}
 
 resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' = {
@@ -68,6 +76,7 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15
   ]
 }
 
+@description('Details of the Cosmos DB account, database, and container.')
 output cosmosOutput object = {
   cosmosAccountName: cosmos.name
   cosmosDatabaseName: databaseName
