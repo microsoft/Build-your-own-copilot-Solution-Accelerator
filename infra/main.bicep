@@ -85,7 +85,6 @@ param aiDeploymentsLocation string
 param AZURE_LOCATION string = ''
 var solutionLocation = empty(AZURE_LOCATION) ? resourceGroup().location : AZURE_LOCATION
 
-//var uniqueId = toLower(uniqueString(solutionName , subscription().id, solutionLocation, resourceGroup().name))
 //var solutionSuffix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
  
 @maxLength(5)
