@@ -98,7 +98,7 @@ based on available quota you can deploy application otherwise, you can request f
 <summary><b>InsufficientQuota</b></summary>
 
 - Check if you have sufficient quota available in your subscription before deployment.
-- To verify, refer to the [quota_check](../docs/quota_check.md) file for details.
+- To verify, refer to the [quota_check](../docs/QuotaCheck.md) file for details.
 
 </details>
  
