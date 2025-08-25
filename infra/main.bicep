@@ -1207,7 +1207,7 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
 
 //========== Updates to Key Vault ========== //
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
-  name: aifoundry.outputs.keyvaultName
+  name: keyVaultName
   scope: resourceGroup(resourceGroup().name)
 }
 
