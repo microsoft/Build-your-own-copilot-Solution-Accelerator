@@ -101,6 +101,18 @@ var solutionSuffix= toLower(trim(replace(
   ''
 )))
 
+@description('Optional. Enable private networking for applicable resources, aligned with the Well Architected Framework recommendations. Defaults to false.')
+param enablePrivateNetworking bool = false
+
+@description('Optional. Enable monitoring applicable resources, aligned with the Well Architected Framework recommendations. This setting enables Application Insights and Log Analytics and configures all the resources applicable resources to send logs. Defaults to false.')
+param enableMonitoring bool = false
+
+@description('Optional. Enable/Disable usage telemetry for module.')
+param enableTelemetry bool = true
+
+@description('Optional. Enable redundancy for applicable resources, aligned with the Well Architected Framework recommendations. Defaults to false.')
+param enableRedundancy bool = false
+
 // Load the abbrevations file required to name the azure resources.
 //var abbrs = loadJsonContent('./abbreviations.json')
 
@@ -171,10 +183,41 @@ var functionAppStreamTextSystemPrompt = '''The currently selected client's name 
   If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.
   Always send clientId as '{client_id}'.'''
 
+// Replica regions list based on article in [Azure regions list](https://learn.microsoft.com/azure/reliability/regions-list) and [Enhance resilience by replicating your Log Analytics workspace across regions](https://learn.microsoft.com/azure/azure-monitor/logs/workspace-replication#supported-regions) for supported regions for Log Analytics Workspace.
+var replicaRegionPairs = {
+  australiaeast: 'australiasoutheast'
+  centralus: 'westus'
+  eastasia: 'japaneast'
+  eastus: 'centralus'
+  eastus2: 'centralus'
+  japaneast: 'eastasia'
+  northeurope: 'westeurope'
+  southeastasia: 'eastasia'
+  uksouth: 'westeurope'
+  westeurope: 'northeurope'
+}
+var replicaLocation = replicaRegionPairs[resourceGroup().location]
+
 @description('Optional. The tags to apply to all deployed Azure resources.')
 param tags resourceInput<'Microsoft.Resources/resourceGroups@2025-04-01'>.tags = {}
 
 var aiFoundryAiServicesAiProjectResourceName = 'proj-${solutionSuffix}'
+
+// Region pairs list based on article in [Azure Database for MySQL Flexible Server - Azure Regions](https://learn.microsoft.com/azure/mysql/flexible-server/overview#azure-regions) for supported high availability regions for CosmosDB.
+var cosmosDbZoneRedundantHaRegionPairs = {
+  australiaeast: 'uksouth' //'southeastasia'
+  centralus: 'eastus2'
+  eastasia: 'southeastasia'
+  eastus: 'centralus'
+  eastus2: 'centralus'
+  japaneast: 'australiaeast'
+  northeurope: 'westeurope'
+  southeastasia: 'eastasia'
+  uksouth: 'westeurope'
+  westeurope: 'northeurope'
+}
+// Paired location calculated based on 'location' parameter. This location will be used by applicable resources if `enableScalability` is set to `true`
+var cosmosDbHaLocation = cosmosDbZoneRedundantHaRegionPairs[resourceGroup().location]
 
 // ========== Resource Group Tag ========== //
 resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
@@ -187,29 +230,533 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
   }
 }
 
-// ========== Managed Identity ========== //
-module managedIdentityModule 'deploy_managed_identity.bicep' = {
-  name: 'deploy_managed_identity'
+// ========== User Assigned Identity ========== //
+// WAF best practices for identity and access management: https://learn.microsoft.com/en-us/azure/well-architected/security/identity-access
+var userAssignedIdentityResourceName = 'id-${solutionSuffix}'
+module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = {
+  name: take('avm.res.managed-identity.user-assigned-identity.${userAssignedIdentityResourceName}', 64)
   params: {
-    solutionName: solutionSuffix
-    solutionLocation: solutionLocation
-    miName: 'id-${solutionSuffix}'
+    name: userAssignedIdentityResourceName
+    location: solutionLocation
     tags: tags
+    // enableTelemetry: enableTelemetry
   }
-  scope: resourceGroup(resourceGroup().name)
 }
 
 // ========== Key Vault ========== //
-module keyvaultModule 'deploy_keyvault.bicep' = {
-  name: 'deploy_keyvault'
+// module keyvaultModule 'deploy_keyvault.bicep' = {
+//   name: 'deploy_keyvault'
+//   params: {
+//     solutionName: solutionSuffix
+//     solutionLocation: solutionLocation
+//     managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
+//     kvName: 'kv-${solutionSuffix}'
+//     tags: tags
+//   }
+//   scope: resourceGroup(resourceGroup().name)
+// }
+
+var networkSecurityGroupAdministrationResourceName = 'nsg-${solutionSuffix}-administration'
+module networkSecurityGroupAdministration 'br/public:avm/res/network/network-security-group:0.5.1' = if (enablePrivateNetworking) {
+  name: take('avm.res.network.network-security-group.${networkSecurityGroupAdministrationResourceName}', 64)
   params: {
-    solutionName: solutionSuffix
-    solutionLocation: solutionLocation
-    managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
-    kvName: 'kv-${solutionSuffix}'
+    name: networkSecurityGroupAdministrationResourceName
+    location: solutionLocation
     tags: tags
+    enableTelemetry: enableTelemetry
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    securityRules: [
+      {
+        name: 'deny-hop-outbound'
+        properties: {
+          access: 'Deny'
+          destinationAddressPrefix: '*'
+          destinationPortRanges: [
+            '22'
+            '3389'
+          ]
+          direction: 'Outbound'
+          priority: 200
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+        }
+      }
+    ]
   }
-  scope: resourceGroup(resourceGroup().name)
+}
+
+
+// ========== Network Security Groups ========== //
+// WAF best practices for virtual networks: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/virtual-network
+// WAF recommendations for networking and connectivity: https://learn.microsoft.com/en-us/azure/well-architected/security/networking
+var networkSecurityGroupBackendResourceName = 'nsg-${solutionSuffix}-backend'
+module networkSecurityGroupBackend 'br/public:avm/res/network/network-security-group:0.5.1' = if (enablePrivateNetworking) {
+  name: take('avm.res.network.network-security-group.${networkSecurityGroupBackendResourceName}', 64)
+  params: {
+    name: networkSecurityGroupBackendResourceName
+    location: solutionLocation
+    tags: tags
+    enableTelemetry: enableTelemetry
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    securityRules: [
+      {
+        name: 'deny-hop-outbound'
+        properties: {
+          access: 'Deny'
+          destinationAddressPrefix: '*'
+          destinationPortRanges: [
+            '22'
+            '3389'
+          ]
+          direction: 'Outbound'
+          priority: 200
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
+
+var networkSecurityGroupBastionResourceName = 'nsg-${solutionSuffix}-bastion'
+module networkSecurityGroupBastion 'br/public:avm/res/network/network-security-group:0.5.1' = if (enablePrivateNetworking) {
+  name: take('avm.res.network.network-security-group.${networkSecurityGroupBastionResourceName}', 64)
+  params: {
+    name: networkSecurityGroupBastionResourceName
+    location: solutionLocation
+    tags: tags
+    enableTelemetry: enableTelemetry
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    securityRules: [
+      {
+        name: 'AllowHttpsInBound'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          sourceAddressPrefix: 'Internet'
+          destinationPortRange: '443'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 100
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowGatewayManagerInBound'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          sourceAddressPrefix: 'GatewayManager'
+          destinationPortRange: '443'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 110
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowLoadBalancerInBound'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          sourceAddressPrefix: 'AzureLoadBalancer'
+          destinationPortRange: '443'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 120
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowBastionHostCommunicationInBound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          sourceAddressPrefix: 'VirtualNetwork'
+          destinationPortRanges: [
+            '8080'
+            '5701'
+          ]
+          destinationAddressPrefix: 'VirtualNetwork'
+          access: 'Allow'
+          priority: 130
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'DenyAllInBound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationPortRange: '*'
+          destinationAddressPrefix: '*'
+          access: 'Deny'
+          priority: 1000
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowSshRdpOutBound'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationPortRanges: [
+            '22'
+            '3389'
+          ]
+          destinationAddressPrefix: 'VirtualNetwork'
+          access: 'Allow'
+          priority: 100
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'AllowAzureCloudCommunicationOutBound'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationPortRange: '443'
+          destinationAddressPrefix: 'AzureCloud'
+          access: 'Allow'
+          priority: 110
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'AllowBastionHostCommunicationOutBound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          sourceAddressPrefix: 'VirtualNetwork'
+          destinationPortRanges: [
+            '8080'
+            '5701'
+          ]
+          destinationAddressPrefix: 'VirtualNetwork'
+          access: 'Allow'
+          priority: 120
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'AllowGetSessionInformationOutBound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: 'Internet'
+          destinationPortRanges: [
+            '80'
+            '443'
+          ]
+          access: 'Allow'
+          priority: 130
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'DenyAllOutBound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Deny'
+          priority: 1000
+          direction: 'Outbound'
+        }
+      }
+    ]
+  }
+}
+
+var networkSecurityGroupContainersResourceName = 'nsg-${solutionSuffix}-containers'
+module networkSecurityGroupContainers 'br/public:avm/res/network/network-security-group:0.5.1' = if (enablePrivateNetworking) {
+  name: take('avm.res.network.network-security-group.${networkSecurityGroupContainersResourceName}', 64)
+  params: {
+    name: networkSecurityGroupContainersResourceName
+    location: solutionLocation
+    tags: tags
+    enableTelemetry: enableTelemetry
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    securityRules: [
+      {
+        name: 'deny-hop-outbound'
+        properties: {
+          access: 'Deny'
+          destinationAddressPrefix: '*'
+          destinationPortRanges: [
+            '22'
+            '3389'
+          ]
+          direction: 'Outbound'
+          priority: 200
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
+var networkSecurityGroupWebsiteResourceName = 'nsg-${solutionSuffix}-website'
+module networkSecurityGroupWebsite 'br/public:avm/res/network/network-security-group:0.5.1' = if (enablePrivateNetworking) {
+  name: take('avm.res.network.network-security-group.${networkSecurityGroupWebsiteResourceName}', 64)
+  params: {
+    name: networkSecurityGroupWebsiteResourceName
+    location: solutionLocation
+    tags: tags
+    enableTelemetry: enableTelemetry
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    securityRules: [
+      {
+        name: 'deny-hop-outbound'
+        properties: {
+          access: 'Deny'
+          destinationAddressPrefix: '*'
+          destinationPortRanges: [
+            '22'
+            '3389'
+          ]
+          direction: 'Outbound'
+          priority: 200
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+        }
+      }
+    ]
+  }
+}
+
+// ========== Virtual Network ========== //
+// WAF best practices for virtual networks: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/virtual-network
+// WAF recommendations for networking and connectivity: https://learn.microsoft.com/en-us/azure/well-architected/security/networking
+var virtualNetworkResourceName = 'vnet-${solutionSuffix}'
+module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (enablePrivateNetworking) {
+  name: take('avm.res.network.virtual-network.${virtualNetworkResourceName}', 64)
+  params: {
+    name: virtualNetworkResourceName
+    location: solutionLocation
+    tags: tags
+    enableTelemetry: enableTelemetry
+    addressPrefixes: ['10.0.0.0/8']
+    subnets: [
+      {
+        name: 'backend'
+        addressPrefix: '10.0.0.0/27'
+        //defaultOutboundAccess: false TODO: check this configuration for a more restricted outbound access
+        networkSecurityGroupResourceId: networkSecurityGroupBackend!.outputs.resourceId
+      }
+      {
+        name: 'administration'
+        addressPrefix: '10.0.0.32/27'
+        networkSecurityGroupResourceId: networkSecurityGroupAdministration!.outputs.resourceId
+        //defaultOutboundAccess: false TODO: check this configuration for a more restricted outbound access
+        //natGatewayResourceId: natGateway.outputs.resourceId
+      }
+      {
+        // For Azure Bastion resources deployed on or after November 2, 2021, the minimum AzureBastionSubnet size is /26 or larger (/25, /24, etc.).
+        // https://learn.microsoft.com/en-us/azure/bastion/configuration-settings#subnet
+        name: 'AzureBastionSubnet' //This exact name is required for Azure Bastion
+        addressPrefix: '10.0.0.64/26'
+        networkSecurityGroupResourceId: networkSecurityGroupBastion!.outputs.resourceId
+      }
+      {
+        // If you use your own vnw, you need to provide a subnet that is dedicated exclusively to the Container App environment you deploy. This subnet isn't available to other services
+        // https://learn.microsoft.com/en-us/azure/container-apps/networking?tabs=workload-profiles-env%2Cazure-cli#custom-vnw-configuration
+        name: 'containers'
+        addressPrefix: '10.0.2.0/23' //subnet of size /23 is required for container app
+        delegation: 'Microsoft.App/environments'
+        networkSecurityGroupResourceId: networkSecurityGroupContainers!.outputs.resourceId
+        privateEndpointNetworkPolicies: 'Enabled'
+        privateLinkServiceNetworkPolicies: 'Enabled'
+      }
+      {
+        // If you use your own vnw, you need to provide a subnet that is dedicated exclusively to the App Environment you deploy. This subnet isn't available to other services
+        // https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration#subnet-requirements
+        name: 'webserverfarm'
+        addressPrefix: '10.0.4.0/27' //When you're creating subnets in Azure portal as part of integrating with the virtual network, a minimum size of /27 is required
+        delegation: 'Microsoft.Web/serverfarms'
+        networkSecurityGroupResourceId: networkSecurityGroupWebsite!.outputs.resourceId
+        privateEndpointNetworkPolicies: 'Enabled'
+        privateLinkServiceNetworkPolicies: 'Enabled'
+      }
+    ]
+  }
+}
+
+// ========== Private DNS Zones ========== //
+var privateDnsZones = [
+  'privatelink.cognitiveservices.azure.com'
+  'privatelink.openai.azure.com'
+  'privatelink.services.ai.azure.com'
+  'privatelink.contentunderstanding.ai.azure.com'
+  'privatelink.blob.${environment().suffixes.storage}'
+  'privatelink.queue.${environment().suffixes.storage}'
+  'privatelink.file.${environment().suffixes.storage}'
+  'privatelink.api.azureml.ms'
+  'privatelink.notebooks.azure.net'
+  'privatelink.mongo.cosmos.azure.com'
+  'privatelink.azconfig.io'
+  'privatelink.vaultcore.azure.net'
+  'privatelink.azurecr.io'
+  'privatelink${environment().suffixes.sqlServerHostname}'
+]
+// DNS Zone Index Constants
+var dnsZoneIndex = {
+  cognitiveServices: 0
+  openAI: 1
+  aiServices: 2
+  contentUnderstanding: 3
+  storageBlob: 4
+  storageQueue: 5
+  storageFile: 6
+  aiFoundry: 7
+  notebooks: 8
+  cosmosDB: 9
+  appConfig: 10
+  keyVault: 11
+  containerRegistry: 12
+  sqlServer: 13
+}
+@batchSize(5)
+module avmPrivateDnsZones 'br/public:avm/res/network/private-dns-zone:0.7.1' = [
+  for (zone, i) in privateDnsZones: if (enablePrivateNetworking) {
+    name: 'dns-zone-${i}'
+    params: {
+      name: zone
+      tags: tags
+      enableTelemetry: enableTelemetry
+      virtualNetworkLinks: [{ virtualNetworkResourceId: virtualNetwork!.outputs.resourceId }]
+    }
+  }
+]
+
+
+// ========== Log Analytics Workspace ========== //
+// WAF best practices for Log Analytics: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-log-analytics
+// WAF PSRules for Log Analytics: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#azure-monitor-logs
+var logAnalyticsWorkspaceResourceName = 'log-${solutionSuffix}'
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (enableMonitoring) {
+  name: take('avm.res.operational-insights.workspace.${logAnalyticsWorkspaceResourceName}', 64)
+  params: {
+    name: logAnalyticsWorkspaceResourceName
+    tags: tags
+    location: solutionLocation
+    enableTelemetry: enableTelemetry
+    skuName: 'PerGB2018'
+    dataRetention: 365
+    features: { enableLogAccessUsingOnlyResourcePermissions: true }
+    diagnosticSettings: [{ useThisWorkspace: true }]
+    // WAF aligned configuration for Redundancy
+    dailyQuotaGb: enableRedundancy ? 10 : null //WAF recommendation: 10 GB per day is a good starting point for most workloads
+    replication: enableRedundancy
+      ? {
+          enabled: true
+          location: replicaLocation
+        }
+      : null
+    // WAF aligned configuration for Private Networking
+    publicNetworkAccessForIngestion: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    publicNetworkAccessForQuery: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    dataSources: enablePrivateNetworking
+      ? [
+          {
+            tags: tags
+            eventLogName: 'Application'
+            eventTypes: [
+              {
+                eventType: 'Error'
+              }
+              {
+                eventType: 'Warning'
+              }
+              {
+                eventType: 'Information'
+              }
+            ]
+            kind: 'WindowsEvent'
+            name: 'applicationEvent'
+          }
+          {
+            counterName: '% Processor Time'
+            instanceName: '*'
+            intervalSeconds: 60
+            kind: 'WindowsPerformanceCounter'
+            name: 'windowsPerfCounter1'
+            objectName: 'Processor'
+          }
+          {
+            kind: 'IISLogs'
+            name: 'sampleIISLog1'
+            state: 'OnPremiseEnabled'
+          }
+        ]
+      : null
+  }
+}
+
+// Key Vault resource
+var keyVaultName = 'KV-${solutionSuffix}'
+module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
+  name: take('avm.res.key-vault.vault.${keyVaultName}', 64)
+  params: {
+    name: keyVaultName
+    location: solutionLocation
+    tags: tags
+    sku: 'premium'
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    networkAcls: {
+      defaultAction: 'Allow'
+    }
+    enableVaultForDeployment: true
+    enableVaultForDiskEncryption: true
+    enableVaultForTemplateDeployment: true
+    enableRbacAuthorization: true
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 7
+    diagnosticSettings: enableMonitoring 
+      ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] 
+      : []
+    // WAF aligned configuration for Private Networking
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-${keyVaultName}'
+            customNetworkInterfaceName: 'nic-${keyVaultName}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [{ privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.keyVault]!.outputs.resourceId}]
+            }
+            service: 'vault'
+            subnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
+          }
+        ]
+      : []
+    // WAF aligned configuration for Role-based Access Control
+    roleAssignments: [
+      {
+         principalId: userAssignedIdentity.outputs.principalId
+         principalType: 'ServicePrincipal'
+         roleDefinitionIdOrName: 'Key Vault Administrator'
+      }
+    ]
+    secrets: [
+      {
+        name: 'ExampleSecret'
+        value: 'YourSecretValue'
+      }
+    ]
+    // enableTelemetry: enableTelemetry
+  }
 }
 
 // ==========AI Foundry and related resources ========== //
@@ -218,7 +765,7 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
   params: {
     solutionName: solutionSuffix
     solutionLocation: aiDeploymentsLocation
-    keyVaultName: keyvaultModule.outputs.keyvaultName
+    keyVaultName: keyvault.outputs.name
     deploymentType: deploymentType
     gptModelName: gptModelName
     azureOpenaiAPIVersion: azureOpenaiAPIVersion
@@ -234,26 +781,209 @@ module aifoundry 'deploy_ai_foundry.bicep' = {
 }
 
 // ========== CosmosDB ========== //
-module cosmosDBModule 'deploy_cosmos_db.bicep' = {
-  name: 'deploy_cosmos_db'
+// module cosmosDBModule 'deploy_cosmos_db.bicep' = {
+//   name: 'deploy_cosmos_db'
+//   params: {
+//     solutionLocation: cosmosLocation
+//     cosmosDBName: 'cosmos-${solutionSuffix}'
+//     tags: tags
+//   }
+//   scope: resourceGroup(resourceGroup().name)
+// }
+
+
+//========== AVM WAF ========== //
+//========== Cosmos DB module ========== //
+var cosmosDbResourceName = 'cosmos-${solutionSuffix}'
+var cosmosDbDatabaseName = 'db_conversation_history'
+// var cosmosDbDatabaseMemoryContainerName = 'memory'
+var collectionName = 'conversations'
+//TODO: update to latest version of AVM module
+module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
+  name: take('avm.res.document-db.database-account.${cosmosDbResourceName}', 64)
   params: {
-    solutionLocation: cosmosLocation
-    cosmosDBName: 'cosmos-${solutionSuffix}'
+    // Required parameters
+    name: cosmosDbResourceName
+    location: solutionLocation
     tags: tags
+    enableTelemetry: enableTelemetry
+    sqlDatabases: [
+      {
+        name: cosmosDbDatabaseName
+        containers: [
+          // {
+          //   name: cosmosDbDatabaseMemoryContainerName
+          //   paths: [
+          //     '/session_id'
+          //   ]
+          //   kind: 'Hash'
+          //   version: 2
+          // }
+          {
+            name: collectionName
+            paths: [
+              '/userId'
+            ]
+          }
+        ]
+      }
+    ]
+    dataPlaneRoleDefinitions: [
+      {
+        // Cosmos DB Built-in Data Contributor: https://docs.azure.cn/en-us/cosmos-db/nosql/security/reference-data-plane-roles#cosmos-db-built-in-data-contributor
+        roleName: 'Cosmos DB SQL Data Contributor'
+        dataActions: [
+          'Microsoft.DocumentDB/databaseAccounts/readMetadata'
+          'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*'
+          'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*'
+        ]
+        assignments: [{ principalId: userAssignedIdentity.outputs.principalId }]
+      }
+    ]
+    // WAF aligned configuration for Monitoring
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    // WAF aligned configuration for Private Networking
+    networkRestrictions: {
+      networkAclBypass: 'None'
+      publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    }
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-${cosmosDbResourceName}'
+            customNetworkInterfaceName: 'nic-${cosmosDbResourceName}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.cosmosDB]!.outputs.resourceId }
+              ]
+            }
+            service: 'Sql'
+            subnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
+          }
+        ]
+      : []
+    // WAF aligned configuration for Redundancy
+    zoneRedundant: enableRedundancy ? true : false
+    capabilitiesToAdd: enableRedundancy ? null : ['EnableServerless']
+    automaticFailover: enableRedundancy ? true : false
+    failoverLocations: enableRedundancy
+      ? [
+          {
+            failoverPriority: 0
+            isZoneRedundant: true
+            locationName: solutionLocation
+          }
+          {
+            failoverPriority: 1
+            isZoneRedundant: true
+            locationName: cosmosDbHaLocation
+          }
+        ]
+      : [
+          {
+            locationName: solutionLocation
+            failoverPriority: 0
+          }
+        ]
   }
+  dependsOn: [keyvault, avmStorageAccount]
   scope: resourceGroup(resourceGroup().name)
 }
 
+
 // ========== Storage Account Module ========== //
-module storageAccountModule 'deploy_storage_account.bicep' = {
-  name: 'deploy_storage_account'
+// module storageAccountModule 'deploy_storage_account.bicep' = {
+//   name: 'deploy_storage_account'
+//   params: {
+//     solutionLocation: solutionLocation
+//     managedIdentityObjectId: userAssignedIdentity.outputs.principalId
+//     saName: 'st${solutionSuffix}'
+//     keyVaultName: keyvault.outputs.name
+//     tags: tags
+//   }
+//   scope: resourceGroup(resourceGroup().name)
+// }
+
+// ========== AVM WAF ========== //
+// ========== Storage account module ========== //
+var storageAccountName = 'st${solutionSuffix}'
+module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
+  name: take('avm.res.storage.storage-account.${storageAccountName}', 64)
   params: {
-    solutionLocation: solutionLocation
-    managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
-    saName: 'st${solutionSuffix}'
-    keyVaultName: keyvaultModule.outputs.keyvaultName
+    name: storageAccountName
+    location: solutionLocation
+    managedIdentities: { systemAssigned: true }
+    minimumTlsVersion: 'TLS1_2'
+    enableTelemetry: enableTelemetry
     tags: tags
+    accessTier: 'Hot'
+    supportsHttpsTrafficOnly: true
+    roleAssignments: [
+      {
+        principalId: userAssignedIdentity.outputs.principalId
+        roleDefinitionIdOrName: 'Storage Blob Data Contributor'
+        principalType: 'ServicePrincipal'
+      }
+    ]
+    // WAF aligned networking
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: enablePrivateNetworking ? 'Deny' : 'Allow'
+    }
+    allowBlobPublicAccess: enablePrivateNetworking ? true : false
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    // Private endpoints for blob and queue
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-blob-${solutionSuffix}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                {
+                  name: 'storage-dns-zone-group-blob'
+                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.storageBlob]!.outputs.resourceId
+                }
+              ]
+            }
+            subnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
+            service: 'blob'
+          }
+          {
+            name: 'pep-queue-${solutionSuffix}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                {
+                  name: 'storage-dns-zone-group-queue'
+                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.storageQueue]!.outputs.resourceId
+                }
+              ]
+            }
+            subnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
+            service: 'queue'
+          }
+        ]
+      : []
+    blobServices: {
+      corsRules: []
+      deleteRetentionPolicyEnabled: false
+      containers: [
+        {
+          name: 'data'
+          publicAccess: 'None'
+        }
+      ]
+    }
+    //   secretsExportConfiguration: {
+    //   accessKey1Name: 'ADLS-ACCOUNT-NAME'
+    //   connectionString1Name: storageAccountName
+    //   accessKey2Name: 'ADLS-ACCOUNT-CONTAINER'
+    //   connectionString2Name: 'data'
+    //   accessKey3Name: 'ADLS-ACCOUNT-KEY'
+    //   connectionString3Name: listKeys(resourceId('Microsoft.Storage/storageAccounts', storageAccountName), '2021-04-01')
+    //   keyVaultResourceId: keyvault.outputs.resourceId
+    // }
   }
+  dependsOn: [keyvault]
   scope: resourceGroup(resourceGroup().name)
 }
 
@@ -262,9 +992,9 @@ module sqlDBModule 'deploy_sql_db.bicep' = {
   name: 'deploy_sql_db'
   params: {
     solutionLocation: solutionLocation
-    keyVaultName: keyvaultModule.outputs.keyvaultName
-    managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
-    managedIdentityName: managedIdentityModule.outputs.managedIdentityOutput.name
+    keyVaultName: keyvault.outputs.name
+    managedIdentityObjectId: userAssignedIdentity.outputs.principalId
+    managedIdentityName: userAssignedIdentity.outputs.name
     serverName: 'sql-${solutionSuffix}'
     sqlDBName: 'sqldb-${solutionSuffix}'
     tags: tags
@@ -314,14 +1044,14 @@ module appserviceModule 'deploy_app_service.bicep' = {
     USE_INTERNAL_STREAM: useInternalStream
     SQLDB_SERVER: sqlServerFqdn
     SQLDB_DATABASE: sqlDBModule.outputs.sqlDbName
-    AZURE_COSMOSDB_ACCOUNT: cosmosDBModule.outputs.cosmosAccountName
-    AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDBModule.outputs.cosmosContainerName
-    AZURE_COSMOSDB_DATABASE: cosmosDBModule.outputs.cosmosDatabaseName
+    AZURE_COSMOSDB_ACCOUNT: cosmosDb.outputs.cosmosAccountName
+    AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDb.outputs.cosmosContainerName
+    AZURE_COSMOSDB_DATABASE: cosmosDb.outputs.cosmosDatabaseName
     AZURE_COSMOSDB_ENABLE_FEEDBACK: azureCosmosDbEnableFeedback
     //VITE_POWERBI_EMBED_URL: 'TBD'
     imageTag: imageTag
-    userassignedIdentityClientId: managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
-    userassignedIdentityId: managedIdentityModule.outputs.managedIdentityWebAppOutput.id
+    userassignedIdentityClientId: userAssignedIdentity.outputs.clientId
+    userassignedIdentityId: userAssignedIdentity.outputs.principalId
     applicationInsightsId: aifoundry.outputs.applicationInsightsId
     azureSearchServiceEndpoint: aifoundry.outputs.aiSearchTarget
     sqlSystemPrompt: functionAppSqlPrompt
@@ -342,13 +1072,13 @@ module appserviceModule 'deploy_app_service.bicep' = {
 output WEB_APP_URL string = appserviceModule.outputs.webAppUrl
 
 @description('Name of the storage account.')
-output STORAGE_ACCOUNT_NAME string = storageAccountModule.outputs.storageName
+output STORAGE_ACCOUNT_NAME string = avmStorageAccount.outputs.name
 
 @description('Name of the storage container.')
-output STORAGE_CONTAINER_NAME string = storageAccountModule.outputs.storageContainer
+output STORAGE_CONTAINER_NAME string = avmStorageAccount.outputs.containerName
 
 @description('Name of the Key Vault.')
-output KEY_VAULT_NAME string = keyvaultModule.outputs.keyvaultName
+output KEY_VAULT_NAME string = keyvault.outputs.name
 
 @description('Name of the Cosmos DB account.')
 output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
@@ -366,10 +1096,10 @@ output SQLDB_SERVER_NAME string = sqlDBModule.outputs.sqlServerName
 output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
 
 @description('Name of the managed identity used by the web app.')
-output MANAGEDIDENTITY_WEBAPP_NAME string = managedIdentityModule.outputs.managedIdentityWebAppOutput.name
+output MANAGEDIDENTITY_WEBAPP_NAME string = userAssignedIdentity.outputs.name
 
 @description('Client ID of the managed identity used by the web app.')
-output MANAGEDIDENTITY_WEBAPP_CLIENTID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
+output MANAGEDIDENTITY_WEBAPP_CLIENTID string = userAssignedIdentity.outputs.clientId
 @description('Name of the AI Search service.')
 output AI_SEARCH_SERVICE_NAME string = aifoundry.outputs.aiSearchService
 
@@ -502,7 +1232,7 @@ output AZURE_SQL_SYSTEM_PROMPT string = functionAppSqlPrompt
 output SQLDB_SERVER string = sqlServerFqdn
 
 @description('The client ID of the managed identity for the web application.')
-output SQLDB_USER_MID string = managedIdentityModule.outputs.managedIdentityWebAppOutput.clientId
+output SQLDB_USER_MID string = userAssignedIdentity.outputs.clientId
 
 @description('Indicates whether the AI Project Client should be used.')
 output USE_AI_PROJECT_CLIENT string = useAIProjectClientFlag
