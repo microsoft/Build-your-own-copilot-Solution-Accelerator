@@ -886,104 +886,21 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
           }
         ]
   }
-  dependsOn: [keyvault, avmStorageAccount]
+  dependsOn: [keyvault, storageAccountModule]
   scope: resourceGroup(resourceGroup().name)
 }
 
 
 // ========== Storage Account Module ========== //
-// module storageAccountModule 'deploy_storage_account.bicep' = {
-//   name: 'deploy_storage_account'
-//   params: {
-//     solutionLocation: solutionLocation
-//     managedIdentityObjectId: userAssignedIdentity.outputs.principalId
-//     saName: 'st${solutionSuffix}'
-//     keyVaultName: keyvault.outputs.name
-//     tags: tags
-//   }
-//   scope: resourceGroup(resourceGroup().name)
-// }
-
-// ========== AVM WAF ========== //
-// ========== Storage account module ========== //
-var storageAccountName = 'st${solutionSuffix}'
-module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
-  name: take('avm.res.storage.storage-account.${storageAccountName}', 64)
+module storageAccountModule 'deploy_storage_account.bicep' = {
+  name: 'deploy_storage_account'
   params: {
-    name: storageAccountName
-    location: solutionLocation
-    managedIdentities: { systemAssigned: true }
-    minimumTlsVersion: 'TLS1_2'
-    enableTelemetry: enableTelemetry
+    solutionLocation: solutionLocation
+    managedIdentityObjectId: userAssignedIdentity.outputs.principalId
+    saName: 'st${solutionSuffix}'
+    keyVaultName: keyvault.outputs.name
     tags: tags
-    accessTier: 'Hot'
-    supportsHttpsTrafficOnly: true
-    roleAssignments: [
-      {
-        principalId: userAssignedIdentity.outputs.principalId
-        roleDefinitionIdOrName: 'Storage Blob Data Contributor'
-        principalType: 'ServicePrincipal'
-      }
-    ]
-    // WAF aligned networking
-    networkAcls: {
-      bypass: 'AzureServices'
-      defaultAction: enablePrivateNetworking ? 'Deny' : 'Allow'
-    }
-    allowBlobPublicAccess: enablePrivateNetworking ? true : false
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-    // Private endpoints for blob and queue
-    privateEndpoints: enablePrivateNetworking
-      ? [
-          {
-            name: 'pep-blob-${solutionSuffix}'
-            privateDnsZoneGroup: {
-              privateDnsZoneGroupConfigs: [
-                {
-                  name: 'storage-dns-zone-group-blob'
-                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.storageBlob]!.outputs.resourceId
-                }
-              ]
-            }
-            subnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
-            service: 'blob'
-          }
-          {
-            name: 'pep-queue-${solutionSuffix}'
-            privateDnsZoneGroup: {
-              privateDnsZoneGroupConfigs: [
-                {
-                  name: 'storage-dns-zone-group-queue'
-                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.storageQueue]!.outputs.resourceId
-                }
-              ]
-            }
-            subnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
-            service: 'queue'
-          }
-        ]
-      : []
-    blobServices: {
-      corsRules: []
-      deleteRetentionPolicyEnabled: false
-      containers: [
-        {
-          name: 'data'
-          publicAccess: 'None'
-        }
-      ]
-    }
-    //   secretsExportConfiguration: {
-    //   accessKey1Name: 'ADLS-ACCOUNT-NAME'
-    //   connectionString1Name: storageAccountName
-    //   accessKey2Name: 'ADLS-ACCOUNT-CONTAINER'
-    //   connectionString2Name: 'data'
-    //   accessKey3Name: 'ADLS-ACCOUNT-KEY'
-    //   connectionString3Name: listKeys(resourceId('Microsoft.Storage/storageAccounts', storageAccountName), '2021-04-01')
-    //   keyVaultResourceId: keyvault.outputs.resourceId
-    // }
   }
-  dependsOn: [keyvault]
   scope: resourceGroup(resourceGroup().name)
 }
 
@@ -1044,9 +961,9 @@ module appserviceModule 'deploy_app_service.bicep' = {
     USE_INTERNAL_STREAM: useInternalStream
     SQLDB_SERVER: sqlServerFqdn
     SQLDB_DATABASE: sqlDBModule.outputs.sqlDbName
-    AZURE_COSMOSDB_ACCOUNT: cosmosDb.outputs.cosmosAccountName
-    AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: cosmosDb.outputs.cosmosContainerName
-    AZURE_COSMOSDB_DATABASE: cosmosDb.outputs.cosmosDatabaseName
+    AZURE_COSMOSDB_ACCOUNT: cosmosDb.outputs.name
+    AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: collectionName
+    AZURE_COSMOSDB_DATABASE: cosmosDbDatabaseName
     AZURE_COSMOSDB_ENABLE_FEEDBACK: azureCosmosDbEnableFeedback
     //VITE_POWERBI_EMBED_URL: 'TBD'
     imageTag: imageTag
@@ -1072,16 +989,16 @@ module appserviceModule 'deploy_app_service.bicep' = {
 output WEB_APP_URL string = appserviceModule.outputs.webAppUrl
 
 @description('Name of the storage account.')
-output STORAGE_ACCOUNT_NAME string = avmStorageAccount.outputs.name
+output STORAGE_ACCOUNT_NAME string = storageAccountModule.outputs.storageName
 
 @description('Name of the storage container.')
-output STORAGE_CONTAINER_NAME string = avmStorageAccount.outputs.containerName
+output STORAGE_CONTAINER_NAME string = storageAccountModule.outputs.storageContainer
 
 @description('Name of the Key Vault.')
 output KEY_VAULT_NAME string = keyvault.outputs.name
 
 @description('Name of the Cosmos DB account.')
-output COSMOSDB_ACCOUNT_NAME string = cosmosDBModule.outputs.cosmosAccountName
+output COSMOSDB_ACCOUNT_NAME string = cosmosDb.outputs.name
 
 @description('Name of the resource group.')
 output RESOURCE_GROUP_NAME string = resourceGroup().name
@@ -1130,13 +1047,13 @@ output AZURE_AI_SEARCH_ENDPOINT string = aifoundry.outputs.aiSearchTarget
 output AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT string = functionAppCallTranscriptSystemPrompt
 
 @description('The name of the Azure Cosmos DB account.')
-output AZURE_COSMOSDB_ACCOUNT string = cosmosDBModule.outputs.cosmosAccountName
+output AZURE_COSMOSDB_ACCOUNT string = cosmosDb.outputs.name
 
 @description('The name of the Azure Cosmos DB container for storing conversations.')
-output AZURE_COSMOSDB_CONVERSATIONS_CONTAINER string = cosmosDBModule.outputs.cosmosContainerName
+output AZURE_COSMOSDB_CONVERSATIONS_CONTAINER string = collectionName
 
 @description('The name of the Azure Cosmos DB database.')
-output AZURE_COSMOSDB_DATABASE string = cosmosDBModule.outputs.cosmosDatabaseName
+output AZURE_COSMOSDB_DATABASE string = cosmosDbDatabaseName
 
 @description('Indicates whether feedback is enabled in Azure Cosmos DB.')
 output AZURE_COSMOSDB_ENABLE_FEEDBACK string = azureCosmosDbEnableFeedback
