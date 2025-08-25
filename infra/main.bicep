@@ -1254,7 +1254,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     //VITE_POWERBI_EMBED_URL: 'TBD'
     imageTag: imageTag
     userassignedIdentityClientId: userAssignedIdentity.outputs.clientId
-    userassignedIdentityId: userAssignedIdentity.outputs.principalId
+    userassignedIdentityId: userAssignedIdentity.outputs.resourceId
     applicationInsightsId: aifoundry.outputs.applicationInsightsId
     azureSearchServiceEndpoint: aifoundry.outputs.aiSearchTarget
     sqlSystemPrompt: functionAppSqlPrompt
