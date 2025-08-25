@@ -148,7 +148,7 @@ var azureSearchEnableInDomain = 'False' // Set to 'True' if you want to enable i
 var azureCosmosDbEnableFeedback = 'True'
 var useInternalStream = 'True'
 var useAIProjectClientFlag = 'False'
-var sqlServerFqdn = '${sqlDBModule.outputs.sqlServerName}.database.windows.net'
+var sqlServerFqdn = '${sqlDBModule.outputs.name}.database.windows.net'
 
 @description('Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true.')
 param vmSize string? 
@@ -200,19 +200,19 @@ var functionAppStreamTextSystemPrompt = '''The currently selected client's name 
   Always send clientId as '{client_id}'.'''
 
 // Replica regions list based on article in [Azure regions list](https://learn.microsoft.com/azure/reliability/regions-list) and [Enhance resilience by replicating your Log Analytics workspace across regions](https://learn.microsoft.com/azure/azure-monitor/logs/workspace-replication#supported-regions) for supported regions for Log Analytics Workspace.
-var replicaRegionPairs = {
-  australiaeast: 'australiasoutheast'
-  centralus: 'westus'
-  eastasia: 'japaneast'
-  eastus: 'centralus'
-  eastus2: 'centralus'
-  japaneast: 'eastasia'
-  northeurope: 'westeurope'
-  southeastasia: 'eastasia'
-  uksouth: 'westeurope'
-  westeurope: 'northeurope'
-}
-var replicaLocation = replicaRegionPairs[resourceGroup().location]
+// var replicaRegionPairs = {
+//   australiaeast: 'australiasoutheast'
+//   centralus: 'westus'
+//   eastasia: 'japaneast'
+//   eastus: 'centralus'
+//   eastus2: 'centralus'
+//   japaneast: 'eastasia'
+//   northeurope: 'westeurope'
+//   southeastasia: 'eastasia'
+//   uksouth: 'westeurope'
+//   westeurope: 'northeurope'
+// }
+// var replicaLocation = replicaRegionPairs[resourceGroup().location]
 
 @description('Optional. The tags to apply to all deployed Azure resources.')
 param tags resourceInput<'Microsoft.Resources/resourceGroups@2025-04-01'>.tags = {}
@@ -220,18 +220,18 @@ param tags resourceInput<'Microsoft.Resources/resourceGroups@2025-04-01'>.tags =
 var aiFoundryAiServicesAiProjectResourceName = 'proj-${solutionSuffix}'
 
 // Region pairs list based on article in [Azure Database for MySQL Flexible Server - Azure Regions](https://learn.microsoft.com/azure/mysql/flexible-server/overview#azure-regions) for supported high availability regions for CosmosDB.
-var cosmosDbZoneRedundantHaRegionPairs = {
-  australiaeast: 'uksouth' //'southeastasia'
-  centralus: 'eastus2'
-  eastasia: 'southeastasia'
-  eastus: 'centralus'
-  eastus2: 'centralus'
-  japaneast: 'australiaeast'
-  northeurope: 'westeurope'
-  southeastasia: 'eastasia'
-  uksouth: 'westeurope'
-  westeurope: 'northeurope'
-}
+// var cosmosDbZoneRedundantHaRegionPairs = {
+//   australiaeast: 'uksouth' //'southeastasia'
+//   centralus: 'eastus2'
+//   eastasia: 'southeastasia'
+//   eastus: 'centralus'
+//   eastus2: 'centralus'
+//   japaneast: 'australiaeast'
+//   northeurope: 'westeurope'
+//   southeastasia: 'eastasia'
+//   uksouth: 'westeurope'
+//   westeurope: 'northeurope'
+// }
 
 
 var allTags = union(
@@ -252,7 +252,7 @@ var resourcesName = toLower(trim(replace(
 )))
 
 // Paired location calculated based on 'location' parameter. This location will be used by applicable resources if `enableScalability` is set to `true`
-var cosmosDbHaLocation = cosmosDbZoneRedundantHaRegionPairs[resourceGroup().location]
+// var cosmosDbHaLocation = cosmosDbZoneRedundantHaRegionPairs[resourceGroup().location]
 
 // ========== Resource Group Tag ========== //
 resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
@@ -709,12 +709,6 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
     diagnosticSettings: [{ useThisWorkspace: true }]
     // WAF aligned configuration for Redundancy
     dailyQuotaGb: enableRedundancy ? 10 : null //WAF recommendation: 10 GB per day is a good starting point for most workloads
-    replication: enableRedundancy
-      ? {
-          enabled: true
-          location: replicaLocation
-        }
-      : null
     // WAF aligned configuration for Private Networking
     publicNetworkAccessForIngestion: enablePrivateNetworking ? 'Disabled' : 'Enabled'
     publicNetworkAccessForQuery: enablePrivateNetworking ? 'Disabled' : 'Enabled'
@@ -916,25 +910,6 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
     zoneRedundant: enableRedundancy ? true : false
     capabilitiesToAdd: enableRedundancy ? null : ['EnableServerless']
     automaticFailover: enableRedundancy ? true : false
-    failoverLocations: enableRedundancy
-      ? [
-          {
-            failoverPriority: 0
-            isZoneRedundant: true
-            locationName: solutionLocation
-          }
-          {
-            failoverPriority: 1
-            isZoneRedundant: true
-            locationName: cosmosDbHaLocation
-          }
-        ]
-      : [
-          {
-            locationName: solutionLocation
-            failoverPriority: 0
-          }
-        ]
   }
   dependsOn: [keyvault, avmStorageAccount]
   scope: resourceGroup(resourceGroup().name)
@@ -1082,7 +1057,7 @@ module saveStorageAccountSecretsInKeyVault 'br/public:avm/res/key-vault/vault:0.
 //   scope: resourceGroup(resourceGroup().name)
 // }
 
-
+var sqlDbName = 'sqldb-${solutionSuffix}'
 module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
   name: 'serverDeployment'
   params: {
@@ -1271,7 +1246,7 @@ module appserviceModule 'deploy_app_service.bicep' = {
     azureOpenAIEmbeddingEndpoint: aifoundry.outputs.aoaiEndpoint
     USE_INTERNAL_STREAM: useInternalStream
     SQLDB_SERVER: sqlServerFqdn
-    SQLDB_DATABASE: sqlDBModule.outputs.sqlDbName
+    SQLDB_DATABASE: sqlDbName
     AZURE_COSMOSDB_ACCOUNT: cosmosDb.outputs.name
     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: collectionName
     AZURE_COSMOSDB_DATABASE: cosmosDbDatabaseName
@@ -1318,10 +1293,10 @@ output RESOURCE_GROUP_NAME string = resourceGroup().name
 output AI_FOUNDRY_RESOURCE_ID string = aifoundry.outputs.aiFoundryId
 
 @description('Name of the SQL Database server.')
-output SQLDB_SERVER_NAME string = sqlDBModule.outputs.sqlServerName
+output SQLDB_SERVER_NAME string = sqlDBModule.outputs.name
 
 @description('Name of the SQL Database.')
-output SQLDB_DATABASE string = sqlDBModule.outputs.sqlDbName
+output SQLDB_DATABASE string = sqlDbName
 
 @description('Name of the managed identity used by the web app.')
 output MANAGEDIDENTITY_WEBAPP_NAME string = userAssignedIdentity.outputs.name
