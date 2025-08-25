@@ -297,6 +297,59 @@ The subscription 'xxxx-xxxx' cannot have more than 1 Container App Environments 
 
 </details>
 
+<details>
+<summary><b>Unauthorized - Operation cannot be completed without additional quota</b> </summary>
+ 
+- You can check your quota usage using `az vm list-usage`.
+   
+    ```
+    az vm list-usage --location "<Location>" -o table
+    ```
+- To Request more quota refer [VM Quota Request](https://techcommunity.microsoft.com/blog/startupsatmicrosoftblog/how-to-increase-quota-for-specific-types-of-azure-virtual-machines/3792394).
+ 
+</details>
+ 
+<details><summary><b>ParentResourceNotfound</b>
+</summary>
+ 
+- You can refer to the [Parent Resource Not found](https://learn.microsoft.com/en-us/azure/azure-resource-manager/troubleshooting/error-parent-resource?tabs=bicep) documentation if you encounter this error.
+ 
+</details>
+ 
+<details><summary><b>ResourceProviderError</b></summary>
+ 
+- This error occurs when the resource provider is not registered in your subscription.
+- To register it, refer to [Register Resource Provider](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types) documentation.
+ 
+</details>
+ 
+<details><summary><b>Conflict - Cannot use the SKU Basic with File Change Audit for site.</b></summary>
+ 
+- This error happens because File Change Audit logs aren’t supported on Basic SKU App Service Plans.
+ 
+- Upgrading to Premium/Isolated SKU (supports File Change Audit), or
+ 
+- Disabling File Change Audit in Diagnostic Settings if you must stay on Basic.
+- Always cross-check the [supported log types](https://aka.ms/supported-log-types)
+ before adding diagnostic logs to your Bicep templates.
+ 
+</details>
+ 
+<details>
+ 
+<summary><b>AccountPropertyCannotBeUpdated</b></summary>
+ 
+- The property **`isHnsEnabled`** (Hierarchical Namespace for Data Lake Gen2) is **read-only** and can only be set during **storage account creation**.  
+- Once a storage account is created, this property **cannot be updated**.  
+- Trying to update it via ARM template, Bicep, CLI, or Portal will fail.
+ 
+- **Resolution**  
+- Create a **new storage account** with `isHnsEnabled=true` if you require hierarchical namespace.  
+- Migration may be needed if you already have data.  
+- Refer to [Storage Account Update Restrictions](https://aka.ms/storageaccountupdate) for more details.  
+ 
+</details>
+
 
 💡 Note: If you encounter any other issues, you can refer to the [Common Deployment Errors](https://learn.microsoft.com/en-us/azure/azure-resource-manager/troubleshooting/common-deployment-errors) documentation.
 If the problem persists, you can also raise an bug in our [MACAE Github Issues](https://github.com/microsoft/Multi-Agent-Custom-Automation-Engine-Solution-Accelerator/issues) for further support.
