@@ -113,6 +113,9 @@ param enableTelemetry bool = true
 @description('Optional. Enable redundancy for applicable resources, aligned with the Well Architected Framework recommendations. Defaults to false.')
 param enableRedundancy bool = false
 
+@description('Optional. Enable purge protection for the Key Vault')
+param enablePurgeProtection bool = false
+
 // Load the abbrevations file required to name the azure resources.
 //var abbrs = loadJsonContent('./abbreviations.json')
 
@@ -146,6 +149,19 @@ var azureCosmosDbEnableFeedback = 'True'
 var useInternalStream = 'True'
 var useAIProjectClientFlag = 'False'
 var sqlServerFqdn = '${sqlDBModule.outputs.sqlServerName}.database.windows.net'
+
+@description('Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true.')
+param vmSize string? 
+
+@description('Optional. Admin username for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
+@secure()
+//param vmAdminUsername string = take(newGuid(), 20)
+param vmAdminUsername string?
+
+@description('Optional. Admin password for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
+@secure()
+//param vmAdminPassword string = newGuid()
+param vmAdminPassword string?
 
 var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for tables and columns provided below:
    1. Table: Clients
@@ -216,6 +232,25 @@ var cosmosDbZoneRedundantHaRegionPairs = {
   uksouth: 'westeurope'
   westeurope: 'northeurope'
 }
+
+
+var allTags = union(
+  {
+    'azd-env-name': solutionName
+  },
+  tags
+)
+
+var resourcesName = toLower(trim(replace(
+  replace(
+    replace(replace(replace(replace('${solutionName}${solutionUniqueToken}', '-', ''), '_', ''), '.', ''), '/', ''),
+    ' ',
+    ''
+  ),
+  '*',
+  ''
+)))
+
 // Paired location calculated based on 'location' parameter. This location will be used by applicable resources if `enableScalability` is set to `true`
 var cosmosDbHaLocation = cosmosDbZoneRedundantHaRegionPairs[resourceGroup().location]
 
@@ -255,6 +290,21 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
 //   }
 //   scope: resourceGroup(resourceGroup().name)
 // }
+
+module network 'modules/network.bicep' = if (enablePrivateNetworking) {
+  name: take('network-${resourcesName}-deployment', 64)
+  params: {
+    resourcesName: resourcesName
+    logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspace.outputs.resourceId
+    vmAdminUsername: vmAdminUsername ?? 'JumpboxAdminUser'
+    vmAdminPassword: vmAdminPassword ?? 'JumpboxAdminP@ssw0rd1234!'
+    vmSize: vmSize ??  'Standard_DS2_v2' // Default VM size 
+    location: solutionLocation
+    tags: allTags
+    enableTelemetry: enableTelemetry
+  }
+}
+
 
 var networkSecurityGroupAdministrationResourceName = 'nsg-${solutionSuffix}-administration'
 module networkSecurityGroupAdministration 'br/public:avm/res/network/network-security-group:0.5.1' = if (enablePrivateNetworking) {
@@ -886,37 +936,298 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
           }
         ]
   }
-  dependsOn: [keyvault, storageAccountModule]
+  dependsOn: [keyvault, avmStorageAccount]
   scope: resourceGroup(resourceGroup().name)
 }
 
 
 // ========== Storage Account Module ========== //
-module storageAccountModule 'deploy_storage_account.bicep' = {
-  name: 'deploy_storage_account'
+// module storageAccountModule 'deploy_storage_account.bicep' = {
+//   name: 'deploy_storage_account'
+//   params: {
+//     solutionLocation: solutionLocation
+//     managedIdentityObjectId: userAssignedIdentity.outputs.principalId
+//     saName: 'st${solutionSuffix}'
+//     keyVaultName: keyvault.outputs.name
+//     tags: tags
+//   }
+//   scope: resourceGroup(resourceGroup().name)
+// }
+
+// ========== AVM WAF ========== //
+// ========== Storage account module ========== //
+var storageAccountName = 'st${solutionSuffix}'
+module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
+  name: take('avm.res.storage.storage-account.${storageAccountName}', 64)
   params: {
-    solutionLocation: solutionLocation
-    managedIdentityObjectId: userAssignedIdentity.outputs.principalId
-    saName: 'st${solutionSuffix}'
-    keyVaultName: keyvault.outputs.name
+    name: storageAccountName
+    location: solutionLocation
+    managedIdentities: { systemAssigned: true }
+    minimumTlsVersion: 'TLS1_2'
+    enableTelemetry: enableTelemetry
     tags: tags
+    accessTier: 'Hot'
+    supportsHttpsTrafficOnly: true
+    roleAssignments: [
+      {
+        principalId: userAssignedIdentity.outputs.principalId
+        roleDefinitionIdOrName: 'Storage Blob Data Contributor'
+        principalType: 'ServicePrincipal'
+      }
+    ]
+    // WAF aligned networking
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: enablePrivateNetworking ? 'Deny' : 'Allow'
+    }
+    allowBlobPublicAccess: enablePrivateNetworking ? true : false
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    // Private endpoints for blob and queue
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-blob-${solutionSuffix}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                {
+                  name: 'storage-dns-zone-group-blob'
+                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.storageBlob]!.outputs.resourceId
+                }
+              ]
+            }
+            subnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
+            service: 'blob'
+          }
+          {
+            name: 'pep-queue-${solutionSuffix}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                {
+                  name: 'storage-dns-zone-group-queue'
+                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.storageQueue]!.outputs.resourceId
+                }
+              ]
+            }
+            subnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
+            service: 'queue'
+          }
+        ]
+      : []
+    blobServices: {
+      corsRules: []
+      deleteRetentionPolicyEnabled: false
+      containers: [
+        {
+          name: 'data'
+          publicAccess: 'None'
+        }
+      ]
+    }
+    //   secretsExportConfiguration: {
+    //   accessKey1Name: 'ADLS-ACCOUNT-NAME'
+    //   connectionString1Name: storageAccountName
+    //   accessKey2Name: 'ADLS-ACCOUNT-CONTAINER'
+    //   connectionString2Name: 'data'
+    //   accessKey3Name: 'ADLS-ACCOUNT-KEY'
+    //   connectionString3Name: listKeys(resourceId('Microsoft.Storage/storageAccounts', storageAccountName), '2021-04-01')
+    //   keyVaultResourceId: keyvault.outputs.resourceId
+    // }
   }
+  dependsOn: [keyvault]
   scope: resourceGroup(resourceGroup().name)
 }
 
-//========== SQL DB Module ========== //
-module sqlDBModule 'deploy_sql_db.bicep' = {
-  name: 'deploy_sql_db'
+// working version of saving storage account secrets in key vault using AVM module
+module saveStorageAccountSecretsInKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = {
+  name: take('saveStorageAccountSecretsInKeyVault.${keyVaultName}', 64)
   params: {
-    solutionLocation: solutionLocation
-    keyVaultName: keyvault.outputs.name
-    managedIdentityObjectId: userAssignedIdentity.outputs.principalId
-    managedIdentityName: userAssignedIdentity.outputs.name
-    serverName: 'sql-${solutionSuffix}'
-    sqlDBName: 'sqldb-${solutionSuffix}'
-    tags: tags
+    name: keyVaultName
+    enablePurgeProtection: enablePurgeProtection
+    enableVaultForDeployment: true
+    enableVaultForDiskEncryption: true
+    enableVaultForTemplateDeployment: true
+    enableRbacAuthorization: true
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 7
+    secrets: [
+      {
+        name: 'ADLS-ACCOUNT-NAME'
+        value: storageAccountName
+      }
+      {
+        name: 'ADLS-ACCOUNT-CONTAINER'
+        value: 'data'
+      }
+      {
+        name: 'ADLS-ACCOUNT-KEY'
+        value: avmStorageAccount.outputs.primaryAccessKey
+      }
+    ]
   }
-  scope: resourceGroup(resourceGroup().name)
+}
+
+
+//========== SQL DB Module ========== //
+// module sqlDBModule 'deploy_sql_db.bicep' = {
+//   name: 'deploy_sql_db'
+//   params: {
+//     solutionLocation: solutionLocation
+//     keyVaultName: keyvault.outputs.name
+//     managedIdentityObjectId: userAssignedIdentity.outputs.principalId
+//     managedIdentityName: userAssignedIdentity.outputs.name
+//     serverName: 'sql-${solutionSuffix}'
+//     sqlDBName: 'sqldb-${solutionSuffix}'
+//     tags: tags
+//   }
+//   scope: resourceGroup(resourceGroup().name)
+// }
+
+
+module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
+  name: 'serverDeployment'
+  params: {
+    // Required parameters
+    name: 'sql-${solutionSuffix}'
+    // Non-required parameters
+    administrators: {
+      azureADOnlyAuthentication: true
+      login: userAssignedIdentity.outputs.name
+      principalType: 'Application'
+      sid: userAssignedIdentity.outputs.principalId
+      tenantId: subscription().tenantId
+    }
+    connectionPolicy: 'Redirect'
+    // customerManagedKey: {
+    //   autoRotationEnabled: true
+    //   keyName: keyvault.outputs.name
+    //   keyVaultResourceId: keyvault.outputs.resourceId
+    //   // keyVersion: keyvault.outputs.
+    // }
+    databases: [
+      {
+        availabilityZone: 1
+        backupLongTermRetentionPolicy: {
+          monthlyRetention: 'P6M'
+        }
+        backupShortTermRetentionPolicy: {
+          retentionDays: 14
+        }
+        collation: 'SQL_Latin1_General_CP1_CI_AS'
+        diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+        elasticPoolResourceId: resourceId('Microsoft.Sql/servers/elasticPools', 'sql-${solutionSuffix}', 'sqlswaf-ep-001')
+        licenseType: 'LicenseIncluded'
+        maxSizeBytes: 34359738368
+        name: 'sqldb-${solutionSuffix}'
+        sku: {
+          capacity: 0
+          name: 'ElasticPool'
+          tier: 'GeneralPurpose'
+        }
+      }
+    ]
+    elasticPools: [
+      {
+        availabilityZone: -1
+        //maintenanceConfigurationId: '<maintenanceConfigurationId>'
+        name: 'sqlswaf-ep-001'
+        sku: {
+          capacity: 10
+          name: 'GP_Gen5'
+          tier: 'GeneralPurpose'
+        }
+        roleAssignments: [
+          {
+            principalId: userAssignedIdentity.outputs.principalId
+            principalType: 'ServicePrincipal'
+            roleDefinitionIdOrName: 'db_datareader'
+          }
+          {
+            principalId: userAssignedIdentity.outputs.principalId
+            principalType: 'ServicePrincipal'
+            roleDefinitionIdOrName: 'db_datawriter'
+          }
+
+          //Enable if above access is not sufficient for your use case
+          // {
+          //   principalId: userAssignedIdentity.outputs.principalId
+          //   principalType: 'ServicePrincipal'
+          //   roleDefinitionIdOrName: 'SQL DB Contributor'
+          // }
+          // {
+          //   principalId: userAssignedIdentity.outputs.principalId
+          //   principalType: 'ServicePrincipal'
+          //   roleDefinitionIdOrName: 'SQL Server Contributor'
+          // }
+        ]
+      }
+    ]
+    firewallRules: [
+      {
+        endIpAddress: '255.255.255.255'
+        name: 'AllowSpecificRange'
+        startIpAddress: '0.0.0.0'
+      }
+      {
+        endIpAddress: '0.0.0.0'
+        name: 'AllowAllWindowsAzureIps'
+        startIpAddress: '0.0.0.0'
+      }
+    ]
+    location: solutionLocation
+    managedIdentities: {
+      systemAssigned: true
+      userAssignedResourceIds: [
+        userAssignedIdentity.outputs.resourceId
+      ]
+    }
+    primaryUserAssignedIdentityResourceId: userAssignedIdentity.outputs.resourceId
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                {
+                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.sqlServer]!.outputs.resourceId
+                }
+              ]
+            }
+            service: 'sqlServer'
+            subnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
+            tags: tags
+          }
+        ]
+      : []
+    restrictOutboundNetworkAccess: 'Disabled'
+    securityAlertPolicies: [
+      {
+        emailAccountAdmins: true
+        name: 'Default'
+        state: 'Enabled'
+      }
+    ]
+    tags: tags
+    virtualNetworkRules: enablePrivateNetworking
+      ? [
+          {
+            ignoreMissingVnetServiceEndpoint: true
+            name: 'newVnetRule1'
+            virtualNetworkSubnetResourceId: virtualNetwork!.outputs.subnetResourceIds[0]
+          }
+        ]
+      : []
+    vulnerabilityAssessmentsObj: {
+      name: 'default'
+      // recurringScans: {
+      //   emails: [
+      //     'test1@contoso.com'
+      //     'test2@contoso.com'
+      //   ]
+      //   emailSubscriptionAdmins: true
+      //   isEnabled: true
+      // }
+      storageAccountResourceId: avmStorageAccount.outputs.resourceId
+    }
+  }
 }
 
 //========== Updates to Key Vault ========== //
@@ -989,10 +1300,10 @@ module appserviceModule 'deploy_app_service.bicep' = {
 output WEB_APP_URL string = appserviceModule.outputs.webAppUrl
 
 @description('Name of the storage account.')
-output STORAGE_ACCOUNT_NAME string = storageAccountModule.outputs.storageName
+output STORAGE_ACCOUNT_NAME string = avmStorageAccount.outputs.name
 
 @description('Name of the storage container.')
-output STORAGE_CONTAINER_NAME string = storageAccountModule.outputs.storageContainer
+output STORAGE_CONTAINER_NAME string = 'data'
 
 @description('Name of the Key Vault.')
 output KEY_VAULT_NAME string = keyvault.outputs.name
