@@ -352,4 +352,4 @@ The subscription 'xxxx-xxxx' cannot have more than 1 Container App Environments 
 
 
 💡 Note: If you encounter any other issues, you can refer to the [Common Deployment Errors](https://learn.microsoft.com/en-us/azure/azure-resource-manager/troubleshooting/common-deployment-errors) documentation.
-If the problem persists, you can also raise an bug in our [MACAE Github Issues](https://github.com/microsoft/Multi-Agent-Custom-Automation-Engine-Solution-Accelerator/issues) for further support.
+If the problem persists, you can also raise an bug in our [BYOC-Client Advisor Github Issues](https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator/issues) for further support.
