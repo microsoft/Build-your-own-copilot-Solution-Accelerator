@@ -218,7 +218,7 @@ If you need to rebuild the source code and push the updated container to the dep
 This will rebuild the source code, package it into a container, and push it to the Azure Container Registry associated with your deployment.
 
 ### 🛠️ Troubleshooting
- If you encounter any issues during the deployment process, please refer  [troubleshooting](../docs/TroubleShootingSteps.md) document for detailed steps and solutions
+ If you encounter any issues during the deployment process, please refer [troubleshooting](../docs/TroubleShootingSteps.md) document for detailed steps and solutions
 
 ## Post Deployment Steps
 
