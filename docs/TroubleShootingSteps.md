@@ -68,7 +68,7 @@ Before deploying the resources, you may need to enable the **Bring Your Own Publ
 - This error can occur if you deploy the template using the same .env file - from a previous deployment.
 - To avoid this issue, create a new environment before redeploying.
 - You can use the following command to create a new environment:
- ```
+ ```bash
  azd env new <env-name>
  ```
 </details>
