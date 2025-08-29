@@ -116,7 +116,7 @@ based on available quota you can deploy application otherwise, you can request f
 - Make sure there are no typos in the resource ID.
 - Verify that the provisioning state of the existing resource is `Succeeded` by running the following command to avoid this error while deployment or restoring the resource.
 
-    ```
+    ```bash
     az resource show --ids <Resource ID> --query "properties.provisioningState"
     ```
 - Sample Resource IDs format
