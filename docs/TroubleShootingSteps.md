@@ -79,7 +79,7 @@ To prevent this issue, please ensure that the resource group you are targeting f
 ### Steps:
 1. Go to [Azure Portal](https://portal.azure.com/#home)
 2. Go to resource group option and search for targeted resource group
-3. If Targeted resource group is there and deletion for this is in progress, it means u cannot use this, you can create new or use any other resource group
+3. If Targeted resource group is there and deletion for this is in progress, it means you cannot use this, you can create new or use any other resource group
  
 </details>
  
