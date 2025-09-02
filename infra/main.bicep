@@ -543,7 +543,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
         }
         {
           name: 'AZURE-OPENAI-ENDPOINT'
-          value: aiFoundryAiServices.outputs.endpoint
+          value: aiFoundryAiServices.outputs.endpoints['OpenAI Language Model Instance API']
         }
         {
           name: 'AZURE-OPENAI-EMBEDDING-MODEL'
@@ -965,7 +965,7 @@ module saveStorageAccountSecretsInKeyVault 'br/public:avm/res/key-vault/vault:0.
 // ========== SQL module ========== //
 var sqlDbName = 'sqldb-${solutionSuffix}'
 module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
-  name: 'serverDeployment'
+  name: take('avm.res.sql.server.${sqlDbName}', 64)
   params: {
     // Required parameters
     name: 'sql-${solutionSuffix}'
@@ -1301,7 +1301,7 @@ module webSite 'modules/web-sites.bicep' = {
 
 var aiSearchName = 'srch-${solutionName}'
 module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
-  name: 'searchServiceDeployment'
+  name: take('avm.res.search.search-service.${aiSearchName}', 64)
   params: {
     // Required parameters
     name: aiSearchName
