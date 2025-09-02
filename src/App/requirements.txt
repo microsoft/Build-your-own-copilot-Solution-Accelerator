@@ -1,7 +1,7 @@
 # Core requirements
-azure-identity==1.23.1
+azure-identity==1.24.0
 # Flask[async]==2.3.2
-openai==1.99.1
+openai==1.102.0
 azure-storage-blob==12.26.0
 python-dotenv==1.1.1
 azure-cosmos==4.9.0
@@ -39,4 +39,4 @@ opentelemetry-sdk==1.36.0
 opentelemetry-api==1.36.0
 opentelemetry-semantic-conventions==0.57b0
 opentelemetry-instrumentation==0.57b0
-azure-monitor-opentelemetry==1.6.13
+azure-monitor-opentelemetry==1.7.0
