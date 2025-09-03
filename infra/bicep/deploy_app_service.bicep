@@ -9,7 +9,7 @@ targetScope = 'resourceGroup'
 @description('Required. Solution Location')
 param solutionLocation string
 
-// param identity string
+param identity string
 
 @description('Required. Name of App Service plan')
 param HostingPlanName string 
