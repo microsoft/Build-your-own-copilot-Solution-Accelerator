@@ -1268,7 +1268,7 @@ module webSite 'modules/web-sites.bicep' = {
           AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME: gptModelName
           AZURE_AI_AGENT_API_VERSION: azureOpenaiAPIVersion
           // AZURE_SEARCH_CONNECTION_NAME: '' //aiSearchProjectConnectionName
-          AZURE_SEARCH_CONNECTION_NAME: 'foundry-search-connection-${solutionName}'
+          AZURE_SEARCH_CONNECTION_NAME: aiSearchName
           AZURE_CLIENT_ID: userAssignedIdentity.outputs.clientId
         }
         // WAF aligned configuration for Monitoring
@@ -1384,6 +1384,18 @@ resource projectAISearchConnection 'Microsoft.CognitiveServices/accounts/project
     }
   }
 }
+
+// ========== Search Service to AI Services Role Assignment ========== //
+resource searchServiceToAiServicesRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiSearchName, '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd', aiFoundryAiServicesResourceName)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd') // Cognitive Services OpenAI User
+    principalId: searchService.outputs.systemAssignedMIPrincipalId!
+    principalType: 'ServicePrincipal'
+  }
+}
+
+
 
 
 @description('URL of the deployed web application.')
