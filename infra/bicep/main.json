@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "2763108320315144282"
+      "templateHash": "15748040506854778847"
     }
   },
   "parameters": {
@@ -37495,6 +37495,9 @@
         },
         "mode": "Incremental",
         "parameters": {
+          "identity": {
+            "value": "[reference('userAssignedIdentity').outputs.resourceId.value]"
+          },
           "solutionLocation": {
             "value": "[variables('solutionLocation')]"
           },
@@ -37626,7 +37629,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.37.4.10188",
-              "templateHash": "4107990273148015623"
+              "templateHash": "4117615656018386152"
             }
           },
           "parameters": {
@@ -37637,6 +37640,9 @@
               "metadata": {
                 "description": "Required. Solution Location"
               }
+            },
+            "identity": {
+              "type": "string"
             },
             "HostingPlanName": {
               "type": "string",
@@ -39449,7 +39455,8 @@
         "azAIMultiServiceAccount",
         "azOpenAI",
         "azSearchService",
-        "storageAccountModule"
+        "storageAccountModule",
+        "userAssignedIdentity"
       ]
     }
   }

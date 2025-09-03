@@ -734,7 +734,7 @@ module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
 module appserviceModule 'deploy_app_service.bicep' = {
   name: 'deploy_app_service'
   params: {
-    // identity:userAssignedIdentity.outputs.resourceId
+    identity:userAssignedIdentity.outputs.resourceId
     // solutionName: solutionPrefix
     solutionLocation: solutionLocation
     AzureSearchService:azSearchService.outputs.name
