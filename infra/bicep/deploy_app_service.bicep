@@ -3,179 +3,203 @@ targetScope = 'resourceGroup'
 
 @minLength(3)
 @maxLength(15)
-@description('Solution Name')
-param solutionName string
+// @description('Solution Name')
+// param solutionName string
 
-@description('Solution Location')
+@description('Required. Solution Location')
 param solutionLocation string
 
-param identity string
+// param identity string
 
-@description('Name of App Service plan')
+@description('Required. Name of App Service plan')
 param HostingPlanName string 
 
-@description('The pricing tier for the App Service plan')
+@description('Required. The pricing tier for the App Service plan')
 @allowed(
   ['F1', 'D1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P4']
 )
 param HostingPlanSku string = 'B1'
 
-@description('Name of Web App')
+@description('Required.Name of Web App')
 param WebsiteName string 
 
-@description('Name of Application Insights')
+@description('Required. Name of Application Insights')
 param ApplicationInsightsName string 
 
-@description('Name of Azure Search Service')
+@description('Required. Name of Azure Search Service')
 param AzureSearchService string = ''
 
-@description('Name of Azure Search Index')
+@description('Required. Name of Azure Search Index')
 param AzureSearchIndex string = ''
 
-@description('Name of Azure Search Articles Index')
+@description('Required. Name of Azure Search Articles Index')
 param AzureSearchArticlesIndex string = ''
 
-@description('Name of Azure Search Grants Index')
+@description('Required. Name of Azure Search Grants Index')
 param AzureSearchGrantsIndex string = ''
 
-@description('Name of Azure Search Drafts Index')
+@description('Required. Name of Azure Search Drafts Index')
 param AzureSearchDraftsIndex string = ''
 
-@description('Azure Search Admin Key')
+@description('Required. Azure Search Admin Key')
 @secure()
 param AzureSearchKey string = ''
 
-@description('Use semantic search')
+@description('Required. Use semantic search')
 param AzureSearchUseSemanticSearch string = 'False'
 
-@description('Semantic search config')
+@description('Required. Semantic search config')
 param AzureSearchSemanticSearchConfig string = 'default'
 
-@description('Is the index prechunked')
+@description('Required. Is the index prechunked')
 param AzureSearchIndexIsPrechunked string = 'False'
 
-@description('Top K results')
+@description('Required. Top K results')
 param AzureSearchTopK string = '5'
 
-@description('Enable in domain')
+@description('Required. Enable in domain')
 param AzureSearchEnableInDomain string = 'False'
 
-@description('Content columns')
+@description('Required. Content columns')
 param AzureSearchContentColumns string = 'content'
 
-@description('Filename column')
+@description('Required. Filename column')
 param AzureSearchFilenameColumn string = 'filename'
 
-@description('Title column')
+@description('Required. Title column')
 param AzureSearchTitleColumn string = 'title'
 
-@description('Url column')
+@description('Required. Url column')
 param AzureSearchUrlColumn string = 'url'
 
-@description('Name of Azure OpenAI Resource')
+@description('Required. Name of Azure OpenAI Resource')
 param AzureOpenAIResource string
 
-@description('Azure OpenAI Model Deployment Name')
+@description('Required. Azure OpenAI Model Deployment Name')
 param AzureOpenAIModel string
 
-@description('Azure OpenAI Model Name')
+@description('Required. Azure OpenAI Model Name')
 param AzureOpenAIModelName string = 'gpt-35-turbo'
 
-@description('Azure Open AI Endpoint')
+@description('Required. Azure Open AI Endpoint')
 param AzureOpenAIEndpoint string = ''
 
-@description('Azure OpenAI Key')
+@description('Required. Azure OpenAI Key')
 @secure()
 param AzureOpenAIKey string
 
-@description('Azure OpenAI Temperature')
+@description('Required. Azure OpenAI Temperature')
 param AzureOpenAITemperature string = '0'
 
-@description('Azure OpenAI Top P')
+@description('Required. Azure OpenAI Top P')
 param AzureOpenAITopP string = '1'
 
-@description('Azure OpenAI Max Tokens')
+@description('Required. Azure OpenAI Max Tokens')
 param AzureOpenAIMaxTokens string = '1000'
 
-@description('Azure OpenAI Stop Sequence')
+@description('Required. Azure OpenAI Stop Sequence')
 param AzureOpenAIStopSequence string = '\n'
 
-@description('Azure OpenAI System Message')
+@description('Required. Azure OpenAI System Message')
 param AzureOpenAISystemMessage string = 'You are an AI assistant that helps people find information.'
 
-@description('Azure OpenAI Api Version')
+@description('Required. Azure OpenAI Api Version')
 param AzureOpenAIApiVersion string = '2023-12-01-preview'
 
-@description('Whether or not to stream responses from Azure OpenAI')
+@description('Required. Whether or not to stream responses from Azure OpenAI')
 param AzureOpenAIStream string = 'True'
 
-@description('Azure Search Query Type')
+@description('Required. Azure Search Query Type')
 @allowed(
   ['simple', 'semantic', 'vector', 'vectorSimpleHybrid', 'vectorSemanticHybrid']
 )
 param AzureSearchQueryType string = 'vectorSemanticHybrid'
 
-@description('Azure Search Vector Fields')
+@description('Required. Azure Search Vector Fields')
 param AzureSearchVectorFields string = ''
 
-@description('Azure Search Permitted Groups Field')
+@description('Required. Azure Search Permitted Groups Field')
 param AzureSearchPermittedGroupsField string = ''
 
-@description('Azure Search Strictness')
+@description('Required. Azure Search Strictness')
 @allowed(['1', '2', '3', '4', '5'])
 param AzureSearchStrictness string = '3'
 
-@description('Azure OpenAI Embedding Deployment Name')
+@description('Required. Azure OpenAI Embedding Deployment Name')
 param AzureOpenAIEmbeddingName string = ''
 
-@description('Azure Open AI Embedding Key')
+@description('Required. Azure Open AI Embedding Key')
 param AzureOpenAIEmbeddingkey string = ''
 
-@description('Azure Open AI Embedding Endpoint')
+@description('Required. Azure Open AI Embedding Endpoint')
 param AzureOpenAIEmbeddingEndpoint string = ''
 
-@description('Enable chat history by deploying a Cosmos DB instance')
+@description('Required. Enable chat history by deploying a Cosmos DB instance')
 param WebAppEnableChatHistory string = 'False'
 
 
-@description('Azure AI Studio Chat Flow Endpoint')
-param AIStudioChatFlowEndpoint string = ''
+// @description('Azure AI Studio Chat Flow Endpoint')
+// param AIStudioChatFlowEndpoint string = ''
 
-@description('Azure AI Studio Chat Flow Key')
-param AIStudioChatFlowAPIKey string = ''
+// @description('Azure AI Studio Chat Flow Key')
+// param AIStudioChatFlowAPIKey string = ''
 
 
-@description('Azure AI Studio Chat Flow Deployment Name')
-param AIStudioChatFlowDeploymentName string = ''
+// @description('Azure AI Studio Chat Flow Deployment Name')
+// param AIStudioChatFlowDeploymentName string = ''
 
-@description('Azure AI Studio Draft Flow Endpoint')
+@description('Required. Azure AI Studio Draft Flow Endpoint')
 param AIStudioDraftFlowEndpoint string = ''
 
 
-@description('Azure AI Studio Draft Flow Key')
+@description('Required. Azure AI Studio Draft Flow Key')
 param AIStudioDraftFlowAPIKey string = ''
 
-@description('Azure AI Studio Draft Flow Deployment Name')
+@description('Required. Azure AI Studio Draft Flow Deployment Name')
 param AIStudioDraftFlowDeploymentName string = ''
 
-@description('Use Azure AI Studio')
+@description('Required. Use Azure AI Studio')
 param AIStudioUse string = 'False'
 
 
 var WebAppImageName = 'DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest'
 
-resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
-  name: HostingPlanName
-  location: resourceGroup().location
-  sku: {
-    name: HostingPlanSku
-  }
-  properties: {
-    name: HostingPlanName
+// resource HostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
+//   name: HostingPlanName
+//   location: resourceGroup().location
+//   sku: {
+//     name: HostingPlanSku
+//   }
+//   properties: {
+//     name: HostingPlanName
+//     reserved: true
+//   }
+//   kind: 'linux'
+// }
+
+// ========== AVM WAF server farm ========== //
+// WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
+// PSRule for Web Server Farm: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#app-service
+var webServerFarmResourceName = HostingPlanName
+module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
+  name: 'deploy_app_service_plan_serverfarm'
+  params: {
+    name: webServerFarmResourceName
+    // tags: tags
+    // enableTelemetry: enableTelemetry
+    location: resourceGroup().location
     reserved: true
+    kind: 'linux'
+    // WAF aligned configuration for Monitoring
+    // diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    // WAF aligned configuration for Scalability
+    skuName: HostingPlanSku
+    // skuCapacity: enableScalability ? 3 : 1
+    // WAF aligned configuration for Redundancy
+    // zoneRedundant: enableRedundancy ? true : false
   }
-  kind: 'linux'
 }
+
 
 resource Website 'Microsoft.Web/sites@2020-06-01' = {
   name: WebsiteName
@@ -189,7 +213,7 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
       appSettings: [
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: reference(ApplicationInsights.id, '2015-05-01').InstrumentationKey
+          value: applicationInsights.outputs.instrumentationKey
         }
         {
           name: 'AZURE_SEARCH_SERVICE'
@@ -386,18 +410,34 @@ resource Website 'Microsoft.Web/sites@2020-06-01' = {
       linuxFxVersion: WebAppImageName
     }
   }
-  dependsOn: [HostingPlan]
+  dependsOn: [webServerFarm]
 }
 
-resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: ApplicationInsightsName
-  location: resourceGroup().location
-  tags: {
-    'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
+// resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+//   name: ApplicationInsightsName
+//   location: resourceGroup().location
+//   tags: {
+//     'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
+//   }
+//   properties: {
+//     Application_Type: 'web'
+//   }
+//   kind: 'web'
+// }
+
+module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = {
+  name: 'applicationInsightsDeploy'
+  params: {
+    name: ApplicationInsightsName
+    location: solutionLocation
+
+    kind: 'web'
+    applicationType: 'web'
+    workspaceResourceId: ''
+    // Tags (align with organizational tagging policy)
+    tags: {
+      'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
+    }
   }
-  properties: {
-    Application_Type: 'web'
-  }
-  kind: 'web'
 }
 
