@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "18149674120991381974"
+      "templateHash": "2763108320315144282"
     }
   },
   "parameters": {
@@ -20,6 +20,7 @@
     },
     "solutionName": {
       "type": "string",
+      "defaultValue": "[parameters('solutionPrefix')]",
       "minLength": 3,
       "maxLength": 15,
       "metadata": {
@@ -59,21 +60,21 @@
     },
     "vmAdminUsername": {
       "type": "securestring",
-      "nullable": true,
+      "defaultValue": "JumpboxAdminUser",
       "metadata": {
         "description": "Optional. Admin username for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true."
       }
     },
     "vmAdminPassword": {
       "type": "securestring",
-      "nullable": true,
+      "defaultValue": "JumpboxAdminP@ssw0rd1234!",
       "metadata": {
         "description": "Optional. Admin password for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true."
       }
     },
     "vmSize": {
       "type": "string",
-      "nullable": true,
+      "defaultValue": "Standard_DS2_v2",
       "metadata": {
         "description": "Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true."
       }
