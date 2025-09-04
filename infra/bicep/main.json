@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "13338836059138156719"
+      "templateHash": "6868528017621113929"
     }
   },
   "parameters": {
@@ -38903,7 +38903,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.37.4.10188",
-              "templateHash": "4298119334635398540"
+              "templateHash": "15307773647336081273"
             }
           },
           "definitions": {
@@ -39801,7 +39801,7 @@
               "location": "[parameters('location')]",
               "kind": "[parameters('kind')]",
               "tags": "[parameters('tags')]",
-              "identity": "[variables('identity')]",
+              "identity": "[if(empty(variables('identity')), null(), variables('identity'))]",
               "properties": {
                 "managedEnvironmentId": "[if(not(empty(parameters('managedEnvironmentId'))), parameters('managedEnvironmentId'), null())]",
                 "serverFarmId": "[parameters('serverFarmResourceId')]",
