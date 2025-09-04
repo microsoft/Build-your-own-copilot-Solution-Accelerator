@@ -698,44 +698,44 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
 // //   dependsOn:[keyvaultModule]
 // // }
 
-// // module createIndex1 'deploy_aihub_scripts.bicep' = {
-// //   name : 'deploy_aihub_scripts'
-// //   params:{
-// //     solutionLocation: solutionLocation
-// //     identity:userAssignedIdentity.outputs.principalId
-// //     baseUrl:baseUrl
-// //     keyVaultName:keyVaultName
-// //     solutionName: solutionPrefix
-// //     resourceGroupName:resourceGroupName
-// //     subscriptionId:subscriptionId
-// //   }
-// //   dependsOn:[keyvault]
-// // }
-
-// //========== Deployment script to create index ========== // 
-// module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
+// module createIndex1 'deploy_aihub_scripts.bicep' = {
 //   name : 'deploy_aihub_scripts'
-//   params: {
-//     // Required parameters
-//     kind: 'AzureCLI'
-//     name: 'create_aihub'
-//     // Non-required parameters
-//     azCliVersion: '2.52.0'
-//     location: solutionLocation
-//     managedIdentities: {
-//       userAssignedResourceIds: [
-//         userAssignedIdentity.outputs.resourceId
-//       ]
-//     }
-//     runOnce: true
-//     primaryScriptUri: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh'
-//     arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}'
-//     tags: tags
-//     timeout: 'PT1H'
-//     retentionInterval: 'PT1H'
-//     cleanupPreference: 'OnSuccess'
+//   params:{
+//     solutionLocation: solutionLocation
+//     identity:userAssignedIdentity.outputs.principalId
+//     baseUrl:baseUrl
+//     keyVaultName:keyVaultName
+//     solutionName: solutionPrefix
+//     resourceGroupName:resourceGroupName
+//     subscriptionId:subscriptionId
 //   }
+//   dependsOn:[keyvault]
 // }
+
+//========== Deployment script to create index ========== // 
+module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
+  name : 'deploy_aihub_scripts'
+  params: {
+    // Required parameters
+    kind: 'AzureCLI'
+    name: 'create_aihub'
+    // Non-required parameters
+    azCliVersion: '2.52.0'
+    location: solutionLocation
+    managedIdentities: {
+      userAssignedResourceIds: [
+        userAssignedIdentity.outputs.resourceId
+      ]
+    }
+    runOnce: true
+    primaryScriptUri: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh'
+    arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}'
+    tags: tags
+    timeout: 'PT1H'
+    retentionInterval: 'PT1H'
+    cleanupPreference: 'OnSuccess'
+  }
+}
 
 // // ========== AVM WAF server farm ========== //
 // // WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
