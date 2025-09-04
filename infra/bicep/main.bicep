@@ -406,61 +406,61 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
 // //     accounts_byc_openai_name: '${abbrs.ai.openAIService}${solutionPrefix}'
 // //   }
 // // }
-// var accounts_byc_openai_name = '${abbrs.ai.openAIService}${solutionPrefix}'
-// module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
-//   name: 'deploy_azure_open_ai'
-//   params: {
-//     // Required parameters
-//     kind: 'OpenAI'
-//     name: accounts_byc_openai_name
-//     // Non-required parameters
-//     customSubDomainName: accounts_byc_openai_name
-//     deployments: [
-//       {
-//         model: {
-//           format: 'OpenAI'
-//           name: 'gpt-35-turbo'
-//           version: '0125'
-//         }
-//         name: 'gpt-35-turbo'
-//         sku: {
-//           capacity: 30
-//           name: 'Standard'
-//         }
-//       }
-//       {
-//         model: {
-//           format: 'OpenAI'
-//           name: 'text-embedding-ada-002'
-//           version: '2'
-//         }
-//         name: 'text-embedding-ada-002'
-//         sku: {
-//           capacity: 45
-//           name: 'GlobalStandard'
-//         }
-//       }
-//     ]
-//     location: solutionLocation
-//     // WAF aligned configuration for Private Networking
-//     privateEndpoints: enablePrivateNetworking
-//       ? [
-//           {
-//             name: 'pep-${accounts_byc_openai_name}'
-//             customNetworkInterfaceName: 'nic-${accounts_byc_openai_name}'
-//             privateDnsZoneGroup: {
-//               privateDnsZoneGroupConfigs: [
-//                 { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.openAI]!.outputs.resourceId }
-//               ]
-//             }
-//             service: 'vault'
-//             subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
-//           }
-//         ]
-//       : []
-//     publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-//   }
-// }
+var accounts_byc_openai_name = '${abbrs.ai.openAIService}${solutionPrefix}'
+module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
+  name: 'deploy_azure_open_ai'
+  params: {
+    // Required parameters
+    kind: 'OpenAI'
+    name: accounts_byc_openai_name
+    // Non-required parameters
+    customSubDomainName: accounts_byc_openai_name
+    deployments: [
+      {
+        model: {
+          format: 'OpenAI'
+          name: 'gpt-35-turbo'
+          version: '0125'
+        }
+        name: 'gpt-35-turbo'
+        sku: {
+          capacity: 30
+          name: 'Standard'
+        }
+      }
+      {
+        model: {
+          format: 'OpenAI'
+          name: 'text-embedding-ada-002'
+          version: '2'
+        }
+        name: 'text-embedding-ada-002'
+        sku: {
+          capacity: 45
+          name: 'GlobalStandard'
+        }
+      }
+    ]
+    location: solutionLocation
+    // WAF aligned configuration for Private Networking
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-${accounts_byc_openai_name}'
+            customNetworkInterfaceName: 'nic-${accounts_byc_openai_name}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.openAI]!.outputs.resourceId }
+              ]
+            }
+            service: 'vault'
+            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+          }
+        ]
+      : []
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+  }
+}
 
 // // module uploadFiles 'deploy_upload_files_script.bicep' = {
 // //   name : 'deploy_upload_files_script'
