@@ -83,6 +83,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
     tags: {
       ...tags
       TemplateName: 'Research Assistant'
+      SecurityControl: 'Ignore'
     }
   }
 }

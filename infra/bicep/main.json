@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "17438931209409956459"
+      "templateHash": "11438747509418478572"
     }
   },
   "parameters": {
@@ -391,7 +391,7 @@
       "apiVersion": "2021-04-01",
       "name": "default",
       "properties": {
-        "tags": "[shallowMerge(createArray(parameters('tags'), createObject('TemplateName', 'Research Assistant')))]"
+        "tags": "[shallowMerge(createArray(parameters('tags'), createObject('TemplateName', 'Research Assistant', 'SecurityControl', 'Ignore')))]"
       }
     },
     "userAssignedIdentity": {
@@ -25546,8 +25546,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "network",
         "userAssignedIdentity"
       ]
