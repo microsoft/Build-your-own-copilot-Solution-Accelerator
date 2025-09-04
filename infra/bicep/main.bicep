@@ -304,9 +304,6 @@ module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.1
     // Non-required parameters
     customSubDomainName: accounts_byc_cogser_name
     location: solutionLocation
-    // managedIdentities: {
-    //   type: 'None'
-    // }
     // WAF aligned configuration for Private Networking
     privateEndpoints: enablePrivateNetworking
       ? [
@@ -337,68 +334,68 @@ module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.1
 // //   }
 // // } 
 
-// var aiSearchName = '${abbrs.ai.aiSearch}${solutionPrefix}'
-// module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
-//   name: take('avm.res.search.search-service.${aiSearchName}', 64)
-//   params: {
-//     // Required parameters
-//     name: aiSearchName
-//     // Authentication options
-//     authOptions: {
-//       aadOrApiKey: {
-//         aadAuthFailureMode: 'http401WithBearerChallenge'
-//       }
-//     }
-//     disableLocalAuth: false
-//     hostingMode: 'default'
-//     managedIdentities: {
-//       systemAssigned: true
-//     }
-//     networkRuleSet: {
-//       bypass: 'AzureServices'
-//       ipRules: []
-//     }
-//     roleAssignments: [
-//       // {
-//       //   roleDefinitionIdOrName: 'Cognitive Services Contributor' // Cognitive Search Contributor
-//       //   principalId: userAssignedIdentity.outputs.principalId
-//       //   principalType: 'ServicePrincipal'
-//       // }
-//       // {
-//       //   roleDefinitionIdOrName: 'Cognitive Services OpenAI User'//'5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'// Cognitive Services OpenAI User
-//       //   principalId: userAssignedIdentity.outputs.principalId
-//       //   principalType: 'ServicePrincipal'
-//       // }
-//       {
-//         roleDefinitionIdOrName: 'Search Index Data Contributor' // 1407120a-92aa-4202-b7e9-c0e197c71c8f
-//         principalId: userAssignedIdentity.outputs.principalId
-//         principalType: 'ServicePrincipal'
-//       }
-//     ]
-//     partitionCount: 1
-//     replicaCount: 1
-//     sku: 'standard'
-//     semanticSearch: 'free'
-//     // Use the deployment tags provided to the template
-//     tags: tags
-//     publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-//     privateEndpoints: enablePrivateNetworking
-//     ? [
-//         {
-//           name: 'pep-${aiSearchName}'
-//           customNetworkInterfaceName: 'nic-${aiSearchName}'
-//           privateDnsZoneGroup: {
-//             privateDnsZoneGroupConfigs: [
-//               { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.searchService]!.outputs.resourceId }
-//             ]
-//           }
-//           service: 'searchService'
-//           subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
-//         }
-//       ]
-//     : []
-//   }
-// }
+var aiSearchName = '${abbrs.ai.aiSearch}${solutionPrefix}'
+module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
+  name: take('avm.res.search.search-service.${aiSearchName}', 64)
+  params: {
+    // Required parameters
+    name: aiSearchName
+    // Authentication options
+    authOptions: {
+      aadOrApiKey: {
+        aadAuthFailureMode: 'http401WithBearerChallenge'
+      }
+    }
+    disableLocalAuth: false
+    hostingMode: 'default'
+    managedIdentities: {
+      systemAssigned: true
+    }
+    networkRuleSet: {
+      bypass: 'AzureServices'
+      ipRules: []
+    }
+    roleAssignments: [
+      // {
+      //   roleDefinitionIdOrName: 'Cognitive Services Contributor' // Cognitive Search Contributor
+      //   principalId: userAssignedIdentity.outputs.principalId
+      //   principalType: 'ServicePrincipal'
+      // }
+      // {
+      //   roleDefinitionIdOrName: 'Cognitive Services OpenAI User'//'5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'// Cognitive Services OpenAI User
+      //   principalId: userAssignedIdentity.outputs.principalId
+      //   principalType: 'ServicePrincipal'
+      // }
+      {
+        roleDefinitionIdOrName: 'Search Index Data Contributor' // 1407120a-92aa-4202-b7e9-c0e197c71c8f
+        principalId: userAssignedIdentity.outputs.principalId
+        principalType: 'ServicePrincipal'
+      }
+    ]
+    partitionCount: 1
+    replicaCount: 1
+    sku: 'standard'
+    semanticSearch: 'free'
+    // Use the deployment tags provided to the template
+    tags: tags
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    privateEndpoints: enablePrivateNetworking
+    ? [
+        {
+          name: 'pep-${aiSearchName}'
+          customNetworkInterfaceName: 'nic-${aiSearchName}'
+          privateDnsZoneGroup: {
+            privateDnsZoneGroupConfigs: [
+              { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.searchService]!.outputs.resourceId }
+            ]
+          }
+          service: 'searchService'
+          subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+        }
+      ]
+    : []
+  }
+}
 
 // // ========== Azure OpenAI ========== //
 // // module azOpenAI 'deploy_azure_open_ai.bicep' = {
