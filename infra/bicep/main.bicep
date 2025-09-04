@@ -726,6 +726,9 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     retentionInterval: 'P1D'
     cleanupPreference: 'OnSuccess'
   }
+  dependsOn: [
+    keyvault
+  ]
 }
 
 // // module createFabricItems 'deploy_fabric_scripts.bicep' = if (fabricWorkspaceId != '') {
@@ -777,6 +780,9 @@ module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     retentionInterval: 'PT1H'
     cleanupPreference: 'OnSuccess'
   }
+  dependsOn: [
+    keyvault
+  ]
 }
 
 // ========== AVM WAF server farm ========== //

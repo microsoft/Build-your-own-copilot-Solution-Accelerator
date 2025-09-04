@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "17072647199586297151"
+      "templateHash": "15687102763283874843"
     }
   },
   "parameters": {
@@ -37540,6 +37540,7 @@
         }
       },
       "dependsOn": [
+        "keyvault",
         "userAssignedIdentity"
       ]
     },
