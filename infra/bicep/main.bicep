@@ -408,62 +408,6 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
 // //     accounts_byc_openai_name: '${abbrs.ai.openAIService}${solutionPrefix}'
 // //   }
 // // }
-var accounts_byc_openai_name = '${abbrs.ai.openAIService}${solutionPrefix}'
-module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
-  name: 'deploy_azure_open_ai'
-  params: {
-    // Required parameters
-    kind: 'OpenAI'
-    name: accounts_byc_openai_name
-    disableLocalAuth: false // ✅ Enable key-based auth
-    // Non-required parameters
-    customSubDomainName: accounts_byc_openai_name
-    deployments: [
-      {
-        model: {
-          format: 'OpenAI'
-          name: 'gpt-35-turbo'
-          version: '0125'
-        }
-        name: 'gpt-35-turbo'
-        sku: {
-          capacity: 30
-          name: 'Standard'
-        }
-      }
-      {
-        model: {
-          format: 'OpenAI'
-          name: 'text-embedding-ada-002'
-          version: '2'
-        }
-        name: 'text-embedding-ada-002'
-        sku: {
-          capacity: 45
-          name: 'GlobalStandard'
-        }
-      }
-    ]
-    location: solutionLocation
-    // WAF aligned configuration for Private Networking
-    privateEndpoints: enablePrivateNetworking
-      ? [
-          {
-            name: 'pep-${accounts_byc_openai_name}'
-            customNetworkInterfaceName: 'nic-${accounts_byc_openai_name}'
-            privateDnsZoneGroup: {
-              privateDnsZoneGroupConfigs: [
-                { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.openAI]!.outputs.resourceId }
-              ]
-            }
-            service: 'vault'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
-          }
-        ]
-      : []
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-  }
-}
 
 // // module uploadFiles 'deploy_upload_files_script.bicep' = {
 // //   name : 'deploy_upload_files_script'
@@ -586,18 +530,18 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
           name: 'ADLS-ACCOUNT-NAME'
           value: storageAccountName
         }
-        {
-          name: 'AZURE-OPENAI-KEY'
-          value: azOpenAI.outputs.exportedSecrets['key1'].secretUri
-        }
+        // {
+        //   name: 'AZURE-OPENAI-KEY'
+        //   value: azOpenAI.outputs.exportedSecrets['key1'].secretUri
+        // }
         {
           name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
           value: '2023-07-01-preview'
         }
-        {
-          name: 'AZURE-OPENAI-ENDPOINT'
-          value: azOpenAI.outputs.endpoint
-        }
+        // {
+        //   name: 'AZURE-OPENAI-ENDPOINT'
+        //   value: azOpenAI.outputs.endpoint
+        // }
         {
           name: 'AZURE-SEARCH-KEY'
           value: azSearchService.outputs.primaryKey
@@ -651,6 +595,74 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
   }
 }
 
+
+var accounts_byc_openai_name = '${abbrs.ai.openAIService}${solutionPrefix}'
+module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
+  name: 'deploy_azure_open_ai'
+  params: {
+    // Required parameters
+    kind: 'OpenAI'
+    name: accounts_byc_openai_name
+    disableLocalAuth: false // ✅ Enable key-based auth
+    secretsExportConfiguration: {
+      keyVaultResourceId: keyvault.outputs.resourceId
+      accessKey1Name: 'AZURE-OPENAI-KEY'
+    }
+    // Non-required parameters
+    customSubDomainName: accounts_byc_openai_name
+    deployments: [
+      {
+        model: {
+          format: 'OpenAI'
+          name: 'gpt-35-turbo'
+          version: '0125'
+        }
+        name: 'gpt-35-turbo'
+        sku: {
+          capacity: 30
+          name: 'Standard'
+        }
+      }
+      {
+        model: {
+          format: 'OpenAI'
+          name: 'text-embedding-ada-002'
+          version: '2'
+        }
+        name: 'text-embedding-ada-002'
+        sku: {
+          capacity: 45
+          name: 'GlobalStandard'
+        }
+      }
+    ]
+    location: solutionLocation
+    // WAF aligned configuration for Private Networking
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-${accounts_byc_openai_name}'
+            customNetworkInterfaceName: 'nic-${accounts_byc_openai_name}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.openAI]!.outputs.resourceId }
+              ]
+            }
+            service: 'openAI'
+            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+          }
+        ]
+      : []
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+  }
+}
+
+resource setEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: '${keyvault.name}/AZURE-OPENAI-ENDPOINT'
+  properties: {
+    value: azOpenAI.outputs.endpoint
+  }
+}
 
 // // module createIndex 'deploy_index_scripts.bicep' = {
 // //   name : 'deploy_index_scripts'
