@@ -415,7 +415,7 @@ module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
     // Required parameters
     kind: 'OpenAI'
     name: accounts_byc_openai_name
-    disableLocalAuth: false
+    disableLocalAuth: false // ✅ Enable key-based auth
     // Non-required parameters
     customSubDomainName: accounts_byc_openai_name
     deployments: [
