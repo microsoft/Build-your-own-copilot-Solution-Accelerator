@@ -474,29 +474,29 @@ module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
 // //   dependsOn:[storageAccountModule]
 // // }
 
-// module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-//   name : 'deploy_upload_files_script'
-//   params: {
-//     // Required parameters
-//     kind: 'AzureCLI'
-//     name: 'copy_demo_Data'
-//     // Non-required parameters
-//     azCliVersion: '2.50.0'
-//     location: solutionLocation
-//     managedIdentities: {
-//       userAssignedResourceIds: [
-//         userAssignedIdentity.outputs.resourceId
-//       ]
-//     }
-//     runOnce: true
-//     primaryScriptUri: '${baseUrl}infra/scripts/copy_kb_files.sh'
-//     arguments: '${storageAccountName} ${containerName} ${baseUrl}'
-//     tags: tags
-//     timeout: 'PT1H'
-//     retentionInterval: 'PT1H'
-//     cleanupPreference: 'OnSuccess'
-//   }
-// }
+module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
+  name : 'deploy_upload_files_script'
+  params: {
+    // Required parameters
+    kind: 'AzureCLI'
+    name: 'copy_demo_Data'
+    // Non-required parameters
+    azCliVersion: '2.50.0'
+    location: solutionLocation
+    managedIdentities: {
+      userAssignedResourceIds: [
+        userAssignedIdentity.outputs.resourceId
+      ]
+    }
+    runOnce: true
+    primaryScriptUri: '${baseUrl}infra/scripts/copy_kb_files.sh'
+    arguments: '${storageAccountName} ${containerName} ${baseUrl}'
+    tags: tags
+    timeout: 'PT1H'
+    retentionInterval: 'PT1H'
+    cleanupPreference: 'OnSuccess'
+  }
+}
 
 
 // // ========== Key Vault ========== //
