@@ -111,6 +111,17 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
   }
 }
 
+module roleAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
+  name: 'roleAssignmentDeployment'
+  params: {
+    // Required parameters
+    principalId:  userAssignedIdentity.outputs.principalId
+    roleDefinitionIdOrName: '/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635' // Owner role
+    // Non-required parameters
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // ========== Storage Account Module ========== //
 // module storageAccountModule 'deploy_storage_account.bicep' = {
 //   name: 'deploy_storage_account'
