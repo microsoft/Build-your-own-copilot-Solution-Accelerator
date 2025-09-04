@@ -305,7 +305,7 @@ module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.1
     // Non-required parameters
     customSubDomainName: accounts_byc_cogser_name
     location: solutionLocation
-    disableLocalAuth: true
+    disableLocalAuth: false
     // WAF aligned configuration for Private Networking
     privateEndpoints: enablePrivateNetworking
       ? [
@@ -415,7 +415,7 @@ module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
     // Required parameters
     kind: 'OpenAI'
     name: accounts_byc_openai_name
-    disableLocalAuth: true
+    disableLocalAuth: false
     // Non-required parameters
     customSubDomainName: accounts_byc_openai_name
     deployments: [

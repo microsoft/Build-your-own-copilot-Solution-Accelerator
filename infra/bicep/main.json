@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "10430034153428224074"
+      "templateHash": "5236855194676807943"
     }
   },
   "parameters": {
@@ -25575,7 +25575,7 @@
             "value": "[variables('solutionLocation')]"
           },
           "disableLocalAuth": {
-            "value": true
+            "value": false
           },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_cogser_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_cogser_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)).outputs.resourceId.value))), 'service', 'cognitiveservices', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
           "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]"
@@ -30215,7 +30215,7 @@
             "value": "[variables('accounts_byc_openai_name')]"
           },
           "disableLocalAuth": {
-            "value": true
+            "value": false
           },
           "customSubDomainName": {
             "value": "[variables('accounts_byc_openai_name')]"
