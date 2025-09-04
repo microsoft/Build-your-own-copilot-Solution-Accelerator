@@ -305,6 +305,7 @@ module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.1
     // Non-required parameters
     customSubDomainName: accounts_byc_cogser_name
     location: solutionLocation
+    disableLocalAuth: true
     // WAF aligned configuration for Private Networking
     privateEndpoints: enablePrivateNetworking
       ? [
@@ -414,6 +415,7 @@ module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
     // Required parameters
     kind: 'OpenAI'
     name: accounts_byc_openai_name
+    disableLocalAuth: true
     // Non-required parameters
     customSubDomainName: accounts_byc_openai_name
     deployments: [
@@ -585,6 +587,10 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
           value: storageAccountName
         }
         {
+          name: 'AZURE-OPENAI-KEY'
+          value: azOpenAI.outputs.exportedSecrets['key1'].secretUri
+        }
+        {
           name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
           value: '2023-07-01-preview'
         }
@@ -620,10 +626,10 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
           name: 'COG-SERVICES-ENDPOINT'
           value: azAIMultiServiceAccount.outputs.endpoint
         }
-        // {
-        //   name: 'COG-SERVICES-KEY'
-        //   value: azAIMultiServiceAccount.outputs.exportedSecrets['key1'].secretUri
-        // }
+        {
+          name: 'COG-SERVICES-KEY'
+          value: azAIMultiServiceAccount.outputs.exportedSecrets['key1'].secretUri
+        }
         {
           name: 'COG-SERVICES-NAME'
           value: azAIMultiServiceAccount.outputs.name

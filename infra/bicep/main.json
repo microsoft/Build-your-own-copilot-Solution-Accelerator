@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "11438747509418478572"
+      "templateHash": "10430034153428224074"
     }
   },
   "parameters": {
@@ -25574,6 +25574,9 @@
           "location": {
             "value": "[variables('solutionLocation')]"
           },
+          "disableLocalAuth": {
+            "value": true
+          },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_cogser_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_cogser_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)).outputs.resourceId.value))), 'service', 'cognitiveservices', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
           "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]"
         },
@@ -30211,6 +30214,9 @@
           "name": {
             "value": "[variables('accounts_byc_openai_name')]"
           },
+          "disableLocalAuth": {
+            "value": true
+          },
           "customSubDomainName": {
             "value": "[variables('accounts_byc_openai_name')]"
           },
@@ -33158,6 +33164,10 @@
                 "value": "[variables('storageAccountName')]"
               },
               {
+                "name": "AZURE-OPENAI-KEY",
+                "value": "[reference('azOpenAI').outputs.exportedSecrets.value.key1.secretUri]"
+              },
+              {
                 "name": "AZURE-OPENAI-PREVIEW-API-VERSION",
                 "value": "2023-07-01-preview"
               },
@@ -33192,6 +33202,10 @@
               {
                 "name": "COG-SERVICES-ENDPOINT",
                 "value": "[reference('azAIMultiServiceAccount').outputs.endpoint.value]"
+              },
+              {
+                "name": "COG-SERVICES-KEY",
+                "value": "[reference('azAIMultiServiceAccount').outputs.exportedSecrets.value.key1.secretUri]"
               },
               {
                 "name": "COG-SERVICES-NAME",
