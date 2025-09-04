@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "6868528017621113929"
+      "templateHash": "3030014309676771463"
     }
   },
   "parameters": {
@@ -38816,13 +38816,6 @@
           "location": {
             "value": "[variables('solutionLocation')]"
           },
-          "managedIdentities": {
-            "value": {
-              "userAssignedResourceIds": [
-                "[reference('userAssignedIdentity').outputs.resourceId.value]"
-              ]
-            }
-          },
           "kind": {
             "value": "app,linux,container"
           },
@@ -38903,7 +38896,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.37.4.10188",
-              "templateHash": "15307773647336081273"
+              "templateHash": "4298119334635398540"
             }
           },
           "definitions": {
@@ -39801,7 +39794,7 @@
               "location": "[parameters('location')]",
               "kind": "[parameters('kind')]",
               "tags": "[parameters('tags')]",
-              "identity": "[if(empty(variables('identity')), null(), variables('identity'))]",
+              "identity": "[variables('identity')]",
               "properties": {
                 "managedEnvironmentId": "[if(not(empty(parameters('managedEnvironmentId'))), parameters('managedEnvironmentId'), null())]",
                 "serverFarmId": "[parameters('serverFarmResourceId')]",
@@ -40880,7 +40873,6 @@
         "azOpenAI",
         "azSearchService",
         "network",
-        "userAssignedIdentity",
         "webServerFarm"
       ]
     }

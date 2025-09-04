@@ -174,7 +174,7 @@ resource app 'Microsoft.Web/sites@2024-04-01' = {
   location: location
   kind: kind
   tags: tags
-  identity: empty(identity) ? null : identity
+  identity: identity
   properties: {
     managedEnvironmentId: !empty(managedEnvironmentId) ? managedEnvironmentId : null
     serverFarmId: serverFarmResourceId

@@ -856,7 +856,7 @@ module webSite '../modules/web-sites.bicep' = {
     tags: tags
     location: solutionLocation
     // identity: identityBlock
-    managedIdentities: { userAssignedResourceIds: [userAssignedIdentity!.outputs.resourceId] }
+    // managedIdentities: { userAssignedResourceIds: [userAssignedIdentity!.outputs.resourceId] }
     kind: 'app,linux,container'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
     siteConfig: {
