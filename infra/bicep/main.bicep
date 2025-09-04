@@ -530,123 +530,123 @@ module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
 // // }
 
 // // ==========Key Vault Module ========== //
-// var keyVaultName = '${abbrs.security.keyVault}${solutionPrefix}'
-// module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
-//   name: take('avm.res.key-vault.vault.${keyVaultName}', 64)
-//   params: {
-//     name: keyVaultName
-//     location: solutionLocation
-//     tags: tags
-//     sku: 'standard'
-//     publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-//     networkAcls: {
-//       defaultAction: 'Allow'
-//     }
-//     enableVaultForDeployment: true
-//     enableVaultForDiskEncryption: true
-//     enableVaultForTemplateDeployment: true
-//     enableRbacAuthorization: true
-//     enableSoftDelete: true
-//     enablePurgeProtection: enablePurgeProtection
-//     softDeleteRetentionInDays: 7
-//     // diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : []
-//     // WAF aligned configuration for Private Networking
-//     privateEndpoints: enablePrivateNetworking
-//       ? [
-//           {
-//             name: 'pep-${keyVaultName}'
-//             customNetworkInterfaceName: 'nic-${keyVaultName}'
-//             privateDnsZoneGroup: {
-//               privateDnsZoneGroupConfigs: [
-//                 { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.keyVault]!.outputs.resourceId }
-//               ]
-//             }
-//             service: 'vault'
-//             subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
-//           }
-//         ]
-//       : []
-//     // WAF aligned configuration for Role-based Access Control
-//     roleAssignments: [
-//       {
-//         principalId: userAssignedIdentity.outputs.principalId
-//         principalType: 'ServicePrincipal'
-//         roleDefinitionIdOrName: 'Key Vault Administrator'
-//       }
-//     ]
-//     secrets: [
-//         {
-//           name: 'TENANT-ID'
-//           value: subscription().tenantId
-//         }
-//         {
-//           name: 'ADLS-ACCOUNT-NAME'
-//           value: storageAccountName
-//         }
-//         {
-//           name: 'AZURE-OPENAI-KEY'
-//           value: azOpenAI.outputs.exportedSecrets['key1'].secretUri
-//         }
-//         {
-//           name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
-//           value: '2023-07-01-preview'
-//         }
-//         {
-//           name: 'AZURE-OPENAI-ENDPOINT'
-//           value: azOpenAI.outputs.endpoint
-//         }
-//         {
-//           name: 'AZURE-SEARCH-KEY'
-//           value: azSearchService.outputs.primaryKey
-//         }
-//         {
-//           name: 'AZURE-SEARCH-ENDPOINT'
-//           value: azSearchService.outputs.endpoint
-//         }
-//         {
-//           name: 'AZURE-SEARCH-SERVICE'
-//           value: azSearchService.outputs.name
-//         }
-//         {
-//           name: 'AZURE-SEARCH-INDEX-ARTICLES'
-//           value: 'articlesindex'
-//         }
-//         {
-//           name: 'AZURE-SEARCH-INDEX-GRANTS'
-//           value: 'grantsindex'
-//         }
-//         {
-//           name: 'AZURE-SEARCH-INDEX-DRAFTS'
-//           value: 'draftsindex'
-//         }
-//         {
-//           name: 'COG-SERVICES-ENDPOINT'
-//           value: azAIMultiServiceAccount.outputs.endpoint
-//         }
-//         {
-//           name: 'COG-SERVICES-KEY'
-//           value: azAIMultiServiceAccount.outputs.exportedSecrets['key1'].secretUri
-//         }
-//         {
-//           name: 'COG-SERVICES-NAME'
-//           value: azAIMultiServiceAccount.outputs.name
-//         }
-//         {
-//           name: 'AZURE-SUBSCRIPTION-ID'
-//           value: subscription().subscriptionId
-//         }
-//         {
-//           name: 'AZURE-RESOURCE-GROUP'
-//           value: resourceGroup().name
-//         }
-//         {
-//           name: 'AZURE-LOCATION'
-//           value: resourceGroup().location
-//         }
-//     ]
-//     enableTelemetry: enableTelemetry
-//   }
-// }
+var keyVaultName = '${abbrs.security.keyVault}${solutionPrefix}'
+module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
+  name: take('avm.res.key-vault.vault.${keyVaultName}', 64)
+  params: {
+    name: keyVaultName
+    location: solutionLocation
+    tags: tags
+    sku: 'standard'
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    networkAcls: {
+      defaultAction: 'Allow'
+    }
+    enableVaultForDeployment: true
+    enableVaultForDiskEncryption: true
+    enableVaultForTemplateDeployment: true
+    enableRbacAuthorization: true
+    enableSoftDelete: true
+    enablePurgeProtection: enablePurgeProtection
+    softDeleteRetentionInDays: 7
+    // diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : []
+    // WAF aligned configuration for Private Networking
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-${keyVaultName}'
+            customNetworkInterfaceName: 'nic-${keyVaultName}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.keyVault]!.outputs.resourceId }
+              ]
+            }
+            service: 'vault'
+            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+          }
+        ]
+      : []
+    // WAF aligned configuration for Role-based Access Control
+    roleAssignments: [
+      {
+        principalId: userAssignedIdentity.outputs.principalId
+        principalType: 'ServicePrincipal'
+        roleDefinitionIdOrName: 'Key Vault Administrator'
+      }
+    ]
+    secrets: [
+        {
+          name: 'TENANT-ID'
+          value: subscription().tenantId
+        }
+        {
+          name: 'ADLS-ACCOUNT-NAME'
+          value: storageAccountName
+        }
+        {
+          name: 'AZURE-OPENAI-KEY'
+          value: azOpenAI.outputs.exportedSecrets['key1'].secretUri
+        }
+        {
+          name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
+          value: '2023-07-01-preview'
+        }
+        {
+          name: 'AZURE-OPENAI-ENDPOINT'
+          value: azOpenAI.outputs.endpoint
+        }
+        {
+          name: 'AZURE-SEARCH-KEY'
+          value: azSearchService.outputs.primaryKey
+        }
+        {
+          name: 'AZURE-SEARCH-ENDPOINT'
+          value: azSearchService.outputs.endpoint
+        }
+        {
+          name: 'AZURE-SEARCH-SERVICE'
+          value: azSearchService.outputs.name
+        }
+        {
+          name: 'AZURE-SEARCH-INDEX-ARTICLES'
+          value: 'articlesindex'
+        }
+        {
+          name: 'AZURE-SEARCH-INDEX-GRANTS'
+          value: 'grantsindex'
+        }
+        {
+          name: 'AZURE-SEARCH-INDEX-DRAFTS'
+          value: 'draftsindex'
+        }
+        {
+          name: 'COG-SERVICES-ENDPOINT'
+          value: azAIMultiServiceAccount.outputs.endpoint
+        }
+        {
+          name: 'COG-SERVICES-KEY'
+          value: azAIMultiServiceAccount.outputs.exportedSecrets['key1'].secretUri
+        }
+        {
+          name: 'COG-SERVICES-NAME'
+          value: azAIMultiServiceAccount.outputs.name
+        }
+        {
+          name: 'AZURE-SUBSCRIPTION-ID'
+          value: subscription().subscriptionId
+        }
+        {
+          name: 'AZURE-RESOURCE-GROUP'
+          value: resourceGroup().name
+        }
+        {
+          name: 'AZURE-LOCATION'
+          value: resourceGroup().location
+        }
+    ]
+    enableTelemetry: enableTelemetry
+  }
+}
 
 
 // // module createIndex 'deploy_index_scripts.bicep' = {
