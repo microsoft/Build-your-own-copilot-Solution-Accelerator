@@ -294,38 +294,38 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
 //   }
 // } 
 
-// var accounts_byc_cogser_name = '${abbrs.ai.documentIntelligence}${solutionPrefix}'
-// module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.10.1' = {
-//   name: 'deploy_azure_ai_service'
-//   params: {
-//     // Required parameters
-//     kind: 'CognitiveServices'
-//     name: accounts_byc_cogser_name
-//     // Non-required parameters
-//     customSubDomainName: accounts_byc_cogser_name
-//     location: solutionLocation
-//     // managedIdentities: {
-//     //   type: 'None'
-//     // }
-//     // WAF aligned configuration for Private Networking
-//     privateEndpoints: enablePrivateNetworking
-//       ? [
-//           {
-//             name: 'pep-${accounts_byc_cogser_name}'
-//             customNetworkInterfaceName: 'nic-${accounts_byc_cogser_name}'
-//             privateDnsZoneGroup: {
-//               privateDnsZoneGroupConfigs: [
-//                 { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.cognitiveServices]!.outputs.resourceId }
-//               ]
-//             }
-//             service: 'cognitiveservices'
-//             subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
-//           }
-//         ]
-//       : []
-//     publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-//   }
-// }
+var accounts_byc_cogser_name = '${abbrs.ai.documentIntelligence}${solutionPrefix}'
+module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.10.1' = {
+  name: 'deploy_azure_ai_service'
+  params: {
+    // Required parameters
+    kind: 'CognitiveServices'
+    name: accounts_byc_cogser_name
+    // Non-required parameters
+    customSubDomainName: accounts_byc_cogser_name
+    location: solutionLocation
+    // managedIdentities: {
+    //   type: 'None'
+    // }
+    // WAF aligned configuration for Private Networking
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-${accounts_byc_cogser_name}'
+            customNetworkInterfaceName: 'nic-${accounts_byc_cogser_name}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.cognitiveServices]!.outputs.resourceId }
+              ]
+            }
+            service: 'cognitiveservices'
+            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+          }
+        ]
+      : []
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+  }
+}
 
 // // ========== Search service ========== //
 // // module azSearchService 'deploy_ai_search_service.bicep' = {
