@@ -34,7 +34,7 @@ param enablePrivateNetworking bool = false
 param enablePurgeProtection bool = false
 
 @description('Optional. Enable Monitoring')
-param enableMonitoring bool = false
+param enableMonitoring bool = true
 
 @description('Optional. Admin username for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
 @secure()
