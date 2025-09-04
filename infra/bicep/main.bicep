@@ -295,37 +295,6 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
 //   }
 // } 
 
-var accounts_byc_cogser_name = '${abbrs.ai.documentIntelligence}${solutionPrefix}'
-module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.10.1' = {
-  name: 'deploy_azure_ai_service'
-  params: {
-    // Required parameters
-    kind: 'CognitiveServices'
-    name: accounts_byc_cogser_name
-    // Non-required parameters
-    customSubDomainName: accounts_byc_cogser_name
-    location: solutionLocation
-    disableLocalAuth: false
-    // WAF aligned configuration for Private Networking
-    privateEndpoints: enablePrivateNetworking
-      ? [
-          {
-            name: 'pep-${accounts_byc_cogser_name}'
-            customNetworkInterfaceName: 'nic-${accounts_byc_cogser_name}'
-            privateDnsZoneGroup: {
-              privateDnsZoneGroupConfigs: [
-                { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.cognitiveServices]!.outputs.resourceId }
-              ]
-            }
-            service: 'cognitiveservices'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
-          }
-        ]
-      : []
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-  }
-}
-
 // // ========== Search service ========== //
 // // module azSearchService 'deploy_ai_search_service.bicep' = {
 // //   name: 'deploy_ai_search_service'
@@ -567,18 +536,18 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
           name: 'AZURE-SEARCH-INDEX-DRAFTS'
           value: 'draftsindex'
         }
-        {
-          name: 'COG-SERVICES-ENDPOINT'
-          value: azAIMultiServiceAccount.outputs.endpoint
-        }
+        // {
+        //   name: 'COG-SERVICES-ENDPOINT'
+        //   value: azAIMultiServiceAccount.outputs.endpoint
+        // }
         // {
         //   name: 'COG-SERVICES-KEY'
         //   value: azAIMultiServiceAccount.outputs.exportedSecrets['key1'].secretUri
         // }
-        {
-          name: 'COG-SERVICES-NAME'
-          value: azAIMultiServiceAccount.outputs.name
-        }
+        // {
+        //   name: 'COG-SERVICES-NAME'
+        //   value: azAIMultiServiceAccount.outputs.name
+        // }
         {
           name: 'AZURE-SUBSCRIPTION-ID'
           value: subscription().subscriptionId
@@ -669,6 +638,58 @@ resource openAiEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
     value: azOpenAI.outputs.endpoint
   }
 }
+
+var accounts_byc_cogser_name = '${abbrs.ai.documentIntelligence}${solutionPrefix}'
+module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.10.1' = {
+  name: 'deploy_azure_ai_service'
+  params: {
+    // Required parameters
+    kind: 'CognitiveServices'
+    name: accounts_byc_cogser_name
+    // Non-required parameters
+    customSubDomainName: accounts_byc_cogser_name
+    location: solutionLocation
+    disableLocalAuth: false
+    secretsExportConfiguration: {
+      accessKey1Name: 'COG-SERVICES-KEY'
+      keyVaultResourceId: keyvault.outputs.resourceId
+    }
+    // WAF aligned configuration for Private Networking
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-${accounts_byc_cogser_name}'
+            customNetworkInterfaceName: 'nic-${accounts_byc_cogser_name}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.cognitiveServices]!.outputs.resourceId }
+              ]
+            }
+            service: 'cognitiveservices'
+            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+          }
+        ]
+      : []
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+  }
+}
+
+// Add endpoint as a secret
+resource cogEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: '${keyVaultName}/COG-SERVICES-ENDPOINT'
+  properties: {
+    value: azAIMultiServiceAccount.outputs.endpoint
+  }
+}
+
+// Add name as a secret
+resource cogNameSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: '${keyVaultName}/COG-SERVICES-NAME'
+  properties: {
+    value: azAIMultiServiceAccount.outputs.name
+  }
+}
+
 
 // // module createIndex 'deploy_index_scripts.bicep' = {
 // //   name : 'deploy_index_scripts'
@@ -781,6 +802,66 @@ module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
   }
 }
 
+var logAnalyticsWorkspaceResourceName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${solutionPrefix}'
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (enableMonitoring) {
+  name: take('avm.res.operational-insights.workspace.${logAnalyticsWorkspaceResourceName}', 64)
+  params: {
+    name: logAnalyticsWorkspaceResourceName
+    tags: tags
+    location: solutionLocation
+    enableTelemetry: enableTelemetry
+    skuName: 'PerGB2018'
+    dataRetention: 365
+    features: { enableLogAccessUsingOnlyResourcePermissions: true }
+    diagnosticSettings: [{ useThisWorkspace: true }]
+    // // WAF aligned configuration for Redundancy
+    // dailyQuotaGb: enableRedundancy ? 10 : null //WAF recommendation: 10 GB per day is a good starting point for most workloads
+    // replication: enableRedundancy
+    //   ? {
+    //       enabled: true
+    //       location: replicaLocation
+    //     }
+    //   : null
+    // WAF aligned configuration for Private Networking
+    publicNetworkAccessForIngestion: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    publicNetworkAccessForQuery: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    dataSources: enablePrivateNetworking
+      ? [
+          {
+            tags: tags
+            eventLogName: 'Application'
+            eventTypes: [
+              {
+                eventType: 'Error'
+              }
+              {
+                eventType: 'Warning'
+              }
+              {
+                eventType: 'Information'
+              }
+            ]
+            kind: 'WindowsEvent'
+            name: 'applicationEvent'
+          }
+          {
+            counterName: '% Processor Time'
+            instanceName: '*'
+            intervalSeconds: 60
+            kind: 'WindowsPerformanceCounter'
+            name: 'windowsPerfCounter1'
+            objectName: 'Processor'
+          }
+          {
+            kind: 'IISLogs'
+            name: 'sampleIISLog1'
+            state: 'OnPremiseEnabled'
+          }
+        ]
+      : null
+  }
+}
+
 var ApplicationInsightsName = '${abbrs.analytics.analysisServicesServer}${solutionPrefix}'
 module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = {
   name: 'applicationInsightsDeploy'
@@ -790,8 +871,10 @@ module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = {
 
     kind: 'web'
     applicationType: 'web'
-    workspaceResourceId: ''
     // Tags (align with organizational tagging policy)
+    // WAF aligned configuration for Monitoring
+    workspaceResourceId: enableMonitoring ? logAnalyticsWorkspace!.outputs.resourceId : ''
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
     tags: {
       'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
     }
