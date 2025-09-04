@@ -737,45 +737,45 @@ module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
   }
 }
 
-// // ========== AVM WAF server farm ========== //
-// // WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
-// // PSRule for Web Server Farm: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#app-service
-// var webServerFarmResourceName = '${abbrs.compute.appServicePlan}${solutionPrefix}'
-// module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
-//   name: 'deploy_app_service_plan_serverfarm'
-//   params: {
-//     name: webServerFarmResourceName
-//     // tags: tags
-//     // enableTelemetry: enableTelemetry
-//     location: resourceGroup().location
-//     reserved: true
-//     kind: 'linux'
-//     // WAF aligned configuration for Monitoring
-//     // diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
-//     // WAF aligned configuration for Scalability
-//     skuName: HostingPlanSku
-//     // skuCapacity: enableScalability ? 3 : 1
-//     // WAF aligned configuration for Redundancy
-//     // zoneRedundant: enableRedundancy ? true : false
-//   }
-// }
+// ========== AVM WAF server farm ========== //
+// WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
+// PSRule for Web Server Farm: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#app-service
+var webServerFarmResourceName = '${abbrs.compute.appServicePlan}${solutionPrefix}'
+module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
+  name: 'deploy_app_service_plan_serverfarm'
+  params: {
+    name: webServerFarmResourceName
+    // tags: tags
+    // enableTelemetry: enableTelemetry
+    location: resourceGroup().location
+    reserved: true
+    kind: 'linux'
+    // WAF aligned configuration for Monitoring
+    // diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    // WAF aligned configuration for Scalability
+    skuName: HostingPlanSku
+    // skuCapacity: enableScalability ? 3 : 1
+    // WAF aligned configuration for Redundancy
+    // zoneRedundant: enableRedundancy ? true : false
+  }
+}
 
-// var ApplicationInsightsName = '${abbrs.analytics.analysisServicesServer}${solutionPrefix}'
-// module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = {
-//   name: 'applicationInsightsDeploy'
-//   params: {
-//     name: ApplicationInsightsName
-//     location: solutionLocation
+var ApplicationInsightsName = '${abbrs.analytics.analysisServicesServer}${solutionPrefix}'
+module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = {
+  name: 'applicationInsightsDeploy'
+  params: {
+    name: ApplicationInsightsName
+    location: solutionLocation
 
-//     kind: 'web'
-//     applicationType: 'web'
-//     workspaceResourceId: ''
-//     // Tags (align with organizational tagging policy)
-//     tags: {
-//       'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
-//     }
-//   }
-// }
+    kind: 'web'
+    applicationType: 'web'
+    workspaceResourceId: ''
+    // Tags (align with organizational tagging policy)
+    tags: {
+      'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
+    }
+  }
+}
 
 
 // // var webSiteResourceName = '${abbrs.compute.webApp}${solutionPrefix}'
