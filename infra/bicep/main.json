@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "83721577728214720"
+      "templateHash": "17438931209409956459"
     }
   },
   "parameters": {
@@ -33158,10 +33158,6 @@
                 "value": "[variables('storageAccountName')]"
               },
               {
-                "name": "AZURE-OPENAI-KEY",
-                "value": "[reference('azOpenAI').outputs.exportedSecrets.value.key1.secretUri]"
-              },
-              {
                 "name": "AZURE-OPENAI-PREVIEW-API-VERSION",
                 "value": "2023-07-01-preview"
               },
@@ -33196,10 +33192,6 @@
               {
                 "name": "COG-SERVICES-ENDPOINT",
                 "value": "[reference('azAIMultiServiceAccount').outputs.endpoint.value]"
-              },
-              {
-                "name": "COG-SERVICES-KEY",
-                "value": "[reference('azAIMultiServiceAccount').outputs.exportedSecrets.value.key1.secretUri]"
               },
               {
                 "name": "COG-SERVICES-NAME",
@@ -38846,7 +38838,6 @@
                   "AZURE_OPENAI_RESOURCE": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AZURE_OPENAI_ENDPOINT": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AZURE_OPENAI_MODEL": "gpt-35-turbo",
-                  "AZURE_OPENAI_KEY": "[reference('azOpenAI').outputs.exportedSecrets.value.key1.secretUri]",
                   "AZURE_OPENAI_MODEL_NAME": "gpt-35-turbo",
                   "AZURE_OPENAI_TEMPERATURE": "0",
                   "AZURE_OPENAI_TOP_P": "1",
@@ -38860,7 +38851,6 @@
                   "AZURE_SEARCH_PERMITTED_GROUPS_FIELD": "",
                   "AZURE_SEARCH_STRICTNESS": "3",
                   "AZURE_OPENAI_EMBEDDING_NAME": "text-embedding-ada-002",
-                  "AZURE_OPENAI_EMBEDDING_KEY": "[reference('azOpenAI').outputs.exportedSecrets.value.key1.secretUri]",
                   "AZURE_OPENAI_EMBEDDING_ENDPOINT": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AI_STUDIO_DRAFT_FLOW_ENDPOINT": "TBD",
                   "AI_STUDIO_DRAFT_FLOW_API_KEY": "TBD",

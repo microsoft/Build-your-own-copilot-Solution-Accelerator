@@ -584,10 +584,6 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
           value: storageAccountName
         }
         {
-          name: 'AZURE-OPENAI-KEY'
-          value: azOpenAI.outputs.exportedSecrets['key1'].secretUri
-        }
-        {
           name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
           value: '2023-07-01-preview'
         }
@@ -623,10 +619,10 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
           name: 'COG-SERVICES-ENDPOINT'
           value: azAIMultiServiceAccount.outputs.endpoint
         }
-        {
-          name: 'COG-SERVICES-KEY'
-          value: azAIMultiServiceAccount.outputs.exportedSecrets['key1'].secretUri
-        }
+        // {
+        //   name: 'COG-SERVICES-KEY'
+        //   value: azAIMultiServiceAccount.outputs.exportedSecrets['key1'].secretUri
+        // }
         {
           name: 'COG-SERVICES-NAME'
           value: azAIMultiServiceAccount.outputs.name
@@ -880,7 +876,7 @@ module webSite '../modules/web-sites.bicep' = {
           AZURE_OPENAI_RESOURCE:azOpenAI.outputs.endpoint
           AZURE_OPENAI_ENDPOINT:azOpenAI.outputs.endpoint
           AZURE_OPENAI_MODEL:'gpt-35-turbo'
-          AZURE_OPENAI_KEY:azOpenAI.outputs.exportedSecrets['key1'].secretUri
+          // AZURE_OPENAI_KEY:azOpenAI.outputs.exportedSecrets['key1'].secretUri
           AZURE_OPENAI_MODEL_NAME:'gpt-35-turbo'
           AZURE_OPENAI_TEMPERATURE:'0'
           AZURE_OPENAI_TOP_P:'1'
@@ -901,7 +897,7 @@ module webSite '../modules/web-sites.bicep' = {
           AZURE_SEARCH_PERMITTED_GROUPS_FIELD:''
           AZURE_SEARCH_STRICTNESS:'3'
           AZURE_OPENAI_EMBEDDING_NAME:'text-embedding-ada-002'
-          AZURE_OPENAI_EMBEDDING_KEY:azOpenAI.outputs.exportedSecrets['key1'].secretUri
+          // AZURE_OPENAI_EMBEDDING_KEY:azOpenAI.outputs.exportedSecrets['key1'].secretUri
           AZURE_OPENAI_EMBEDDING_ENDPOINT:azOpenAI.outputs.endpoint
           // AIStudioChatFlowEndpoint:'TBD'
           // AIStudioChatFlowAPIKey:'TBD'
