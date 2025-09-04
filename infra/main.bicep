@@ -109,7 +109,7 @@ var solutionSuffix= toLower(trim(replace(
 param enablePrivateNetworking bool = false
 
 @description('Optional. Enable monitoring applicable resources, aligned with the Well Architected Framework recommendations. This setting enables Application Insights and Log Analytics and configures all the resources applicable resources to send logs. Defaults to false.')
-param enableMonitoring bool = false
+param enableMonitoring bool = true
 
 @description('Optional. Enable scalability for applicable resources, aligned with the Well Architected Framework recommendations. Defaults to false.')
 param enableScalability bool = false
@@ -280,6 +280,12 @@ resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces
   scope: resourceGroup(existingLawSubscription, existingLawResourceGroup)
 }
 
+// Log Analytics Name, workspace ID, customer ID, and shared key (existing or new) 
+// var logAnalyticsWorkspaceName = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.name  : logAnalyticsWorkspace!.outputs.name
+var logAnalyticsWorkspaceResourceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspaceId  : logAnalyticsWorkspace!.outputs.resourceId
+// var logAnalyticsPrimarySharedKey = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.listKeys().primarySharedKey  : logAnalyticsWorkspace.outputs.primarySharedKey
+// var logAnalyticsWorkspaceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.properties.customerId  : logAnalyticsWorkspace!.outputs.logAnalyticsWorkspaceId
+
 // ========== Resource Group Tag ========== //
 resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
   name: 'default'
@@ -295,7 +301,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
 // WAF best practices for Log Analytics: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-log-analytics
 // WAF PSRules for Log Analytics: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#azure-monitor-logs
 var logAnalyticsWorkspaceResourceName = 'log-${solutionSuffix}'
-module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (enableMonitoring) {
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (enableMonitoring && !useExistingLogAnalytics) {
   name: take('avm.res.operational-insights.workspace.${logAnalyticsWorkspaceResourceName}', 64)
   params: {
     name: logAnalyticsWorkspaceResourceName
@@ -354,12 +360,6 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
   }
 }
 
-// Log Analytics Name, workspace ID, customer ID, and shared key (existing or new) 
-// var logAnalyticsWorkspaceName = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.name  : logAnalyticsWorkspace!.outputs.name
-var logAnalyticsWorkspaceResourceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspaceId  : logAnalyticsWorkspace!.outputs.resourceId
-// var logAnalyticsPrimarySharedKey = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.listKeys().primarySharedKey  : logAnalyticsWorkspace.outputs.primarySharedKey
-// var logAnalyticsWorkspaceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.properties.customerId  : logAnalyticsWorkspace!.outputs.logAnalyticsWorkspaceId
-
 // ========== Application Insights ========== //
 // WAF best practices for Application Insights: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/application-insights
 // WAF PSRules for  Application Insights: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#application-insights
@@ -412,7 +412,7 @@ module network 'modules/network.bicep' = if (enablePrivateNetworking) {
   params: {
     resourcesName: resourcesName
     // logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspace.outputs.resourceId
-    logAnalyticsWorkSpaceResourceId: useExistingLogAnalytics ? existingLogAnalyticsWorkspaceId : resourceId('Microsoft.OperationalInsights/workspaces', logAnalyticsWorkspaceResourceName)
+    logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspaceResourceId
     vmAdminUsername: vmAdminUsername ?? 'JumpboxAdminUser'
     vmAdminPassword: vmAdminPassword ?? 'JumpboxAdminP@ssw0rd1234!'
     vmSize: vmSize ??  'Standard_DS2_v2' // Default VM size 
@@ -503,7 +503,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
     enableSoftDelete: true
     enablePurgeProtection: enablePurgeProtection
     softDeleteRetentionInDays: 7
-    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : []
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }] : []
     // WAF aligned configuration for Private Networking
     privateEndpoints: enablePrivateNetworking
       ? [
@@ -785,7 +785,7 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
       }
     ]
     // WAF aligned configuration for Monitoring
-    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }] : null
     // WAF aligned configuration for Private Networking
     networkRestrictions: {
       networkAclBypass: 'None'
@@ -995,7 +995,7 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
         }
         collation: 'SQL_Latin1_General_CP1_CI_AS'
         diagnosticSettings: enableMonitoring
-          ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }]
+          ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }]
           : null
         elasticPoolResourceId: resourceId('Microsoft.Sql/servers/elasticPools', 'sql-${solutionSuffix}', 'sqlswaf-ep-001')
         licenseType: 'LicenseIncluded'
@@ -1316,7 +1316,7 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
     // Wire up diagnostic settings to the Log Analytics workspace when monitoring is enabled
     diagnosticSettings: enableMonitoring ? [
       {
-        workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId
+        workspaceResourceId: logAnalyticsWorkspaceResourceId
       }
     ] : null
     disableLocalAuth: false
