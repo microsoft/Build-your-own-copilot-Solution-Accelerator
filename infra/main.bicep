@@ -1351,8 +1351,8 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
     semanticSearch: 'free'
     // Use the deployment tags provided to the template
     tags: tags
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-    privateEndpoints: enablePrivateNetworking
+    publicNetworkAccess: 'Enabled'
+    privateEndpoints: false
     ? [
         {
           name: 'pep-${aiSearchName}'
