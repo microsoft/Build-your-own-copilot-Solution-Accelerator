@@ -660,31 +660,31 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
 // //   dependsOn:[keyvault]
 // // }
 
-// //========== AVM WAF ========== //
-// //========== Deployment script to create index ========== // 
-// module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-//   name : 'deploy_index_scripts'
-//   params: {
-//     // Required parameters
-//     kind: 'AzureCLI'
-//     name: 'create_search_indexes'
-//     // Non-required parameters
-//     azCliVersion: '2.52.0'
-//     location: solutionLocation
-//     managedIdentities: {
-//       userAssignedResourceIds: [
-//         userAssignedIdentity.outputs.resourceId
-//       ]
-//     }
-//     runOnce: true
-//     primaryScriptUri: '${baseUrl}infra/scripts/run_create_index_scripts.sh'
-//     arguments: '${baseUrl} ${keyvault.outputs.name} ${userAssignedIdentity.outputs.clientId}'
-//     tags: tags
-//     timeout: 'PT1H'
-//     retentionInterval: 'P1D'
-//     cleanupPreference: 'OnSuccess'
-//   }
-// }
+//========== AVM WAF ========== //
+//========== Deployment script to create index ========== // 
+module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
+  name : 'deploy_index_scripts'
+  params: {
+    // Required parameters
+    kind: 'AzureCLI'
+    name: 'create_search_indexes'
+    // Non-required parameters
+    azCliVersion: '2.52.0'
+    location: solutionLocation
+    managedIdentities: {
+      userAssignedResourceIds: [
+        userAssignedIdentity.outputs.resourceId
+      ]
+    }
+    runOnce: true
+    primaryScriptUri: '${baseUrl}infra/scripts/run_create_index_scripts.sh'
+    arguments: '${baseUrl} ${keyvault.outputs.name}'
+    tags: tags
+    timeout: 'PT1H'
+    retentionInterval: 'P1D'
+    cleanupPreference: 'OnSuccess'
+  }
+}
 
 // // module createFabricItems 'deploy_fabric_scripts.bicep' = if (fabricWorkspaceId != '') {
 // //   name : 'deploy_fabric_scripts'
