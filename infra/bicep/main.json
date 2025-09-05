@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "585685244803829929"
+      "templateHash": "9501634091785909902"
     }
   },
   "parameters": {
@@ -42157,6 +42157,7 @@
                   "AZURE_OPENAI_RESOURCE": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AZURE_OPENAI_ENDPOINT": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AZURE_OPENAI_MODEL": "gpt-35-turbo",
+                  "AZURE_OPENAI_KEY": "[format('@Microsoft.KeyVault(SecretUri={0})', reference('azOpenAI').outputs.exportedSecrets.value['AZURE-OPENAI-KEY'].secretUriWithVersion)]",
                   "AZURE_OPENAI_MODEL_NAME": "gpt-35-turbo",
                   "AZURE_OPENAI_TEMPERATURE": "0",
                   "AZURE_OPENAI_TOP_P": "1",
@@ -42170,6 +42171,7 @@
                   "AZURE_SEARCH_PERMITTED_GROUPS_FIELD": "",
                   "AZURE_SEARCH_STRICTNESS": "3",
                   "AZURE_OPENAI_EMBEDDING_NAME": "text-embedding-ada-002",
+                  "AZURE_OPENAI_EMBEDDING_KEY": "[format('@Microsoft.KeyVault(SecretUri={0})', reference('azOpenAI').outputs.exportedSecrets.value['AZURE-OPENAI-KEY'].secretUriWithVersion)]",
                   "AZURE_OPENAI_EMBEDDING_ENDPOINT": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AI_STUDIO_DRAFT_FLOW_ENDPOINT": "TBD",
                   "AI_STUDIO_DRAFT_FLOW_API_KEY": "TBD",
