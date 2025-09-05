@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "15999187635516322525"
+      "templateHash": "3971251431584847426"
     }
   },
   "parameters": {
@@ -403,7 +403,8 @@
         "value": "[reference('azOpenAI').outputs.endpoint.value]"
       },
       "dependsOn": [
-        "azOpenAI"
+        "azOpenAI",
+        "keyvault"
       ]
     },
     "cogEndpointSecret": {
@@ -414,7 +415,8 @@
         "value": "[reference('azAIMultiServiceAccount').outputs.endpoint.value]"
       },
       "dependsOn": [
-        "azAIMultiServiceAccount"
+        "azAIMultiServiceAccount",
+        "keyvault"
       ]
     },
     "cogNameSecret": {
@@ -425,7 +427,8 @@
         "value": "[reference('azAIMultiServiceAccount').outputs.name.value]"
       },
       "dependsOn": [
-        "azAIMultiServiceAccount"
+        "azAIMultiServiceAccount",
+        "keyvault"
       ]
     },
     "userAssignedIdentity": {

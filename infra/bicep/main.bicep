@@ -647,6 +647,7 @@ resource openAiEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   properties: {
     value: azOpenAI.outputs.endpoint
   }
+  dependsOn:[keyvault]
 }
 
 var accounts_byc_cogser_name = '${abbrs.ai.documentIntelligence}${solutionPrefix}'
@@ -690,6 +691,7 @@ resource cogEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   properties: {
     value: azAIMultiServiceAccount.outputs.endpoint
   }
+  dependsOn:[keyvault]
 }
 
 // Add name as a secret
@@ -698,6 +700,7 @@ resource cogNameSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   properties: {
     value: azAIMultiServiceAccount.outputs.name
   }
+  dependsOn:[keyvault]
 }
 
 
