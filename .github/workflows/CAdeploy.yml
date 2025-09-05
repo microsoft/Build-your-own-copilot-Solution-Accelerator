@@ -145,6 +145,7 @@ jobs:
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
             --parameters aiDeploymentsLocation=${{ env.AZURE_LOCATION }} solutionName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} imageTag=${{ env.IMAGE_TAG }} \
+            --parameters createdBy="Pipeline" \
             --query "properties.outputs" -o json)
 
           echo "Deployment output: $DEPLOY_OUTPUT"
