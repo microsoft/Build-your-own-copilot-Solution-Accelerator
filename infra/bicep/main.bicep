@@ -402,29 +402,29 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
 // //   dependsOn:[storageAccountModule]
 // // }
 
-// module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-//   name : 'deploy_upload_files_script'
-//   params: {
-//     // Required parameters
-//     kind: 'AzureCLI'
-//     name: 'copy_demo_Data'
-//     // Non-required parameters
-//     azCliVersion: '2.50.0'
-//     location: solutionLocation
-//     managedIdentities: {
-//       userAssignedResourceIds: [
-//         userAssignedIdentity.outputs.resourceId
-//       ]
-//     }
-//     runOnce: true
-//     primaryScriptUri: '${baseUrl}infra/scripts/copy_kb_files.sh'
-//     arguments: '${storageAccountName} ${containerName} ${baseUrl}'
-//     tags: tags
-//     timeout: 'PT1H'
-//     retentionInterval: 'PT1H'
-//     cleanupPreference: 'OnSuccess'
-//   }
-// }
+module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
+  name : 'deploy_upload_files_script'
+  params: {
+    // Required parameters
+    kind: 'AzureCLI'
+    name: 'copy_demo_Data'
+    // Non-required parameters
+    azCliVersion: '2.50.0'
+    location: solutionLocation
+    managedIdentities: {
+      userAssignedResourceIds: [
+        userAssignedIdentity.outputs.resourceId
+      ]
+    }
+    runOnce: true
+    primaryScriptUri: '${baseUrl}infra/scripts/copy_kb_files.sh'
+    arguments: '${storageAccountName} ${containerName} ${baseUrl}'
+    tags: tags
+    timeout: 'PT1H'
+    retentionInterval: 'PT1H'
+    cleanupPreference: 'OnSuccess'
+  }
+}
 
 
 // // ========== Key Vault ========== //
@@ -717,32 +717,32 @@ resource cogNameSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 
 //========== AVM WAF ========== //
 //========== Deployment script to create index ========== // 
-// module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-//   name : 'deploy_index_scripts'
-//   params: {
-//     // Required parameters
-//     kind: 'AzureCLI'
-//     name: 'create_search_indexes'
-//     // Non-required parameters
-//     azCliVersion: '2.52.0'
-//     location: solutionLocation
-//     managedIdentities: {
-//       userAssignedResourceIds: [
-//         userAssignedIdentity.outputs.resourceId
-//       ]
-//     }
-//     runOnce: true
-//     primaryScriptUri: '${baseUrl}infra/scripts/run_create_index_scripts.sh'
-//     arguments: '${baseUrl} ${keyvault.outputs.name}'
-//     tags: tags
-//     timeout: 'PT1H'
-//     retentionInterval: 'P1D'
-//     cleanupPreference: 'OnSuccess'
-//   }
-//   dependsOn: [
-//     keyvault
-//   ]
-// }
+module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
+  name : 'deploy_index_scripts'
+  params: {
+    // Required parameters
+    kind: 'AzureCLI'
+    name: 'create_search_indexes'
+    // Non-required parameters
+    azCliVersion: '2.52.0'
+    location: solutionLocation
+    managedIdentities: {
+      userAssignedResourceIds: [
+        userAssignedIdentity.outputs.resourceId
+      ]
+    }
+    runOnce: true
+    primaryScriptUri: '${baseUrl}infra/scripts/run_create_index_scripts.sh'
+    arguments: '${baseUrl} ${keyvault.outputs.name}'
+    tags: tags
+    timeout: 'PT1H'
+    retentionInterval: 'P1D'
+    cleanupPreference: 'OnSuccess'
+  }
+  dependsOn: [
+    keyvault
+  ]
+}
 
 // // module createFabricItems 'deploy_fabric_scripts.bicep' = if (fabricWorkspaceId != '') {
 // //   name : 'deploy_fabric_scripts'
@@ -771,7 +771,7 @@ resource cogNameSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 // }
 
 //========== Deployment script to create index ========== // 
-module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
+module createIndex1 '../modules/deployment-script.bicep' = {
   name : 'deploy_aihub_scripts'
   params: {
     // Required parameters
@@ -790,7 +790,7 @@ module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}'
     tags: tags
     timeout: 'PT1H'
-    retentionInterval: 'P1D'
+    retentionInterval: 'PT1H'
     cleanupPreference: 'OnSuccess'
   }
   dependsOn: [
@@ -973,6 +973,7 @@ module webSite '../modules/web-sites.bicep' = {
   name: take('module.web-sites.${webSiteResourceName}', 64)
   params: {
     name: webSiteResourceName
+    managedIdentities: { userAssignedResourceIds: [userAssignedIdentity!.outputs.resourceId] }
     tags: tags
     location: solutionLocation
     kind: 'app,linux,container'
@@ -1069,12 +1070,13 @@ module webSite '../modules/web-sites.bicep' = {
   }
 }
 
+var selectedPrincipalId string = webSite.outputs.systemAssignedMIPrincipalId ?? userAssignedIdentity.outputs.principalId
 
 module keyVaultSecretsUserAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
   name: 'keyVaultSecretsUserAssignment'
   params: {
-    principalId: webSite.outputs.resourceId
-    roleDefinitionIdOrName: '/providers/Microsoft.Authorization/roleDefinitions/4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
+    principalId: selectedPrincipalId
+    roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
     principalType: 'ServicePrincipal'
   }
   dependsOn: [
