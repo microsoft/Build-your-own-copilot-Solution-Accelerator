@@ -1003,7 +1003,7 @@ module webSite '../modules/web-sites.bicep' = {
           AZURE_OPENAI_RESOURCE:azOpenAI.outputs.endpoint
           AZURE_OPENAI_ENDPOINT:azOpenAI.outputs.endpoint
           AZURE_OPENAI_MODEL:'gpt-35-turbo'
-          AZURE_OPENAI_KEY:listSecret(resourceId('Microsoft.KeyVault/vaults/secrets', keyVaultName, 'AZURE-OPENAI-KEY'),'2023-07-01').value
+          // AZURE_OPENAI_KEY:listSecret(resourceId('Microsoft.KeyVault/vaults/secrets', keyVaultName, 'AZURE-OPENAI-KEY'),'2023-07-01').value
           AZURE_OPENAI_MODEL_NAME:'gpt-35-turbo'
           AZURE_OPENAI_TEMPERATURE:'0'
           AZURE_OPENAI_TOP_P:'1'
@@ -1024,7 +1024,7 @@ module webSite '../modules/web-sites.bicep' = {
           AZURE_SEARCH_PERMITTED_GROUPS_FIELD:''
           AZURE_SEARCH_STRICTNESS:'3'
           AZURE_OPENAI_EMBEDDING_NAME:'text-embedding-ada-002'
-          AZURE_OPENAI_EMBEDDING_KEY:listSecret(resourceId('Microsoft.KeyVault/vaults/secrets', keyVaultName, 'AZURE-OPENAI-KEY'),'2023-07-01').value
+          // AZURE_OPENAI_EMBEDDING_KEY:listSecret(resourceId('Microsoft.KeyVault/vaults/secrets', keyVaultName, 'AZURE-OPENAI-KEY'),'2023-07-01').value
           AZURE_OPENAI_EMBEDDING_ENDPOINT:azOpenAI.outputs.endpoint
           AI_STUDIO_DRAFT_FLOW_ENDPOINT:'TBD'
           AI_STUDIO_DRAFT_FLOW_API_KEY:'TBD'
