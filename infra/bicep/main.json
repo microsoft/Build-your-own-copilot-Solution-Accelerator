@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "15464129282482502182"
+      "templateHash": "4984743856872931501"
     }
   },
   "parameters": {
@@ -31973,7 +31973,6 @@
           "secretsExportConfiguration": {
             "value": {
               "accessKey1Name": "AZURE-OPENAI-KEY",
-              "accessKey2Name": "AZURE-OPENAI-KEY-2",
               "keyVaultResourceId": "[reference('keyvault').outputs.resourceId.value]"
             }
           },
@@ -42195,6 +42194,7 @@
                   "SCM_DO_BUILD_DURING_DEPLOYMENT": "True",
                   "UWSGI_PROCESSES": "2",
                   "UWSGI_THREADS": "2",
+                  "APP_ENV": "prod",
                   "HostingPlanName": "[format('{0}{1}', variables('abbrs').compute.appServicePlan, parameters('solutionPrefix'))]",
                   "WebsiteName": "[variables('webSiteResourceName')]",
                   "ApplicationInsightsName": "[format('{0}{1}', variables('abbrs').analytics.analysisServicesServer, parameters('solutionPrefix'))]"

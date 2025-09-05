@@ -592,7 +592,6 @@ module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
     // Non-required parameters
     secretsExportConfiguration: {
       accessKey1Name: 'AZURE-OPENAI-KEY'
-      accessKey2Name: 'AZURE-OPENAI-KEY-2'
       keyVaultResourceId: keyvault.outputs.resourceId
     }
     customSubDomainName: accounts_byc_openai_name
@@ -1001,7 +1000,7 @@ module webSite '../modules/web-sites.bicep' = {
           AZURE_OPENAI_RESOURCE:azOpenAI.outputs.endpoint
           AZURE_OPENAI_ENDPOINT:azOpenAI.outputs.endpoint
           AZURE_OPENAI_MODEL:'gpt-35-turbo'
-          // AZURE_OPENAI_KEY:azOpenAI.outputs.exportedSecrets['key1'].secretUri
+          // AZURE_OPENAI_KEY:keyvault.outputs.secrets.AZURE_OPENAI_KEY.secretUri
           AZURE_OPENAI_MODEL_NAME:'gpt-35-turbo'
           AZURE_OPENAI_TEMPERATURE:'0'
           AZURE_OPENAI_TOP_P:'1'
@@ -1024,9 +1023,6 @@ module webSite '../modules/web-sites.bicep' = {
           AZURE_OPENAI_EMBEDDING_NAME:'text-embedding-ada-002'
           // AZURE_OPENAI_EMBEDDING_KEY:azOpenAI.outputs.exportedSecrets['key1'].secretUri
           AZURE_OPENAI_EMBEDDING_ENDPOINT:azOpenAI.outputs.endpoint
-          // AIStudioChatFlowEndpoint:'TBD'
-          // AIStudioChatFlowAPIKey:'TBD'
-          // AIStudioChatFlowDeploymentName:'TBD'
           AI_STUDIO_DRAFT_FLOW_ENDPOINT:'TBD'
           AI_STUDIO_DRAFT_FLOW_API_KEY:'TBD'
           AI_STUDIO_DRAFT_FLOW_DEPLOYMENT_NAME:'TBD'
@@ -1034,6 +1030,7 @@ module webSite '../modules/web-sites.bicep' = {
           SCM_DO_BUILD_DURING_DEPLOYMENT:'True'
           UWSGI_PROCESSES:'2'
           UWSGI_THREADS:'2'
+          APP_ENV: 'prod'
           HostingPlanName:'${abbrs.compute.appServicePlan}${solutionPrefix}'
           WebsiteName:webSiteResourceName
           ApplicationInsightsName:'${abbrs.analytics.analysisServicesServer}${solutionPrefix}'
