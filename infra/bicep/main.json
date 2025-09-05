@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "15464129282482502182"
+      "templateHash": "18200532926063617587"
     }
   },
   "parameters": {
@@ -37183,7 +37183,7 @@
           "runOnce": {
             "value": true
           },
-          "primaryScriptUri": {
+          "scriptContent": {
             "value": "[format('{0}infra/scripts/run_create_aihub_scripts.sh', variables('baseUrl'))]"
           },
           "arguments": {

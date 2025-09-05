@@ -784,7 +784,7 @@ module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
       ]
     }
     runOnce: true
-    primaryScriptUri: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh'
+    scriptContent: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh'
     arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}'
     tags: tags
     timeout: 'PT1H'
