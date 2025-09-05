@@ -37706,16 +37706,6 @@
                 "description": "The output of the deployment script."
               },
               "value": "[coalesce(tryGet(reference('deploymentScript'), 'outputs'), createObject())]"
-            },
-            "deploymentScriptLogs": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "metadata": {
-                "description": "The logs of the deployment script."
-              },
-              "value": "[split(reference('deploymentScriptLogs').log, '\n')]"
             }
           }
         }
