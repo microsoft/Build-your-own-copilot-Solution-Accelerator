@@ -1070,12 +1070,12 @@ module webSite '../modules/web-sites.bicep' = {
   }
 }
 
-var selectedPrincipalId string = webSite.outputs.systemAssignedMIPrincipalId ?? userAssignedIdentity.outputs.principalId
+// var selectedPrincipalId string = webSite.outputs.systemAssignedMIPrincipalId ?? userAssignedIdentity.outputs.principalId
 
 module keyVaultSecretsUserAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
   name: 'keyVaultSecretsUserAssignment'
   params: {
-    principalId: selectedPrincipalId
+    principalId: userAssignedIdentity.outputs.principalId
     roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
     principalType: 'ServicePrincipal'
   }

@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "7871052114727442075"
+      "templateHash": "3815495718477368725"
     }
   },
   "parameters": {
@@ -44210,7 +44210,7 @@
         "mode": "Incremental",
         "parameters": {
           "principalId": {
-            "value": "[coalesce(reference('webSite').outputs.systemAssignedMIPrincipalId.value, reference('userAssignedIdentity').outputs.principalId.value)]"
+            "value": "[reference('userAssignedIdentity').outputs.principalId.value]"
           },
           "roleDefinitionIdOrName": {
             "value": "4633458b-17de-408a-b874-0445c86b69e6"
