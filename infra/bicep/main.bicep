@@ -402,29 +402,29 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
 // //   dependsOn:[storageAccountModule]
 // // }
 
-module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-  name : 'deploy_upload_files_script'
-  params: {
-    // Required parameters
-    kind: 'AzureCLI'
-    name: 'copy_demo_Data'
-    // Non-required parameters
-    azCliVersion: '2.50.0'
-    location: solutionLocation
-    managedIdentities: {
-      userAssignedResourceIds: [
-        userAssignedIdentity.outputs.resourceId
-      ]
-    }
-    runOnce: true
-    primaryScriptUri: '${baseUrl}infra/scripts/copy_kb_files.sh'
-    arguments: '${storageAccountName} ${containerName} ${baseUrl}'
-    tags: tags
-    timeout: 'PT1H'
-    retentionInterval: 'PT1H'
-    cleanupPreference: 'OnSuccess'
-  }
-}
+// module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
+//   name : 'deploy_upload_files_script'
+//   params: {
+//     // Required parameters
+//     kind: 'AzureCLI'
+//     name: 'copy_demo_Data'
+//     // Non-required parameters
+//     azCliVersion: '2.50.0'
+//     location: solutionLocation
+//     managedIdentities: {
+//       userAssignedResourceIds: [
+//         userAssignedIdentity.outputs.resourceId
+//       ]
+//     }
+//     runOnce: true
+//     primaryScriptUri: '${baseUrl}infra/scripts/copy_kb_files.sh'
+//     arguments: '${storageAccountName} ${containerName} ${baseUrl}'
+//     tags: tags
+//     timeout: 'PT1H'
+//     retentionInterval: 'PT1H'
+//     cleanupPreference: 'OnSuccess'
+//   }
+// }
 
 
 // // ========== Key Vault ========== //
@@ -717,32 +717,32 @@ resource cogNameSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 
 //========== AVM WAF ========== //
 //========== Deployment script to create index ========== // 
-module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-  name : 'deploy_index_scripts'
-  params: {
-    // Required parameters
-    kind: 'AzureCLI'
-    name: 'create_search_indexes'
-    // Non-required parameters
-    azCliVersion: '2.52.0'
-    location: solutionLocation
-    managedIdentities: {
-      userAssignedResourceIds: [
-        userAssignedIdentity.outputs.resourceId
-      ]
-    }
-    runOnce: true
-    primaryScriptUri: '${baseUrl}infra/scripts/run_create_index_scripts.sh'
-    arguments: '${baseUrl} ${keyvault.outputs.name}'
-    tags: tags
-    timeout: 'PT1H'
-    retentionInterval: 'P1D'
-    cleanupPreference: 'OnSuccess'
-  }
-  dependsOn: [
-    keyvault
-  ]
-}
+// module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
+//   name : 'deploy_index_scripts'
+//   params: {
+//     // Required parameters
+//     kind: 'AzureCLI'
+//     name: 'create_search_indexes'
+//     // Non-required parameters
+//     azCliVersion: '2.52.0'
+//     location: solutionLocation
+//     managedIdentities: {
+//       userAssignedResourceIds: [
+//         userAssignedIdentity.outputs.resourceId
+//       ]
+//     }
+//     runOnce: true
+//     primaryScriptUri: '${baseUrl}infra/scripts/run_create_index_scripts.sh'
+//     arguments: '${baseUrl} ${keyvault.outputs.name}'
+//     tags: tags
+//     timeout: 'PT1H'
+//     retentionInterval: 'P1D'
+//     cleanupPreference: 'OnSuccess'
+//   }
+//   dependsOn: [
+//     keyvault
+//   ]
+// }
 
 // // module createFabricItems 'deploy_fabric_scripts.bicep' = if (fabricWorkspaceId != '') {
 // //   name : 'deploy_fabric_scripts'
@@ -797,7 +797,6 @@ module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     keyvault
   ]
 }
-
 
 // ========== AVM WAF server farm ========== //
 // WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
@@ -989,9 +988,11 @@ module webSite '../modules/web-sites.bicep' = {
           solutionLocation: solutionLocation
           AZURE_SEARCH_SERVICE:azSearchService.outputs.name
           AZURE_SEARCH_INDEX:'articlesindex'
-          AZURE_SEARCH_ARTICLES_INDEX:'articlesindex'
-          AZURE_SEARCH_GRANTS_INDEX:'grantsindex'
-          AZURE_SEARCH_DRAFTS_INDEX:'draftsindex'
+          AZURE_SEARCH_INDEX_ARTICLES:'articlesindex'
+          AZURE_SEARCH_INDEX_GRANTS:'grantsindex'
+          WEB_APP_ENABLE_CHAT_HISTORY: 'False'
+          AZURE_SEARCH_ENABLE_IN_DOMAIN: 'False'
+          AZURE_SEARCH_INDEX_DRAFTS:'draftsindex'
           AZURE_SEARCH_KEY:azSearchService.outputs.primaryKey
           AZURE_SEARCH_USE_SEMANTIC_SEARCH:'True'
           AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG:'my-semantic-config'
@@ -1067,3 +1068,17 @@ module webSite '../modules/web-sites.bicep' = {
       : null
   }
 }
+
+
+module keyVaultSecretsUserAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
+  name: 'keyVaultSecretsUserAssignment'
+  params: {
+    principalId: webSite.outputs.resourceId
+    roleDefinitionIdOrName: '/providers/Microsoft.Authorization/roleDefinitions/4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
+    principalType: 'ServicePrincipal'
+  }
+  dependsOn: [
+    webSite
+  ]
+}
+
