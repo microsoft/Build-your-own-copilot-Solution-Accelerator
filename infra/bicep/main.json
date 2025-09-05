@@ -37669,15 +37669,6 @@
               "dependsOn": [
                 "deploymentScript"
               ]
-            },
-            "deploymentScriptLogs": {
-              "existing": true,
-              "type": "Microsoft.Resources/deploymentScripts/logs",
-              "apiVersion": "2023-08-01",
-              "name": "[format('{0}/{1}', parameters('name'), 'default')]",
-              "dependsOn": [
-                "deploymentScript"
-              ]
             }
           },
           "outputs": {

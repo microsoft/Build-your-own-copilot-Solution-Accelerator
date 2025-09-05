@@ -798,6 +798,7 @@ module createIndex1 'br/public:avm/res/resources/deployment-script:0.5.1' = {
   ]
 }
 
+
 // ========== AVM WAF server farm ========== //
 // WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
 // PSRule for Web Server Farm: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#app-service
