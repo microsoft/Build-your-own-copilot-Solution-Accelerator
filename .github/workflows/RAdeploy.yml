@@ -104,7 +104,7 @@ jobs:
           az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/bicep/main.bicep \
-            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }}
+            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} createdBy="Pipeline" 
       - name: List KeyVaults and Store in Array
         id: list_keyvaults
         run: |

@@ -16,14 +16,15 @@ var subscriptionId  = subscription().subscriptionId
 var solutionLocation = resourceGroupLocation
 var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/'
 
-var deployerInfo = deployer()
+@description('Optional created by user name')
+param createdBy string = empty(deployer().userPrincipalName) ? '' : split(deployer().userPrincipalName, '@')[0]
 // ========== Resource Group Tag ========== //
 resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
   name: 'default'
   properties: {
     tags: {
       TemplateName: 'Research Assistant'
-      CreatedBy: split(deployerInfo.userPrincipalName, '@')[0] 
+      CreatedBy: createdBy
     }
   }
 }
