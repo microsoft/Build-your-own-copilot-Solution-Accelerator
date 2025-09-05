@@ -309,7 +309,8 @@ The subscription 'xxxx-xxxx' cannot have more than 1 Container App Environments 
  
 </details>
  
-<details><summary><b>ParentResourceNotfound</b>
+<details><summary><b>ParentResourceNotFound</b>
+
 </summary>
  
 - You can refer to the [Parent Resource Not found](https://learn.microsoft.com/en-us/azure/azure-resource-manager/troubleshooting/error-parent-resource?tabs=bicep) documentation if you encounter this error.
