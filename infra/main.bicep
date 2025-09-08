@@ -201,6 +201,7 @@ var functionAppSqlPrompt = '''Generate a valid T-SQL query to find {query} for t
    ALWAYS select Client Name (Column: Client) in the query.
    Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
    When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.
+   For asset values: if question is about total \"asset value\"/\"portfolio value\"/\"AUM\" → return SUM of latest investments; if about \"current asset/investment value\" → return all latest investments without SUM.
    Only return the generated SQL query. Do not return anything else.'''
 
 var functionAppCallTranscriptSystemPrompt = '''You are an assistant who supports wealth advisors in preparing for client meetings. 
@@ -282,6 +283,9 @@ resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces
 var logAnalyticsWorkspaceResourceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspaceId  : logAnalyticsWorkspace!.outputs.resourceId
 // var logAnalyticsPrimarySharedKey = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.listKeys().primarySharedKey  : logAnalyticsWorkspace.outputs.primarySharedKey
 // var logAnalyticsWorkspaceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.properties.customerId  : logAnalyticsWorkspace!.outputs.logAnalyticsWorkspaceId
+
+@description('Optional created by user name')
+param createdBy string = empty(deployer().userPrincipalName) ? '' : split(deployer().userPrincipalName, '@')[0]
 
 @description('Optional created by user name')
 param createdBy string = empty(deployer().userPrincipalName) ? '' : split(deployer().userPrincipalName, '@')[0]
