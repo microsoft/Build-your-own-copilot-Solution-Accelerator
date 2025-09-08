@@ -586,23 +586,23 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
 // ========== AI Foundry: AI Services ========== //
 // WAF best practices for Open AI: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-openai
 
-// var aiFoundryAiServicesSubscriptionId = useExistingAiFoundryAiProject
-//   ? split(azureExistingAIProjectResourceId, '/')[2]
-//   : subscription().id
-// var useExistingAiFoundryAiProject = !empty(azureExistingAIProjectResourceId)
-// var aiFoundryAiServicesResourceGroupName = useExistingAiFoundryAiProject
-//   ? split(azureExistingAIProjectResourceId, '/')[4]
-//   : 'rg-${solutionSuffix}'
-// var aiFoundryAiServicesResourceName = useExistingAiFoundryAiProject
-//   ? split(azureExistingAIProjectResourceId, '/')[8]
-//   : 'aif-${solutionSuffix}'
-// var aiFoundryAiProjectResourceName = useExistingAiFoundryAiProject
-//   ? split(azureExistingAIProjectResourceId, '/')[10]
-//   : 'proj-${solutionSuffix}' 
+var aiFoundryAiServicesSubscriptionId = useExistingAiFoundryAiProject
+  ? split(existingFoundryProjectResourceId, '/')[2]
+  : subscription().id
+var useExistingAiFoundryAiProject = !empty(existingFoundryProjectResourceId)
+var aiFoundryAiServicesResourceGroupName = useExistingAiFoundryAiProject
+  ? split(existingFoundryProjectResourceId, '/')[4]
+  : 'rg-${solutionSuffix}'
+var aiFoundryAiServicesResourceName = useExistingAiFoundryAiProject
+  ? split(existingFoundryProjectResourceId, '/')[8]
+  : 'aif-${solutionSuffix}'
+var aiFoundryAiProjectResourceName = useExistingAiFoundryAiProject
+  ? split(existingFoundryProjectResourceId, '/')[10]
+  : 'proj-${solutionSuffix}' 
 // AI Project resource id: /subscriptions/<subscription-id>/resourceGroups/<resource-group-name>/providers/Microsoft.CognitiveServices/accounts/<ai-services-name>/projects/<project-name>
 
 // NOTE: Required version 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' not available in AVM
-var aiFoundryAiServicesResourceName = 'aif-${solutionSuffix}'
+// var aiFoundryAiServicesResourceName = 'aif-${solutionSuffix}'
 var aiFoundryAiServicesAiProjectResourceName = 'proj-${solutionSuffix}'
 var aiFoundryAIservicesEnabled = true
 var aiFoundryAiServicesModelDeployment = {
@@ -1370,7 +1370,7 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
   }
 }
 
-resource projectAISearchConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
+resource projectAISearchConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' =  if (!useExistingAiFoundryAiProject) {
   name: '${aiFoundryAiServicesResourceName}/${aiFoundryAiServicesAiProjectResourceName}/${aiSearchName}'
   properties: {
     category: 'CognitiveSearch'
@@ -1385,8 +1385,21 @@ resource projectAISearchConnection 'Microsoft.CognitiveServices/accounts/project
   }
 }
 
+module existing_AIProject_SearchConnectionModule 'modules/deploy_aifp_aisearch_connection.bicep' = if (useExistingAiFoundryAiProject) {
+  name: 'aiProjectSearchConnectionDeployment'
+  scope: resourceGroup(aiFoundryAiServicesSubscriptionId, aiFoundryAiServicesResourceGroupName)
+  params: {
+    existingAIProjectName: aiFoundryAiProjectResourceName
+    existingAIFoundryName: aiFoundryAiServicesResourceName
+    aiSearchName: aiSearchName
+    aiSearchResourceId: searchService.outputs.resourceId
+    aiSearchLocation: searchService.outputs.location
+    aiSearchConnectionName: aiSearchName
+  }
+}
+
 // ========== Search Service to AI Services Role Assignment ========== //
-resource searchServiceToAiServicesRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource searchServiceToAiServicesRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!useExistingAiFoundryAiProject) {
   name: guid(aiSearchName, '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd', aiFoundryAiServicesResourceName)
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd') // Cognitive Services OpenAI User
@@ -1395,9 +1408,18 @@ resource searchServiceToAiServicesRoleAssignment 'Microsoft.Authorization/roleAs
   }
 }
 
+// Role assignment for existing AI Services scenario
+module searchServiceToExistingAiServicesRoleAssignment 'modules/role-assignment.bicep' = if (useExistingAiFoundryAiProject) {
+  name: 'searchToExistingAiServices-roleAssignment'
+  scope: resourceGroup(aiFoundryAiServicesSubscriptionId, aiFoundryAiServicesResourceGroupName)
+  params: {
+    principalId: searchService.outputs.systemAssignedMIPrincipalId!
+    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd' // Cognitive Services OpenAI User
+    targetResourceName: aiFoundryAiServices.outputs.name
+  }
+}
 
-
-
+// ========== Outputs ========== //
 @description('URL of the deployed web application.')
 output WEB_APP_URL string = 'https://${webSite.outputs.name}.azurewebsites.net'
 

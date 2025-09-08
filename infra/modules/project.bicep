@@ -41,14 +41,15 @@ resource aiProject 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = 
   }
 }
 
+
 @description('This is the built-in Search Index Data Reader role.')
 resource searchIndexDataReaderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
 }
 
 // ========== Search Service to AI Services Role Assignment ========== //
-resource searchServiceToAiServicesRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aiProject.id, '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
+resource searchServiceToAiServicesRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(!useExistingProject) {
+  name: guid(aiProject.id, searchIndexDataReaderRoleDefinition.id)
   properties: {
     roleDefinitionId: searchIndexDataReaderRoleDefinition.id
     principalId: aiProject.identity.principalId
@@ -61,7 +62,7 @@ resource searchServiceContributorRoleDefinition 'Microsoft.Authorization/roleDef
   name: '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
 }
 
-resource searchServiceContributorRoleAssignmentToAIFP 'Microsoft.Authorization/roleAssignments@2022-04-01' =  {
+resource searchServiceContributorRoleAssignmentToAIFP 'Microsoft.Authorization/roleAssignments@2022-04-01' =  if (!useExistingProject) {
   name: guid(aiProject.id, searchServiceContributorRoleDefinition.id)
   properties: {
     roleDefinitionId: searchServiceContributorRoleDefinition.id
