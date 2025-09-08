@@ -283,6 +283,9 @@ var logAnalyticsWorkspaceResourceId = useExistingLogAnalytics  ? existingLogAnal
 // var logAnalyticsPrimarySharedKey = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.listKeys().primarySharedKey  : logAnalyticsWorkspace.outputs.primarySharedKey
 // var logAnalyticsWorkspaceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.properties.customerId  : logAnalyticsWorkspace!.outputs.logAnalyticsWorkspaceId
 
+@description('Optional created by user name')
+param createdBy string = empty(deployer().userPrincipalName) ? '' : split(deployer().userPrincipalName, '@')[0]
+
 // ========== Resource Group Tag ========== //
 resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
   name: 'default'
@@ -290,6 +293,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
     tags: {
       ...tags
       TemplateName: 'Client Advisor'
+      CreatedBy: createdBy
     }
   }
 }
