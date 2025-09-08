@@ -50,47 +50,6 @@ resource existingAiProject 'Microsoft.CognitiveServices/accounts/projects@2025-0
   scope: resourceGroup(existingAiFoundryAiServicesSubscriptionId, existingAiFoundryAiServicesResourceGroupName)
 }
 
-// @description('This is the built-in Search Index Data Reader role.')
-// resource searchIndexDataReaderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-//   name: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
-// }
-
-// // ========== Search Service to AI Services Role Assignment ========== //
-// resource searchServiceToAiServicesRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(!useExistingProject) {
-//   name: guid(aiProject.id, searchIndexDataReaderRoleDefinition.id)
-//   properties: {
-//     roleDefinitionId: searchIndexDataReaderRoleDefinition.id
-//     principalId: aiProject!.identity.principalId
-//     principalType: 'ServicePrincipal'
-//   }
-// }
-
-// // Assign Search Index Data Reader role to existing AI Foundry project principal
-// resource searchIndexDataReaderRoleAssignmentForExisting 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (useExistingProject) {
-//   name: guid(existingAiProject.id, searchIndexDataReaderRoleDefinition.id)
-//   scope: resourceGroup()
-//   properties: {
-//     roleDefinitionId: searchIndexDataReaderRoleDefinition.id
-//     principalId: existingAiProject!.identity.principalId
-//     principalType: 'ServicePrincipal'
-//   }
-// }
-
-// @description('This is the built-in Search Service Contributor role.')
-// resource searchServiceContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-//   name: '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
-// }
-
-// resource searchServiceContributorRoleAssignmentToAIFP 'Microsoft.Authorization/roleAssignments@2022-04-01' =  if (!useExistingProject) {
-//   name: guid(aiProject.id, searchServiceContributorRoleDefinition.id)
-//   properties: {
-//     roleDefinitionId: searchServiceContributorRoleDefinition.id
-//     principalId: aiProject.identity.principalId
-//     principalType: 'ServicePrincipal'
-//   }
-// }
-
-
 @description('AI Project metadata including name, resource ID, and API endpoint.')
 output aiProjectInfo aiProjectOutputType = {
   name: useExistingProject ? existingProjName : aiProject.name

@@ -9,9 +9,6 @@ param solutionName string = 'clientadvisor'
 @description('Optional. Existing Log Analytics Workspace Resource ID')
 param existingLogAnalyticsWorkspaceId string = ''
 
-@description('Optional. Resource ID of an existing Foundry project')
-param azureExistingAIProjectResourceId string = ''
-
 @description('Optional. CosmosDB Location')
 param cosmosLocation string = 'eastus2'
 
@@ -394,18 +391,6 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
   }
 }
 
-// ========== Key Vault ========== //
-// module keyvaultModule 'deploy_keyvault.bicep' = {
-//   name: 'deploy_keyvault'
-//   params: {
-//     solutionName: solutionSuffix
-//     solutionLocation: solutionLocation
-//     managedIdentityObjectId: managedIdentityModule.outputs.managedIdentityOutput.objectId
-//     kvName: 'kv-${solutionSuffix}'
-//     tags: tags
-//   }
-//   scope: resourceGroup(resourceGroup().name)
-// }
 
 module network 'modules/network.bicep' = if (enablePrivateNetworking) {
   name: take('network-${resourcesName}-deployment', 64)
@@ -562,27 +547,6 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
   }
 }
 
-// ==========AI Foundry and related resources ========== //
-// module aifoundry 'deploy_ai_foundry.bicep' = {
-//   name: 'deploy_ai_foundry'
-//   params: {
-//     solutionName: solutionSuffix
-//     solutionLocation: aiDeploymentsLocation
-//     keyVaultName: keyvault.outputs.name
-//     deploymentType: gptModelDeploymentType
-//     gptModelName: gptModelName
-//     azureOpenaiAPIVersion: azureOpenaiAPIVersion
-//     gptDeploymentCapacity: gptModelCapacity
-//     embeddingModel: embeddingModel
-//     embeddingDeploymentCapacity: embeddingDeploymentCapacity
-//     existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
-//     azureExistingAIProjectResourceId: azureExistingAIProjectResourceId
-//     aiFoundryAiServicesAiProjectResourceName: 'proj-${solutionSuffix}'
-//     tags: tags
-//   }
-//   scope: resourceGroup(resourceGroup().name)
-// }
-
 // ========== AI Foundry: AI Services ========== //
 // WAF best practices for Open AI: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-openai
 var useExistingAiFoundryAiProject = !empty(existingFoundryProjectResourceId)
@@ -725,17 +689,6 @@ module aiFoundryAiServices 'modules/ai-services.bicep' = if (aiFoundryAIservices
   }
 }
 
-// ========== CosmosDB ========== //
-// module cosmosDBModule 'deploy_cosmos_db.bicep' = {
-//   name: 'deploy_cosmos_db'
-//   params: {
-//     solutionLocation: cosmosLocation
-//     cosmosDBName: 'cosmos-${solutionSuffix}'
-//     tags: tags
-//   }
-//   scope: resourceGroup(resourceGroup().name)
-// }
-
 //========== AVM WAF ========== //
 //========== Cosmos DB module ========== //
 var cosmosDbResourceName = 'cosmos-${solutionSuffix}'
@@ -755,14 +708,6 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
       {
         name: cosmosDbDatabaseName
         containers: [
-          // {
-          //   name: cosmosDbDatabaseMemoryContainerName
-          //   paths: [
-          //     '/session_id'
-          //   ]
-          //   kind: 'Hash'
-          //   version: 2
-          // }
           {
             name: collectionName
             paths: [
@@ -833,19 +778,6 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
   dependsOn: [keyvault, avmStorageAccount]
   scope: resourceGroup(resourceGroup().name)
 }
-
-// ========== Storage Account Module ========== //
-// module storageAccountModule 'deploy_storage_account.bicep' = {
-//   name: 'deploy_storage_account'
-//   params: {
-//     solutionLocation: solutionLocation
-//     managedIdentityObjectId: userAssignedIdentity.outputs.principalId
-//     saName: 'st${solutionSuffix}'
-//     keyVaultName: keyvault.outputs.name
-//     tags: tags
-//   }
-//   scope: resourceGroup(resourceGroup().name)
-// }
 
 // ========== AVM WAF ========== //
 // ========== Storage account module ========== //
@@ -1113,66 +1045,6 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
   }
 }
 
-// // ========== App Service Module ========== //
-// module appserviceModule 'deploy_app_service.bicep' = {
-//   name: 'deploy_app_service'
-//   params: {
-//     solutionLocation: solutionLocation
-//     hostingPlanName: hostingPlanName
-//     websiteName: websiteName
-//     appEnvironment: appEnvironment
-//     azureSearchService: aifoundry.outputs.aiSearchService
-//     azureSearchIndex: azureSearchIndex
-//     azureSearchUseSemanticSearch: azureSearchUseSemanticSearch
-//     azureSearchSemanticSearchConfig: azureSearchSemanticSearchConfig
-//     azureSearchTopK: azureSearchTopK
-//     azureSearchContentColumns: azureSearchContentColumns
-//     azureSearchFilenameColumn: azureSearchFilenameColumn
-//     azureSearchTitleColumn: azureSearchTitleColumn
-//     azureSearchUrlColumn: azureSearchUrlColumn
-//     azureOpenAIResource: aifoundry.outputs.aiFoundryName
-//     azureOpenAIEndpoint: aifoundry.outputs.aoaiEndpoint
-//     azureOpenAIModel: gptModelName
-//     azureOpenAITemperature: azureOpenAITemperature
-//     azureOpenAITopP: azureOpenAITopP
-//     azureOpenAIMaxTokens: azureOpenAIMaxTokens
-//     azureOpenAIStopSequence: azureOpenAIStopSequence
-//     azureOpenAISystemMessage: azureOpenAISystemMessage
-//     azureOpenAIApiVersion: azureOpenaiAPIVersion
-//     azureOpenAIStream: azureOpenAIStream
-//     azureSearchQueryType: azureSearchQueryType
-//     azureSearchVectorFields: azureSearchVectorFields
-//     azureSearchPermittedGroupsField: azureSearchPermittedGroupsField
-//     azureSearchStrictness: azureSearchStrictness
-//     azureOpenAIEmbeddingName: embeddingModel
-//     azureOpenAIEmbeddingEndpoint: aifoundry.outputs.aoaiEndpoint
-//     USE_INTERNAL_STREAM: useInternalStream
-//     SQLDB_SERVER: sqlServerFqdn
-//     SQLDB_DATABASE: sqlDBModule.outputs.sqlDbName
-//     AZURE_COSMOSDB_ACCOUNT: cosmosDb.outputs.name
-//     AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: collectionName
-//     AZURE_COSMOSDB_DATABASE: cosmosDbDatabaseName
-//     AZURE_COSMOSDB_ENABLE_FEEDBACK: azureCosmosDbEnableFeedback
-//     //VITE_POWERBI_EMBED_URL: 'TBD'
-//     imageTag: imageTag
-//     userassignedIdentityClientId: userAssignedIdentity.outputs.clientId
-//     userassignedIdentityId: userAssignedIdentity.outputs.principalId
-//     applicationInsightsId: aifoundry.outputs.applicationInsightsId
-//     azureSearchServiceEndpoint: aifoundry.outputs.aiSearchTarget
-//     sqlSystemPrompt: functionAppSqlPrompt
-//     callTranscriptSystemPrompt: functionAppCallTranscriptSystemPrompt
-//     streamTextSystemPrompt: functionAppStreamTextSystemPrompt
-//     //aiFoundryProjectName:aifoundry.outputs.aiFoundryProjectName
-//     aiFoundryProjectEndpoint: aifoundry.outputs.aiFoundryProjectEndpoint
-//     aiFoundryName: aifoundry.outputs.aiFoundryName
-//     applicationInsightsConnectionString: aifoundry.outputs.applicationInsightsConnectionString
-//     azureExistingAIProjectResourceId: azureExistingAIProjectResourceId
-//     aiSearchProjectConnectionName: aifoundry.outputs.aiSearchFoundryConnectionName
-//      tags: tags
-//   }
-//   scope: resourceGroup(resourceGroup().name)
-// }
-
 // ========== Frontend server farm ========== //
 // WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
 // PSRule for Web Server Farm: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#app-service
@@ -1340,16 +1212,6 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
       ipRules: []
     }
     roleAssignments: [
-      // {
-      //   roleDefinitionIdOrName: 'Cognitive Services Contributor' // Cognitive Search Contributor
-      //   principalId: userAssignedIdentity.outputs.principalId
-      //   principalType: 'ServicePrincipal'
-      // }
-      // {
-      //   roleDefinitionIdOrName: 'Cognitive Services OpenAI User'//'5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'// Cognitive Services OpenAI User
-      //   principalId: userAssignedIdentity.outputs.principalId
-      //   principalType: 'ServicePrincipal'
-      // }
       {
         roleDefinitionIdOrName: '1407120a-92aa-4202-b7e9-c0e197c71c8f' // Search Index Data Reader
         principalId: userAssignedIdentity.outputs.principalId
@@ -1479,7 +1341,6 @@ output MANAGEDIDENTITY_WEBAPP_NAME string = userAssignedIdentity.outputs.name
 @description('Client ID of the managed identity used by the web app.')
 output MANAGEDIDENTITY_WEBAPP_CLIENTID string = userAssignedIdentity.outputs.clientId
 @description('Name of the AI Search service.')
-// output AI_SEARCH_SERVICE_NAME string = '' //aifoundry.outputs.aiSearchService
 output AI_SEARCH_SERVICE_NAME string = aiSearchName //aifoundry.outputs.aiSearchService
 
 @description('Name of the deployed web application.')
@@ -1505,7 +1366,6 @@ output AZURE_AI_AGENT_ENDPOINT string = aiFoundryAiServices.outputs.aiProjectInf
 output AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME string = gptModelName
 
 @description('The endpoint URL of the Azure AI Search service.')
-// output AZURE_AI_SEARCH_ENDPOINT string = '' //aifoundry.outputs.aiSearchTarget
 output AZURE_AI_SEARCH_ENDPOINT string = 'https://${aiSearchName}.search.windows.net' //aifoundry.outputs.aiSearchTarget
 
 @description('The system prompt used for call transcript processing in Azure Functions.')
@@ -1563,7 +1423,6 @@ output AZURE_OPENAI_TEMPERATURE string = azureOpenAITemperature
 output AZURE_OPENAI_TOP_P string = azureOpenAITopP
 
 @description('The name of the Azure AI Search connection.')
-// output AZURE_SEARCH_CONNECTION_NAME string = '' //aiFoundryAiServices.outputs.aiSearchFoundryConnectionName
 output AZURE_SEARCH_CONNECTION_NAME string = 'foundry-search-connection-${solutionSuffix}' //aiFoundryAiServices.outputs.aiSearchFoundryConnectionName
 
 @description('The columns in Azure AI Search that contain content.')
@@ -1588,7 +1447,6 @@ output AZURE_SEARCH_QUERY_TYPE string = azureSearchQueryType
 output AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG string = azureSearchSemanticSearchConfig
 
 @description('The name of the Azure AI Search service.')
-// output AZURE_SEARCH_SERVICE string = '' //aifoundry.outputs.aiSearchService
 output AZURE_SEARCH_SERVICE string = aiSearchName //aifoundry.outputs.aiSearchService
 
 @description('The strictness setting for Azure AI Search semantic ranking.')
