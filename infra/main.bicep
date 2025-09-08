@@ -585,11 +585,11 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
 
 // ========== AI Foundry: AI Services ========== //
 // WAF best practices for Open AI: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-openai
+var useExistingAiFoundryAiProject = !empty(existingFoundryProjectResourceId)
 
 var aiFoundryAiServicesSubscriptionId = useExistingAiFoundryAiProject
   ? split(existingFoundryProjectResourceId, '/')[2]
   : subscription().id
-var useExistingAiFoundryAiProject = !empty(existingFoundryProjectResourceId)
 var aiFoundryAiServicesResourceGroupName = useExistingAiFoundryAiProject
   ? split(existingFoundryProjectResourceId, '/')[4]
   : 'rg-${solutionSuffix}'
@@ -748,7 +748,7 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
   params: {
     // Required parameters
     name: cosmosDbResourceName
-    location: solutionLocation
+    location: cosmosLocation
     tags: tags
     enableTelemetry: enableTelemetry
     sqlDatabases: [
@@ -1299,6 +1299,17 @@ module webSite 'modules/web-sites.bicep' = {
   }
 }
 
+resource existingAiFoundryAiServices 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = if (useExistingAiFoundryAiProject) {
+  name: aiFoundryAiServicesResourceName
+  scope: resourceGroup(aiFoundryAiServicesSubscriptionId, aiFoundryAiServicesResourceGroupName)
+}
+
+resource existingAiFoundryAiServicesProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' existing = if (useExistingAiFoundryAiProject) {
+  name: aiFoundryAiProjectResourceName
+  parent: existingAiFoundryAiServices
+}
+
+
 var aiSearchName = 'srch-${solutionName}'
 module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
   name: take('avm.res.search.search-service.${aiSearchName}', 64)
@@ -1340,8 +1351,23 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
       //   principalType: 'ServicePrincipal'
       // }
       {
-        roleDefinitionIdOrName: 'Search Index Data Contributor' // 1407120a-92aa-4202-b7e9-c0e197c71c8f
+        roleDefinitionIdOrName: '1407120a-92aa-4202-b7e9-c0e197c71c8f' // Search Index Data Reader
         principalId: userAssignedIdentity.outputs.principalId
+        principalType: 'ServicePrincipal'
+      }
+      {
+        roleDefinitionIdOrName: '7ca78c08-252a-4471-8644-bb5ff32d4ba0' // Search Service Contributor
+        principalId: userAssignedIdentity.outputs.principalId
+        principalType: 'ServicePrincipal'
+      }
+      {
+        roleDefinitionIdOrName: '1407120a-92aa-4202-b7e9-c0e197c71c8f' // Search Index Data Reader
+        principalId: !useExistingAiFoundryAiProject ? aiFoundryAiServices.outputs.aiProjectInfo.aiprojectSystemAssignedMIPrincipalId : existingAiFoundryAiServicesProject!.identity.principalId
+        principalType: 'ServicePrincipal'
+      }
+      {
+        roleDefinitionIdOrName: '7ca78c08-252a-4471-8644-bb5ff32d4ba0' // Search Service Contributor
+        principalId: !useExistingAiFoundryAiProject ? aiFoundryAiServices.outputs.aiProjectInfo.aiprojectSystemAssignedMIPrincipalId : existingAiFoundryAiServicesProject!.identity.principalId
         principalType: 'ServicePrincipal'
       }
     ]
