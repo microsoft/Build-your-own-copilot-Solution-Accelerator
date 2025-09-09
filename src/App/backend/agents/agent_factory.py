@@ -183,9 +183,8 @@ class AgentFactory:
     - Do not use client name for filtering
     - Assets table contains snapshots by date; do not sum values across dates
     - Use StartTime for time-based filtering (meetings)
-    - For asset values:
-     - If the question is about total "asset value", "what is the asset value", "portfolio value", or "AUM" → ALWAYS return the SUM of the latest investments (do not return individual rows).
-     - If the question is about "current asset value" or "current investment value" → return all latest investments without SUM.
+    - For asset values: If the question is about "asset value", "total asset value", "portfolio value", or "AUM" → ALWAYS return the SUM of the latest investments (do not return individual rows). If the question is about "current asset value" or "current investment value" → return all latest investments without SUM.
+    - For trend queries: If the question contains "how did change", "over the last", "trend", or "progression" → return time series data for the requested period with SUM for each time period and show chronological progression.
     - Only return the raw T-SQL query. No explanations or comments.
     """
 
