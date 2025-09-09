@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "17818263811792330491"
+      "templateHash": "3986676839489070022"
     }
   },
   "parameters": {
@@ -42151,7 +42151,7 @@
           },
           "siteConfig": {
             "value": {
-              "linuxFxVersion": "DOCKER|racontainerreg49.azurecr.io/byoaia-app:latest",
+              "linuxFxVersion": "DOCKER|racontainerreg50.azurecr.io/byoaia-app:latest",
               "minTlsVersion": "1.2"
             }
           },
