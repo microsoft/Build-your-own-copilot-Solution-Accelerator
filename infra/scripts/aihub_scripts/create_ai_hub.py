@@ -37,6 +37,7 @@ aihub_name = 'ai_hub_' + 'solutionname_to-be-replaced'
 project_name = 'ai_project_' + 'solutionname_to-be-replaced'
 deployment_name = 'draftsinference-' + 'solutionname_to-be-replaced'
 solutionLocation = 'solutionlocation_to-be-replaced'
+azure_client_id = "azureclientid_to-be-replaced"
 
 # Open AI Details
 open_ai_key = get_secrets_from_kv(key_vault_name, "AZURE-OPENAI-KEY")
@@ -60,8 +61,10 @@ ai_search_res_name = (
 )
 ai_search_key = get_secrets_from_kv(key_vault_name, "AZURE-SEARCH-KEY")
 
+azure_client_id = get_secrets_from_kv(key_vault_name, "AZURE-CLIENT-ID")
+
 # Credentials
-credential = get_azure_credential()
+credential = get_azure_credential(client_id=azure_client_id)
 
 # Create an ML client
 ml_client = MLClient(

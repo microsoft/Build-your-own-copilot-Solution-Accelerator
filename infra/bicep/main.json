@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "3815495718477368725"
+      "templateHash": "21162088633975208"
     }
   },
   "parameters": {
@@ -28771,6 +28771,11 @@
                 "principalId": "[reference('userAssignedIdentity').outputs.principalId.value]",
                 "principalType": "ServicePrincipal",
                 "roleDefinitionIdOrName": "Key Vault Administrator"
+              },
+              {
+                "principalId": "[reference('userAssignedIdentity').outputs.principalId.value]",
+                "principalType": "ServicePrincipal",
+                "roleDefinitionIdOrName": "4633458b-17de-408a-b874-0445c86b69e6"
               }
             ]
           },
@@ -28823,6 +28828,10 @@
               {
                 "name": "AZURE-LOCATION",
                 "value": "[resourceGroup().location]"
+              },
+              {
+                "name": "AZURE-CLIENT-ID",
+                "value": "[reference('userAssignedIdentity').outputs.clientId.value]"
               }
             ]
           },
@@ -37189,7 +37198,7 @@
             "value": "[format('{0}infra/scripts/run_create_aihub_scripts.sh', variables('baseUrl'))]"
           },
           "arguments": {
-            "value": "[format('{0} {1} {2} {3} {4} {5}', variables('baseUrl'), variables('keyVaultName'), parameters('solutionName'), variables('resourceGroupName'), variables('subscriptionId'), variables('solutionLocation'))]"
+            "value": "[format('{0} {1} {2} {3} {4} {5} {6}', variables('baseUrl'), variables('keyVaultName'), parameters('solutionName'), variables('resourceGroupName'), variables('subscriptionId'), variables('solutionLocation'), reference('userAssignedIdentity').outputs.clientId.value)]"
           },
           "tags": {
             "value": "[parameters('tags')]"

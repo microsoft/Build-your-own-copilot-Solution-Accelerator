@@ -501,6 +501,11 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Key Vault Administrator'
       }
+      {
+        principalId: userAssignedIdentity.outputs.principalId
+        principalType: 'ServicePrincipal'
+        roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
+      }
     ]
     secrets: [
         {
@@ -570,6 +575,10 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
         {
           name: 'AZURE-LOCATION'
           value: resourceGroup().location
+        }
+        {
+          name: 'AZURE-CLIENT-ID'
+          value: userAssignedIdentity.outputs.clientId
         }
     ]
     enableTelemetry: enableTelemetry
@@ -787,7 +796,7 @@ module createIndex1 '../modules/deployment-script.bicep' = {
     }
     runOnce: true
     primaryScriptUri: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh'
-    arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}'
+    arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation} ${userAssignedIdentity.outputs.clientId}'
     tags: tags
     timeout: 'PT1H'
     retentionInterval: 'PT1H'

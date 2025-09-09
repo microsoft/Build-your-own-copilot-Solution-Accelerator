@@ -114,6 +114,8 @@ openai_api_key  = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-KEY")
 openai_api_base = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-ENDPOINT")
 openai_api_version = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-PREVIEW-API-VERSION")
 
+azure_client_id = get_secrets_from_kv(key_vault_name, "AZURE-CLIENT-ID")
+
 # Set up your Azure Text Analytics service and credentials  
 COG_SERVICES_NAME = get_secrets_from_kv(key_vault_name,"COG-SERVICES-NAME")
 COG_SERVICES_ENDPOINT = get_secrets_from_kv(key_vault_name,"COG-SERVICES-ENDPOINT")
@@ -352,7 +354,10 @@ import pandas as pd
 
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-credential = get_azure_credential()
+
+azure_client_id = get_secrets_from_kv(key_vault_name, "AZURE-CLIENT-ID")
+
+credential = get_azure_credential(client_id=azure_client_id)
 
 account_url = f"https://{account_name}.dfs.core.windows.net"
 
