@@ -916,82 +916,23 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
       tenantId: subscription().tenantId
     }
     connectionPolicy: 'Redirect'
-    // customerManagedKey: {
-    //   autoRotationEnabled: true
-    //   keyName: keyvault.outputs.name
-    //   keyVaultResourceId: keyvault.outputs.resourceId
-    //   // keyVersion: keyvault.outputs.
-    // }
     databases: [
       {
-        availabilityZone: 1
-        backupLongTermRetentionPolicy: {
-          monthlyRetention: 'P6M'
-        }
-        backupShortTermRetentionPolicy: {
-          retentionDays: 14
-        }
+        availabilityZone: enableRedundancy ? 1 : -1
         collation: 'SQL_Latin1_General_CP1_CI_AS'
         diagnosticSettings: enableMonitoring
-          ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }]
+          ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }]
           : null
-        elasticPoolResourceId: resourceId('Microsoft.Sql/servers/elasticPools', 'sql-${solutionSuffix}', 'sqlswaf-ep-001')
         licenseType: 'LicenseIncluded'
         maxSizeBytes: 34359738368
         name: 'sqldb-${solutionSuffix}'
+        minCapacity: '1'
         sku: {
-          capacity: 0
-          name: 'ElasticPool'
+          name: 'GP_S_Gen5'
           tier: 'GeneralPurpose'
+          family: 'Gen5'
+          capacity: 2
         }
-      }
-    ]
-    elasticPools: [
-      {
-        availabilityZone: -1
-        //maintenanceConfigurationId: '<maintenanceConfigurationId>'
-        name: 'sqlswaf-ep-001'
-        sku: {
-          capacity: 10
-          name: 'GP_Gen5'
-          tier: 'GeneralPurpose'
-        }
-        roleAssignments: [
-          {
-            principalId: userAssignedIdentity.outputs.principalId
-            principalType: 'ServicePrincipal'
-            roleDefinitionIdOrName: 'db_datareader'
-          }
-          {
-            principalId: userAssignedIdentity.outputs.principalId
-            principalType: 'ServicePrincipal'
-            roleDefinitionIdOrName: 'db_datawriter'
-          }
-
-          //Enable if above access is not sufficient for your use case
-          // {
-          //   principalId: userAssignedIdentity.outputs.principalId
-          //   principalType: 'ServicePrincipal'
-          //   roleDefinitionIdOrName: 'SQL DB Contributor'
-          // }
-          // {
-          //   principalId: userAssignedIdentity.outputs.principalId
-          //   principalType: 'ServicePrincipal'
-          //   roleDefinitionIdOrName: 'SQL Server Contributor'
-          // }
-        ]
-      }
-    ]
-    firewallRules: [
-      {
-        endIpAddress: '255.255.255.255'
-        name: 'AllowSpecificRange'
-        startIpAddress: '0.0.0.0'
-      }
-      {
-        endIpAddress: '0.0.0.0'
-        name: 'AllowAllWindowsAzureIps'
-        startIpAddress: '0.0.0.0'
       }
     ]
     location: solutionLocation
@@ -1018,36 +959,19 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
           }
         ]
       : []
-    restrictOutboundNetworkAccess: 'Disabled'
-    securityAlertPolicies: [
+    firewallRules: (!enablePrivateNetworking) ? [
       {
-        emailAccountAdmins: true
-        name: 'Default'
-        state: 'Enabled'
+        endIpAddress: '255.255.255.255'
+        name: 'AllowSpecificRange'
+        startIpAddress: '0.0.0.0'
       }
-    ]
+      {
+        endIpAddress: '0.0.0.0'
+        name: 'AllowAllWindowsAzureIps'
+        startIpAddress: '0.0.0.0'
+      }
+    ] : []
     tags: tags
-    virtualNetworkRules: enablePrivateNetworking
-      ? [
-          {
-            ignoreMissingVnetServiceEndpoint: true
-            name: 'newVnetRule1'
-            virtualNetworkSubnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
-          }
-        ]
-      : []
-    vulnerabilityAssessmentsObj: {
-      name: 'default'
-      // recurringScans: {
-      //   emails: [
-      //     'test1@contoso.com'
-      //     'test2@contoso.com'
-      //   ]
-      //   emailSubscriptionAdmins: true
-      //   isEnabled: true
-      // }
-      storageAccountResourceId: avmStorageAccount.outputs.resourceId
-    }
   }
 }
 
