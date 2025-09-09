@@ -260,7 +260,8 @@
       "name": "default",
       "properties": {
         "tags": {
-          "TemplateName": "Research Assistant"
+          "TemplateName": "Research Assistant",
+          "CreatedBy": "[if(empty(deployment().properties.user.username), '', split(deployment().properties.user.username, '@')[0])]"
         }
       }
     },
