@@ -576,10 +576,6 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
           name: 'AZURE-LOCATION'
           value: resourceGroup().location
         }
-        {
-          name: 'AZURE-CLIENT-ID'
-          value: userAssignedIdentity.outputs.clientId
-        }
     ]
     enableTelemetry: enableTelemetry
   }
@@ -749,7 +745,7 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     cleanupPreference: 'OnSuccess'
   }
   dependsOn: [
-    keyvault
+    keyvault, webSite
   ]
 }
 
@@ -796,14 +792,14 @@ module createIndex1 '../modules/deployment-script.bicep' = {
     }
     runOnce: true
     primaryScriptUri: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh'
-    arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation} ${userAssignedIdentity.outputs.clientId}'
+    arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}'
     tags: tags
     timeout: 'PT1H'
     retentionInterval: 'PT1H'
     cleanupPreference: 'OnSuccess'
   }
   dependsOn: [
-    keyvault
+    keyvault, webSite
   ]
 }
 
@@ -982,7 +978,12 @@ module webSite '../modules/web-sites.bicep' = {
   name: take('module.web-sites.${webSiteResourceName}', 64)
   params: {
     name: webSiteResourceName
-    managedIdentities: { userAssignedResourceIds: [userAssignedIdentity!.outputs.resourceId] }
+    managedIdentities: {
+      systemAssigned: true
+      userAssignedResourceIds: [
+        userAssignedIdentity.outputs.resourceId
+      ]
+    }
     tags: tags
     location: solutionLocation
     kind: 'app,linux,container'
@@ -1047,6 +1048,7 @@ module webSite '../modules/web-sites.bicep' = {
           UWSGI_PROCESSES:'2'
           UWSGI_THREADS:'2'
           APP_ENV: 'prod'
+          AZURE_CLIENT_ID: userAssignedIdentity.outputs.clientId
           HostingPlanName:'${abbrs.compute.appServicePlan}${solutionPrefix}'
           WebsiteName:webSiteResourceName
           ApplicationInsightsName:'${abbrs.analytics.analysisServicesServer}${solutionPrefix}'
@@ -1084,7 +1086,7 @@ module webSite '../modules/web-sites.bicep' = {
 module keyVaultSecretsUserAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
   name: 'keyVaultSecretsUserAssignment'
   params: {
-    principalId: userAssignedIdentity.outputs.principalId
+    principalId: webSite.outputs.?systemAssignedMIPrincipalId ?? userAssignedIdentity.outputs.principalId
     roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
     principalType: 'ServicePrincipal'
   }
@@ -1092,4 +1094,3 @@ module keyVaultSecretsUserAssignment 'br/public:avm/res/authorization/role-assig
     webSite
   ]
 }
-

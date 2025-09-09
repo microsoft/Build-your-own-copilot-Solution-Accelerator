@@ -1,6 +1,7 @@
 #Get Azure Key Vault Client
 key_vault_name = 'kv_to-be-replaced'
 
+import os
 import time
  
 time.sleep(120) # to fix the issue of the script 
@@ -18,13 +19,15 @@ from azure.keyvault.secrets import SecretClient
 
 from azure_credential_utils import get_azure_credential
 
+azure_client_id = os.environ.get("AZURE_CLIENT_ID")
+
 def get_secrets_from_kv(kv_name, secret_name):
     
   # Set the name of the Azure Key Vault  
   key_vault_name = kv_name 
     
   # Create a credential object using the default Azure credentials  
-  credential = get_azure_credential()
+  credential = get_azure_credential(client_id=azure_client_id)
 
     # Create a secret client object using the credential and Key Vault name  
   secret_client = SecretClient(vault_url=f"https://{key_vault_name}.vault.azure.net/", credential=credential)  
@@ -113,8 +116,6 @@ openai.api_version = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-PREVIEW-AP
 openai_api_key  = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-KEY")
 openai_api_base = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-ENDPOINT")
 openai_api_version = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-PREVIEW-API-VERSION")
-
-azure_client_id = get_secrets_from_kv(key_vault_name, "AZURE-CLIENT-ID")
 
 # Set up your Azure Text Analytics service and credentials  
 COG_SERVICES_NAME = get_secrets_from_kv(key_vault_name,"COG-SERVICES-NAME")
@@ -354,8 +355,6 @@ import pandas as pd
 
 
 account_name = get_secrets_from_kv(key_vault_name, "ADLS-ACCOUNT-NAME")
-
-azure_client_id = get_secrets_from_kv(key_vault_name, "AZURE-CLIENT-ID")
 
 credential = get_azure_credential(client_id=azure_client_id)
 
