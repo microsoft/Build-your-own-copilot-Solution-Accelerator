@@ -21,7 +21,7 @@ By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tok
 
 Depending on your subscription quota and capacity, you can [adjust quota settings](AzureGPTQuotaSettings.md) to better meet your specific needs. You can also [adjust the deployment parameters](CustomizingAzdParameters.md) for additional optimization.
 ­
-## Deployment Options & Steps
+## Deployment Options
 
 ### Sandbox or WAF Aligned Deployment Options
 
