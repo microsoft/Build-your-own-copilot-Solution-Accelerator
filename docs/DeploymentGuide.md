@@ -14,12 +14,6 @@ Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/g
 
 Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central.
 
-
-### **Important: Check Azure OpenAI Quota Availability**
-
-⚠️ To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./QuotaCheck.md) before you deploy the solution.
-
-
 ### [Optional] Quota Recommendations  
 By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tokens**, so we recommend updating the following:
 
@@ -27,6 +21,46 @@ By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tok
 
 Depending on your subscription quota and capacity, you can [adjust quota settings](AzureGPTQuotaSettings.md) to better meet your specific needs. You can also [adjust the deployment parameters](CustomizingAzdParameters.md) for additional optimization.
 ­
+## Deployment Options & Steps
+
+### Sandbox or WAF Aligned Deployment Options
+
+The [`infra`](../infra) folder of the Build-your-own-copilot-Solution-Accelerator contains the [`main.bicep`](../infra/main.bicep) Bicep script, which defines all Azure infrastructure components for this solution.
+
+By default, the `azd up` command uses the [`main.parameters.json`](../infra/main.parameters.json) file to deploy the solution. This file is pre-configured for a **sandbox environment** — ideal for development and proof-of-concept scenarios, with minimal security and cost controls for rapid iteration.
+
+For **production deployments**, the repository also provides [`main.waf.parameters.json`](../infra/main.waf.parameters.json), which applies a [Well-Architected Framework (WAF) aligned](https://learn.microsoft.com/en-us/azure/well-architected/) configuration. This option enables additional Azure best practices for reliability, security, cost optimization, operational excellence, and performance efficiency, such as:
+
+  - Enhanced network security (e.g., Network protection with private endpoints)
+  - Stricter access controls and managed identities
+  - Logging, monitoring, and diagnostics enabled by default
+  - Resource tagging and cost management recommendations
+
+**How to choose your deployment configuration:**
+
+* Use the default `main.parameters.json` file for a **sandbox/dev environment**
+* For a **WAF-aligned, production-ready deployment**, copy the contents of `main.waf.parameters.json` into `main.parameters.json` before running `azd up`
+
+---
+
+### VM Credentials Configuration
+
+By default, the solution sets the VM administrator username and password from environment variables.
+
+To set your own VM credentials before deployment, use:
+
+```sh
+azd env set AZURE_ENV_VM_ADMIN_USERNAME <your-username>
+azd env set AZURE_ENV_VM_ADMIN_PASSWORD <your-password>
+```
+
+> [!TIP]
+> Always review and adjust parameter values (such as region, capacity, security settings and log analytics workspace configuration) to match your organization’s requirements before deploying. For production, ensure you have sufficient quota and follow the principle of least privilege for all identities and role assignments.
+
+
+> [!IMPORTANT]
+> The WAF-aligned configuration is under active development. More Azure Well-Architected recommendations will be added in future updates.
+
 ## Deployment Options & Steps
 
 Pick from the options below to see step-by-step instructions for GitHub Codespaces, VS Code Dev Containers, and Local Environments.

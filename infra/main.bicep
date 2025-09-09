@@ -777,6 +777,7 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
           {
             locationName: solutionLocation
             failoverPriority: 0
+            isZoneRedundant: enableRedundancy
           }
         ]
   }
