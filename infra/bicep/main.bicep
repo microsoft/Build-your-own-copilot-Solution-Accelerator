@@ -521,7 +521,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
         //   value: azOpenAI.outputs.exportedSecrets['key1'].secretUri
         // }
         {
-          name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
+          name: 'AZURE_OPENAI_PREVIEW_API_VERSION'
           value: '2023-07-01-preview'
         }
         // {
@@ -989,7 +989,7 @@ module webSite '../modules/web-sites.bicep' = {
     kind: 'app,linux,container'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
     siteConfig: {
-      linuxFxVersion: 'DOCKER|racontainerreg50.azurecr.io/byoaia-app:latest'
+      linuxFxVersion: 'DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest'
       minTlsVersion: '1.2'
     }
     configs: [
@@ -1049,9 +1049,10 @@ module webSite '../modules/web-sites.bicep' = {
           UWSGI_THREADS:'2'
           APP_ENV: 'prod'
           AZURE_CLIENT_ID: userAssignedIdentity.outputs.clientId
-          HostingPlanName:'${abbrs.compute.appServicePlan}${solutionPrefix}'
-          WebsiteName:webSiteResourceName
-          ApplicationInsightsName:'${abbrs.analytics.analysisServicesServer}${solutionPrefix}'
+          
+          // HostingPlanName:'${abbrs.compute.appServicePlan}${solutionPrefix}'
+          // WebsiteName:webSiteResourceName
+          // ApplicationInsightsName:'${abbrs.analytics.analysisServicesServer}${solutionPrefix}'
         }
         // WAF aligned configuration for Monitoring
         applicationInsightResourceId: enableMonitoring ? applicationInsights!.outputs.resourceId : null

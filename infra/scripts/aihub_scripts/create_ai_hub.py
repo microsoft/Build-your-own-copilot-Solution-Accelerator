@@ -40,7 +40,7 @@ aihub_name = 'ai_hub_' + 'solutionname_to-be-replaced'
 project_name = 'ai_project_' + 'solutionname_to-be-replaced'
 deployment_name = 'draftsinference-' + 'solutionname_to-be-replaced'
 solutionLocation = 'solutionlocation_to-be-replaced'
-azure_client_id = "azureclientid_to-be-replaced"
+# azure_client_id = "azureclientid_to-be-replaced"
 
 # Open AI Details
 open_ai_key = get_secrets_from_kv(key_vault_name, "AZURE-OPENAI-KEY")

@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "3986676839489070022"
+      "templateHash": "11691108071923320127"
     }
   },
   "parameters": {
@@ -28790,7 +28790,7 @@
                 "value": "[variables('storageAccountName')]"
               },
               {
-                "name": "AZURE-OPENAI-PREVIEW-API-VERSION",
+                "name": "AZURE_OPENAI_PREVIEW_API_VERSION",
                 "value": "2023-07-01-preview"
               },
               {
@@ -42151,7 +42151,7 @@
           },
           "siteConfig": {
             "value": {
-              "linuxFxVersion": "DOCKER|racontainerreg50.azurecr.io/byoaia-app:latest",
+              "linuxFxVersion": "DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest",
               "minTlsVersion": "1.2"
             }
           },
@@ -42204,10 +42204,7 @@
                   "UWSGI_PROCESSES": "2",
                   "UWSGI_THREADS": "2",
                   "APP_ENV": "prod",
-                  "AZURE_CLIENT_ID": "[reference('userAssignedIdentity').outputs.clientId.value]",
-                  "HostingPlanName": "[format('{0}{1}', variables('abbrs').compute.appServicePlan, parameters('solutionPrefix'))]",
-                  "WebsiteName": "[variables('webSiteResourceName')]",
-                  "ApplicationInsightsName": "[format('{0}{1}', variables('abbrs').analytics.analysisServicesServer, parameters('solutionPrefix'))]"
+                  "AZURE_CLIENT_ID": "[reference('userAssignedIdentity').outputs.clientId.value]"
                 },
                 "applicationInsightResourceId": "[if(parameters('enableMonitoring'), reference('applicationInsights').outputs.resourceId.value, null())]"
               }
