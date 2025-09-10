@@ -106,7 +106,7 @@ var solutionSuffix= toLower(trim(replace(
 param enablePrivateNetworking bool = false
 
 @description('Optional. Enable monitoring applicable resources, aligned with the Well Architected Framework recommendations. This setting enables Application Insights and Log Analytics and configures all the resources applicable resources to send logs. Defaults to false.')
-param enableMonitoring bool = true
+param enableMonitoring bool = false
 
 @description('Optional. Enable scalability for applicable resources, aligned with the Well Architected Framework recommendations. Defaults to false.')
 param enableScalability bool = false
@@ -254,16 +254,6 @@ var allTags = union(
   tags
 )
 
-var resourcesName = toLower(trim(replace(
-  replace(
-    replace(replace(replace(replace('${solutionName}${solutionUniqueToken}', '-', ''), '_', ''), '.', ''), '/', ''),
-    ' ',
-    ''
-  ),
-  '*',
-  ''
-)))
-
 // Paired location calculated based on 'location' parameter. This location will be used by applicable resources if `enableScalability` is set to `true`
 var cosmosDbHaLocation = cosmosDbZoneRedundantHaRegionPairs[resourceGroup().location]
 
@@ -398,9 +388,9 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
 
 
 module network 'modules/network.bicep' = if (enablePrivateNetworking) {
-  name: take('network-${resourcesName}-deployment', 64)
+  name: take('network-${solutionSuffix}-deployment', 64)
   params: {
-    resourcesName: resourcesName
+    resourcesName: solutionSuffix
     // logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspace.outputs.resourceId
     logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspaceResourceId
     vmAdminUsername: vmAdminUsername ?? 'JumpboxAdminUser'
@@ -782,7 +772,6 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
         ]
   }
   dependsOn: [keyvault, avmStorageAccount]
-  scope: resourceGroup(resourceGroup().name)
 }
 
 // ========== AVM WAF ========== //
@@ -867,7 +856,6 @@ module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
     // }
   }
   dependsOn: [keyvault]
-  scope: resourceGroup(resourceGroup().name)
 }
 
 // working version of saving storage account secrets in key vault using AVM module
@@ -1082,22 +1070,7 @@ module webSite 'modules/web-sites.bicep' = {
     vnetRouteAllEnabled: enablePrivateNetworking ? true : false
     vnetImagePullEnabled: enablePrivateNetworking ? true : false
     virtualNetworkSubnetId: enablePrivateNetworking ? network!.outputs.subnetWebResourceId : null
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-    privateEndpoints: enablePrivateNetworking
-      ? [
-          {
-            name: 'pep-${webSiteResourceName}'
-            customNetworkInterfaceName: 'nic-${webSiteResourceName}'
-            privateDnsZoneGroup: {
-              privateDnsZoneGroupConfigs: [
-                { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.appService]!.outputs.resourceId }
-              ]
-            }
-            service: 'sites'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
-          }
-        ]
-      : null
+    publicNetworkAccess: 'Enabled'
   }
 }
 
