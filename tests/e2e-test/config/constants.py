@@ -7,7 +7,7 @@ if URL.endswith('/'):
     URL = URL[:-1]
 
 # HomePage input data
-homepage_title = "Woodgrove Bank"
+homepage_title = "AgendaAI"
 client_name = "Karen Berg"
 # next_meeting_question = "when is the next meeting scheduled with this client?"
 golden_path_question1 = "What were karen's concerns during our last meeting?"

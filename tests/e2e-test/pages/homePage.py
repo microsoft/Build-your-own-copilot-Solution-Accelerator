@@ -2,7 +2,7 @@ from base.base import BasePage
 
 
 class HomePage(BasePage):
-    HOME_PAGE_TITLE = "//h2[text()='Woodgrove Bank']"
+    HOME_PAGE_TITLE = "//h2[text()='AgendaAI']"
     SIDE_PANEL_CLIENT_NAMES ="//div[contains(@class,'cardContainer')]//div[contains(@class,'clientName')]"
     SELECTED_CLIENT_NAME_LABEL = "//span[contains(@class,'selectedName')]"
     MORE_DETAILS_LINKS = "//div[contains(@class,'cardContainer')]//div[text()='More details']"

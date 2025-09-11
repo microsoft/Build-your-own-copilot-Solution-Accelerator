@@ -135,7 +135,7 @@ const mockState = {
       chat_title: 'Start chatting',
       logo: null,
       show_share_button: true,
-      title: 'Woodgrove Bank'
+      title: 'AgendaAI'
     }
   },
   feedbackState: {},
