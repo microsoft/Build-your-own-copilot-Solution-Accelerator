@@ -220,19 +220,18 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
     supportsHttpsTrafficOnly: true
     allowSharedKeyAccess: true    // needed by scripts if MI fails
     allowBlobPublicAccess: true
-    // publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
+    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
 
     minimumTlsVersion: 'TLS1_2'
 
     // ✅ Networking - WAF aligned but open enough for deployment scripts
-    publicNetworkAccess: 'Enabled' // Always Enabled for deployment scripts
+    // publicNetworkAccess: 'Enabled' // Always Enabled for deployment scripts
 
     networkAcls: {
       bypass: 'AzureServices, Logging, Metrics'
       defaultAction: 'Allow'
       virtualNetworkRules: []
     }
-
 
     privateEndpoints: enablePrivateNetworking
       ? [
@@ -282,6 +281,11 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
       {
         principalId: userAssignedIdentity.outputs.principalId
         roleDefinitionIdOrName: 'Storage Blob Data Contributor'
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: userAssignedIdentity.outputs.principalId
+        roleDefinitionIdOrName: 'Storage File Data Privileged Contributor'
         principalType: 'ServicePrincipal'
       }
     ]
@@ -371,6 +375,9 @@ module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     retentionInterval: 'PT1H'
     // ✅ Explicit storage account + subnet for private networking
     storageAccountResourceId: storageAccountModule.outputs.resourceId
+    subnetResourceIds: enablePrivateNetworking ? [
+      network!.outputs.subnetDeploymentScriptsResourceId
+    ] : null
     cleanupPreference: 'OnSuccess'
   }
   dependsOn:[

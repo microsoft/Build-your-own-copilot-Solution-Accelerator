@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "8366307762056926060"
+      "templateHash": "5181493587503695277"
     }
   },
   "parameters": {
@@ -20105,11 +20105,9 @@
           "allowBlobPublicAccess": {
             "value": true
           },
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
           "minimumTlsVersion": {
             "value": "TLS1_2"
-          },
-          "publicNetworkAccess": {
-            "value": "Enabled"
           },
           "networkAcls": {
             "value": {
@@ -20138,6 +20136,11 @@
               {
                 "principalId": "[reference('userAssignedIdentity').outputs.principalId.value]",
                 "roleDefinitionIdOrName": "Storage Blob Data Contributor",
+                "principalType": "ServicePrincipal"
+              },
+              {
+                "principalId": "[reference('userAssignedIdentity').outputs.principalId.value]",
+                "roleDefinitionIdOrName": "Storage File Data Privileged Contributor",
                 "principalType": "ServicePrincipal"
               }
             ]
@@ -28249,6 +28252,7 @@
           "storageAccountResourceId": {
             "value": "[reference('storageAccountModule').outputs.resourceId.value]"
           },
+          "subnetResourceIds": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(reference('network').outputs.subnetDeploymentScriptsResourceId.value)), createObject('value', null()))]",
           "cleanupPreference": {
             "value": "OnSuccess"
           }
