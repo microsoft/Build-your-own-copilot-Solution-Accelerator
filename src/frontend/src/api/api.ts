@@ -55,6 +55,7 @@ export const documentSectionGenerate = async (researchTopic: string, documentSec
 
   // check for errors
   if (!response.ok) {
+    console.error(`POST /draft_document/generate_section ${response.status} (${response.statusText || 'Bad Request'})`)
     console.error('There was an issue fetching your data.')
     return response
   }
