@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "11691108071923320127"
+      "templateHash": "128052027953144749"
     }
   },
   "parameters": {
@@ -60,9 +60,23 @@
     },
     "enableMonitoring": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "Optional. Enable Monitoring"
+      }
+    },
+    "enableScalability": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Optional. Enable scalability for applicable resources, aligned with the Well Architected Framework recommendations. Defaults to false."
+      }
+    },
+    "enableRedundancy": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Optional. Enable redundancy for applicable resources, aligned with the Well Architected Framework recommendations. Defaults to false."
       }
     },
     "vmAdminUsername": {
@@ -343,6 +357,20 @@
     "solutionLocation": "[variables('resourceGroupLocation')]",
     "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/",
     "allTags": "[union(createObject('azd-env-name', parameters('solutionName')), parameters('tags'))]",
+    "replicaRegionPairs": {
+      "northcentralus": "southcentralus",
+      "australiaeast": "australiasoutheast",
+      "centralus": "westus",
+      "eastasia": "japaneast",
+      "eastus": "centralus",
+      "eastus2": "centralus",
+      "japaneast": "eastasia",
+      "northeurope": "westeurope",
+      "southeastasia": "eastasia",
+      "uksouth": "westeurope",
+      "westeurope": "northeurope"
+    },
+    "replicaLocation": "[variables('replicaRegionPairs')[resourceGroup().location]]",
     "containerName": "data",
     "userAssignedIdentityResourceName": "[format('id-{0}', parameters('solutionPrefix'))]",
     "privateDnsZones": [
@@ -1113,7 +1141,7 @@
             "value": "[variables('resourceGroupName')]"
           },
           "logAnalyticsWorkSpaceResourceId": {
-            "value": ""
+            "value": "[reference('logAnalyticsWorkspace').outputs.resourceId.value]"
           },
           "vmAdminUsername": {
             "value": "[coalesce(parameters('vmAdminUsername'), 'JumpboxAdminUser')]"
@@ -16834,7 +16862,10 @@
             }
           }
         }
-      }
+      },
+      "dependsOn": [
+        "logAnalyticsWorkspace"
+      ]
     },
     "avmPrivateDnsZones": {
       "copy": {
@@ -16843,7 +16874,7 @@
         "mode": "serial",
         "batchSize": 5
       },
-      "condition": "[and(parameters('enablePrivateNetworking'), not(contains(variables('aiRelatedDnsZoneIndices'), copyIndex())))]",
+      "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "[format('dns-zone-{0}', copyIndex())]",
@@ -20034,7 +20065,10 @@
           },
           "managedIdentities": {
             "value": {
-              "systemAssigned": true
+              "systemAssigned": true,
+              "userAssignedResourceIds": [
+                "[reference('userAssignedIdentity').outputs.resourceId.value]"
+              ]
             }
           },
           "accessTier": {
@@ -20043,15 +20077,21 @@
           "supportsHttpsTrafficOnly": {
             "value": true
           },
-          "allowBlobPublicAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', true()), createObject('value', false()))]",
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
+          "allowSharedKeyAccess": {
+            "value": true
+          },
+          "allowBlobPublicAccess": {
+            "value": true
+          },
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
           "minimumTlsVersion": {
             "value": "TLS1_2"
           },
           "networkAcls": {
             "value": {
-              "bypass": "AzureServices",
-              "defaultAction": "[if(parameters('enablePrivateNetworking'), 'Deny', 'Allow')]"
+              "bypass": "AzureServices, Logging, Metrics",
+              "defaultAction": "Allow",
+              "virtualNetworkRules": []
             }
           },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-blob-{0}', parameters('solutionPrefix')), 'service', 'blob', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-blob', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)).outputs.resourceId.value)))), createObject('name', format('pep-queue-{0}', parameters('solutionPrefix')), 'service', 'queue', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-queue', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)).outputs.resourceId.value)))))), createObject('value', createArray()))]",
@@ -25771,8 +25811,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "network",
         "userAssignedIdentity"
       ]
@@ -28182,6 +28222,9 @@
           "retentionInterval": {
             "value": "PT1H"
           },
+          "storageAccountResourceId": {
+            "value": "[reference('storageAccountModule').outputs.resourceId.value]"
+          },
           "cleanupPreference": {
             "value": "OnSuccess"
           }
@@ -28712,6 +28755,8 @@
         }
       },
       "dependsOn": [
+        "network",
+        "storageAccountModule",
         "userAssignedIdentity"
       ]
     },
@@ -28737,7 +28782,7 @@
           "sku": {
             "value": "standard"
           },
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
           "networkAcls": {
             "value": {
               "defaultAction": "Allow"
@@ -28764,7 +28809,7 @@
           "softDeleteRetentionInDays": {
             "value": 7
           },
-          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('keyVaultName')), 'customNetworkInterfaceName', format('nic-{0}', variables('keyVaultName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').keyVault)).outputs.resourceId.value))), 'service', 'vault', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
+          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('keyVaultName')), 'customNetworkInterfaceName', format('nic-{0}', variables('keyVaultName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'vault-dns-zone-group', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').keyVault)).outputs.resourceId.value))), 'service', 'vault', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
           "roleAssignments": {
             "value": [
               {
@@ -28790,7 +28835,7 @@
                 "value": "[variables('storageAccountName')]"
               },
               {
-                "name": "AZURE_OPENAI_PREVIEW_API_VERSION",
+                "name": "AZURE-OPENAI-PREVIEW-API-VERSION",
                 "value": "2023-07-01-preview"
               },
               {
@@ -32018,7 +32063,7 @@
           "location": {
             "value": "[variables('solutionLocation')]"
           },
-          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_openai_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_openai_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)).outputs.resourceId.value))), 'service', 'openAI', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
+          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_openai_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_openai_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'openai-dns-zone-group', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)).outputs.resourceId.value))), 'service', 'account', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
           "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]"
         },
         "template": {
@@ -34313,8 +34358,8 @@
               "keyVaultResourceId": "[reference('keyvault').outputs.resourceId.value]"
             }
           },
-          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_cogser_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_cogser_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)).outputs.resourceId.value))), 'service', 'cognitiveservices', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]"
+          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_cogser_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_cogser_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)).outputs.resourceId.value))), 'service', 'account', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -37750,9 +37795,9 @@
           "kind": {
             "value": "linux"
           },
-          "skuName": {
-            "value": "[parameters('HostingPlanSku')]"
-          }
+          "skuName": "[if(or(parameters('enableScalability'), parameters('enableRedundancy')), createObject('value', 'P1v3'), createObject('value', 'B3'))]",
+          "skuCapacity": "[if(parameters('enableScalability'), createObject('value', 3), createObject('value', 1))]",
+          "zoneRedundant": "[if(parameters('enableRedundancy'), createObject('value', true()), createObject('value', false()))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -38330,6 +38375,8 @@
               }
             ]
           },
+          "dailyQuotaGb": "[if(parameters('enableRedundancy'), createObject('value', 10), createObject('value', null()))]",
+          "replication": "[if(parameters('enableRedundancy'), createObject('value', createObject('enabled', true(), 'location', variables('replicaLocation'))), createObject('value', null()))]",
           "publicNetworkAccessForIngestion": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
           "publicNetworkAccessForQuery": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
           "dataSources": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('tags', parameters('tags'), 'eventLogName', 'Application', 'eventTypes', createArray(createObject('eventType', 'Error'), createObject('eventType', 'Warning'), createObject('eventType', 'Information')), 'kind', 'WindowsEvent', 'name', 'applicationEvent'), createObject('counterName', '% Processor Time', 'instanceName', '*', 'intervalSeconds', 60, 'kind', 'WindowsPerformanceCounter', 'name', 'windowsPerfCounter1', 'objectName', 'Processor'), createObject('kind', 'IISLogs', 'name', 'sampleIISLog1', 'state', 'OnPremiseEnabled'))), createObject('value', null()))]"
@@ -41394,6 +41441,7 @@
       }
     },
     "applicationInsights": {
+      "condition": "[parameters('enableMonitoring')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "applicationInsightsDeploy",
@@ -42151,7 +42199,7 @@
           },
           "siteConfig": {
             "value": {
-              "linuxFxVersion": "DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest",
+              "linuxFxVersion": "DOCKER|racontainerreg50.azurecr.io/byoaia-app:latest",
               "minTlsVersion": "1.2"
             }
           },
@@ -42180,7 +42228,7 @@
                   "AZURE_OPENAI_RESOURCE": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AZURE_OPENAI_ENDPOINT": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AZURE_OPENAI_MODEL": "gpt-35-turbo",
-                  "AZURE_OPENAI_KEY": "[reference('azOpenAI').outputs.exportedSecrets.value['AZURE-OPENAI-KEY'].secretUriWithVersion]",
+                  "AZURE_OPENAI_KEY": "[format('@Microsoft.KeyVault(SecretUri={0})', reference('azOpenAI').outputs.exportedSecrets.value['AZURE-OPENAI-KEY'].secretUri)]",
                   "AZURE_OPENAI_MODEL_NAME": "gpt-35-turbo",
                   "AZURE_OPENAI_TEMPERATURE": "0",
                   "AZURE_OPENAI_TOP_P": "1",
@@ -42190,11 +42238,11 @@
                   "AZURE_OPENAI_API_VERSION": "2023-12-01-preview",
                   "AZURE_OPENAI_STREAM": "True",
                   "AZURE_SEARCH_QUERY_TYPE": "vectorSemanticHybrid",
-                  "AZURE_SEARCH_VECTOR_FIELDS": "titleVector,contentVector",
+                  "AZURE_SEARCH_VECTOR_COLUMNS": "titleVector,contentVector",
                   "AZURE_SEARCH_PERMITTED_GROUPS_FIELD": "",
                   "AZURE_SEARCH_STRICTNESS": "3",
                   "AZURE_OPENAI_EMBEDDING_NAME": "text-embedding-ada-002",
-                  "AZURE_OPENAI_EMBEDDING_KEY": "[reference('azOpenAI').outputs.exportedSecrets.value['AZURE-OPENAI-KEY'].secretUriWithVersion]",
+                  "AZURE_OPENAI_EMBEDDING_KEY": "[format('@Microsoft.KeyVault(SecretUri={0})', reference('azOpenAI').outputs.exportedSecrets.value['AZURE-OPENAI-KEY'].secretUri)]",
                   "AZURE_OPENAI_EMBEDDING_ENDPOINT": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AI_STUDIO_DRAFT_FLOW_ENDPOINT": "TBD",
                   "AI_STUDIO_DRAFT_FLOW_API_KEY": "TBD",
@@ -42210,10 +42258,11 @@
               }
             ]
           },
+          "diagnosticSettings": "[if(parameters('enableMonitoring'), createObject('value', createArray(createObject('workspaceResourceId', reference('logAnalyticsWorkspace').outputs.resourceId.value))), createObject('value', null()))]",
           "vnetRouteAllEnabled": "[if(parameters('enablePrivateNetworking'), createObject('value', true()), createObject('value', false()))]",
           "vnetImagePullEnabled": "[if(parameters('enablePrivateNetworking'), createObject('value', true()), createObject('value', false()))]",
           "virtualNetworkSubnetId": "[if(parameters('enablePrivateNetworking'), createObject('value', reference('network').outputs.subnetWebResourceId.value), createObject('value', null()))]",
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('webSiteResourceName')), 'customNetworkInterfaceName', format('nic-{0}', variables('webSiteResourceName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').appService)).outputs.resourceId.value))), 'service', 'sites', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', null()))]"
         },
         "template": {
@@ -44200,6 +44249,7 @@
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').appService)]",
         "azOpenAI",
         "azSearchService",
+        "logAnalyticsWorkspace",
         "network",
         "userAssignedIdentity",
         "webServerFarm"
