@@ -232,7 +232,9 @@
 			if MSYS_NO_PATHCONV=1 az resource update \
 				--ids "$aif_account_resource_id" \
 				--api-version 2024-10-01 \
-				--set properties.publicNetworkAccess="$original_foundry_public_access" properties.apiProperties="{}" \
+				--set properties.publicNetworkAccess="$original_foundry_public_access" \
+            	--set properties.apiProperties.qnaAzureSearchEndpointKey="" \
+            	--set properties.networkAcls.bypass="AzureServices" \
 				--output none 2>/dev/null; then
 				echo "✓ AI Foundry access restored"
 			else
@@ -242,8 +244,6 @@
 		else
 			echo "AI Foundry access unchanged (already at desired state)"
 		fi
-		
-		echo "=== Network access restoration completed ==="
 
 		# Restore SQL Server public access
 		if [ -n "$original_sql_public_access" ] && [ "$original_sql_public_access" != "Enabled" ]; then
@@ -269,7 +269,8 @@
 		fi
 
 	}
-
+	echo "=== Network access restoration completed ==="
+	
 	# Function to handle script cleanup on exit
 	cleanup_on_exit() {
 		exit_code=$?
