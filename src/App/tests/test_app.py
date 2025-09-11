@@ -49,7 +49,7 @@ def set_env_vars():
     ), patch(
         "backend.common.config.config.AZURE_OPENAI_KEY", "valid_key"
     ), patch(
-        "backend.common.config.config.UI_TITLE", "Woodgrove Bank"
+        "backend.common.config.config.UI_TITLE", "AgendaAI"
     ), patch(
         "backend.common.config.config.UI_FAVICON", "/favicon.ico"
     ), patch(
@@ -105,7 +105,7 @@ async def test_index(mock_render_template, client):
     response = await client.get("/")
     assert response.status_code == 200
     mock_render_template.assert_called_once_with(
-        "index.html", title="Woodgrove Bank", favicon="/favicon.ico"
+        "index.html", title="AgendaAI", favicon="/favicon.ico"
     )
 
 
