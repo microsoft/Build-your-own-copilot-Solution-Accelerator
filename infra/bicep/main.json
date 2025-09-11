@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "128052027953144749"
+      "templateHash": "8366307762056926060"
     }
   },
   "parameters": {
@@ -1169,7 +1169,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.37.4.10188",
-              "templateHash": "10866545553438202136"
+              "templateHash": "14905271260741200917"
             }
           },
           "parameters": {
@@ -1325,6 +1325,21 @@
                           "name": "nsg-peps",
                           "securityRules": []
                         }
+                      },
+                      {
+                        "name": "deployment-scripts",
+                        "addressPrefixes": [
+                          "10.0.4.0/24"
+                        ],
+                        "networkSecurityGroup": {
+                          "name": "nsg-deployment-scripts",
+                          "securityRules": []
+                        },
+                        "delegation": "Microsoft.ContainerInstance/containerGroups",
+                        "serviceEndpoints": [
+                          "Microsoft.Storage",
+                          "Microsoft.KeyVault"
+                        ]
                       }
                     ]
                   },
@@ -16853,6 +16868,13 @@
               },
               "value": "[reference(resourceId('Microsoft.Resources/deployments', take(format('network-{0}-create', parameters('resourcesName')), 64)), '2022-09-01').outputs.bastionHostId.value]"
             },
+            "subnetDeploymentScriptsResourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the subnet for deployment scripts."
+              },
+              "value": "[coalesce(tryGet(first(filter(reference(resourceId('Microsoft.Resources/deployments', take(format('network-{0}-create', parameters('resourcesName')), 64)), '2022-09-01').outputs.subnets.value, lambda('s', equals(lambdaVariables('s').name, 'deployment-scripts')))), 'resourceId'), '')]"
+            },
             "jumpboxResourceId": {
               "type": "string",
               "metadata": {
@@ -20083,9 +20105,11 @@
           "allowBlobPublicAccess": {
             "value": true
           },
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
           "minimumTlsVersion": {
             "value": "TLS1_2"
+          },
+          "publicNetworkAccess": {
+            "value": "Enabled"
           },
           "networkAcls": {
             "value": {
@@ -25878,7 +25902,7 @@
           "tags": {
             "value": "[parameters('tags')]"
           },
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('aiSearchName')), 'customNetworkInterfaceName', format('nic-{0}', variables('aiSearchName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').searchService)).outputs.resourceId.value))), 'service', 'searchService', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]"
         },
         "template": {
@@ -36671,7 +36695,11 @@
           },
           "cleanupPreference": {
             "value": "OnSuccess"
-          }
+          },
+          "storageAccountResourceId": {
+            "value": "[reference('storageAccountModule').outputs.resourceId.value]"
+          },
+          "subnetResourceIds": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(reference('network').outputs.subnetDeploymentScriptsResourceId.value)), createObject('value', null()))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -37200,6 +37228,8 @@
       },
       "dependsOn": [
         "keyvault",
+        "network",
+        "storageAccountModule",
         "userAssignedIdentity",
         "webSite"
       ]
@@ -37253,7 +37283,11 @@
           },
           "cleanupPreference": {
             "value": "OnSuccess"
-          }
+          },
+          "storageAccountResourceId": {
+            "value": "[reference('storageAccountModule').outputs.resourceId.value]"
+          },
+          "subnetResourceIds": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(reference('network').outputs.subnetDeploymentScriptsResourceId.value)), createObject('value', null()))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -37769,6 +37803,8 @@
       },
       "dependsOn": [
         "keyvault",
+        "network",
+        "storageAccountModule",
         "userAssignedIdentity",
         "webSite"
       ]

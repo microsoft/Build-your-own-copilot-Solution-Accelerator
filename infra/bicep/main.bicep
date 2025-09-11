@@ -220,16 +220,19 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
     supportsHttpsTrafficOnly: true
     allowSharedKeyAccess: true    // needed by scripts if MI fails
     allowBlobPublicAccess: true
-    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
+    // publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
 
     minimumTlsVersion: 'TLS1_2'
 
     // ✅ Networking - WAF aligned but open enough for deployment scripts
+    publicNetworkAccess: 'Enabled' // Always Enabled for deployment scripts
+
     networkAcls: {
       bypass: 'AzureServices, Logging, Metrics'
-      defaultAction: 'Allow' // Allow during deployment; later can restrict
+      defaultAction: 'Allow'
       virtualNetworkRules: []
     }
+
 
     privateEndpoints: enablePrivateNetworking
       ? [
@@ -325,7 +328,7 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
     semanticSearch: 'free'
     // Use the deployment tags provided to the template
     tags: tags
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
     privateEndpoints: enablePrivateNetworking
     ? [
         {
@@ -634,6 +637,10 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     timeout: 'PT1H'
     retentionInterval: 'P1D'
     cleanupPreference: 'OnSuccess'
+    storageAccountResourceId: storageAccountModule.outputs.resourceId
+    subnetResourceIds: enablePrivateNetworking ? [
+      network!.outputs.subnetDeploymentScriptsResourceId
+    ] : null
   }
   dependsOn: [
     keyvault, webSite
