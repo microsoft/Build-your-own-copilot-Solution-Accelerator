@@ -50,14 +50,28 @@ export const ResearchTopicCard = (): JSX.Element => {
     }
 
     const generatedSection = await documentSectionGenerate(appStateContext?.state.researchTopic, documentSection)
-    if ((generatedSection?.body) != null && (generatedSection?.status) != 400) {
-      set_is_bad_request(false)
-      const response = await generatedSection.json()
-      return response.content
-    } else {
-      setTimeout(() => {
-        set_is_bad_request(true)
-      }, 2000)
+    if (!generatedSection) {
+      console.error('No response from /draft_document/generate_section')
+      set_is_bad_request(true)
+      return ''
+    }
+
+    // If backend rejected (e.g., unethical input), show message; do NOT try to parse JSON
+    if (!generatedSection.ok) {
+      console.error(`POST /draft_document/generate_section ${generatedSection.status} (Bad Request)`)
+      set_is_bad_request(true)
+      return ''
+    }
+
+    // 200 OK -> read text and TRY to parse JSON; if not JSON, treat as error but keep UI responsive
+    try {
+  const bodyText = await generatedSection.text()
+  const response = JSON.parse(bodyText)
+  // do NOT clear error here; success of one section must not hide an earlier failure
+  return response.content
+    } catch (e) {
+      console.error('Unexpected non-JSON response from /draft_document/generate_section', e)
+      set_is_bad_request(true)
       return ''
     }
   }
@@ -105,26 +119,37 @@ export const ResearchTopicCard = (): JSX.Element => {
           open={open}
           onOpenChange={async (event, data) => {
             setOpen(data.open)
-            const documentSections = appStateContext?.state.documentSections ?? []
-            const newDocumentSectionContent = []
-            for (let i = 0; i < documentSections.length; i++) {
-              const section = documentSections[i]
-              newDocumentSectionContent.push(callGenerateSectionContent(section))
-            }
-            const newDocumentSections = await Promise.all(newDocumentSectionContent)
-            for (let i = 0; i < newDocumentSections.length; i++) {
-              if (newDocumentSections[i] === '') {
-                documentSections[i].content = newDocumentSections[i]
-                console.error('Error generating section content')
-                setOpen(false)
-              }else{
-                documentSections[i].content = newDocumentSections[i]
-                documentSections[i].metaPrompt = documentSectionPrompt(documentSections[i].title, appStateContext?.state.researchTopic ?? '')
-              }
-            }
+            if (!data.open) return
 
-            appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: documentSections })
-            setOpen(false)
+            set_is_bad_request(false) // ← add this: start clean for this run
+
+            const documentSections = appStateContext?.state.documentSections ?? []
+            const newDocumentSectionContent: Array<Promise<string>> = []
+
+            try {
+              for (let i = 0; i < documentSections.length; i++) {
+                const section = documentSections[i]
+                newDocumentSectionContent.push(callGenerateSectionContent(section))
+              }
+              const newDocumentSections = await Promise.all(newDocumentSectionContent)
+              for (let i = 0; i < newDocumentSections.length; i++) {
+                if (newDocumentSections[i] === '') {
+                  documentSections[i].content = SystemErrMessage
+                  console.error('Error generating section content')
+                } else {
+                  documentSections[i].content = newDocumentSections[i]
+                  documentSections[i].metaPrompt = documentSectionPrompt(documentSections[i].title, appStateContext?.state.researchTopic ?? '')
+                }
+              }
+
+              appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: documentSections })
+            } catch (err) {
+              console.error('Generation failed:', err)
+              set_is_bad_request(true)
+            } finally {
+              // ALWAYS close the overlay
+              setOpen(false)
+            }
           }}
         >
           <DialogTrigger disableButtonEnhancement>
@@ -170,22 +195,29 @@ export const Card = (props: CardProps) => {
         const generatedSection = await documentSectionGenerate(appStateContext?.state.researchTopic || '', { ...section, metaPrompt: newPrompt })
 
         const updatedDocumentSections = [...documentSections]
-        if (generatedSection && generatedSection.body && generatedSection?.status != 400) {
-          const response = await generatedSection.json()
-          const newContent = response.content
-          updatedDocumentSections[index].content = newContent
-          appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: updatedDocumentSections })
-          setLoading(false)
+        if (generatedSection && generatedSection.ok) {
+          try {
+            const bodyText = await generatedSection.text()
+            const response = JSON.parse(bodyText)
+            const newContent = response.content
+            updatedDocumentSections[index].content = newContent
+            appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: updatedDocumentSections })
+          } catch (e) {
+            console.error('Unexpected non-JSON 200 response from /draft_document/generate_section', e)
+            updatedDocumentSections[index].content = SystemErrMessage
+            appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: updatedDocumentSections })
+          }
         } else if ((generatedSection?.body) != null && (generatedSection?.status) === 400){
+          console.error('Guardrail/Bad Request while generating section (Section card).')
           updatedDocumentSections[index].content = SystemErrMessage
           appStateContext?.dispatch({ type: 'UPDATE_DRAFT_DOCUMENTS_SECTIONS', payload: updatedDocumentSections })
-          setLoading(false)          
         }
       } else {
         console.error('Section information is undefined.')
       }
     } catch (error) {
       console.error('Error generating section:', error)
+    } finally {
       setLoading(false)
     }
   }
