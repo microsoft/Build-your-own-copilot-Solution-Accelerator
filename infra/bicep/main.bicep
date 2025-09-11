@@ -662,6 +662,10 @@ module createIndex1 '../modules/deployment-script.bicep' = {
     timeout: 'PT1H'
     retentionInterval: 'PT1H'
     cleanupPreference: 'OnSuccess'
+    storageAccountResourceId: storageAccountModule.outputs.resourceId
+    subnetResourceIds: enablePrivateNetworking ? [
+      network!.outputs.subnetDeploymentScriptsResourceId
+    ] : null
   }
   dependsOn: [
     keyvault, webSite
