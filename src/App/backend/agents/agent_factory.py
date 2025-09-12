@@ -37,7 +37,7 @@ class AgentFactory:
         async with cls._lock:
             if cls._wealth_advisor_agent is None:
                 ai_agent_settings = AzureAIAgentSettings()
-                creds = await get_azure_credential_async()
+                creds = await get_azure_credential_async(config.MID_ID)
                 client = AzureAIAgent.create_client(
                     credential=creds, endpoint=ai_agent_settings.endpoint
                 )
@@ -78,7 +78,7 @@ class AgentFactory:
 
                 project_client = AIProjectClient(
                     endpoint=config.AI_PROJECT_ENDPOINT,
-                    credential=get_azure_credential(),
+                    credential=get_azure_credential(config.MID_ID),
                     api_version="2025-05-01",
                 )
 
@@ -183,13 +183,14 @@ class AgentFactory:
     - Do not use client name for filtering
     - Assets table contains snapshots by date; do not sum values across dates
     - Use StartTime for time-based filtering (meetings)
-    - For asset values: if question is about total "asset value"/"portfolio value"/"AUM" → return SUM of latest investments; if about "current asset/investment value" → return all latest investments without SUM.
+    - For asset values: If the question is about "asset value", "total asset value", "portfolio value", or "AUM" → ALWAYS return the SUM of the latest investments (do not return individual rows). If the question is about "current asset value" or "current investment value" → return all latest investments without SUM.
+    - For trend queries: If the question contains "how did change", "over the last", "trend", or "progression" → return time series data for the requested period with SUM for each time period and show chronological progression.
     - Only return the raw T-SQL query. No explanations or comments.
     """
 
                 project_client = AIProjectClient(
                     endpoint=config.AI_PROJECT_ENDPOINT,
-                    credential=get_azure_credential(),
+                    credential=get_azure_credential(config.MID_ID),
                     api_version="2025-05-01",
                 )
 

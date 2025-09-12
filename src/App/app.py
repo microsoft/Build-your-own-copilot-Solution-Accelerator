@@ -147,7 +147,6 @@ frontend_settings = {
 }
 # Enable Microsoft Defender for Cloud Integration
 MS_DEFENDER_ENABLED = os.environ.get("MS_DEFENDER_ENABLED", "false").lower() == "true"
-
 # VITE_POWERBI_EMBED_URL = os.environ.get("VITE_POWERBI_EMBED_URL")
 
 
@@ -195,7 +194,7 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
         if not aoai_api_key:
             logging.debug("No AZURE_OPENAI_KEY found, using Azure AD auth")
             ad_token_provider = get_bearer_token_provider(
-                get_azure_credential(), "https://cognitiveservices.azure.com/.default"
+                get_azure_credential(config.MID_ID), "https://cognitiveservices.azure.com/.default"
             )
 
         # Deployment
@@ -243,7 +242,7 @@ def init_cosmosdb_client():
             )
 
             if not config.AZURE_COSMOSDB_ACCOUNT_KEY:
-                credential = get_azure_credential()
+                credential = get_azure_credential(config.MID_ID)
             else:
                 credential = config.AZURE_COSMOSDB_ACCOUNT_KEY
 

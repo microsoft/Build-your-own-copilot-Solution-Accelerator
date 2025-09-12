@@ -8,7 +8,7 @@
     "cosmosLocation": {
       "value": "${AZURE_ENV_COSMOS_LOCATION}"
     },
-    "gptModelDeploymentType": {
+    "deploymentType": {
       "value": "${AZURE_ENV_MODEL_DEPLOYMENT_TYPE}"
     },
     "gptModelName": {
@@ -42,6 +42,24 @@
       "value": {
         "solutionName": "${AZURE_ENV_NAME}"
       }
+    },
+    "enableTelemetry": {
+      "value": "${AZURE_ENV_ENABLE_TELEMETRY}"
+    },
+    "enableMonitoring": {
+      "value": true
+    },
+    "enablePrivateNetworking": {
+      "value": true
+    },
+    "enableScalability": {
+      "value": true
+    },
+    "vmAdminUsername": {
+      "value": "${AZURE_ENV_VM_ADMIN_USERNAME}"
+    },
+    "vmAdminPassword": {
+      "value": "${AZURE_ENV_VM_ADMIN_PASSWORD}"
     }
   }
 }
