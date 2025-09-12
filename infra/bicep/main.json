@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "5181493587503695277"
+      "templateHash": "15341243462397630668"
     }
   },
   "parameters": {
@@ -1169,7 +1169,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.37.4.10188",
-              "templateHash": "14905271260741200917"
+              "templateHash": "1085609688480596031"
             }
           },
           "parameters": {
@@ -1337,8 +1337,7 @@
                         },
                         "delegation": "Microsoft.ContainerInstance/containerGroups",
                         "serviceEndpoints": [
-                          "Microsoft.Storage",
-                          "Microsoft.KeyVault"
+                          "Microsoft.Storage"
                         ]
                       }
                     ]
@@ -1462,7 +1461,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.37.4.10188",
-                      "templateHash": "10645092392603021381"
+                      "templateHash": "15207223252983879062"
                     }
                   },
                   "definitions": {
@@ -1802,7 +1801,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.37.4.10188",
-                              "templateHash": "1936468723755149871"
+                              "templateHash": "5992825805937865628"
                             }
                           },
                           "definitions": {
@@ -2696,7 +2695,7 @@
                                       {
                                         "name": "value",
                                         "count": "[length(parameters('subnets'))]",
-                                        "input": "[createObject('name', parameters('subnets')[copyIndex('value')].name, 'addressPrefixes', tryGet(parameters('subnets')[copyIndex('value')], 'addressPrefixes'), 'networkSecurityGroupResourceId', if(not(empty(tryGet(parameters('subnets')[copyIndex('value')], 'networkSecurityGroup'))), reference(format('nsgs[{0}]', copyIndex('value'))).outputs.resourceId.value, null()), 'privateEndpointNetworkPolicies', tryGet(parameters('subnets')[copyIndex('value')], 'privateEndpointNetworkPolicies'), 'privateLinkServiceNetworkPolicies', tryGet(parameters('subnets')[copyIndex('value')], 'privateLinkServiceNetworkPolicies'), 'delegation', tryGet(parameters('subnets')[copyIndex('value')], 'delegation'))]"
+                                        "input": "[createObject('name', parameters('subnets')[copyIndex('value')].name, 'addressPrefixes', tryGet(parameters('subnets')[copyIndex('value')], 'addressPrefixes'), 'networkSecurityGroupResourceId', if(not(empty(tryGet(parameters('subnets')[copyIndex('value')], 'networkSecurityGroup'))), reference(format('nsgs[{0}]', copyIndex('value'))).outputs.resourceId.value, null()), 'privateEndpointNetworkPolicies', tryGet(parameters('subnets')[copyIndex('value')], 'privateEndpointNetworkPolicies'), 'privateLinkServiceNetworkPolicies', tryGet(parameters('subnets')[copyIndex('value')], 'privateLinkServiceNetworkPolicies'), 'delegation', tryGet(parameters('subnets')[copyIndex('value')], 'delegation'), 'serviceEndpoints', tryGet(parameters('subnets')[copyIndex('value')], 'serviceEndpoints'))]"
                                       }
                                     ]
                                   },
@@ -20105,7 +20104,7 @@
           "allowBlobPublicAccess": {
             "value": true
           },
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
           "minimumTlsVersion": {
             "value": "TLS1_2"
           },
@@ -20116,7 +20115,7 @@
               "virtualNetworkRules": []
             }
           },
-          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-blob-{0}', parameters('solutionPrefix')), 'service', 'blob', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-blob', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)).outputs.resourceId.value)))), createObject('name', format('pep-queue-{0}', parameters('solutionPrefix')), 'service', 'queue', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-queue', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)).outputs.resourceId.value)))))), createObject('value', createArray()))]",
+          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-blob-{0}', parameters('solutionPrefix')), 'service', 'blob', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-blob', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)).outputs.resourceId.value)))), createObject('name', format('pep-queue-{0}', parameters('solutionPrefix')), 'service', 'queue', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-queue', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)).outputs.resourceId.value)))), createObject('name', format('pep-file-{0}', parameters('solutionPrefix')), 'service', 'file', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-file', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)).outputs.resourceId.value)))))), createObject('value', createArray()))]",
           "blobServices": {
             "value": {
               "corsRules": [],
@@ -25839,6 +25838,7 @@
       },
       "dependsOn": [
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "network",
         "userAssignedIdentity"
@@ -28810,7 +28810,7 @@
           "sku": {
             "value": "standard"
           },
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
           "networkAcls": {
             "value": {
               "defaultAction": "Allow"
@@ -34387,7 +34387,7 @@
             }
           },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_cogser_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_cogser_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)).outputs.resourceId.value))), 'service', 'account', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]"
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -42302,7 +42302,9 @@
           "vnetRouteAllEnabled": "[if(parameters('enablePrivateNetworking'), createObject('value', true()), createObject('value', false()))]",
           "vnetImagePullEnabled": "[if(parameters('enablePrivateNetworking'), createObject('value', true()), createObject('value', false()))]",
           "virtualNetworkSubnetId": "[if(parameters('enablePrivateNetworking'), createObject('value', reference('network').outputs.subnetWebResourceId.value), createObject('value', null()))]",
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
+          "publicNetworkAccess": {
+            "value": "Enabled"
+          },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('webSiteResourceName')), 'customNetworkInterfaceName', format('nic-{0}', variables('webSiteResourceName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').appService)).outputs.resourceId.value))), 'service', 'sites', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', null()))]"
         },
         "template": {

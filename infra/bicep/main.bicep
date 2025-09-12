@@ -220,7 +220,7 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
     supportsHttpsTrafficOnly: true
     allowSharedKeyAccess: true    // needed by scripts if MI fails
     allowBlobPublicAccess: true
-    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
 
     minimumTlsVersion: 'TLS1_2'
 
@@ -257,6 +257,19 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
                 {
                   name: 'storage-dns-zone-group-queue'
                   privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.storageQueue]!.outputs.resourceId
+                }
+              ]
+            }
+          }
+          {
+            name: 'pep-file-${solutionPrefix}'
+            service: 'file'
+            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                {
+                  name: 'storage-dns-zone-group-file'
+                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.storageFile]!.outputs.resourceId
                 }
               ]
             }
@@ -395,7 +408,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
     location: solutionLocation
     tags: tags
     sku: 'standard'
-    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
     networkAcls: {
       defaultAction: 'Allow'
     }
@@ -599,7 +612,7 @@ module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.1
           }
         ]
       : []
-    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
   }
 }
 
@@ -878,7 +891,7 @@ module webSite '../modules/web-sites.bicep' = {
     vnetRouteAllEnabled: enablePrivateNetworking ? true : false
     vnetImagePullEnabled: enablePrivateNetworking ? true : false
     virtualNetworkSubnetId: enablePrivateNetworking ? network!.outputs.subnetWebResourceId : null
-    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
+    publicNetworkAccess: 'Enabled'
     privateEndpoints: enablePrivateNetworking
       ? [
           {
