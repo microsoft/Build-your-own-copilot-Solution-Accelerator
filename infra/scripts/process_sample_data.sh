@@ -260,12 +260,12 @@
 				--enable-public-network $restore_value \
 				--output none
 			if [ $? -eq 0 ]; then
-				echo "✓ SQL Server public access restored"
+				echo "✓ SQL Server access restored"
 			else
-				echo "✗ Failed to restore SQL Server public access"
+				echo "✗ Failed to restore SQL Server access"
 			fi
 		else
-			echo "SQL Server public access unchanged (already at desired state)"
+			echo "SQL Server access unchanged (already at desired state)"
 		fi
 
 	}
