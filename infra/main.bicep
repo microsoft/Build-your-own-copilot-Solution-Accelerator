@@ -86,8 +86,6 @@ param azureAiServiceLocation string
 param AZURE_LOCATION string = ''
 var solutionLocation = empty(AZURE_LOCATION) ? resourceGroup().location : AZURE_LOCATION
 
-//var solutionSuffix = 'ca${padLeft(take(uniqueId, 12), 12, '0')}'
-
 @maxLength(5)
 @description('Optional. A unique token for the solution. This is used to ensure resource names are unique for global resources. Defaults to a 5-character substring of the unique string generated from the subscription ID, resource group name, and solution name.')
 param solutionUniqueToken string = substring(uniqueString(subscription().id, resourceGroup().name, solutionName), 0, 5)
@@ -135,10 +133,6 @@ param enablePurgeProtection bool = false
 // Load the abbrevations file required to name the azure resources.
 //var abbrs = loadJsonContent('./abbreviations.json')
 
-//var resourceGroupLocation = resourceGroup().location
-//var solutionLocation = resourceGroupLocation
-// var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/main/'
-
 var appEnvironment = 'Prod'
 var azureSearchIndex = 'transcripts_index'
 var azureSearchUseSemanticSearch = 'True'
@@ -162,7 +156,6 @@ var azureSearchEnableInDomain = 'False' // Set to 'True' if you want to enable i
 var azureCosmosDbEnableFeedback = 'True'
 var useInternalStream = 'True'
 var useAIProjectClientFlag = 'False'
-// var sqlServerFqdn = '${sqlDBModule.outputs.name}.database.windows.net'
 var sqlServerFqdn = 'sql-${solutionSuffix}.database.windows.net'
 
 @description('Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true.')
@@ -269,11 +262,7 @@ resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces
   scope: resourceGroup(existingLawSubscription, existingLawResourceGroup)
 }
 
-// Log Analytics Name, workspace ID, customer ID, and shared key (existing or new) 
-// var logAnalyticsWorkspaceName = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.name  : logAnalyticsWorkspace!.outputs.name
 var logAnalyticsWorkspaceResourceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspaceId  : logAnalyticsWorkspace!.outputs.resourceId
-// var logAnalyticsPrimarySharedKey = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.listKeys().primarySharedKey  : logAnalyticsWorkspace.outputs.primarySharedKey
-// var logAnalyticsWorkspaceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspace!.properties.customerId  : logAnalyticsWorkspace!.outputs.logAnalyticsWorkspaceId
 
 @description('Optional created by user name')
 param createdBy string = empty(deployer().userPrincipalName) ? '' : split(deployer().userPrincipalName, '@')[0]
@@ -387,7 +376,7 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
   }
 }
 
-
+// ========== Network Module ========== //
 module network 'modules/network.bicep' = if (enablePrivateNetworking) {
   name: take('network-${solutionSuffix}-deployment', 64)
   params: {
@@ -586,7 +575,6 @@ var aiFoundryAiServicesEmbeddingModel = {
   raiPolicyName: 'Microsoft.Default'
 }
 
-//TODO: update to AVM module when AI Projects and AI Projects RBAC are supported
 module aiFoundryAiServices 'modules/ai-services.bicep' = if (aiFoundryAIservicesEnabled) {
   name: take('avm.res.cognitive-services.account.${aiFoundryAiServicesResourceName}', 64)
   params: {
@@ -689,9 +677,7 @@ module aiFoundryAiServices 'modules/ai-services.bicep' = if (aiFoundryAIservices
 //========== Cosmos DB module ========== //
 var cosmosDbResourceName = 'cosmos-${solutionSuffix}'
 var cosmosDbDatabaseName = 'db_conversation_history'
-// var cosmosDbDatabaseMemoryContainerName = 'memory'
 var collectionName = 'conversations'
-//TODO: update to latest version of AVM module
 module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
   name: take('avm.res.document-db.database-account.${cosmosDbResourceName}', 64)
   params: {
@@ -846,15 +832,6 @@ module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
         }
       ]
     }
-    //   secretsExportConfiguration: {
-    //   accessKey1Name: 'ADLS-ACCOUNT-NAME'
-    //   connectionString1Name: storageAccountName
-    //   accessKey2Name: 'ADLS-ACCOUNT-CONTAINER'
-    //   connectionString2Name: 'data'
-    //   accessKey3Name: 'ADLS-ACCOUNT-KEY'
-    //   connectionString3Name: listKeys(resourceId('Microsoft.Storage/storageAccounts', storageAccountName), '2021-04-01')
-    //   keyVaultResourceId: keyvault.outputs.resourceId
-    // }
   }
   dependsOn: [keyvault]
 }
@@ -1013,7 +990,6 @@ module webSite 'modules/web-sites.bicep' = {
           APP_ENV: appEnvironment
           APPINSIGHTS_INSTRUMENTATIONKEY: enableMonitoring ? applicationInsights!.outputs.instrumentationKey : ''
           APPLICATIONINSIGHTS_CONNECTION_STRING: enableMonitoring ? applicationInsights!.outputs.connectionString : ''
-          // AZURE_SEARCH_SERVICE: ''//azureSearchService
           AZURE_SEARCH_SERVICE: aiSearchName
           AZURE_SEARCH_INDEX: azureSearchIndex
           AZURE_SEARCH_USE_SEMANTIC_SEARCH: azureSearchUseSemanticSearch
@@ -1039,7 +1015,6 @@ module webSite 'modules/web-sites.bicep' = {
           AZURE_SEARCH_PERMITTED_GROUPS_COLUMN: azureSearchPermittedGroupsField
           AZURE_SEARCH_STRICTNESS: azureSearchStrictness
           AZURE_OPENAI_EMBEDDING_NAME: embeddingModel
-          // AZURE_OPENAI_EMBEDDING_ENDPOINT: aiFoundryAiServices.outputs.endpoint
           AZURE_OPENAI_EMBEDDING_ENDPOINT : aiFoundryAiServices.outputs.endpoints['OpenAI Language Model Instance API']
           SQLDB_SERVER: sqlServerFqdn
           SQLDB_DATABASE: sqlDbName
@@ -1049,7 +1024,6 @@ module webSite 'modules/web-sites.bicep' = {
           AZURE_COSMOSDB_DATABASE: cosmosDbDatabaseName
           AZURE_COSMOSDB_ENABLE_FEEDBACK: azureCosmosDbEnableFeedback
           SQLDB_USER_MID: userAssignedIdentity.outputs.clientId
-          // AZURE_AI_SEARCH_ENDPOINT: '' //azureSearchServiceEndpoint
           AZURE_AI_SEARCH_ENDPOINT: 'https://${aiSearchName}.search.windows.net'
           AZURE_SQL_SYSTEM_PROMPT: functionAppSqlPrompt
           AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT: functionAppCallTranscriptSystemPrompt
@@ -1058,7 +1032,6 @@ module webSite 'modules/web-sites.bicep' = {
           AZURE_AI_AGENT_ENDPOINT: aiFoundryAiServices.outputs.aiProjectInfo.apiEndpoint
           AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME: gptModelName
           AZURE_AI_AGENT_API_VERSION: azureOpenaiAPIVersion
-          // AZURE_SEARCH_CONNECTION_NAME: '' //aiSearchProjectConnectionName
           AZURE_SEARCH_CONNECTION_NAME: aiSearchName
           AZURE_CLIENT_ID: userAssignedIdentity.outputs.clientId
         }
@@ -1098,9 +1071,6 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
         aadAuthFailureMode: 'http401WithBearerChallenge'
       }
     }
-    // Customer-managed key enforcement (optional)
-    // cmkEnforcement: 'Enabled'
-    // Wire up diagnostic settings to the Log Analytics workspace when monitoring is enabled
     diagnosticSettings: enableMonitoring ? [
       {
         workspaceResourceId: logAnalyticsWorkspaceResourceId
@@ -1245,7 +1215,7 @@ output MANAGEDIDENTITY_WEBAPP_NAME string = userAssignedIdentity.outputs.name
 @description('Client ID of the managed identity used by the web app.')
 output MANAGEDIDENTITY_WEBAPP_CLIENTID string = userAssignedIdentity.outputs.clientId
 @description('Name of the AI Search service.')
-output AI_SEARCH_SERVICE_NAME string = aiSearchName //aifoundry.outputs.aiSearchService
+output AI_SEARCH_SERVICE_NAME string = aiSearchName 
 
 @description('Name of the deployed web application.')
 output WEB_APP_NAME string = webSite.outputs.name
@@ -1270,7 +1240,7 @@ output AZURE_AI_AGENT_ENDPOINT string = aiFoundryAiServices.outputs.aiProjectInf
 output AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME string = gptModelName
 
 @description('The endpoint URL of the Azure AI Search service.')
-output AZURE_AI_SEARCH_ENDPOINT string = 'https://${aiSearchName}.search.windows.net' //aifoundry.outputs.aiSearchTarget
+output AZURE_AI_SEARCH_ENDPOINT string = 'https://${aiSearchName}.search.windows.net' 
 
 @description('The system prompt used for call transcript processing in Azure Functions.')
 output AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT string = functionAppCallTranscriptSystemPrompt
@@ -1327,7 +1297,7 @@ output AZURE_OPENAI_TEMPERATURE string = azureOpenAITemperature
 output AZURE_OPENAI_TOP_P string = azureOpenAITopP
 
 @description('The name of the Azure AI Search connection.')
-output AZURE_SEARCH_CONNECTION_NAME string = 'foundry-search-connection-${solutionSuffix}' //aiFoundryAiServices.outputs.aiSearchFoundryConnectionName
+output AZURE_SEARCH_CONNECTION_NAME string = aiSearchName
 
 @description('The columns in Azure AI Search that contain content.')
 output AZURE_SEARCH_CONTENT_COLUMNS string = azureSearchContentColumns
@@ -1351,7 +1321,7 @@ output AZURE_SEARCH_QUERY_TYPE string = azureSearchQueryType
 output AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG string = azureSearchSemanticSearchConfig
 
 @description('The name of the Azure AI Search service.')
-output AZURE_SEARCH_SERVICE string = aiSearchName //aifoundry.outputs.aiSearchService
+output AZURE_SEARCH_SERVICE string = aiSearchName 
 
 @description('The strictness setting for Azure AI Search semantic ranking.')
 output AZURE_SEARCH_STRICTNESS string = azureSearchStrictness

@@ -50,7 +50,7 @@ resource existingAiProject 'Microsoft.CognitiveServices/accounts/projects@2025-0
   scope: resourceGroup(existingAiFoundryAiServicesSubscriptionId, existingAiFoundryAiServicesResourceGroupName)
 }
 
-@description('AI Project metadata including name, resource ID, and API endpoint.')
+@description('AI Project metadata including name, resource ID, and API endpoint, and SystemAssignedManagedIdentity Principal Id.')
 output aiProjectInfo aiProjectOutputType = {
   name: useExistingProject ? existingProjName : aiProject.name
   resourceId: useExistingProject ? existingFoundryProjectResourceId : aiProject.id
