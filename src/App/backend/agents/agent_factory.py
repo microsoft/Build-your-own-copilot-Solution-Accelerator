@@ -37,7 +37,7 @@ class AgentFactory:
         async with cls._lock:
             if cls._wealth_advisor_agent is None:
                 ai_agent_settings = AzureAIAgentSettings()
-                creds = await get_azure_credential_async()
+                creds = await get_azure_credential_async(config.MID_ID)
                 client = AzureAIAgent.create_client(
                     credential=creds, endpoint=ai_agent_settings.endpoint
                 )
@@ -78,7 +78,7 @@ class AgentFactory:
 
                 project_client = AIProjectClient(
                     endpoint=config.AI_PROJECT_ENDPOINT,
-                    credential=get_azure_credential(),
+                    credential=get_azure_credential(config.MID_ID),
                     api_version="2025-05-01",
                 )
 
@@ -190,7 +190,7 @@ class AgentFactory:
 
                 project_client = AIProjectClient(
                     endpoint=config.AI_PROJECT_ENDPOINT,
-                    credential=get_azure_credential(),
+                    credential=get_azure_credential(config.MID_ID),
                     api_version="2025-05-01",
                 )
 

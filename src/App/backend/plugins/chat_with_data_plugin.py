@@ -225,7 +225,7 @@ class ChatWithDataPlugin:
 
     def get_openai_client(self):
         token_provider = get_bearer_token_provider(
-            get_azure_credential(), "https://cognitiveservices.azure.com/.default"
+            get_azure_credential(config.MID_ID), "https://cognitiveservices.azure.com/.default"
         )
         openai_client = openai.AzureOpenAI(
             azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
@@ -236,7 +236,7 @@ class ChatWithDataPlugin:
 
     def get_project_openai_client(self):
         project = AIProjectClient(
-            endpoint=config.AI_PROJECT_ENDPOINT, credential=get_azure_credential()
+            endpoint=config.AI_PROJECT_ENDPOINT, credential=get_azure_credential(config.MID_ID)
         )
         openai_client = project.inference.get_azure_openai_client(
             api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION
