@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "15341243462397630668"
+      "templateHash": "10434821362028702222"
     }
   },
   "parameters": {
@@ -384,7 +384,8 @@
       "privatelink.documents.azure.com",
       "privatelink.vaultcore.azure.net",
       "[format('privatelink{0}', environment().suffixes.sqlServerHostname)]",
-      "privatelink.search.windows.net"
+      "privatelink.search.windows.net",
+      "[format('privatelink.dfs.{0}', environment().suffixes.storage)]"
     ],
     "dnsZoneIndex": {
       "cognitiveServices": 0,
@@ -397,7 +398,8 @@
       "cosmosDB": 7,
       "keyVault": 8,
       "sqlServer": 9,
-      "searchService": 10
+      "searchService": 10,
+      "storageDfs": 11
     },
     "aiRelatedDnsZoneIndices": [
       "[variables('dnsZoneIndex').cognitiveServices]",
@@ -20115,7 +20117,7 @@
               "virtualNetworkRules": []
             }
           },
-          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-blob-{0}', parameters('solutionPrefix')), 'service', 'blob', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-blob', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)).outputs.resourceId.value)))), createObject('name', format('pep-queue-{0}', parameters('solutionPrefix')), 'service', 'queue', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-queue', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)).outputs.resourceId.value)))), createObject('name', format('pep-file-{0}', parameters('solutionPrefix')), 'service', 'file', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-file', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)).outputs.resourceId.value)))))), createObject('value', createArray()))]",
+          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-blob-{0}', parameters('solutionPrefix')), 'service', 'blob', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-blob', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)).outputs.resourceId.value)))), createObject('name', format('pep-queue-{0}', parameters('solutionPrefix')), 'service', 'queue', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-queue', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)).outputs.resourceId.value)))), createObject('name', format('pep-file-{0}', parameters('solutionPrefix')), 'service', 'file', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-file', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)).outputs.resourceId.value)))), createObject('name', format('pep-dfs-{0}', parameters('solutionPrefix')), 'service', 'dfs', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-dfs', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)).outputs.resourceId.value)))))), createObject('value', createArray()))]",
           "blobServices": {
             "value": {
               "corsRules": [],
@@ -20135,6 +20137,11 @@
               {
                 "principalId": "[reference('userAssignedIdentity').outputs.principalId.value]",
                 "roleDefinitionIdOrName": "Storage Blob Data Contributor",
+                "principalType": "ServicePrincipal"
+              },
+              {
+                "principalId": "[reference('userAssignedIdentity').outputs.principalId.value]",
+                "roleDefinitionIdOrName": "Storage Account Contributor",
                 "principalType": "ServicePrincipal"
               },
               {
@@ -25837,9 +25844,10 @@
         }
       },
       "dependsOn": [
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "network",
         "userAssignedIdentity"
       ]

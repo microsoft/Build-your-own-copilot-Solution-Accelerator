@@ -156,6 +156,7 @@ var privateDnsZones = [
   'privatelink.vaultcore.azure.net'
   'privatelink${environment().suffixes.sqlServerHostname}'
   'privatelink.search.windows.net'
+  'privatelink.dfs.${environment().suffixes.storage}'
 ]
 
 // DNS Zone Index Constants
@@ -171,6 +172,7 @@ var dnsZoneIndex = {
   keyVault: 8
   sqlServer: 9
   searchService: 10
+  storageDfs: 11
 }
 
 // List of DNS zone indices that correspond to AI-related services.
@@ -274,6 +276,19 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
               ]
             }
           }
+          {
+            name: 'pep-dfs-${solutionPrefix}'
+            service: 'dfs'
+            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                {
+                  name: 'storage-dns-zone-group-dfs'
+                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.storageDfs]!.outputs.resourceId
+                }
+              ]
+            }
+          }
         ]
       : []
 
@@ -298,9 +313,15 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
       }
       {
         principalId: userAssignedIdentity.outputs.principalId
+        roleDefinitionIdOrName: 'Storage Account Contributor'
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: userAssignedIdentity.outputs.principalId
         roleDefinitionIdOrName: 'Storage File Data Privileged Contributor'
         principalType: 'ServicePrincipal'
       }
+
     ]
   }
 
