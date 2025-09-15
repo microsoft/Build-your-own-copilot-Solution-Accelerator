@@ -842,7 +842,7 @@ module webSite '../modules/web-sites.bicep' = {
     kind: 'app,linux,container'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
     siteConfig: {
-      linuxFxVersion: 'DOCKER|racontainerreg50.azurecr.io/byoaia-app:latest'
+      linuxFxVersion: 'DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest'
       minTlsVersion: '1.2'
     }
     configs: [
