@@ -5,9 +5,6 @@ targetScope = 'resourceGroup'
 @maxLength(6)
 @description('Prefix Name')
 param solutionPrefix string
-var abbrs = loadJsonContent('./abbreviations.json')
-// @description('Fabric Workspace Id if you have one, else leave it empty. ')
-// param fabricWorkspaceId string
 
 @minLength(3)
 @maxLength(15)
@@ -56,6 +53,7 @@ param vmAdminPassword string ='JumpboxAdminP@ssw0rd1234!'
 @allowed(
   ['F1', 'D1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P4']
 )
+
 param HostingPlanSku string = 'B1'
 
 @description('Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true.')
@@ -70,7 +68,6 @@ var allTags = union(
 
 // Replica regions list based on article in [Azure regions list](https://learn.microsoft.com/azure/reliability/regions-list) and [Enhance resilience by replicating your Log Analytics workspace across regions](https://learn.microsoft.com/azure/azure-monitor/logs/workspace-replication#supported-regions) for supported regions for Log Analytics Workspace.
 var replicaRegionPairs = {
-  northcentralus: 'southcentralus'
   australiaeast: 'australiasoutheast'
   centralus: 'westus'
   eastasia: 'japaneast'
@@ -113,7 +110,7 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
 }
 
 module roleAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
-  name: 'roleAssignmentDeployment'
+  name: take('avm.res.authorization.role-assignment.deployRoleAssignment', 64)
   params: {
     // Required parameters
     principalId:  userAssignedIdentity.outputs.principalId
@@ -202,7 +199,7 @@ module avmPrivateDnsZones 'br/public:avm/res/network/private-dns-zone:0.7.1' = [
 
 // ========== AVM WAF ========== //
 // ========== Storage Account using AVM ========== //
-var storageAccountName = '${abbrs.storage.storageAccount}${ solutionPrefix}'
+var storageAccountName = 'st${ solutionPrefix}'
 module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' = {
   name: take('avm.res.storage.storage-account.${storageAccountName}', 64)
   scope: resourceGroup()
@@ -332,7 +329,7 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
 
 // ========== AVM WAF ========== //
 // ========== Search Service using AVM ========== //
-var aiSearchName = '${abbrs.ai.aiSearch}${solutionPrefix}'
+var aiSearchName = 'srch-${solutionPrefix}'
 module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
   name: take('avm.res.search.search-service.${aiSearchName}', 64)
   params: {
@@ -388,7 +385,7 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
 //========== AVM WAF ========== //
 //========== Deployment script to upload data ========== //
 module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-  name : 'deploy_upload_files_script'
+  name : 'deploymentScriptForUploadFiles'
   params: {
     // Required parameters
     kind: 'AzureCLI'
@@ -420,8 +417,8 @@ module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
   ]
 }
 
-// // ==========Key Vault Module AVM ========== //
-var keyVaultName = '${abbrs.security.keyVault}${solutionPrefix}'
+// // ==========Key Vault Module AVM WAF ========== //
+var keyVaultName = 'kv-${solutionPrefix}'
 module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
   name: take('avm.res.key-vault.vault.${keyVaultName}', 64)
   params: {
@@ -440,7 +437,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
     enableSoftDelete: true
     enablePurgeProtection: enablePurgeProtection
     softDeleteRetentionInDays: 7
-    // diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : []
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : []
     // WAF aligned configuration for Private Networking
     privateEndpoints: enablePrivateNetworking
       ? [
@@ -530,9 +527,9 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
 }
 
 // ========= Open AI AVM WAF ========== //
-var accounts_byc_openai_name = '${abbrs.ai.openAIService}${solutionPrefix}'
+var accounts_byc_openai_name = 'oai-${solutionPrefix}'
 module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
-  name: 'deploy_azure_open_ai'
+  name: take('avm.res.cognitiveservices.account.${accounts_byc_openai_name}', 64)
   params: {
     // Required parameters
     kind: 'OpenAI'
@@ -602,9 +599,9 @@ resource openAiEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   dependsOn:[keyvault]
 }
 
-var accounts_byc_cogser_name = '${abbrs.ai.documentIntelligence}${solutionPrefix}'
+var accounts_byc_cogser_name = 'di-${solutionPrefix}'
 module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.10.1' = {
-  name: 'deploy_azure_ai_service'
+  name: take('avm.res.cognitiveservices.account.${accounts_byc_cogser_name}', 64)
   params: {
     // Required parameters
     kind: 'CognitiveServices'
@@ -658,7 +655,7 @@ resource cogNameSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 //========== AVM WAF ========== //
 //========== Deployment script to create index ========== // 
 module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-  name : 'deploy_index_scripts'
+  name : 'deploymentScriptForCreateIndex'
   params: {
     // Required parameters
     kind: 'AzureCLI'
@@ -689,8 +686,8 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
 }
 
 //========== Deployment script to create index ========== // 
-module createIndex1 '../modules/deployment-script.bicep' = {
-  name : 'deploy_aihub_scripts'
+module deployAihubScript '../modules/deployment-script.bicep' = {
+  name : 'deploymentScriptForAIHub'
   params: {
     // Required parameters
     kind: 'AzureCLI'
@@ -723,7 +720,7 @@ module createIndex1 '../modules/deployment-script.bicep' = {
 // ========== AVM WAF server farm ========== //
 // WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
 // PSRule for Web Server Farm: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#app-service
-var webServerFarmResourceName = '${abbrs.compute.appServicePlan}${solutionPrefix}'
+var webServerFarmResourceName = 'asp-${solutionPrefix}'
 module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
   name: 'deploy_app_service_plan_serverfarm'
   params: {
@@ -742,7 +739,7 @@ module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
   }
 }
 
-var logAnalyticsWorkspaceResourceName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${solutionPrefix}'
+var logAnalyticsWorkspaceResourceName = 'log-${solutionPrefix}'
 module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (enableMonitoring) {
   name: take('avm.res.operational-insights.workspace.${logAnalyticsWorkspaceResourceName}', 64)
   params: {
@@ -801,9 +798,9 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
   }
 }
 
-var ApplicationInsightsName = '${abbrs.analytics.analysisServicesServer}${solutionPrefix}'
+var ApplicationInsightsName = 'as${solutionPrefix}'
 module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = if (enableMonitoring) {
-  name: 'applicationInsightsDeploy'
+  name: take('avm.res.insights.component.${ApplicationInsightsName}', 64)
   params: {
     name: ApplicationInsightsName
     location: solutionLocation
@@ -825,7 +822,7 @@ module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = if (en
 // PSRule for Web Server Farm: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#app-service
 
 //NOTE: AVM module adds 1 MB of overhead to the template. Keeping vanilla resource to save template size.
-var webSiteResourceName = '${abbrs.compute.webApp}${solutionPrefix}'
+var webSiteResourceName = 'app-${solutionPrefix}'
 var openAIKeyUri = azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri
 module webSite '../modules/web-sites.bicep' = {
   name: take('module.web-sites.${webSiteResourceName}', 64)
@@ -932,7 +929,7 @@ module webSite '../modules/web-sites.bicep' = {
 }
 
 module keyVaultSecretsUserAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
-  name: 'keyVaultSecretsUserAssignment'
+  name: take('avm.res.authorization.role-assignment.keyVaultSecretsUserAssignment', 64)
   params: {
     principalId: webSite.outputs.?systemAssignedMIPrincipalId ?? userAssignedIdentity.outputs.principalId
     roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
