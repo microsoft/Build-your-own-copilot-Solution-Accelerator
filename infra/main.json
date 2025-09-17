@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "1330795539540033187"
+      "templateHash": "8667168677735334522"
     }
   },
   "parameters": {
@@ -152,7 +152,7 @@
     },
     "enableMonitoring": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "Optional. Enable monitoring applicable resources, aligned with the Well Architected Framework recommendations. This setting enables Application Insights and Log Analytics and configures all the resources applicable resources to send logs. Defaults to false."
       }
@@ -194,7 +194,7 @@
     },
     "containerImageTag": {
       "type": "string",
-      "defaultValue": "latest",
+      "defaultValue": "latest_waf",
       "metadata": {
         "description": "Optional. The Container Image Tag to deploy on the webapp."
       }
@@ -279,7 +279,7 @@
     "useInternalStream": "True",
     "useAIProjectClientFlag": "False",
     "sqlServerFqdn": "[format('sql-{0}.database.windows.net', variables('solutionSuffix'))]",
-    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\n   1. Table: Clients\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\n   2. Table: InvestmentGoals\n   Columns: ClientId, InvestmentGoal\n   3. Table: Assets\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\n   4. Table: ClientSummaries\n   Columns: ClientId, ClientSummary\n   5. Table: InvestmentGoalsDetails\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\n   6. Table: Retirement\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\n   7. Table: ClientMeetings\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\n   Always use the Investment column from the Assets table as the value.\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\n   Do not use client name in filters.\n   Do not include assets values unless asked for.\n   ALWAYS use ClientId = {clientid} in the query filter.\n   ALWAYS select Client Name (Column: Client) in the query.\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\n   When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.\n   For asset values: if question is about total \\\"asset value\\\"/\\\"portfolio value\\\"/\\\"AUM\\\" → return SUM of latest investments; if about \\\"current asset/investment value\\\" → return all latest investments without SUM.\n   Only return the generated SQL query. Do not return anything else.",
+    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\n   1. Table: Clients\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\n   2. Table: InvestmentGoals\n   Columns: ClientId, InvestmentGoal\n   3. Table: Assets\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\n   4. Table: ClientSummaries\n   Columns: ClientId, ClientSummary\n   5. Table: InvestmentGoalsDetails\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\n   6. Table: Retirement\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\n   7. Table: ClientMeetings\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\n   Always use the Investment column from the Assets table as the value.\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\n   Do not use client name in filters.\n   Do not include assets values unless asked for.\n   ALWAYS use ClientId = {clientid} in the query filter.\n   ALWAYS select Client Name (Column: Client) in the query.\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\n   When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.\n   For asset values: If the question is about \"asset value\", \"total asset value\", \"portfolio value\", or \"AUM\" → ALWAYS return the SUM of the latest investments (do not return individual rows). If the question is about \"current asset value\" or \"current investment value\" → return all latest investments without SUM.\n   For trend queries: If the question contains \"how did change\", \"over the last\", \"trend\", or \"progression\" → return time series data for the requested period with SUM for each time period and show chronological progression.\n   Only return the generated SQL query. Do not return anything else.",
     "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \n  You have access to the client’s past meeting call transcripts. \n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \n  If no data is available, state 'No relevant data found for previous meetings.",
     "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\n  If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\n  Always send clientId as '{client_id}'.",
     "replicaRegionPairs": {
@@ -308,7 +308,6 @@
       "westeurope": "northeurope"
     },
     "allTags": "[union(createObject('azd-env-name', parameters('solutionName')), parameters('tags'))]",
-    "resourcesName": "[toLower(trim(replace(replace(replace(replace(replace(replace(format('{0}{1}', parameters('solutionName'), parameters('solutionUniqueToken')), '-', ''), '_', ''), '.', ''), '/', ''), ' ', ''), '*', '')))]",
     "cosmosDbHaLocation": "[variables('cosmosDbZoneRedundantHaRegionPairs')[resourceGroup().location]]",
     "useExistingLogAnalytics": "[not(empty(parameters('existingLogAnalyticsWorkspaceId')))]",
     "existingLawSubscription": "[if(variables('useExistingLogAnalytics'), split(parameters('existingLogAnalyticsWorkspaceId'), '/')[2], '')]",
@@ -4777,7 +4776,7 @@
       "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "[take(format('network-{0}-deployment', variables('resourcesName')), 64)]",
+      "name": "[take(format('network-{0}-deployment', variables('solutionSuffix')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -4785,7 +4784,7 @@
         "mode": "Incremental",
         "parameters": {
           "resourcesName": {
-            "value": "[variables('resourcesName')]"
+            "value": "[variables('solutionSuffix')]"
           },
           "logAnalyticsWorkSpaceResourceId": "[if(variables('useExistingLogAnalytics'), createObject('value', parameters('existingLogAnalyticsWorkspaceId')), createObject('value', reference('logAnalyticsWorkspace').outputs.resourceId.value))]",
           "vmAdminUsername": {
@@ -27026,7 +27025,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.37.4.10188",
-              "templateHash": "7757141333856577130"
+              "templateHash": "9573727846743928038"
             },
             "name": "Cognitive Services",
             "description": "This module deploys a Cognitive Service."
@@ -28259,7 +28258,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.37.4.10188",
-                      "templateHash": "13864482829550647329"
+                      "templateHash": "16444475951283055894"
                     }
                   },
                   "definitions": {
@@ -30228,7 +30227,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.37.4.10188",
-                              "templateHash": "7781450680156271399"
+                              "templateHash": "346451728741152022"
                             }
                           },
                           "definitions": {
@@ -30352,7 +30351,7 @@
                             "aiProjectInfo": {
                               "$ref": "#/definitions/aiProjectOutputType",
                               "metadata": {
-                                "description": "AI Project metadata including name, resource ID, and API endpoint."
+                                "description": "AI Project metadata including name, resource ID, and API endpoint, and SystemAssignedManagedIdentity Principal Id."
                               },
                               "value": {
                                 "name": "[if(variables('useExistingProject'), variables('existingProjName'), parameters('name'))]",
@@ -30465,7 +30464,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.37.4.10188",
-                      "templateHash": "13864482829550647329"
+                      "templateHash": "16444475951283055894"
                     }
                   },
                   "definitions": {
@@ -32434,7 +32433,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.37.4.10188",
-                              "templateHash": "7781450680156271399"
+                              "templateHash": "346451728741152022"
                             }
                           },
                           "definitions": {
@@ -32558,7 +32557,7 @@
                             "aiProjectInfo": {
                               "$ref": "#/definitions/aiProjectOutputType",
                               "metadata": {
-                                "description": "AI Project metadata including name, resource ID, and API endpoint."
+                                "description": "AI Project metadata including name, resource ID, and API endpoint, and SystemAssignedManagedIdentity Principal Id."
                               },
                               "value": {
                                 "name": "[if(variables('useExistingProject'), variables('existingProjName'), parameters('name'))]",
@@ -32691,9 +32690,9 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').aiServices)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)]",
         "logAnalyticsWorkspace",
         "network",
         "userAssignedIdentity"
@@ -32703,7 +32702,6 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.document-db.database-account.{0}', variables('cosmosDbResourceName')), 64)]",
-      "resourceGroup": "[resourceGroup().name]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -36544,7 +36542,6 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.storage.storage-account.{0}', variables('storageAccountName')), 64)]",
-      "resourceGroup": "[resourceGroup().name]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -45509,63 +45506,19 @@
           "databases": {
             "value": [
               {
-                "availabilityZone": 1,
-                "backupLongTermRetentionPolicy": {
-                  "monthlyRetention": "P6M"
-                },
-                "backupShortTermRetentionPolicy": {
-                  "retentionDays": 14
-                },
+                "availabilityZone": "[if(parameters('enableRedundancy'), 1, -1)]",
                 "collation": "SQL_Latin1_General_CP1_CI_AS",
                 "diagnosticSettings": "[if(parameters('enableMonitoring'), createArray(createObject('workspaceResourceId', if(variables('useExistingLogAnalytics'), parameters('existingLogAnalyticsWorkspaceId'), reference('logAnalyticsWorkspace').outputs.resourceId.value))), null())]",
-                "elasticPoolResourceId": "[resourceId('Microsoft.Sql/servers/elasticPools', format('sql-{0}', variables('solutionSuffix')), 'sqlswaf-ep-001')]",
                 "licenseType": "LicenseIncluded",
                 "maxSizeBytes": 34359738368,
                 "name": "[format('sqldb-{0}', variables('solutionSuffix'))]",
+                "minCapacity": "1",
                 "sku": {
-                  "capacity": 0,
-                  "name": "ElasticPool",
-                  "tier": "GeneralPurpose"
+                  "name": "GP_S_Gen5",
+                  "tier": "GeneralPurpose",
+                  "family": "Gen5",
+                  "capacity": 2
                 }
-              }
-            ]
-          },
-          "elasticPools": {
-            "value": [
-              {
-                "availabilityZone": -1,
-                "name": "sqlswaf-ep-001",
-                "sku": {
-                  "capacity": 10,
-                  "name": "GP_Gen5",
-                  "tier": "GeneralPurpose"
-                },
-                "roleAssignments": [
-                  {
-                    "principalId": "[reference('userAssignedIdentity').outputs.principalId.value]",
-                    "principalType": "ServicePrincipal",
-                    "roleDefinitionIdOrName": "db_datareader"
-                  },
-                  {
-                    "principalId": "[reference('userAssignedIdentity').outputs.principalId.value]",
-                    "principalType": "ServicePrincipal",
-                    "roleDefinitionIdOrName": "db_datawriter"
-                  }
-                ]
-              }
-            ]
-          },
-          "firewallRules": {
-            "value": [
-              {
-                "endIpAddress": "255.255.255.255",
-                "name": "AllowSpecificRange",
-                "startIpAddress": "0.0.0.0"
-              },
-              {
-                "endIpAddress": "0.0.0.0",
-                "name": "AllowAllWindowsAzureIps",
-                "startIpAddress": "0.0.0.0"
               }
             ]
           },
@@ -45584,27 +45537,9 @@
             "value": "[reference('userAssignedIdentity').outputs.resourceId.value]"
           },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').sqlServer)).outputs.resourceId.value))), 'service', 'sqlServer', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'tags', parameters('tags')))), createObject('value', createArray()))]",
-          "restrictOutboundNetworkAccess": {
-            "value": "Disabled"
-          },
-          "securityAlertPolicies": {
-            "value": [
-              {
-                "emailAccountAdmins": true,
-                "name": "Default",
-                "state": "Enabled"
-              }
-            ]
-          },
+          "firewallRules": "[if(not(parameters('enablePrivateNetworking')), createObject('value', createArray(createObject('endIpAddress', '255.255.255.255', 'name', 'AllowSpecificRange', 'startIpAddress', '0.0.0.0'), createObject('endIpAddress', '0.0.0.0', 'name', 'AllowAllWindowsAzureIps', 'startIpAddress', '0.0.0.0'))), createObject('value', createArray()))]",
           "tags": {
             "value": "[parameters('tags')]"
-          },
-          "virtualNetworkRules": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('ignoreMissingVnetServiceEndpoint', true(), 'name', 'newVnetRule1', 'virtualNetworkSubnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
-          "vulnerabilityAssessmentsObj": {
-            "value": {
-              "name": "default",
-              "storageAccountResourceId": "[reference('avmStorageAccount').outputs.resourceId.value]"
-            }
           }
         },
         "template": {
@@ -52179,7 +52114,6 @@
       },
       "dependsOn": [
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').sqlServer)]",
-        "avmStorageAccount",
         "logAnalyticsWorkspace",
         "network",
         "userAssignedIdentity"
@@ -52855,8 +52789,9 @@
           "vnetRouteAllEnabled": "[if(parameters('enablePrivateNetworking'), createObject('value', true()), createObject('value', false()))]",
           "vnetImagePullEnabled": "[if(parameters('enablePrivateNetworking'), createObject('value', true()), createObject('value', false()))]",
           "virtualNetworkSubnetId": "[if(parameters('enablePrivateNetworking'), createObject('value', reference('network').outputs.subnetWebResourceId.value), createObject('value', null()))]",
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
-          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('webSiteResourceName')), 'customNetworkInterfaceName', format('nic-{0}', variables('webSiteResourceName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').appService)).outputs.resourceId.value))), 'service', 'sites', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', null()))]"
+          "publicNetworkAccess": {
+            "value": "Enabled"
+          }
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -54840,7 +54775,6 @@
       "dependsOn": [
         "aiFoundryAiServices",
         "applicationInsights",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').appService)]",
         "cosmosDb",
         "logAnalyticsWorkspace",
         "network",
@@ -57682,7 +57616,7 @@
       "metadata": {
         "description": "The name of the Azure AI Search connection."
       },
-      "value": "[format('foundry-search-connection-{0}', variables('solutionSuffix'))]"
+      "value": "[variables('aiSearchName')]"
     },
     "AZURE_SEARCH_CONTENT_COLUMNS": {
       "type": "string",
