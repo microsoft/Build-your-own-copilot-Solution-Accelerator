@@ -122,7 +122,7 @@ param containerRegistryHostname string = 'bycwacontainerreg.azurecr.io'
 param containerImageName string = 'byc-wa-app'
 
 @description('Optional. The Container Image Tag to deploy on the webapp.')
-param containerImageTag string = 'latest'
+param containerImageTag string = 'latest_waf'
 
 @description('Optional. Resource ID of an existing Foundry project')
 param existingFoundryProjectResourceId string = ''

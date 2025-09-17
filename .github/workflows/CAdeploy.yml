@@ -127,10 +127,10 @@ jobs:
         id: determine_tag
         run: |
           BRANCH=${{ github.ref_name }}
-          if [[ "$BRANCH" == "main" ]]; then TAG="latest"
+          if [[ "$BRANCH" == "main" ]]; then TAG="latest_waf"
           elif [[ "$BRANCH" == "dev" ]]; then TAG="dev"
           elif [[ "$BRANCH" == "demo" ]]; then TAG="demo"
-          else TAG="latest"; fi
+          else TAG="latest_waf"; fi
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
           echo "Image Tag: $TAG"
       - name: Deploy and extract values from deployment output

@@ -148,7 +148,7 @@ When you start the deployment, most parameters will have **default values**, but
 | **GPT Model Deployment Capacity**    | Configure capacity for **GPT models**. Choose based on Azure OpenAI quota.                         | `30`                     |
 | **Embedding Model**                  | OpenAI embedding model used for vector similarity.                                                 | `text-embedding-ada-002` |
 | **Embedding Model Capacity**         | Set the capacity for **embedding models**. Choose based on usage and quota.                        | `80`                     |
-| **Image Tag**                        | The version of the Docker image to use (e.g., `latest`, `dev`, `hotfix`).                          | `latest`                 |
+| **Image Tag**                        | The version of the Docker image to use (e.g., `latest_waf`, `dev`, `hotfix`).                          | `latest_waf`                 |
 | **Azure OpenAI API Version**         | Set the API version for OpenAI model deployments.                                                  | `2025-04-01-preview`     |
 | **AZURE_LOCATION**                  | Sets the Azure region for resource deployment. | `<User selects during deployment>`              |
 | **Existing Log Analytics Workspace** | To reuse an existing Log Analytics Workspace ID instead of creating a new one.                     | *(empty)*                |
