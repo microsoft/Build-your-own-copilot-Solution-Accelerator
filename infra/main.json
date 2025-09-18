@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "14303228942844903685"
+      "templateHash": "9604046552134506224"
     }
   },
   "parameters": {
@@ -291,9 +291,9 @@
     "useInternalStream": "True",
     "useAIProjectClientFlag": "False",
     "sqlServerFqdn": "[format('sql-{0}.database.windows.net', variables('solutionSuffix'))]",
-    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\n   1. Table: Clients\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\n   2. Table: InvestmentGoals\n   Columns: ClientId, InvestmentGoal\n   3. Table: Assets\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\n   4. Table: ClientSummaries\n   Columns: ClientId, ClientSummary\n   5. Table: InvestmentGoalsDetails\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\n   6. Table: Retirement\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\n   7. Table: ClientMeetings\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\n   Always use the Investment column from the Assets table as the value.\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\n   Do not use client name in filters.\n   Do not include assets values unless asked for.\n   ALWAYS use ClientId = {clientid} in the query filter.\n   ALWAYS select Client Name (Column: Client) in the query.\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\n   When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.\n   For asset values: If the question is about \"asset value\", \"total asset value\", \"portfolio value\", or \"AUM\" → ALWAYS return the SUM of the latest investments (do not return individual rows). If the question is about \"current asset value\" or \"current investment value\" → return all latest investments without SUM.\n   For trend queries: If the question contains \"how did change\", \"over the last\", \"trend\", or \"progression\" → return time series data for the requested period with SUM for each time period and show chronological progression.\n   Only return the generated SQL query. Do not return anything else.",
-    "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \n  You have access to the client’s past meeting call transcripts. \n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \n  If no data is available, state 'No relevant data found for previous meetings.",
-    "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\n  If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\n  Always send clientId as '{client_id}'.",
+    "functionAppSqlPrompt": "Generate a valid T-SQL query to find {query} for tables and columns provided below:\r\n   1. Table: Clients\r\n   Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents\r\n   2. Table: InvestmentGoals\r\n   Columns: ClientId, InvestmentGoal\r\n   3. Table: Assets\r\n   Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType\r\n   4. Table: ClientSummaries\r\n   Columns: ClientId, ClientSummary\r\n   5. Table: InvestmentGoalsDetails\r\n   Columns: ClientId, InvestmentGoal, TargetAmount, Contribution\r\n   6. Table: Retirement\r\n   Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress\r\n   7. Table: ClientMeetings\r\n   Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail\r\n   Always use the Investment column from the Assets table as the value.\r\n   Assets table has snapshots of values by date. Do not add numbers across different dates for total values.\r\n   Do not use client name in filters.\r\n   Do not include assets values unless asked for.\r\n   ALWAYS use ClientId = {clientid} in the query filter.\r\n   ALWAYS select Client Name (Column: Client) in the query.\r\n   Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.\r\n   When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.\r\n   For asset values: If the question is about \"asset value\", \"total asset value\", \"portfolio value\", or \"AUM\" → ALWAYS return the SUM of the latest investments (do not return individual rows). If the question is about \"current asset value\" or \"current investment value\" → return all latest investments without SUM.\r\n   For trend queries: If the question contains \"how did change\", \"over the last\", \"trend\", or \"progression\" → return time series data for the requested period with SUM for each time period and show chronological progression.\r\n   Only return the generated SQL query. Do not return anything else.",
+    "functionAppCallTranscriptSystemPrompt": "You are an assistant who supports wealth advisors in preparing for client meetings. \r\n  You have access to the client’s past meeting call transcripts. \r\n  When answering questions, especially summary requests, provide a detailed and structured response that includes key topics, concerns, decisions, and trends. \r\n  If no data is available, state 'No relevant data found for previous meetings.",
+    "functionAppStreamTextSystemPrompt": "The currently selected client's name is '{SelectedClientName}'. Treat any case-insensitive or partial mention as referring to this client.\r\n  If the user mentions no name, assume they are asking about '{SelectedClientName}'.\r\n  If the user references a name that clearly differs from '{SelectedClientName}' or comparing with other clients, respond only with: 'Please only ask questions about the selected client or select another client.' Otherwise, provide thorough answers for every question using only data from SQL or call transcripts.'\r\n  If no data is found, respond with 'No data found for that client.' Remove any client identifiers from the final response.\r\n  Always send clientId as '{client_id}'.",
     "replicaRegionPairs": {
       "australiaeast": "australiasoutheast",
       "centralus": "westus",
@@ -27037,7 +27037,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.37.4.10188",
-              "templateHash": "9573727846743928038"
+              "templateHash": "13656850596361779072"
             },
             "name": "Cognitive Services",
             "description": "This module deploys a Cognitive Service."
@@ -27415,12 +27415,6 @@
                   "type": "string",
                   "metadata": {
                     "description": "Required. API endpoint for the AI project."
-                  }
-                },
-                "aiprojectSystemAssignedMIPrincipalId": {
-                  "type": "string",
-                  "metadata": {
-                    "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                   }
                 }
               },
@@ -28270,7 +28264,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.37.4.10188",
-                      "templateHash": "16444475951283055894"
+                      "templateHash": "17521005359575826172"
                     }
                   },
                   "definitions": {
@@ -28646,12 +28640,6 @@
                           "type": "string",
                           "metadata": {
                             "description": "Required. API endpoint for the AI project."
-                          }
-                        },
-                        "aiprojectSystemAssignedMIPrincipalId": {
-                          "type": "string",
-                          "metadata": {
-                            "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                           }
                         }
                       },
@@ -30239,7 +30227,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.37.4.10188",
-                              "templateHash": "346451728741152022"
+                              "templateHash": "3927256115051099098"
                             }
                           },
                           "definitions": {
@@ -30262,12 +30250,6 @@
                                   "type": "string",
                                   "metadata": {
                                     "description": "Required. API endpoint for the AI project."
-                                  }
-                                },
-                                "aiprojectSystemAssignedMIPrincipalId": {
-                                  "type": "string",
-                                  "metadata": {
-                                    "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                                   }
                                 }
                               },
@@ -30322,10 +30304,7 @@
                           "variables": {
                             "useExistingProject": "[not(empty(parameters('existingFoundryProjectResourceId')))]",
                             "existingProjName": "[if(variables('useExistingProject'), last(split(parameters('existingFoundryProjectResourceId'), '/')), '')]",
-                            "existingAiFoundryAiServicesSubscriptionId": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[2], '')]",
-                            "existingAiFoundryAiServicesResourceGroupName": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[4], '')]",
-                            "existingAiFoundryAiServicesServiceName": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[8], '')]",
-                            "existingProjEndpoint": "[if(variables('useExistingProject'), format('https://{0}.services.ai.azure.com/api/projects/{1}', variables('existingAiFoundryAiServicesServiceName'), variables('existingProjName')), '')]"
+                            "existingProjEndpoint": "[if(variables('useExistingProject'), format('https://{0}.services.ai.azure.com/api/projects/{1}', parameters('aiServicesName'), variables('existingProjName')), '')]"
                           },
                           "resources": {
                             "cogServiceReference": {
@@ -30349,27 +30328,63 @@
                                 "displayName": "[parameters('name')]"
                               }
                             },
-                            "existingAiProject": {
-                              "condition": "[variables('useExistingProject')]",
+                            "searchIndexDataReaderRoleDefinition": {
                               "existing": true,
-                              "type": "Microsoft.CognitiveServices/accounts/projects",
-                              "apiVersion": "2025-06-01",
-                              "subscriptionId": "[variables('existingAiFoundryAiServicesSubscriptionId')]",
-                              "resourceGroup": "[variables('existingAiFoundryAiServicesResourceGroupName')]",
-                              "name": "[format('{0}/{1}', variables('existingAiFoundryAiServicesServiceName'), variables('existingProjName'))]"
+                              "type": "Microsoft.Authorization/roleDefinitions",
+                              "apiVersion": "2022-04-01",
+                              "name": "1407120a-92aa-4202-b7e9-c0e197c71c8f",
+                              "metadata": {
+                                "description": "This is the built-in Search Index Data Reader role."
+                              }
+                            },
+                            "searchServiceToAiServicesRoleAssignment": {
+                              "condition": "[not(variables('useExistingProject'))]",
+                              "type": "Microsoft.Authorization/roleAssignments",
+                              "apiVersion": "2022-04-01",
+                              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')), resourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f'))]",
+                              "properties": {
+                                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f')]",
+                                "principalId": "[reference('aiProject', '2025-06-01', 'full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                              },
+                              "dependsOn": [
+                                "aiProject"
+                              ]
+                            },
+                            "searchServiceContributorRoleDefinition": {
+                              "existing": true,
+                              "type": "Microsoft.Authorization/roleDefinitions",
+                              "apiVersion": "2022-04-01",
+                              "name": "7ca78c08-252a-4471-8644-bb5ff32d4ba0",
+                              "metadata": {
+                                "description": "This is the built-in Search Service Contributor role."
+                              }
+                            },
+                            "searchServiceContributorRoleAssignmentToAIFP": {
+                              "condition": "[not(variables('useExistingProject'))]",
+                              "type": "Microsoft.Authorization/roleAssignments",
+                              "apiVersion": "2022-04-01",
+                              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')), resourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0'))]",
+                              "properties": {
+                                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')]",
+                                "principalId": "[reference('aiProject', '2025-06-01', 'full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                              },
+                              "dependsOn": [
+                                "aiProject"
+                              ]
                             }
                           },
                           "outputs": {
                             "aiProjectInfo": {
                               "$ref": "#/definitions/aiProjectOutputType",
                               "metadata": {
-                                "description": "AI Project metadata including name, resource ID, and API endpoint, and SystemAssignedManagedIdentity Principal Id."
+                                "description": "AI Project metadata including name, resource ID, and API endpoint."
                               },
                               "value": {
                                 "name": "[if(variables('useExistingProject'), variables('existingProjName'), parameters('name'))]",
                                 "resourceId": "[if(variables('useExistingProject'), parameters('existingFoundryProjectResourceId'), resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')))]",
-                                "apiEndpoint": "[if(variables('useExistingProject'), variables('existingProjEndpoint'), reference('aiProject').endpoints['AI Foundry API'])]",
-                                "aiprojectSystemAssignedMIPrincipalId": "[if(variables('useExistingProject'), reference('existingAiProject', '2025-06-01', 'full').identity.principalId, reference('aiProject', '2025-06-01', 'full').identity.principalId)]"
+                                "apiEndpoint": "[if(variables('useExistingProject'), variables('existingProjEndpoint'), reference('aiProject').endpoints['AI Foundry API'])]"
                               }
                             }
                           }
@@ -30476,7 +30491,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.37.4.10188",
-                      "templateHash": "16444475951283055894"
+                      "templateHash": "17521005359575826172"
                     }
                   },
                   "definitions": {
@@ -30852,12 +30867,6 @@
                           "type": "string",
                           "metadata": {
                             "description": "Required. API endpoint for the AI project."
-                          }
-                        },
-                        "aiprojectSystemAssignedMIPrincipalId": {
-                          "type": "string",
-                          "metadata": {
-                            "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                           }
                         }
                       },
@@ -32445,7 +32454,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.37.4.10188",
-                              "templateHash": "346451728741152022"
+                              "templateHash": "3927256115051099098"
                             }
                           },
                           "definitions": {
@@ -32468,12 +32477,6 @@
                                   "type": "string",
                                   "metadata": {
                                     "description": "Required. API endpoint for the AI project."
-                                  }
-                                },
-                                "aiprojectSystemAssignedMIPrincipalId": {
-                                  "type": "string",
-                                  "metadata": {
-                                    "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                                   }
                                 }
                               },
@@ -32528,10 +32531,7 @@
                           "variables": {
                             "useExistingProject": "[not(empty(parameters('existingFoundryProjectResourceId')))]",
                             "existingProjName": "[if(variables('useExistingProject'), last(split(parameters('existingFoundryProjectResourceId'), '/')), '')]",
-                            "existingAiFoundryAiServicesSubscriptionId": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[2], '')]",
-                            "existingAiFoundryAiServicesResourceGroupName": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[4], '')]",
-                            "existingAiFoundryAiServicesServiceName": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[8], '')]",
-                            "existingProjEndpoint": "[if(variables('useExistingProject'), format('https://{0}.services.ai.azure.com/api/projects/{1}', variables('existingAiFoundryAiServicesServiceName'), variables('existingProjName')), '')]"
+                            "existingProjEndpoint": "[if(variables('useExistingProject'), format('https://{0}.services.ai.azure.com/api/projects/{1}', parameters('aiServicesName'), variables('existingProjName')), '')]"
                           },
                           "resources": {
                             "cogServiceReference": {
@@ -32555,27 +32555,63 @@
                                 "displayName": "[parameters('name')]"
                               }
                             },
-                            "existingAiProject": {
-                              "condition": "[variables('useExistingProject')]",
+                            "searchIndexDataReaderRoleDefinition": {
                               "existing": true,
-                              "type": "Microsoft.CognitiveServices/accounts/projects",
-                              "apiVersion": "2025-06-01",
-                              "subscriptionId": "[variables('existingAiFoundryAiServicesSubscriptionId')]",
-                              "resourceGroup": "[variables('existingAiFoundryAiServicesResourceGroupName')]",
-                              "name": "[format('{0}/{1}', variables('existingAiFoundryAiServicesServiceName'), variables('existingProjName'))]"
+                              "type": "Microsoft.Authorization/roleDefinitions",
+                              "apiVersion": "2022-04-01",
+                              "name": "1407120a-92aa-4202-b7e9-c0e197c71c8f",
+                              "metadata": {
+                                "description": "This is the built-in Search Index Data Reader role."
+                              }
+                            },
+                            "searchServiceToAiServicesRoleAssignment": {
+                              "condition": "[not(variables('useExistingProject'))]",
+                              "type": "Microsoft.Authorization/roleAssignments",
+                              "apiVersion": "2022-04-01",
+                              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')), resourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f'))]",
+                              "properties": {
+                                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f')]",
+                                "principalId": "[reference('aiProject', '2025-06-01', 'full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                              },
+                              "dependsOn": [
+                                "aiProject"
+                              ]
+                            },
+                            "searchServiceContributorRoleDefinition": {
+                              "existing": true,
+                              "type": "Microsoft.Authorization/roleDefinitions",
+                              "apiVersion": "2022-04-01",
+                              "name": "7ca78c08-252a-4471-8644-bb5ff32d4ba0",
+                              "metadata": {
+                                "description": "This is the built-in Search Service Contributor role."
+                              }
+                            },
+                            "searchServiceContributorRoleAssignmentToAIFP": {
+                              "condition": "[not(variables('useExistingProject'))]",
+                              "type": "Microsoft.Authorization/roleAssignments",
+                              "apiVersion": "2022-04-01",
+                              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')), resourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0'))]",
+                              "properties": {
+                                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')]",
+                                "principalId": "[reference('aiProject', '2025-06-01', 'full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                              },
+                              "dependsOn": [
+                                "aiProject"
+                              ]
                             }
                           },
                           "outputs": {
                             "aiProjectInfo": {
                               "$ref": "#/definitions/aiProjectOutputType",
                               "metadata": {
-                                "description": "AI Project metadata including name, resource ID, and API endpoint, and SystemAssignedManagedIdentity Principal Id."
+                                "description": "AI Project metadata including name, resource ID, and API endpoint."
                               },
                               "value": {
                                 "name": "[if(variables('useExistingProject'), variables('existingProjName'), parameters('name'))]",
                                 "resourceId": "[if(variables('useExistingProject'), parameters('existingFoundryProjectResourceId'), resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')))]",
-                                "apiEndpoint": "[if(variables('useExistingProject'), variables('existingProjEndpoint'), reference('aiProject').endpoints['AI Foundry API'])]",
-                                "aiprojectSystemAssignedMIPrincipalId": "[if(variables('useExistingProject'), reference('existingAiProject', '2025-06-01', 'full').identity.principalId, reference('aiProject', '2025-06-01', 'full').identity.principalId)]"
+                                "apiEndpoint": "[if(variables('useExistingProject'), variables('existingProjEndpoint'), reference('aiProject').endpoints['AI Foundry API'])]"
                               }
                             }
                           }
@@ -32702,9 +32738,9 @@
         }
       },
       "dependsOn": [
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').aiServices)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').aiServices)]",
         "logAnalyticsWorkspace",
         "network",
         "userAssignedIdentity"
