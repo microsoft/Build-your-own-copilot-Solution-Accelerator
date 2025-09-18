@@ -1059,7 +1059,7 @@ resource existingAiFoundryAiServicesProject 'Microsoft.CognitiveServices/account
 }
 
 
-var aiSearchName = 'srch-${solutionName}'
+var aiSearchName = 'srch-${solutionSuffix}'
 module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
   name: take('avm.res.search.search-service.${aiSearchName}', 64)
   params: {
