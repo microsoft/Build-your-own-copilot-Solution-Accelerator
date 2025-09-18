@@ -115,7 +115,6 @@ jobs:
                                    "Purpose=Deploying and Cleaning Up Resources for Validation" \
                                    "CreatedDate=$current_date" \
                                    "ApplicationName=Client Advisor" \
-                                   "SecurityControl=Ignore" \
             || { echo "Error creating resource group"; exit 1; }
           else
             echo "Resource group already exists."
@@ -155,7 +154,7 @@ jobs:
           DEPLOY_OUTPUT=$(az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters location=${{ env.AZURE_LOCATION }} azureAiServiceLocation=${{ env.AZURE_LOCATION }} solutionName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptModelCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} containerImageTag=${{ env.IMAGE_TAG }} createdBy="Pipeline" \
+            --parameters location=${{ env.AZURE_LOCATION }} azureAiServiceLocation=${{ env.AZURE_LOCATION }} solutionName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptModelCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} containerImageTag=${{ env.IMAGE_TAG }} createdBy="Pipeline" tags="{'SecurityControl':'Ignore'}" \
             --query "properties.outputs" -o json)
 
           echo "Deployment output: $DEPLOY_OUTPUT"
