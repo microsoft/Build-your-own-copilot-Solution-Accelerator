@@ -6,25 +6,17 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "4581410716600602738"
+      "templateHash": "4268046405444651324"
     }
   },
   "parameters": {
-    "solutionPrefix": {
-      "type": "string",
-      "minLength": 3,
-      "maxLength": 6,
-      "metadata": {
-        "description": "Prefix Name"
-      }
-    },
     "solutionName": {
       "type": "string",
-      "defaultValue": "[parameters('solutionPrefix')]",
+      "defaultValue": "resassistant",
       "minLength": 3,
-      "maxLength": 15,
+      "maxLength": 16,
       "metadata": {
-        "description": "Solution Name"
+        "description": "Required. A unique prefix for all resources in this deployment. This should be 3-20 characters long:"
       }
     },
     "enableTelemetry": {
@@ -81,37 +73,16 @@
     },
     "vmAdminUsername": {
       "type": "securestring",
-      "defaultValue": "JumpboxAdminUser",
+      "nullable": true,
       "metadata": {
         "description": "Optional. Admin username for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true."
       }
     },
     "vmAdminPassword": {
       "type": "securestring",
-      "defaultValue": "JumpboxAdminP@ssw0rd1234!",
+      "nullable": true,
       "metadata": {
         "description": "Optional. Admin password for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true."
-      }
-    },
-    "HostingPlanSku": {
-      "type": "string",
-      "defaultValue": "B1",
-      "allowedValues": [
-        "F1",
-        "D1",
-        "B1",
-        "B2",
-        "B3",
-        "S1",
-        "S2",
-        "S3",
-        "P1",
-        "P2",
-        "P3",
-        "P4"
-      ],
-      "metadata": {
-        "description": "Required. The pricing tier for the App Service plan"
       }
     },
     "vmSize": {
@@ -120,9 +91,18 @@
       "metadata": {
         "description": "Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true."
       }
+    },
+    "solutionUniqueText": {
+      "type": "string",
+      "defaultValue": "[substring(uniqueString(subscription().id, resourceGroup().name, parameters('solutionName')), 0, 5)]",
+      "maxLength": 5,
+      "metadata": {
+        "description": "Optional. A unique text value for the solution. This is used to ensure resource names are unique for global resources. Defaults to a 5-character substring of the unique string generated from the subscription ID, resource group name, and solution name."
+      }
     }
   },
   "variables": {
+    "solutionSuffix": "[toLower(trim(replace(replace(replace(replace(replace(replace(format('{0}{1}', parameters('solutionName'), parameters('solutionUniqueText')), '-', ''), '_', ''), '.', ''), '/', ''), ' ', ''), '*', '')))]",
     "resourceGroupLocation": "[resourceGroup().location]",
     "resourceGroupName": "[resourceGroup().name]",
     "subscriptionId": "[subscription().subscriptionId]",
@@ -143,7 +123,7 @@
     },
     "replicaLocation": "[variables('replicaRegionPairs')[resourceGroup().location]]",
     "containerName": "data",
-    "userAssignedIdentityResourceName": "[format('id-{0}', parameters('solutionPrefix'))]",
+    "userAssignedIdentityResourceName": "[format('id-{0}', variables('solutionSuffix'))]",
     "privateDnsZones": [
       "privatelink.cognitiveservices.azure.com",
       "privatelink.openai.azure.com",
@@ -152,9 +132,7 @@
       "[format('privatelink.blob.{0}', environment().suffixes.storage)]",
       "[format('privatelink.queue.{0}', environment().suffixes.storage)]",
       "[format('privatelink.file.{0}', environment().suffixes.storage)]",
-      "privatelink.documents.azure.com",
       "privatelink.vaultcore.azure.net",
-      "[format('privatelink{0}', environment().suffixes.sqlServerHostname)]",
       "privatelink.search.windows.net",
       "[format('privatelink.dfs.{0}', environment().suffixes.storage)]"
     ],
@@ -166,26 +144,19 @@
       "storageBlob": 4,
       "storageQueue": 5,
       "storageFile": 6,
-      "cosmosDB": 7,
-      "keyVault": 8,
-      "sqlServer": 9,
-      "searchService": 10,
-      "storageDfs": 11
+      "keyVault": 7,
+      "searchService": 8,
+      "storageDfs": 9
     },
-    "aiRelatedDnsZoneIndices": [
-      "[variables('dnsZoneIndex').cognitiveServices]",
-      "[variables('dnsZoneIndex').openAI]",
-      "[variables('dnsZoneIndex').aiServices]"
-    ],
-    "storageAccountName": "[format('st{0}', parameters('solutionPrefix'))]",
-    "aiSearchName": "[format('srch-{0}', parameters('solutionPrefix'))]",
-    "keyVaultName": "[format('kv-{0}', parameters('solutionPrefix'))]",
-    "accounts_byc_openai_name": "[format('oai-{0}', parameters('solutionPrefix'))]",
-    "accounts_byc_cogser_name": "[format('di-{0}', parameters('solutionPrefix'))]",
-    "webServerFarmResourceName": "[format('asp-{0}', parameters('solutionPrefix'))]",
-    "logAnalyticsWorkspaceResourceName": "[format('log-{0}', parameters('solutionPrefix'))]",
-    "ApplicationInsightsName": "[format('as{0}', parameters('solutionPrefix'))]",
-    "webSiteResourceName": "[format('app-{0}', parameters('solutionPrefix'))]"
+    "storageAccountName": "[format('st{0}', variables('solutionSuffix'))]",
+    "aiSearchName": "[format('srch-{0}', variables('solutionSuffix'))]",
+    "keyVaultName": "[format('kv-{0}', variables('solutionSuffix'))]",
+    "accountsBycOpenAiName": "[format('oai-{0}', variables('solutionSuffix'))]",
+    "accountsBycCogserName": "[format('di-{0}', variables('solutionSuffix'))]",
+    "webServerFarmResourceName": "[format('asp-{0}', variables('solutionSuffix'))]",
+    "logAnalyticsWorkspaceResourceName": "[format('log-{0}', variables('solutionSuffix'))]",
+    "ApplicationInsightsName": "[format('appi-{0}', variables('solutionSuffix'))]",
+    "webSiteResourceName": "[format('app-{0}', variables('solutionSuffix'))]"
   },
   "resources": {
     "resourceGroupTags": {
@@ -196,18 +167,6 @@
         "tags": "[shallowMerge(createArray(parameters('tags'), createObject('TemplateName', 'Research Assistant', 'SecurityControl', 'Ignore')))]"
       }
     },
-    "openAiEndpointSecret": {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2022-07-01",
-      "name": "[format('{0}/AZURE-OPENAI-ENDPOINT', variables('keyVaultName'))]",
-      "properties": {
-        "value": "[reference('azOpenAI').outputs.endpoint.value]"
-      },
-      "dependsOn": [
-        "azOpenAI",
-        "keyvault"
-      ]
-    },
     "cogEndpointSecret": {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2023-07-01",
@@ -216,8 +175,7 @@
         "value": "[reference('azAIMultiServiceAccount').outputs.endpoint.value]"
       },
       "dependsOn": [
-        "azAIMultiServiceAccount",
-        "keyvault"
+        "azAIMultiServiceAccount"
       ]
     },
     "cogNameSecret": {
@@ -228,8 +186,18 @@
         "value": "[reference('azAIMultiServiceAccount').outputs.name.value]"
       },
       "dependsOn": [
-        "azAIMultiServiceAccount",
-        "keyvault"
+        "azAIMultiServiceAccount"
+      ]
+    },
+    "openAiEndpointSecret": {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2022-07-01",
+      "name": "[format('{0}/AZURE-OPENAI-ENDPOINT', variables('keyVaultName'))]",
+      "properties": {
+        "value": "[reference('azOpenAI').outputs.endpoint.value]"
+      },
+      "dependsOn": [
+        "azOpenAI"
       ]
     },
     "userAssignedIdentity": {
@@ -903,7 +871,7 @@
       "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "[take(format('network-{0}-deployment', variables('resourceGroupName')), 64)]",
+      "name": "[take(format('module.network.{0}', variables('solutionSuffix')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -19888,7 +19856,7 @@
               "virtualNetworkRules": []
             }
           },
-          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-blob-{0}', parameters('solutionPrefix')), 'service', 'blob', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-blob', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)).outputs.resourceId.value)))), createObject('name', format('pep-queue-{0}', parameters('solutionPrefix')), 'service', 'queue', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-queue', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)).outputs.resourceId.value)))), createObject('name', format('pep-file-{0}', parameters('solutionPrefix')), 'service', 'file', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-file', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)).outputs.resourceId.value)))), createObject('name', format('pep-dfs-{0}', parameters('solutionPrefix')), 'service', 'dfs', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-dfs', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)).outputs.resourceId.value)))))), createObject('value', createArray()))]",
+          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-blob-{0}', variables('solutionSuffix')), 'service', 'blob', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-blob', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)).outputs.resourceId.value)))), createObject('name', format('pep-queue-{0}', variables('solutionSuffix')), 'service', 'queue', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-queue', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)).outputs.resourceId.value)))), createObject('name', format('pep-file-{0}', variables('solutionSuffix')), 'service', 'file', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-file', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)).outputs.resourceId.value)))), createObject('name', format('pep-dfs-{0}', variables('solutionSuffix')), 'service', 'dfs', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-dfs', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)).outputs.resourceId.value)))))), createObject('value', createArray()))]",
           "blobServices": {
             "value": {
               "corsRules": [],
@@ -25616,9 +25584,9 @@
       },
       "dependsOn": [
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
         "network",
         "userAssignedIdentity"
       ]
@@ -25684,7 +25652,9 @@
           "tags": {
             "value": "[parameters('tags')]"
           },
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]",
+          "publicNetworkAccess": {
+            "value": "Enabled"
+          },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('aiSearchName')), 'customNetworkInterfaceName', format('nic-{0}', variables('aiSearchName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').searchService)).outputs.resourceId.value))), 'service', 'searchService', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]"
         },
         "template": {
@@ -27984,7 +27954,7 @@
     "uploadFiles": {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "deploymentScriptForUploadFiles",
+      "name": "[take('avm.res.resources.deployment-script.uploadFiles', 64)]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -31816,7 +31786,7 @@
     "azOpenAI": {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "[take(format('avm.res.cognitiveservices.account.{0}', variables('accounts_byc_openai_name')), 64)]",
+      "name": "[take(format('avm.res.cognitiveservices.account.{0}', variables('accountsBycOpenAiName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -31827,7 +31797,7 @@
             "value": "OpenAI"
           },
           "name": {
-            "value": "[variables('accounts_byc_openai_name')]"
+            "value": "[variables('accountsBycOpenAiName')]"
           },
           "disableLocalAuth": {
             "value": false
@@ -31842,7 +31812,7 @@
             "value": false
           },
           "customSubDomainName": {
-            "value": "[variables('accounts_byc_openai_name')]"
+            "value": "[variables('accountsBycOpenAiName')]"
           },
           "deployments": {
             "value": [
@@ -31875,8 +31845,8 @@
           "location": {
             "value": "[variables('solutionLocation')]"
           },
-          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_openai_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_openai_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'openai-dns-zone-group', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)).outputs.resourceId.value))), 'service', 'account', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]"
+          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accountsBycOpenAiName')), 'customNetworkInterfaceName', format('nic-{0}', variables('accountsBycOpenAiName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'openai-dns-zone-group', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)).outputs.resourceId.value))), 'service', 'account', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -34142,7 +34112,7 @@
     "azAIMultiServiceAccount": {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "[take(format('avm.res.cognitiveservices.account.{0}', variables('accounts_byc_cogser_name')), 64)]",
+      "name": "[take(format('avm.res.cognitiveservices.account.{0}', variables('accountsBycCogserName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -34153,10 +34123,10 @@
             "value": "CognitiveServices"
           },
           "name": {
-            "value": "[variables('accounts_byc_cogser_name')]"
+            "value": "[variables('accountsBycCogserName')]"
           },
           "customSubDomainName": {
-            "value": "[variables('accounts_byc_cogser_name')]"
+            "value": "[variables('accountsBycCogserName')]"
           },
           "location": {
             "value": "[variables('solutionLocation')]"
@@ -34170,7 +34140,7 @@
               "keyVaultResourceId": "[reference('keyvault').outputs.resourceId.value]"
             }
           },
-          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_cogser_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_cogser_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)).outputs.resourceId.value))), 'service', 'account', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
+          "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accountsBycCogserName')), 'customNetworkInterfaceName', format('nic-{0}', variables('accountsBycCogserName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)).outputs.resourceId.value))), 'service', 'account', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
           "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]"
         },
         "template": {
@@ -36437,7 +36407,7 @@
     "createIndex": {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "deploymentScriptForCreateIndex",
+      "name": "[take('avm.res.resources.deployment-script.createIndex', 64)]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
