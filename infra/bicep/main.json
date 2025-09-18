@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "16295416483818044662"
+      "templateHash": "4581410716600602738"
     }
   },
   "parameters": {
@@ -25615,10 +25615,10 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
         "network",
         "userAssignedIdentity"
       ]
@@ -31838,6 +31838,9 @@
               "keyVaultResourceId": "[reference('keyvault').outputs.resourceId.value]"
             }
           },
+          "restrictOutboundNetworkAccess": {
+            "value": false
+          },
           "customSubDomainName": {
             "value": "[variables('accounts_byc_openai_name')]"
           },
@@ -31873,7 +31876,7 @@
             "value": "[variables('solutionLocation')]"
           },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('accounts_byc_openai_name')), 'customNetworkInterfaceName', format('nic-{0}', variables('accounts_byc_openai_name')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'openai-dns-zone-group', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)).outputs.resourceId.value))), 'service', 'account', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]"
+          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Enabled'), createObject('value', 'Enabled'))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",

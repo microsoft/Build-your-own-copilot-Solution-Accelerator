@@ -540,6 +540,7 @@ module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
       accessKey1Name: 'AZURE-OPENAI-KEY'
       keyVaultResourceId: keyvault.outputs.resourceId
     }
+    restrictOutboundNetworkAccess:false
     customSubDomainName: accounts_byc_openai_name
     deployments: [
       {
@@ -587,9 +588,13 @@ module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
           }
         ]
       : []
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
   }
 }
+
+// to Key Vault via `secretsExportConfiguration` — it does not export the endpoint.
+// To keep the endpoint accessible in Key Vault, we define it here as a separate secret.
+// This avoids circular dependencies while staying consistent with AVM usage elsewhere.
 
 resource openAiEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: '${keyVaultName}/AZURE-OPENAI-ENDPOINT'
@@ -635,6 +640,9 @@ module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.1
 }
 
 // Add endpoint as a secret
+// to Key Vault via `secretsExportConfiguration` — it does not export the endpoint.
+// To keep the endpoint accessible in Key Vault, we define it here as a separate secret.
+// This avoids circular dependencies while staying consistent with AVM usage elsewhere.
 resource cogEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: '${keyVaultName}/COG-SERVICES-ENDPOINT'
   properties: {
@@ -644,6 +652,9 @@ resource cogEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 }
 
 // Add name as a secret
+// to Key Vault via `secretsExportConfiguration` — it does not export the name.
+// To keep the endpoint accessible in Key Vault, we define it here as a separate secret.
+// This avoids circular dependencies while staying consistent with AVM usage elsewhere.
 resource cogNameSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: '${keyVaultName}/COG-SERVICES-NAME'
   properties: {
