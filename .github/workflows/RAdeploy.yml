@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - byoc-researcher
+      - CI-Pipeline-research
   schedule:
     - cron: '0 7,19 * * *'  # Runs at 7:00 AM and 7:00 PM GMT
 
@@ -83,7 +84,17 @@ jobs:
           rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
           if [ "$rg_exists" = "false" ]; then
             echo "Resource group does not exist. Creating..."
-            az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location ${{ env.AZURE_LOCATION }} || { echo "Error creating resource group"; exit 1; }
+
+            # Generate current timestamp in desired format: YYYY-MM-DDTHH:MM:SS.SSSSSSSZ
+            current_date=$(date -u +"%Y-%m-%dT%H:%M:%S.%7NZ")
+            az group create --name ${{ env.RESOURCE_GROUP_NAME }} \
+                            --location ${{ env.AZURE_LOCATION }} \
+                            --tags "CreatedBy=Pipeline" \
+                                   "Purpose=Deploying and Cleaning Up Resources for Validation" \
+                                   "CreatedDate=$current_date" \
+                                   "ApplicationName=Research Assistant" \
+                                   "SecurityControl=Ignore" \
+            || { echo "Error creating resource group"; exit 1; }
           else
             echo "Resource group already exists."
           fi
