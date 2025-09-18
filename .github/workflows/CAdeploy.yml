@@ -6,6 +6,7 @@ on:
       - main
       - dev
       - demo
+      - CI-Pipeline-cad
   schedule:
     - cron: "0 6,18 * * *" # Runs at 6:00 AM and 6:00 PM GMT
 
@@ -110,10 +111,10 @@ jobs:
             current_date=$(date -u +"%Y-%m-%dT%H:%M:%S.%7NZ")
             az group create --name ${{ env.RESOURCE_GROUP_NAME }} \
                             --location ${{ env.AZURE_LOCATION }} \
-                            --tags "CreatedBy=Deployment Lifecycle Automation Pipeline" \
+                            --tags "CreatedBy=Pipeline" \
                                    "Purpose=Deploying and Cleaning Up Resources for Validation" \
                                    "CreatedDate=$current_date" \
-                                   "ApplicationName=BYOC-Client Advisor Accelerator" \
+                                   "ApplicationName=Client Advisor" \
                                    "SecurityControl=Ignore" \
             || { echo "Error creating resource group"; exit 1; }
           else
