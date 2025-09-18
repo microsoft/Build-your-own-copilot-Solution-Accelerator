@@ -93,7 +93,6 @@ jobs:
                                    "Purpose=Deploying and Cleaning Up Resources for Validation" \
                                    "CreatedDate=$current_date" \
                                    "ApplicationName=Research Assistant" \
-                                   "SecurityControl=Ignore" \
             || { echo "Error creating resource group"; exit 1; }
           else
             echo "Resource group already exists."
@@ -115,7 +114,7 @@ jobs:
           az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/bicep/main.bicep \
-            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} createdBy="Pipeline" 
+            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} createdBy="Pipeline" tags="{'SecurityControl':'Ignore'}"
       - name: List KeyVaults and Store in Array
         id: list_keyvaults
         run: |
