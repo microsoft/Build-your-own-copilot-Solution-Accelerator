@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "12557623614553091212"
+      "templateHash": "9604046552134506224"
     }
   },
   "parameters": {
@@ -128,11 +128,23 @@
         "description": "Required. Location for AI Foundry deployment. This is the location where the AI Foundry resources will be deployed."
       }
     },
-    "AZURE_LOCATION": {
+    "location": {
       "type": "string",
-      "defaultValue": "",
+      "allowedValues": [
+        "australiaeast",
+        "centralus",
+        "eastasia",
+        "eastus2",
+        "japaneast",
+        "northeurope",
+        "southeastasia",
+        "uksouth"
+      ],
       "metadata": {
-        "description": "Optional. Set this if you want to deploy to a different region than the resource group. Otherwise, it will use the resource group location by default."
+        "azd": {
+          "type": "location"
+        },
+        "description": "Required. Azure region for all services. Regions are restricted to guarantee compatibility with paired regions and replica locations for data redundancy and failover scenarios based on articles [Azure regions list](https://learn.microsoft.com/azure/reliability/regions-list) and [Azure Database for MySQL Flexible Server - Azure Regions](https://learn.microsoft.com/azure/mysql/flexible-server/overview#azure-regions)."
       }
     },
     "solutionUniqueToken": {
@@ -253,7 +265,7 @@
     }
   },
   "variables": {
-    "solutionLocation": "[if(empty(parameters('AZURE_LOCATION')), resourceGroup().location, parameters('AZURE_LOCATION'))]",
+    "solutionLocation": "[if(empty(parameters('location')), resourceGroup().location, parameters('location'))]",
     "solutionSuffix": "[toLower(trim(replace(replace(replace(replace(replace(replace(format('{0}{1}', parameters('solutionName'), parameters('solutionUniqueToken')), '-', ''), '_', ''), '.', ''), '/', ''), ' ', ''), '*', '')))]",
     "appEnvironment": "Prod",
     "azureSearchIndex": "transcripts_index",
@@ -27025,7 +27037,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.37.4.10188",
-              "templateHash": "9573727846743928038"
+              "templateHash": "13656850596361779072"
             },
             "name": "Cognitive Services",
             "description": "This module deploys a Cognitive Service."
@@ -27403,12 +27415,6 @@
                   "type": "string",
                   "metadata": {
                     "description": "Required. API endpoint for the AI project."
-                  }
-                },
-                "aiprojectSystemAssignedMIPrincipalId": {
-                  "type": "string",
-                  "metadata": {
-                    "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                   }
                 }
               },
@@ -28258,7 +28264,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.37.4.10188",
-                      "templateHash": "16444475951283055894"
+                      "templateHash": "17521005359575826172"
                     }
                   },
                   "definitions": {
@@ -28634,12 +28640,6 @@
                           "type": "string",
                           "metadata": {
                             "description": "Required. API endpoint for the AI project."
-                          }
-                        },
-                        "aiprojectSystemAssignedMIPrincipalId": {
-                          "type": "string",
-                          "metadata": {
-                            "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                           }
                         }
                       },
@@ -30227,7 +30227,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.37.4.10188",
-                              "templateHash": "346451728741152022"
+                              "templateHash": "3927256115051099098"
                             }
                           },
                           "definitions": {
@@ -30250,12 +30250,6 @@
                                   "type": "string",
                                   "metadata": {
                                     "description": "Required. API endpoint for the AI project."
-                                  }
-                                },
-                                "aiprojectSystemAssignedMIPrincipalId": {
-                                  "type": "string",
-                                  "metadata": {
-                                    "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                                   }
                                 }
                               },
@@ -30310,10 +30304,7 @@
                           "variables": {
                             "useExistingProject": "[not(empty(parameters('existingFoundryProjectResourceId')))]",
                             "existingProjName": "[if(variables('useExistingProject'), last(split(parameters('existingFoundryProjectResourceId'), '/')), '')]",
-                            "existingAiFoundryAiServicesSubscriptionId": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[2], '')]",
-                            "existingAiFoundryAiServicesResourceGroupName": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[4], '')]",
-                            "existingAiFoundryAiServicesServiceName": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[8], '')]",
-                            "existingProjEndpoint": "[if(variables('useExistingProject'), format('https://{0}.services.ai.azure.com/api/projects/{1}', variables('existingAiFoundryAiServicesServiceName'), variables('existingProjName')), '')]"
+                            "existingProjEndpoint": "[if(variables('useExistingProject'), format('https://{0}.services.ai.azure.com/api/projects/{1}', parameters('aiServicesName'), variables('existingProjName')), '')]"
                           },
                           "resources": {
                             "cogServiceReference": {
@@ -30337,27 +30328,63 @@
                                 "displayName": "[parameters('name')]"
                               }
                             },
-                            "existingAiProject": {
-                              "condition": "[variables('useExistingProject')]",
+                            "searchIndexDataReaderRoleDefinition": {
                               "existing": true,
-                              "type": "Microsoft.CognitiveServices/accounts/projects",
-                              "apiVersion": "2025-06-01",
-                              "subscriptionId": "[variables('existingAiFoundryAiServicesSubscriptionId')]",
-                              "resourceGroup": "[variables('existingAiFoundryAiServicesResourceGroupName')]",
-                              "name": "[format('{0}/{1}', variables('existingAiFoundryAiServicesServiceName'), variables('existingProjName'))]"
+                              "type": "Microsoft.Authorization/roleDefinitions",
+                              "apiVersion": "2022-04-01",
+                              "name": "1407120a-92aa-4202-b7e9-c0e197c71c8f",
+                              "metadata": {
+                                "description": "This is the built-in Search Index Data Reader role."
+                              }
+                            },
+                            "searchServiceToAiServicesRoleAssignment": {
+                              "condition": "[not(variables('useExistingProject'))]",
+                              "type": "Microsoft.Authorization/roleAssignments",
+                              "apiVersion": "2022-04-01",
+                              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')), resourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f'))]",
+                              "properties": {
+                                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f')]",
+                                "principalId": "[reference('aiProject', '2025-06-01', 'full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                              },
+                              "dependsOn": [
+                                "aiProject"
+                              ]
+                            },
+                            "searchServiceContributorRoleDefinition": {
+                              "existing": true,
+                              "type": "Microsoft.Authorization/roleDefinitions",
+                              "apiVersion": "2022-04-01",
+                              "name": "7ca78c08-252a-4471-8644-bb5ff32d4ba0",
+                              "metadata": {
+                                "description": "This is the built-in Search Service Contributor role."
+                              }
+                            },
+                            "searchServiceContributorRoleAssignmentToAIFP": {
+                              "condition": "[not(variables('useExistingProject'))]",
+                              "type": "Microsoft.Authorization/roleAssignments",
+                              "apiVersion": "2022-04-01",
+                              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')), resourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0'))]",
+                              "properties": {
+                                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')]",
+                                "principalId": "[reference('aiProject', '2025-06-01', 'full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                              },
+                              "dependsOn": [
+                                "aiProject"
+                              ]
                             }
                           },
                           "outputs": {
                             "aiProjectInfo": {
                               "$ref": "#/definitions/aiProjectOutputType",
                               "metadata": {
-                                "description": "AI Project metadata including name, resource ID, and API endpoint, and SystemAssignedManagedIdentity Principal Id."
+                                "description": "AI Project metadata including name, resource ID, and API endpoint."
                               },
                               "value": {
                                 "name": "[if(variables('useExistingProject'), variables('existingProjName'), parameters('name'))]",
                                 "resourceId": "[if(variables('useExistingProject'), parameters('existingFoundryProjectResourceId'), resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')))]",
-                                "apiEndpoint": "[if(variables('useExistingProject'), variables('existingProjEndpoint'), reference('aiProject').endpoints['AI Foundry API'])]",
-                                "aiprojectSystemAssignedMIPrincipalId": "[if(variables('useExistingProject'), reference('existingAiProject', '2025-06-01', 'full').identity.principalId, reference('aiProject', '2025-06-01', 'full').identity.principalId)]"
+                                "apiEndpoint": "[if(variables('useExistingProject'), variables('existingProjEndpoint'), reference('aiProject').endpoints['AI Foundry API'])]"
                               }
                             }
                           }
@@ -30464,7 +30491,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.37.4.10188",
-                      "templateHash": "16444475951283055894"
+                      "templateHash": "17521005359575826172"
                     }
                   },
                   "definitions": {
@@ -30840,12 +30867,6 @@
                           "type": "string",
                           "metadata": {
                             "description": "Required. API endpoint for the AI project."
-                          }
-                        },
-                        "aiprojectSystemAssignedMIPrincipalId": {
-                          "type": "string",
-                          "metadata": {
-                            "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                           }
                         }
                       },
@@ -32433,7 +32454,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.37.4.10188",
-                              "templateHash": "346451728741152022"
+                              "templateHash": "3927256115051099098"
                             }
                           },
                           "definitions": {
@@ -32456,12 +32477,6 @@
                                   "type": "string",
                                   "metadata": {
                                     "description": "Required. API endpoint for the AI project."
-                                  }
-                                },
-                                "aiprojectSystemAssignedMIPrincipalId": {
-                                  "type": "string",
-                                  "metadata": {
-                                    "description": "Required. System Assigned Managed Identity Principal Id of the AI project."
                                   }
                                 }
                               },
@@ -32516,10 +32531,7 @@
                           "variables": {
                             "useExistingProject": "[not(empty(parameters('existingFoundryProjectResourceId')))]",
                             "existingProjName": "[if(variables('useExistingProject'), last(split(parameters('existingFoundryProjectResourceId'), '/')), '')]",
-                            "existingAiFoundryAiServicesSubscriptionId": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[2], '')]",
-                            "existingAiFoundryAiServicesResourceGroupName": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[4], '')]",
-                            "existingAiFoundryAiServicesServiceName": "[if(variables('useExistingProject'), split(parameters('existingFoundryProjectResourceId'), '/')[8], '')]",
-                            "existingProjEndpoint": "[if(variables('useExistingProject'), format('https://{0}.services.ai.azure.com/api/projects/{1}', variables('existingAiFoundryAiServicesServiceName'), variables('existingProjName')), '')]"
+                            "existingProjEndpoint": "[if(variables('useExistingProject'), format('https://{0}.services.ai.azure.com/api/projects/{1}', parameters('aiServicesName'), variables('existingProjName')), '')]"
                           },
                           "resources": {
                             "cogServiceReference": {
@@ -32543,27 +32555,63 @@
                                 "displayName": "[parameters('name')]"
                               }
                             },
-                            "existingAiProject": {
-                              "condition": "[variables('useExistingProject')]",
+                            "searchIndexDataReaderRoleDefinition": {
                               "existing": true,
-                              "type": "Microsoft.CognitiveServices/accounts/projects",
-                              "apiVersion": "2025-06-01",
-                              "subscriptionId": "[variables('existingAiFoundryAiServicesSubscriptionId')]",
-                              "resourceGroup": "[variables('existingAiFoundryAiServicesResourceGroupName')]",
-                              "name": "[format('{0}/{1}', variables('existingAiFoundryAiServicesServiceName'), variables('existingProjName'))]"
+                              "type": "Microsoft.Authorization/roleDefinitions",
+                              "apiVersion": "2022-04-01",
+                              "name": "1407120a-92aa-4202-b7e9-c0e197c71c8f",
+                              "metadata": {
+                                "description": "This is the built-in Search Index Data Reader role."
+                              }
+                            },
+                            "searchServiceToAiServicesRoleAssignment": {
+                              "condition": "[not(variables('useExistingProject'))]",
+                              "type": "Microsoft.Authorization/roleAssignments",
+                              "apiVersion": "2022-04-01",
+                              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')), resourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f'))]",
+                              "properties": {
+                                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f')]",
+                                "principalId": "[reference('aiProject', '2025-06-01', 'full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                              },
+                              "dependsOn": [
+                                "aiProject"
+                              ]
+                            },
+                            "searchServiceContributorRoleDefinition": {
+                              "existing": true,
+                              "type": "Microsoft.Authorization/roleDefinitions",
+                              "apiVersion": "2022-04-01",
+                              "name": "7ca78c08-252a-4471-8644-bb5ff32d4ba0",
+                              "metadata": {
+                                "description": "This is the built-in Search Service Contributor role."
+                              }
+                            },
+                            "searchServiceContributorRoleAssignmentToAIFP": {
+                              "condition": "[not(variables('useExistingProject'))]",
+                              "type": "Microsoft.Authorization/roleAssignments",
+                              "apiVersion": "2022-04-01",
+                              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')), resourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0'))]",
+                              "properties": {
+                                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')]",
+                                "principalId": "[reference('aiProject', '2025-06-01', 'full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                              },
+                              "dependsOn": [
+                                "aiProject"
+                              ]
                             }
                           },
                           "outputs": {
                             "aiProjectInfo": {
                               "$ref": "#/definitions/aiProjectOutputType",
                               "metadata": {
-                                "description": "AI Project metadata including name, resource ID, and API endpoint, and SystemAssignedManagedIdentity Principal Id."
+                                "description": "AI Project metadata including name, resource ID, and API endpoint."
                               },
                               "value": {
                                 "name": "[if(variables('useExistingProject'), variables('existingProjName'), parameters('name'))]",
                                 "resourceId": "[if(variables('useExistingProject'), parameters('existingFoundryProjectResourceId'), resourceId('Microsoft.CognitiveServices/accounts/projects', parameters('aiServicesName'), parameters('name')))]",
-                                "apiEndpoint": "[if(variables('useExistingProject'), variables('existingProjEndpoint'), reference('aiProject').endpoints['AI Foundry API'])]",
-                                "aiprojectSystemAssignedMIPrincipalId": "[if(variables('useExistingProject'), reference('existingAiProject', '2025-06-01', 'full').identity.principalId, reference('aiProject', '2025-06-01', 'full').identity.principalId)]"
+                                "apiEndpoint": "[if(variables('useExistingProject'), variables('existingProjEndpoint'), reference('aiProject').endpoints['AI Foundry API'])]"
                               }
                             }
                           }
@@ -42299,8 +42347,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "keyvault",
         "network",
         "userAssignedIdentity"

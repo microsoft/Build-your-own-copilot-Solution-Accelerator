@@ -155,7 +155,7 @@ jobs:
           DEPLOY_OUTPUT=$(az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters azureAiServiceLocation=${{ env.AZURE_LOCATION }} solutionName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptModelCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} containerImageTag=${{ env.IMAGE_TAG }} createdBy="Pipeline" \
+            --parameters location=${{ env.AZURE_LOCATION }} azureAiServiceLocation=${{ env.AZURE_LOCATION }} solutionName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptModelCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} containerImageTag=${{ env.IMAGE_TAG }} createdBy="Pipeline" \
             --query "properties.outputs" -o json)
 
           echo "Deployment output: $DEPLOY_OUTPUT"
