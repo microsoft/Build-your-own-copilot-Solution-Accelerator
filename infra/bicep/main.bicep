@@ -154,6 +154,7 @@ var privateDnsZones = [
   'privatelink${environment().suffixes.sqlServerHostname}'
   'privatelink.search.windows.net'
   'privatelink.dfs.${environment().suffixes.storage}'
+  'privatelink.azureml.ms'
 ]
 
 // DNS Zone Index Constants
@@ -170,6 +171,7 @@ var dnsZoneIndex = {
   sqlServer: 9
   searchService: 10
   storageDfs: 11
+  machineLearningServices: 12
 }
 
 // List of DNS zone indices that correspond to AI-related services.
@@ -696,37 +698,140 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
   ]
 }
 
-//========== Deployment script to create index ========== // 
-module deployAihubScript '../modules/deployment-script.bicep' = {
-  name : 'deploymentScriptForAIHub'
+var aihubworkspaceName = 'ai_hub_${solutionPrefix}'
+module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
+  name: take('avm.res.devcenter.hub.${aihubworkspaceName}', 64)
   params: {
     // Required parameters
-    kind: 'AzureCLI'
-    name: 'create_aihub'
+    name: aihubworkspaceName
+    sku: 'Basic'
     // Non-required parameters
-    azCliVersion: '2.52.0'
+    associatedStorageAccountResourceId: storageAccountModule.outputs.resourceId
+    kind: 'Hub'
     location: solutionLocation
+    // workspaceHubConfig: {
+    //   additionalWorkspaceStorageAccounts: '<additionalWorkspaceStorageAccounts>'
+    //   defaultWorkspaceResourceGroup: '<defaultWorkspaceResourceGroup>'
+    // }
     managedIdentities: {
+      systemAssigned: true
       userAssignedResourceIds: [
         userAssignedIdentity.outputs.resourceId
       ]
     }
-    runOnce: true
-    primaryScriptUri: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh'
-    arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}'
-    tags: tags
-    timeout: 'PT1H'
-    retentionInterval: 'PT1H'
-    cleanupPreference: 'OnSuccess'
-    storageAccountResourceId: storageAccountModule.outputs.resourceId
-    subnetResourceIds: enablePrivateNetworking ? [
-      network!.outputs.subnetDeploymentScriptsResourceId
-    ] : null
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    privateEndpoints: enablePrivateNetworking
+      ? [
+          {
+            name: 'pep-${aihubworkspaceName}'
+            customNetworkInterfaceName: 'nic-${aihubworkspaceName}'
+            privateDnsZoneGroup: {
+              privateDnsZoneGroupConfigs: [
+                { 
+                  name: 'ml-dns-zone-group'
+                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.machineLearningServices]!.outputs.resourceId 
+                }
+              ]
+            }
+            service: 'amlworkspace'
+            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+          }
+        ]
+      : []
   }
-  dependsOn: [
-    keyvault, webSite
-  ]
 }
+
+var aiProjectworkspaceName = 'ai_proj_${solutionPrefix}'
+module aiProjectWorkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
+  name: take('avm.res.devcenter.hub.${aiProjectworkspaceName}', 64)
+  params: {
+    // Required parameters
+    name: aiProjectworkspaceName
+    sku: 'Basic'
+    // Non-required parameters
+    hubResourceId: aihubworkspace.outputs.resourceId
+    kind: 'Project'
+    location: solutionLocation
+  }
+}
+
+module MLWorkspaceAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
+  name: take('avm.res.authorization.role-assignment.MLWorkspaceAssignment', 64)
+  params: {
+    principalId: aihubworkspace.outputs.?systemAssignedMIPrincipalId ?? userAssignedIdentity.outputs.principalId
+    roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
+    principalType: 'ServicePrincipal'
+  }
+}
+
+
+resource openAIConnection 'Microsoft.MachineLearningServices/workspaces/connections@2023-04-01' = {
+  name: '${aiProjectworkspaceName}/Azure_OpenAI'
+  properties: {
+    category: 'AzureOpenAI'
+    target: 'https://${azOpenAI.outputs.name}.openai.azure.com/'
+    authType: 'ApiKey'
+    credentials: {
+      key: '@Microsoft.KeyVault(SecretUri=${azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri})'
+    }
+    metadata: {
+      ApiType: 'Azure'
+      ResourceId: azOpenAI.outputs.resourceId
+      location: azOpenAI.outputs.location
+    }
+  }
+}
+
+resource projectAISearchConnection 'Microsoft.MachineLearningServices/workspaces/connections@2023-04-01' = {
+  name: '${aiProjectworkspaceName}/Azure_AISearch'
+  properties: {
+    category: 'CognitiveSearch'
+    target: 'https://${azSearchService.outputs.name}.search.windows.net/'
+    authType: 'ApiKey' // Use AAD or ManagedIdentity
+    credentials: {
+      key: azSearchService.outputs.primaryKey
+    }
+    isSharedToAll: true
+    metadata: {
+      ApiType: 'Azure'
+      ResourceId: azSearchService.outputs.resourceId
+      location: azSearchService.outputs.location
+    }
+  }
+}
+
+
+//========== Deployment script to create index ========== // 
+// module deployAihubScript '../modules/deployment-script.bicep' = {
+//   name : 'deploymentScriptForAIHub'
+//   params: {
+//     // Required parameters
+//     kind: 'AzureCLI'
+//     name: 'create_aihub'
+//     // Non-required parameters
+//     azCliVersion: '2.52.0'
+//     location: solutionLocation
+//     managedIdentities: {
+//       userAssignedResourceIds: [
+//         userAssignedIdentity.outputs.resourceId
+//       ]
+//     }
+//     runOnce: true
+//     primaryScriptUri: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh'
+//     arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}'
+//     tags: tags
+//     timeout: 'PT1H'
+//     retentionInterval: 'PT1H'
+//     cleanupPreference: 'OnSuccess'
+//     storageAccountResourceId: storageAccountModule.outputs.resourceId
+//     subnetResourceIds: enablePrivateNetworking ? [
+//       network!.outputs.subnetDeploymentScriptsResourceId
+//     ] : null
+//   }
+//   dependsOn: [
+//     keyvault, webSite
+//   ]
+// }
 
 // ========== AVM WAF server farm ========== //
 // WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
