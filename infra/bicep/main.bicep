@@ -699,6 +699,7 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
 }
 
 var aihubworkspaceName = 'ai_hub_${solutionPrefix}'
+var openAIKeyUri = azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri
 module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
   name: take('avm.res.devcenter.hub.${aihubworkspaceName}', 64)
   params: {
@@ -706,6 +707,7 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
     name: aihubworkspaceName
     sku: 'Basic'
     // Non-required parameters
+    associatedKeyVaultResourceId: keyvault.outputs.resourceId
     associatedStorageAccountResourceId: storageAccountModule.outputs.resourceId
     kind: 'Hub'
     location: solutionLocation
@@ -713,6 +715,42 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
     //   additionalWorkspaceStorageAccounts: '<additionalWorkspaceStorageAccounts>'
     //   defaultWorkspaceResourceGroup: '<defaultWorkspaceResourceGroup>'
     // }
+    connections: [
+      {
+        name: 'Azure_OpenAI'
+        category: 'AzureOpenAI'
+        target: 'https://${azOpenAI.outputs.name}.openai.azure.com/'
+        isSharedToAll: true
+        connectionProperties: {
+          authType: 'ApiKey'
+          credentials: {
+            key: '@Microsoft.KeyVault(SecretUri=${openAIKeyUri})'
+          }
+          metadata: {
+            ApiType: 'Azure'
+            ResourceId: azOpenAI.outputs.resourceId
+            location: azOpenAI.outputs.location
+          }
+        }
+      }
+      {
+        name: 'Azure_AISearch'
+        category: 'CognitiveSearch'
+        target: 'https://${azSearchService.outputs.name}.search.windows.net/'
+        isSharedToAll: true
+        connectionProperties: {
+          authType: 'ApiKey'
+          credentials: {
+            key: azSearchService.outputs.primaryKey
+          }
+          metadata: {
+            ApiType: 'Azure'
+            ResourceId: azSearchService.outputs.resourceId
+            location: azSearchService.outputs.location
+          }
+        }
+      }
+    ]
     managedIdentities: {
       systemAssigned: true
       userAssignedResourceIds: [
@@ -741,6 +779,15 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
   }
 }
 
+module MLWorkspaceAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
+  name: take('avm.res.authorization.role-assignment.MLWorkspaceAssignment', 64)
+  params: {
+    principalId: aihubworkspace.outputs.?systemAssignedMIPrincipalId ?? userAssignedIdentity.outputs.principalId
+    roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
+    principalType: 'ServicePrincipal'
+  }
+}
+
 var aiProjectworkspaceName = 'ai_proj_${solutionPrefix}'
 module aiProjectWorkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
   name: take('avm.res.devcenter.hub.${aiProjectworkspaceName}', 64)
@@ -755,50 +802,41 @@ module aiProjectWorkspace 'br/public:avm/res/machine-learning-services/workspace
   }
 }
 
-module MLWorkspaceAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
-  name: take('avm.res.authorization.role-assignment.MLWorkspaceAssignment', 64)
-  params: {
-    principalId: aihubworkspace.outputs.?systemAssignedMIPrincipalId ?? userAssignedIdentity.outputs.principalId
-    roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
-    principalType: 'ServicePrincipal'
-  }
-}
 
+// resource openAIConnection 'Microsoft.MachineLearningServices/workspaces/connections@2023-04-01' = {
+//   name: '${aiProjectworkspaceName}/Azure_OpenAI'
+//   properties: {
+//     category: 'AzureOpenAI'
+//     target: 'https://${azOpenAI.outputs.name}.openai.azure.com/'
+//     authType: 'ApiKey'
+//     credentials: {
+//       key: '@Microsoft.KeyVault(SecretUri=${azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri})'
+//     }
+//     metadata: {
+//       ApiType: 'Azure'
+//       ResourceId: azOpenAI.outputs.resourceId
+//       location: azOpenAI.outputs.location
+//     }
+//   }
+// }
 
-resource openAIConnection 'Microsoft.MachineLearningServices/workspaces/connections@2023-04-01' = {
-  name: '${aiProjectworkspaceName}/Azure_OpenAI'
-  properties: {
-    category: 'AzureOpenAI'
-    target: 'https://${azOpenAI.outputs.name}.openai.azure.com/'
-    authType: 'ApiKey'
-    credentials: {
-      key: '@Microsoft.KeyVault(SecretUri=${azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri})'
-    }
-    metadata: {
-      ApiType: 'Azure'
-      ResourceId: azOpenAI.outputs.resourceId
-      location: azOpenAI.outputs.location
-    }
-  }
-}
-
-resource projectAISearchConnection 'Microsoft.MachineLearningServices/workspaces/connections@2023-04-01' = {
-  name: '${aiProjectworkspaceName}/Azure_AISearch'
-  properties: {
-    category: 'CognitiveSearch'
-    target: 'https://${azSearchService.outputs.name}.search.windows.net/'
-    authType: 'ApiKey' // Use AAD or ManagedIdentity
-    credentials: {
-      key: azSearchService.outputs.primaryKey
-    }
-    isSharedToAll: true
-    metadata: {
-      ApiType: 'Azure'
-      ResourceId: azSearchService.outputs.resourceId
-      location: azSearchService.outputs.location
-    }
-  }
-}
+// resource projectAISearchConnection 'Microsoft.MachineLearningServices/workspaces/connections@2023-04-01' = {
+//   name: '${aiProjectworkspaceName}/Azure_AISearch'
+//   properties: {
+//     category: 'CognitiveSearch'
+//     target: 'https://${azSearchService.outputs.name}.search.windows.net/'
+//     authType: 'ApiKey' // Use AAD or ManagedIdentity
+//     credentials: {
+//       key: azSearchService.outputs.primaryKey
+//     }
+//     isSharedToAll: true
+//     metadata: {
+//       ApiType: 'Azure'
+//       ResourceId: azSearchService.outputs.resourceId
+//       location: azSearchService.outputs.location
+//     }
+//   }
+// }
 
 
 //========== Deployment script to create index ========== // 
@@ -939,7 +977,6 @@ module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = if (en
 
 //NOTE: AVM module adds 1 MB of overhead to the template. Keeping vanilla resource to save template size.
 var webSiteResourceName = 'app-${solutionPrefix}'
-var openAIKeyUri = azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri
 module webSite '../modules/web-sites.bicep' = {
   name: take('module.web-sites.${webSiteResourceName}', 64)
   params: {
