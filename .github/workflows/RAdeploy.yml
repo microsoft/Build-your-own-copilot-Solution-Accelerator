@@ -84,16 +84,7 @@ jobs:
           rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
           if [ "$rg_exists" = "false" ]; then
             echo "Resource group does not exist. Creating..."
-
-            # Generate current timestamp in desired format: YYYY-MM-DDTHH:MM:SS.SSSSSSSZ
-            current_date=$(date -u +"%Y-%m-%dT%H:%M:%S.%7NZ")
-            az group create --name ${{ env.RESOURCE_GROUP_NAME }} \
-                            --location ${{ env.AZURE_LOCATION }} \
-                            --tags "CreatedBy=Pipeline" \
-                                   "Purpose=Deploying and Cleaning Up Resources for Validation" \
-                                   "CreatedDate=$current_date" \
-                                   "ApplicationName=Research Assistant" \
-            || { echo "Error creating resource group"; exit 1; }
+            az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location ${{ env.AZURE_LOCATION }} || { echo "Error creating resource group"; exit 1; }
           else
             echo "Resource group already exists."
           fi
@@ -111,10 +102,13 @@ jobs:
         id: deploy
         run: |
           set -e
+          # Generate current timestamp in desired format: YYYY-MM-DDTHH:MM:SS.SSSSSSSZ
+            current_date=$(date -u +"%Y-%m-%dT%H:%M:%S.%7NZ")
+
           az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/bicep/main.bicep \
-            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} createdBy="Pipeline" tags="{'SecurityControl':'Ignore'}"
+            --parameters solutionPrefix=${{ env.SOLUTION_PREFIX }} createdBy="Pipeline" tags="{'SecurityControl':'Ignore','Purpose':'Deploying and Cleaning Up Resources for Validation','CreatedDate':'$current_date'}"
       - name: List KeyVaults and Store in Array
         id: list_keyvaults
         run: |
