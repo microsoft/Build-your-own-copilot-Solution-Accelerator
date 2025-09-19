@@ -284,7 +284,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
   properties: {
     tags: {
       ...tags
-      TemplateName: 'Client Advisor'
+      TemplateName: enablePrivateNetworking ? 'Client_Advisor_WAF' : 'Client Advisor'
       CreatedBy: createdBy
     }
   }
