@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - byoc-researcher
-      - CI-Pipeline-research
   schedule:
     - cron: '0 7,19 * * *'  # Runs at 7:00 AM and 7:00 PM GMT
 
