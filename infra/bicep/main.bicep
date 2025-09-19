@@ -155,6 +155,7 @@ var privateDnsZones = [
   'privatelink.search.windows.net'
   'privatelink.dfs.${environment().suffixes.storage}'
   'privatelink.azureml.ms'
+  'privatelink.notebooks.azure.net'
 ]
 
 // DNS Zone Index Constants
@@ -172,6 +173,7 @@ var dnsZoneIndex = {
   searchService: 10
   storageDfs: 11
   machineLearningServices: 12
+  notebook: 13
 }
 
 // List of DNS zone indices that correspond to AI-related services.
@@ -698,6 +700,14 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
   ]
 }
 
+
+// Reference existing Azure OpenAI resource
+resource existingOpenAI 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
+  name: accounts_byc_openai_name
+}
+
+var openaiKey = existingOpenAI.listKeys().key1
+
 var aihubworkspaceName = 'ai_hub_${solutionPrefix}'
 var openAIKeyUri = azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri
 module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
@@ -724,7 +734,7 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
         connectionProperties: {
           authType: 'ApiKey'
           credentials: {
-            key: '@Microsoft.KeyVault(SecretUri=${openAIKeyUri})'
+            key: openaiKey
           }
           metadata: {
             ApiType: 'Azure'
@@ -769,6 +779,10 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
                   name: 'ml-dns-zone-group'
                   privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.machineLearningServices]!.outputs.resourceId 
                 }
+                {
+                  name: 'notebook-dns-zone-group'
+                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.notebook]!.outputs.resourceId
+                }
               ]
             }
             service: 'amlworkspace'
@@ -776,15 +790,6 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
           }
         ]
       : []
-  }
-}
-
-module MLWorkspaceAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:0.1.0' = {
-  name: take('avm.res.authorization.role-assignment.MLWorkspaceAssignment', 64)
-  params: {
-    principalId: aihubworkspace.outputs.?systemAssignedMIPrincipalId ?? userAssignedIdentity.outputs.principalId
-    roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
-    principalType: 'ServicePrincipal'
   }
 }
 
