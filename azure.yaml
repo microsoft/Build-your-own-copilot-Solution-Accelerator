@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: build-your-own-copilot-solution-accelerator
+
+requiredVersions:
+  azd: ">= 1.15.0"
+
+metadata:
+  template: build-your-own-copilot-solution-accelerator@1.0

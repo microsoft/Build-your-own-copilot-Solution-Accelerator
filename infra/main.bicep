@@ -2,21 +2,62 @@
 targetScope = 'resourceGroup'
 
 @minLength(3)
-@maxLength(6)
-@description('Prefix Name')
-param solutionPrefix string
+@maxLength(16)
+@description('Required. A unique prefix for all resources in this deployment. This should be 3-20 characters long:')
+param solutionName string = 'resassistant'
 
-@minLength(3)
-@maxLength(15)
-@description('Solution Name')
-param solutionName string = solutionPrefix
+@metadata({ azd: { type: 'location' } })
+@description('Required. Azure region for all services.')
+param location string
 
-var resourceGroupLocation = resourceGroup().location
-var resourceGroupName = resourceGroup().name
-var subscriptionId  = subscription().subscriptionId
+@minLength(1)
+@description('Optional. GPT model deployment type:')
+@allowed([
+  'Standard'
+  'GlobalStandard'
+])
+param gptModelDeploymentType string = 'Standard'
 
-var solutionLocation = resourceGroupLocation
-var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/'
+@description('Optional. Name of the GPT model to deploy:')
+param gptModelName string = 'gpt-35-turbo'
+
+@description('Optional. Version of the GPT model to deploy:')
+param gptModelVersion string = '0125'
+
+@minValue(10)
+@description('Optional. Capacity of the GPT deployment:')
+param gptDeploymentCapacity int = 30
+
+@minLength(1)
+@description('Optional. GPT model deployment type:')
+@allowed([
+  'Standard'
+  'GlobalStandard'
+])
+param embeddingModelDeploymentType string = 'GlobalStandard'
+
+@minLength(1)
+@description('Optional. Name of the Text Embedding model to deploy:')
+@allowed([
+  'text-embedding-ada-002'
+])
+param embeddingModel string = 'text-embedding-ada-002'
+
+@description('Optional. Version of the Text Embedding model to deploy:')
+param embeddingModelVersion string = '2'
+
+@minValue(10)
+@description('Optional. Capacity of the Embedding Model deployment.')
+param embeddingDeploymentCapacity int = 45
+
+@description('Optional. The Container Registry hostname where the docker images for the webapp are located.')
+param containerRegistryHostname string = 'byoaiacontainerreg.azurecr.io'
+
+@description('Optional. The Container Image Name to deploy on the webapp.')
+param containerImageName string = 'byoaia-app'
+
+@description('Optional. The Container Image Tag to deploy on the webapp.')
+param containerImageTag string = 'latest'
 
 @description('Optional. Enable/Disable usage telemetry for module.')
 param enableTelemetry bool = true
@@ -42,22 +83,31 @@ param enableRedundancy bool = false
 @description('Optional. Admin username for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
 @secure()
 //param vmAdminUsername string = take(newGuid(), 20)
-param vmAdminUsername string = 'JumpboxAdminUser'
+param vmAdminUsername string?
 
 @description('Optional. Admin password for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
 @secure()
 //param vmAdminPassword string = newGuid()
-param vmAdminPassword string ='JumpboxAdminP@ssw0rd1234!'
-
-@description('Required. The pricing tier for the App Service plan')
-@allowed(
-  ['F1', 'D1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P4']
-)
-
-param HostingPlanSku string = 'B1'
+param vmAdminPassword string?
 
 @description('Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true.')
 param vmSize string = 'Standard_DS2_v2' // Default VM size
+
+@maxLength(5)
+@description('Optional. A unique text value for the solution. This is used to ensure resource names are unique for global resources. Defaults to a 5-character substring of the unique string generated from the subscription ID, resource group name, and solution name.')
+param solutionUniqueText string = substring(uniqueString(subscription().id, resourceGroup().name, solutionName), 0, 5)
+
+var solutionSuffix = toLower(trim(replace(
+  replace(
+    replace(replace(replace(replace('${solutionName}${solutionUniqueText}', '-', ''), '_', ''), '.', ''), '/', ''),
+    ' ',
+    ''
+  ),
+  '*',
+  ''
+)))
+var resourceGroupName = resourceGroup().name
+var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/'
 
 var allTags = union(
   {
@@ -99,12 +149,12 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
 
 // ========== User Assigned Identity ========== //
 // WAF best practices for identity and access management: https://learn.microsoft.com/en-us/azure/well-architected/security/identity-access
-var userAssignedIdentityResourceName = 'id-${solutionPrefix}'
+var userAssignedIdentityResourceName = 'id-${solutionSuffix}'
 module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = {
   name: take('avm.res.managed-identity.user-assigned-identity.${userAssignedIdentityResourceName}', 64)
   params: {
     name: userAssignedIdentityResourceName
-    location: solutionLocation
+    location: location
     tags: tags
   }
 }
@@ -120,21 +170,15 @@ module roleAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:
   }
 }
 
-// ===================================================
-// DEPLOY PRIVATE DNS ZONES
-// - Deploys all zones if no existing Foundry project is used
-// - Excludes AI-related zones when using with an existing Foundry project
-// ===================================================
-
-module network '../modules/network.bicep' = if (enablePrivateNetworking) {
-  name: take('network-${resourceGroupName}-deployment', 64)
+module network 'modules/network.bicep' = if (enablePrivateNetworking) {
+  name: take('module.network.${solutionSuffix}', 64)
   params: {
     resourcesName: resourceGroupName
     logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspace!.outputs.resourceId
     vmAdminUsername: vmAdminUsername ?? 'JumpboxAdminUser'
     vmAdminPassword: vmAdminPassword ?? 'JumpboxAdminP@ssw0rd1234!'
     vmSize: vmSize ??  'Standard_DS2_v2' // Default VM size 
-    location: solutionLocation
+    location: location
     tags: allTags
     enableTelemetry: enableTelemetry
   }
@@ -149,9 +193,7 @@ var privateDnsZones = [
   'privatelink.blob.${environment().suffixes.storage}'
   'privatelink.queue.${environment().suffixes.storage}'
   'privatelink.file.${environment().suffixes.storage}'
-  'privatelink.documents.azure.com'
   'privatelink.vaultcore.azure.net'
-  'privatelink${environment().suffixes.sqlServerHostname}'
   'privatelink.search.windows.net'
   'privatelink.dfs.${environment().suffixes.storage}'
   'privatelink.azureml.ms'
@@ -167,21 +209,12 @@ var dnsZoneIndex = {
   storageBlob: 4
   storageQueue: 5
   storageFile: 6
-  cosmosDB: 7
-  keyVault: 8
-  sqlServer: 9
-  searchService: 10
-  storageDfs: 11
-  machineLearningServices: 12
-  notebook: 13
+  keyVault: 7
+  searchService: 8
+  storageDfs: 9
+  machineLearningServices: 10
+  notebook: 11
 }
-
-// List of DNS zone indices that correspond to AI-related services.
-var aiRelatedDnsZoneIndices = [
-  dnsZoneIndex.cognitiveServices
-  dnsZoneIndex.openAI
-  dnsZoneIndex.aiServices
-]
 
 @batchSize(5)
 module avmPrivateDnsZones 'br/public:avm/res/network/private-dns-zone:0.7.1' = [
@@ -203,43 +236,33 @@ module avmPrivateDnsZones 'br/public:avm/res/network/private-dns-zone:0.7.1' = [
 
 // ========== AVM WAF ========== //
 // ========== Storage Account using AVM ========== //
-var storageAccountName = 'st${ solutionPrefix}'
+var storageAccountName = 'st${solutionSuffix}'
 module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' = {
   name: take('avm.res.storage.storage-account.${storageAccountName}', 64)
-  scope: resourceGroup()
   params: {
     name: storageAccountName
-    location: solutionLocation
+    location: location
     enableTelemetry: enableTelemetry
     tags: tags
-
-    // ✅ Use both system + user-assigned MI for maximum flexibility
     managedIdentities: { 
       systemAssigned: true
       userAssignedResourceIds: [ userAssignedIdentity!.outputs.resourceId ]
     }
-
     accessTier: 'Hot'
     supportsHttpsTrafficOnly: true
     allowSharedKeyAccess: true    // needed by scripts if MI fails
     allowBlobPublicAccess: true
     publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
-
     minimumTlsVersion: 'TLS1_2'
-
-    // ✅ Networking - WAF aligned but open enough for deployment scripts
-    // publicNetworkAccess: 'Enabled' // Always Enabled for deployment scripts
-
     networkAcls: {
       bypass: 'AzureServices, Logging, Metrics'
       defaultAction: 'Allow'
       virtualNetworkRules: []
     }
-
     privateEndpoints: enablePrivateNetworking
       ? [
           {
-            name: 'pep-blob-${solutionPrefix}'
+            name: 'pep-blob-${solutionSuffix}'
             service: 'blob'
             subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
             privateDnsZoneGroup: {
@@ -252,7 +275,7 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
             }
           }
           {
-            name: 'pep-queue-${solutionPrefix}'
+            name: 'pep-queue-${solutionSuffix}'
             service: 'queue'
             subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
             privateDnsZoneGroup: {
@@ -265,7 +288,7 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
             }
           }
           {
-            name: 'pep-file-${solutionPrefix}'
+            name: 'pep-file-${solutionSuffix}'
             service: 'file'
             subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
             privateDnsZoneGroup: {
@@ -278,7 +301,7 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
             }
           }
           {
-            name: 'pep-dfs-${solutionPrefix}'
+            name: 'pep-dfs-${solutionSuffix}'
             service: 'dfs'
             subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
             privateDnsZoneGroup: {
@@ -292,7 +315,6 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
           }
         ]
       : []
-
     blobServices: {
       corsRules: []
       deleteRetentionPolicyEnabled: false
@@ -305,7 +327,6 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
         }
       ]
     }
-
     roleAssignments: [
       {
         principalId: userAssignedIdentity.outputs.principalId
@@ -325,15 +346,11 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
 
     ]
   }
-
-  dependsOn: [
-    userAssignedIdentity
-  ]
 }
 
 // ========== AVM WAF ========== //
 // ========== Search Service using AVM ========== //
-var aiSearchName = 'srch-${solutionPrefix}'
+var aiSearchName = 'srch-${solutionSuffix}'
 module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
   name: take('avm.res.search.search-service.${aiSearchName}', 64)
   params: {
@@ -365,9 +382,8 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
     replicaCount: 1
     sku: 'standard'
     semanticSearch: 'free'
-    // Use the deployment tags provided to the template
     tags: tags
-    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
+    publicNetworkAccess: 'Enabled' // Keeping it enabled as we have some issues connecting AiFoundry Agents with search service.
     privateEndpoints: enablePrivateNetworking
     ? [
         {
@@ -389,14 +405,14 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
 //========== AVM WAF ========== //
 //========== Deployment script to upload data ========== //
 module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-  name : 'deploymentScriptForUploadFiles'
+  name : take('avm.res.resources.deployment-script.uploadFiles', 64)
   params: {
     // Required parameters
     kind: 'AzureCLI'
     name: 'copy_demo_Data'
     // Non-required parameters
     azCliVersion: '2.50.0'
-    location: solutionLocation
+    location: location
     managedIdentities: {
       userAssignedResourceIds: [
         userAssignedIdentity.outputs.resourceId
@@ -415,19 +431,15 @@ module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     ] : null
     cleanupPreference: 'OnSuccess'
   }
-  dependsOn:[
-    storageAccountModule
-    network
-  ]
 }
 
 // // ==========Key Vault Module AVM WAF ========== //
-var keyVaultName = 'kv-${solutionPrefix}'
+var keyVaultName = 'kv-${solutionSuffix}'
 module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
   name: take('avm.res.key-vault.vault.${keyVaultName}', 64)
   params: {
     name: keyVaultName
-    location: solutionLocation
+    location: location
     tags: tags
     sku: 'standard'
     publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
@@ -530,55 +542,82 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
   }
 }
 
+var aiModelDeployments = [
+  {
+    name: gptModelName
+    format: 'OpenAI'
+    model: gptModelName
+    sku: {
+      name: gptModelDeploymentType
+      capacity: gptDeploymentCapacity
+    }
+    version: gptModelVersion
+    raiPolicyName: 'Microsoft.Default'
+  }
+  {
+    name: embeddingModel
+    format: 'OpenAI'
+    model: embeddingModel
+    sku: {
+      name: embeddingModelDeploymentType
+      capacity: embeddingDeploymentCapacity
+    }
+    version: embeddingModelVersion
+    raiPolicyName: 'Microsoft.Default'
+  }
+]
+
 // ========= Open AI AVM WAF ========== //
-var accounts_byc_openai_name = 'oai-${solutionPrefix}'
+var openAiResourceName = 'oai-${solutionSuffix}'
 module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
-  name: take('avm.res.cognitiveservices.account.${accounts_byc_openai_name}', 64)
+  name: take('avm.res.cognitiveservices.account.${openAiResourceName}', 64)
   params: {
     // Required parameters
     kind: 'OpenAI'
-    name: accounts_byc_openai_name
+    name: openAiResourceName
     disableLocalAuth: false // ✅ Enable key-based auth
     // Non-required parameters
     secretsExportConfiguration: {
-      accessKey1Name: 'AZURE-OPENAI-KEY'
-      keyVaultResourceId: keyvault.outputs.resourceId
+    accessKey1Name: 'AZURE-OPENAI-KEY'
+    keyVaultResourceId: keyvault.outputs.resourceId
     }
     restrictOutboundNetworkAccess:false
-    customSubDomainName: accounts_byc_openai_name
+    customSubDomainName: openAiResourceName
     deployments: [
       {
+        name: aiModelDeployments[0].name
         model: {
-          format: 'OpenAI'
-          name: 'gpt-35-turbo'
-          version: '0125'
+          format: aiModelDeployments[0].format
+          name: aiModelDeployments[0].name
+          version: aiModelDeployments[0].version
         }
-        name: 'gpt-35-turbo'
+        raiPolicyName: aiModelDeployments[0].raiPolicyName
         sku: {
-          capacity: 30
-          name: 'Standard'
+          name: aiModelDeployments[0].sku.name
+          capacity: aiModelDeployments[0].sku.capacity
         }
       }
       {
+        name: aiModelDeployments[1].name
         model: {
-          format: 'OpenAI'
-          name: 'text-embedding-ada-002'
-          version: '2'
+          format: aiModelDeployments[1].format
+          name: aiModelDeployments[1].name
+          version: aiModelDeployments[1].version
         }
-        name: 'text-embedding-ada-002'
+        raiPolicyName: aiModelDeployments[1].raiPolicyName
         sku: {
-          capacity: 45
-          name: 'GlobalStandard'
+          name: aiModelDeployments[1].sku.name
+          capacity: aiModelDeployments[1].sku.capacity
         }
       }
     ]
-    location: solutionLocation
+    location: location
     // WAF aligned configuration for Private Networking
     privateEndpoints: enablePrivateNetworking
       ? [
           {
-            name: 'pep-${accounts_byc_openai_name}'
-            customNetworkInterfaceName: 'nic-${accounts_byc_openai_name}'
+            name: 'pep-${openAiResourceName}'
+            customNetworkInterfaceName: 'nic-${openAiResourceName}'
             privateDnsZoneGroup: {
               privateDnsZoneGroupConfigs: [
                 { 
@@ -592,32 +631,20 @@ module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
           }
         ]
       : []
-    publicNetworkAccess: enablePrivateNetworking ? 'Enabled' : 'Enabled'
+    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
   }
 }
 
-// to Key Vault via `secretsExportConfiguration` — it does not export the endpoint.
-// To keep the endpoint accessible in Key Vault, we define it here as a separate secret.
-// This avoids circular dependencies while staying consistent with AVM usage elsewhere.
-
-resource openAiEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: '${keyVaultName}/AZURE-OPENAI-ENDPOINT'
-  properties: {
-    value: azOpenAI.outputs.endpoint
-  }
-  dependsOn:[keyvault]
-}
-
-var accounts_byc_cogser_name = 'di-${solutionPrefix}'
+var cognitiveServicesResourceName = 'ais-${solutionSuffix}'
 module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.10.1' = {
-  name: take('avm.res.cognitiveservices.account.${accounts_byc_cogser_name}', 64)
+  name: take('avm.res.cognitiveservices.account.${cognitiveServicesResourceName}', 64)
   params: {
     // Required parameters
     kind: 'CognitiveServices'
-    name: accounts_byc_cogser_name
+    name: cognitiveServicesResourceName
     // Non-required parameters
-    customSubDomainName: accounts_byc_cogser_name
-    location: solutionLocation
+    customSubDomainName: cognitiveServicesResourceName
+    location: location
     disableLocalAuth: false
     secretsExportConfiguration: {
       accessKey1Name: 'COG-SERVICES-KEY'
@@ -627,8 +654,8 @@ module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.1
     privateEndpoints: enablePrivateNetworking
       ? [
           {
-            name: 'pep-${accounts_byc_cogser_name}'
-            customNetworkInterfaceName: 'nic-${accounts_byc_cogser_name}'
+            name: 'pep-${cognitiveServicesResourceName}'
+            customNetworkInterfaceName: 'nic-${cognitiveServicesResourceName}'
             privateDnsZoneGroup: {
               privateDnsZoneGroupConfigs: [
                 { privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.cognitiveServices]!.outputs.resourceId }
@@ -647,37 +674,38 @@ module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.1
 // to Key Vault via `secretsExportConfiguration` — it does not export the endpoint.
 // To keep the endpoint accessible in Key Vault, we define it here as a separate secret.
 // This avoids circular dependencies while staying consistent with AVM usage elsewhere.
+
 resource cogEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: '${keyVaultName}/COG-SERVICES-ENDPOINT'
   properties: {
     value: azAIMultiServiceAccount.outputs.endpoint
   }
-  dependsOn:[keyvault]
 }
 
-// Add name as a secret
-// to Key Vault via `secretsExportConfiguration` — it does not export the name.
-// To keep the endpoint accessible in Key Vault, we define it here as a separate secret.
-// This avoids circular dependencies while staying consistent with AVM usage elsewhere.
 resource cogNameSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: '${keyVaultName}/COG-SERVICES-NAME'
   properties: {
     value: azAIMultiServiceAccount.outputs.name
   }
-  dependsOn:[keyvault]
 }
 
-//========== AVM WAF ========== //
+resource openAiEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: '${keyVaultName}/AZURE-OPENAI-ENDPOINT'
+  properties: {
+    value: azOpenAI.outputs.endpoint
+  }
+}
+
 //========== Deployment script to create index ========== // 
 module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
-  name : 'deploymentScriptForCreateIndex'
+  name : take('avm.res.resources.deployment-script.createIndex', 64)
   params: {
     // Required parameters
     kind: 'AzureCLI'
     name: 'create_search_indexes'
     // Non-required parameters
     azCliVersion: '2.52.0'
-    location: solutionLocation
+    location: location
     managedIdentities: {
       userAssignedResourceIds: [
         userAssignedIdentity.outputs.resourceId
@@ -703,12 +731,15 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
 
 // Reference existing Azure OpenAI resource
 resource existingOpenAI 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
-  name: accounts_byc_openai_name
+  name: cognitiveServicesResourceName
+  dependsOn: [
+    azAIMultiServiceAccount
+  ]
 }
 
 var openaiKey = existingOpenAI.listKeys().key1
 
-var aihubworkspaceName = 'ai_hub_${solutionPrefix}'
+var aihubworkspaceName = 'hub-${solutionSuffix}'
 var openAIKeyUri = azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri
 module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
   name: take('avm.res.devcenter.hub.${aihubworkspaceName}', 64)
@@ -720,7 +751,7 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
     associatedKeyVaultResourceId: keyvault.outputs.resourceId
     associatedStorageAccountResourceId: storageAccountModule.outputs.resourceId
     kind: 'Hub'
-    location: solutionLocation
+    location: location
     // workspaceHubConfig: {
     //   additionalWorkspaceStorageAccounts: '<additionalWorkspaceStorageAccounts>'
     //   defaultWorkspaceResourceGroup: '<defaultWorkspaceResourceGroup>'
@@ -793,7 +824,7 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
   }
 }
 
-var aiProjectworkspaceName = 'ai_proj_${solutionPrefix}'
+var aiProjectworkspaceName = 'proj-${solutionSuffix}'
 module aiProjectWorkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
   name: take('avm.res.devcenter.hub.${aiProjectworkspaceName}', 64)
   params: {
@@ -803,94 +834,25 @@ module aiProjectWorkspace 'br/public:avm/res/machine-learning-services/workspace
     // Non-required parameters
     hubResourceId: aihubworkspace.outputs.resourceId
     kind: 'Project'
-    location: solutionLocation
+    location: location
   }
 }
-
-
-// resource openAIConnection 'Microsoft.MachineLearningServices/workspaces/connections@2023-04-01' = {
-//   name: '${aiProjectworkspaceName}/Azure_OpenAI'
-//   properties: {
-//     category: 'AzureOpenAI'
-//     target: 'https://${azOpenAI.outputs.name}.openai.azure.com/'
-//     authType: 'ApiKey'
-//     credentials: {
-//       key: '@Microsoft.KeyVault(SecretUri=${azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri})'
-//     }
-//     metadata: {
-//       ApiType: 'Azure'
-//       ResourceId: azOpenAI.outputs.resourceId
-//       location: azOpenAI.outputs.location
-//     }
-//   }
-// }
-
-// resource projectAISearchConnection 'Microsoft.MachineLearningServices/workspaces/connections@2023-04-01' = {
-//   name: '${aiProjectworkspaceName}/Azure_AISearch'
-//   properties: {
-//     category: 'CognitiveSearch'
-//     target: 'https://${azSearchService.outputs.name}.search.windows.net/'
-//     authType: 'ApiKey' // Use AAD or ManagedIdentity
-//     credentials: {
-//       key: azSearchService.outputs.primaryKey
-//     }
-//     isSharedToAll: true
-//     metadata: {
-//       ApiType: 'Azure'
-//       ResourceId: azSearchService.outputs.resourceId
-//       location: azSearchService.outputs.location
-//     }
-//   }
-// }
-
-
-//========== Deployment script to create index ========== // 
-// module deployAihubScript '../modules/deployment-script.bicep' = {
-//   name : 'deploymentScriptForAIHub'
-//   params: {
-//     // Required parameters
-//     kind: 'AzureCLI'
-//     name: 'create_aihub'
-//     // Non-required parameters
-//     azCliVersion: '2.52.0'
-//     location: solutionLocation
-//     managedIdentities: {
-//       userAssignedResourceIds: [
-//         userAssignedIdentity.outputs.resourceId
-//       ]
-//     }
-//     runOnce: true
-//     primaryScriptUri: '${baseUrl}infra/scripts/run_create_aihub_scripts.sh'
-//     arguments: '${baseUrl} ${keyVaultName} ${solutionName} ${resourceGroupName} ${subscriptionId} ${solutionLocation}'
-//     tags: tags
-//     timeout: 'PT1H'
-//     retentionInterval: 'PT1H'
-//     cleanupPreference: 'OnSuccess'
-//     storageAccountResourceId: storageAccountModule.outputs.resourceId
-//     subnetResourceIds: enablePrivateNetworking ? [
-//       network!.outputs.subnetDeploymentScriptsResourceId
-//     ] : null
-//   }
-//   dependsOn: [
-//     keyvault, webSite
-//   ]
-// }
 
 // ========== AVM WAF server farm ========== //
 // WAF best practices for Web Application Services: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/app-service-web-apps
 // PSRule for Web Server Farm: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#app-service
-var webServerFarmResourceName = 'asp-${solutionPrefix}'
+var webServerFarmResourceName = 'asp-${solutionSuffix}'
 module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
-  name: 'deploy_app_service_plan_serverfarm'
+  name: take('avm.res.web.serverfarm.${webServerFarmResourceName}',64)
   params: {
     name: webServerFarmResourceName
     // tags: tags
     // enableTelemetry: enableTelemetry
-    location: resourceGroup().location
+    location: location
     reserved: true
     kind: 'linux'
     // WAF aligned configuration for Monitoring
-    // diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
     // WAF aligned configuration for Scalability
     skuName: enableScalability || enableRedundancy ? 'P1v3' : 'B3'
     skuCapacity: enableScalability ? 3 : 1
@@ -898,13 +860,13 @@ module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
   }
 }
 
-var logAnalyticsWorkspaceResourceName = 'log-${solutionPrefix}'
+var logAnalyticsWorkspaceResourceName = 'log-${solutionSuffix}'
 module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (enableMonitoring) {
   name: take('avm.res.operational-insights.workspace.${logAnalyticsWorkspaceResourceName}', 64)
   params: {
     name: logAnalyticsWorkspaceResourceName
     tags: tags
-    location: solutionLocation
+    location: location
     enableTelemetry: enableTelemetry
     skuName: 'PerGB2018'
     dataRetention: 365
@@ -957,12 +919,12 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
   }
 }
 
-var ApplicationInsightsName = 'as${solutionPrefix}'
+var ApplicationInsightsName = 'appi-${solutionSuffix}'
 module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = if (enableMonitoring) {
   name: take('avm.res.insights.component.${ApplicationInsightsName}', 64)
   params: {
     name: ApplicationInsightsName
-    location: solutionLocation
+    location: location
 
     kind: 'web'
     applicationType: 'web'
@@ -981,8 +943,8 @@ module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = if (en
 // PSRule for Web Server Farm: https://azure.github.io/PSRule.Rules.Azure/en/rules/resource/#app-service
 
 //NOTE: AVM module adds 1 MB of overhead to the template. Keeping vanilla resource to save template size.
-var webSiteResourceName = 'app-${solutionPrefix}'
-module webSite '../modules/web-sites.bicep' = {
+var webSiteResourceName = 'app-${solutionSuffix}'
+module webSite 'modules/web-sites.bicep' = {
   name: take('module.web-sites.${webSiteResourceName}', 64)
   params: {
     name: webSiteResourceName
@@ -993,18 +955,18 @@ module webSite '../modules/web-sites.bicep' = {
       ]
     }
     tags: tags
-    location: solutionLocation
+    location: location
     kind: 'app,linux,container'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
     siteConfig: {
-      linuxFxVersion: 'DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest'
+      linuxFxVersion: 'DOCKER|${containerRegistryHostname}/${containerImageName}:${containerImageTag}'
       minTlsVersion: '1.2'
     }
     configs: [
       {
         name: 'appsettings'
         properties: {
-          solutionLocation: solutionLocation
+          location: location
           AZURE_SEARCH_SERVICE:azSearchService.outputs.name
           AZURE_SEARCH_INDEX:'articlesindex'
           AZURE_SEARCH_INDEX_ARTICLES:'articlesindex'
@@ -1093,7 +1055,4 @@ module keyVaultSecretsUserAssignment 'br/public:avm/res/authorization/role-assig
     roleDefinitionIdOrName: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
     principalType: 'ServicePrincipal'
   }
-  dependsOn: [
-    webSite
-  ]
 }

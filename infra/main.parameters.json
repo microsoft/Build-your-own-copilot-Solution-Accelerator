@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "solutionName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "azureAiServiceLocation": {
+      "value": "${AZURE_ENV_OPENAI_LOCATION}"
+    },
+    "gptModelDeploymentType": {
+      "value": "${AZURE_OPENAI_MODEL_DEPLOYMENT_TYPE}"
+    },
+    "gptModelName": {
+      "value": "${AZURE_OPENAI_DEPLOYMENT_MODEL}"
+    },
+    "gptModelVersion": {
+      "value": "${AZURE_OPENAI_API_VERSION}"
+    },
+    "gptModelCapacity": {
+      "value": "${AZURE_OPENAI_DEPLOYMENT_MODEL_CAPACITY}"
+    },
+    "embeddingModel": {
+      "value": "${AZURE_OPENAI_EMBEDDING_MODEL}"
+    },
+    "embeddingModelVersion" : {
+      "value": "${AZURE_OPENAI_EMBEDDING_MODEL_VERSION}"
+    },
+    "embeddingDeploymentCapacity": {
+      "value": "${AZURE_OPENAI_EMBEDDING_MODEL_CAPACITY}"
+    },
+    "containerImageTag": {
+      "value": "${AZURE_ENV_IMAGETAG=latest_waf}"
+    },
+    "enableTelemetry": {
+      "value": "${AZURE_ENV_ENABLE_TELEMETRY}"
+    }
+  }
+}
