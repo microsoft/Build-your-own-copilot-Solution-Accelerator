@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "2652022627147722044"
+      "templateHash": "1558797429006261964"
     }
   },
   "parameters": {
@@ -25721,10 +25721,10 @@
         }
       },
       "dependsOn": [
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "network",
         "userAssignedIdentity"
       ]
@@ -37206,7 +37206,9 @@
               ]
             }
           },
-          "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
+          "publicNetworkAccess": {
+            "value": "Enabled"
+          },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('aihubworkspaceName')), 'customNetworkInterfaceName', format('nic-{0}', variables('aihubworkspaceName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'ml-dns-zone-group', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').machineLearningServices)).outputs.resourceId.value), createObject('name', 'notebook-dns-zone-group', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').notebook)).outputs.resourceId.value))), 'service', 'amlworkspace', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]"
         },
         "template": {

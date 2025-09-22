@@ -798,7 +798,7 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
         userAssignedIdentity.outputs.resourceId
       ]
     }
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: 'Enabled' //kepping it as Enabled for draft flow deployment
     privateEndpoints: enablePrivateNetworking
       ? [
           {
