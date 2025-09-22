@@ -133,7 +133,7 @@ param containerRegistryHostname string = 'bycwacontainerreg.azurecr.io'
 param containerImageName string = 'byc-wa-app'
 
 @description('Optional. The Container Image Tag to deploy on the webapp.')
-param containerImageTag string = 'latest_waf'
+param imageTag string = 'latest_waf_2025-09-18_794'
 
 @description('Optional. Resource ID of an existing Foundry project')
 param existingFoundryProjectResourceId string = ''
@@ -991,7 +991,7 @@ module webSite 'modules/web-sites.bicep' = {
     kind: 'app,linux,container'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
     siteConfig: {
-      linuxFxVersion: 'DOCKER|${containerRegistryHostname}/${containerImageName}:${containerImageTag}'
+      linuxFxVersion: 'DOCKER|${containerRegistryHostname}/${containerImageName}:${imageTag}'
       minTlsVersion: '1.2'
     }
     configs: [
