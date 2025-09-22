@@ -196,7 +196,7 @@ var privateDnsZones = [
   'privatelink.vaultcore.azure.net'
   'privatelink.search.windows.net'
   'privatelink.dfs.${environment().suffixes.storage}'
-  'privatelink.azureml.ms'
+  'privatelink.api.azureml.ms'
   'privatelink.notebooks.azure.net'
 ]
 
