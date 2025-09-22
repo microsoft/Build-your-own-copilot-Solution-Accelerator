@@ -13,6 +13,9 @@ var resourceGroupLocation = resourceGroup().location
 var resourceGroupName = resourceGroup().name
 var subscriptionId  = subscription().subscriptionId
 
+@description('Optional. The tags to apply to all deployed Azure resources.')
+param tags resourceInput<'Microsoft.Resources/resourceGroups@2025-04-01'>.tags = {}
+
 var solutionLocation = resourceGroupLocation
 var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/'
 
@@ -23,6 +26,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
   name: 'default'
   properties: {
     tags: {
+      ...tags
       TemplateName: 'Research Assistant'
       CreatedBy: createdBy
     }
