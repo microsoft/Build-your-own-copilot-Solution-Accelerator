@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "747821310607869699"
+      "templateHash": "2652022627147722044"
     }
   },
   "parameters": {
@@ -17,6 +17,108 @@
       "maxLength": 16,
       "metadata": {
         "description": "Required. A unique prefix for all resources in this deployment. This should be 3-20 characters long:"
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "azd": {
+          "type": "location"
+        },
+        "description": "Required. Azure region for all services."
+      }
+    },
+    "gptModelDeploymentType": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "allowedValues": [
+        "Standard",
+        "GlobalStandard"
+      ],
+      "minLength": 1,
+      "metadata": {
+        "description": "Optional. GPT model deployment type:"
+      }
+    },
+    "gptModelName": {
+      "type": "string",
+      "defaultValue": "gpt-35-turbo",
+      "metadata": {
+        "description": "Optional. Name of the GPT model to deploy:"
+      }
+    },
+    "gptModelVersion": {
+      "type": "string",
+      "defaultValue": "0125",
+      "metadata": {
+        "description": "Optional. Version of the GPT model to deploy:"
+      }
+    },
+    "gptDeploymentCapacity": {
+      "type": "int",
+      "defaultValue": 30,
+      "minValue": 10,
+      "metadata": {
+        "description": "Optional. Capacity of the GPT deployment:"
+      }
+    },
+    "embeddingModelDeploymentType": {
+      "type": "string",
+      "defaultValue": "GlobalStandard",
+      "allowedValues": [
+        "Standard",
+        "GlobalStandard"
+      ],
+      "minLength": 1,
+      "metadata": {
+        "description": "Optional. GPT model deployment type:"
+      }
+    },
+    "embeddingModel": {
+      "type": "string",
+      "defaultValue": "text-embedding-ada-002",
+      "allowedValues": [
+        "text-embedding-ada-002"
+      ],
+      "minLength": 1,
+      "metadata": {
+        "description": "Optional. Name of the Text Embedding model to deploy:"
+      }
+    },
+    "embeddingModelVersion": {
+      "type": "string",
+      "defaultValue": "2",
+      "metadata": {
+        "description": "Optional. Version of the Text Embedding model to deploy:"
+      }
+    },
+    "embeddingDeploymentCapacity": {
+      "type": "int",
+      "defaultValue": 45,
+      "minValue": 10,
+      "metadata": {
+        "description": "Optional. Capacity of the Embedding Model deployment."
+      }
+    },
+    "containerRegistryHostname": {
+      "type": "string",
+      "defaultValue": "byoaiacontainerreg.azurecr.io",
+      "metadata": {
+        "description": "Optional. The Container Registry hostname where the docker images for the webapp are located."
+      }
+    },
+    "containerImageName": {
+      "type": "string",
+      "defaultValue": "byoaia-app",
+      "metadata": {
+        "description": "Optional. The Container Image Name to deploy on the webapp."
+      }
+    },
+    "containerImageTag": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "Optional. The Container Image Tag to deploy on the webapp."
       }
     },
     "enableTelemetry": {
@@ -103,10 +205,7 @@
   },
   "variables": {
     "solutionSuffix": "[toLower(trim(replace(replace(replace(replace(replace(replace(format('{0}{1}', parameters('solutionName'), parameters('solutionUniqueText')), '-', ''), '_', ''), '.', ''), '/', ''), ' ', ''), '*', '')))]",
-    "resourceGroupLocation": "[resourceGroup().location]",
     "resourceGroupName": "[resourceGroup().name]",
-    "subscriptionId": "[subscription().subscriptionId]",
-    "solutionLocation": "[variables('resourceGroupLocation')]",
     "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/",
     "allTags": "[union(createObject('azd-env-name', parameters('solutionName')), parameters('tags'))]",
     "replicaRegionPairs": {
@@ -155,6 +254,30 @@
     "storageAccountName": "[format('st{0}', variables('solutionSuffix'))]",
     "aiSearchName": "[format('srch-{0}', variables('solutionSuffix'))]",
     "keyVaultName": "[format('kv-{0}', variables('solutionSuffix'))]",
+    "aiModelDeployments": [
+      {
+        "name": "[parameters('gptModelName')]",
+        "format": "OpenAI",
+        "model": "[parameters('gptModelName')]",
+        "sku": {
+          "name": "[parameters('gptModelDeploymentType')]",
+          "capacity": "[parameters('gptDeploymentCapacity')]"
+        },
+        "version": "[parameters('gptModelVersion')]",
+        "raiPolicyName": "Microsoft.Default"
+      },
+      {
+        "name": "[parameters('embeddingModel')]",
+        "format": "OpenAI",
+        "model": "[parameters('embeddingModel')]",
+        "sku": {
+          "name": "[parameters('embeddingModelDeploymentType')]",
+          "capacity": "[parameters('embeddingDeploymentCapacity')]"
+        },
+        "version": "[parameters('embeddingModelVersion')]",
+        "raiPolicyName": "Microsoft.Default"
+      }
+    ],
     "openAiResourceName": "[format('oai-{0}', variables('solutionSuffix'))]",
     "cognitiveServicesResourceName": "[format('ais-{0}', variables('solutionSuffix'))]",
     "aihubworkspaceName": "[format('hub-{0}', variables('solutionSuffix'))]",
@@ -210,7 +333,10 @@
       "existing": true,
       "type": "Microsoft.CognitiveServices/accounts",
       "apiVersion": "2023-05-01",
-      "name": "[variables('cognitiveServicesResourceName')]"
+      "name": "[variables('cognitiveServicesResourceName')]",
+      "dependsOn": [
+        "azAIMultiServiceAccount"
+      ]
     },
     "userAssignedIdentity": {
       "type": "Microsoft.Resources/deployments",
@@ -226,7 +352,7 @@
             "value": "[variables('userAssignedIdentityResourceName')]"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "tags": {
             "value": "[parameters('tags')]"
@@ -906,7 +1032,7 @@
             "value": "[coalesce(parameters('vmSize'), 'Standard_DS2_v2')]"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "tags": {
             "value": "[variables('allTags')]"
@@ -19829,7 +19955,7 @@
             "value": "[variables('storageAccountName')]"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "enableTelemetry": {
             "value": "[parameters('enableTelemetry')]"
@@ -25595,10 +25721,10 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "network",
         "userAssignedIdentity"
       ]
@@ -27983,7 +28109,7 @@
             "value": "2.50.0"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "managedIdentities": {
             "value": {
@@ -28563,7 +28689,7 @@
             "value": "[variables('keyVaultName')]"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "tags": {
             "value": "[parameters('tags')]"
@@ -31829,33 +31955,35 @@
           "deployments": {
             "value": [
               {
+                "name": "[variables('aiModelDeployments')[0].name]",
                 "model": {
-                  "format": "OpenAI",
-                  "name": "gpt-35-turbo",
-                  "version": "0125"
+                  "format": "[variables('aiModelDeployments')[0].format]",
+                  "name": "[variables('aiModelDeployments')[0].name]",
+                  "version": "[variables('aiModelDeployments')[0].version]"
                 },
-                "name": "gpt-35-turbo",
+                "raiPolicyName": "[variables('aiModelDeployments')[0].raiPolicyName]",
                 "sku": {
-                  "capacity": 30,
-                  "name": "Standard"
+                  "name": "[variables('aiModelDeployments')[0].sku.name]",
+                  "capacity": "[variables('aiModelDeployments')[0].sku.capacity]"
                 }
               },
               {
+                "name": "[variables('aiModelDeployments')[1].name]",
                 "model": {
-                  "format": "OpenAI",
-                  "name": "text-embedding-ada-002",
-                  "version": "2"
+                  "format": "[variables('aiModelDeployments')[1].format]",
+                  "name": "[variables('aiModelDeployments')[1].name]",
+                  "version": "[variables('aiModelDeployments')[1].version]"
                 },
-                "name": "text-embedding-ada-002",
+                "raiPolicyName": "[variables('aiModelDeployments')[1].raiPolicyName]",
                 "sku": {
-                  "capacity": 45,
-                  "name": "GlobalStandard"
+                  "name": "[variables('aiModelDeployments')[1].sku.name]",
+                  "capacity": "[variables('aiModelDeployments')[1].sku.capacity]"
                 }
               }
             ]
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-{0}', variables('openAiResourceName')), 'customNetworkInterfaceName', format('nic-{0}', variables('openAiResourceName')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'openai-dns-zone-group', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)).outputs.resourceId.value))), 'service', 'account', 'subnetResourceId', reference('network').outputs.subnetPrivateEndpointsResourceId.value))), createObject('value', createArray()))]",
           "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]"
@@ -34141,7 +34269,7 @@
             "value": "[variables('cognitiveServicesResourceName')]"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "disableLocalAuth": {
             "value": false
@@ -36436,7 +36564,7 @@
             "value": "2.52.0"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "managedIdentities": {
             "value": {
@@ -37030,7 +37158,7 @@
             "value": "Hub"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "connections": {
             "value": [
@@ -41467,6 +41595,7 @@
       "dependsOn": [
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').notebook)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').machineLearningServices)]",
+        "azAIMultiServiceAccount",
         "azOpenAI",
         "azSearchService",
         "keyvault",
@@ -41498,7 +41627,7 @@
             "value": "Project"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           }
         },
         "template": {
@@ -45891,7 +46020,7 @@
     "webServerFarm": {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "deploy_app_service_plan_serverfarm",
+      "name": "[take(format('avm.res.web.serverfarm.{0}', variables('webServerFarmResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -45902,7 +46031,7 @@
             "value": "[variables('webServerFarmResourceName')]"
           },
           "location": {
-            "value": "[resourceGroup().location]"
+            "value": "[parameters('location')]"
           },
           "reserved": {
             "value": true
@@ -45910,6 +46039,7 @@
           "kind": {
             "value": "linux"
           },
+          "diagnosticSettings": "[if(parameters('enableMonitoring'), createObject('value', createArray(createObject('workspaceResourceId', reference('logAnalyticsWorkspace').outputs.resourceId.value))), createObject('value', null()))]",
           "skuName": "[if(or(parameters('enableScalability'), parameters('enableRedundancy')), createObject('value', 'P1v3'), createObject('value', 'B3'))]",
           "skuCapacity": "[if(parameters('enableScalability'), createObject('value', 3), createObject('value', 1))]",
           "zoneRedundant": "[if(parameters('enableRedundancy'), createObject('value', true()), createObject('value', false()))]"
@@ -46447,7 +46577,10 @@
             }
           }
         }
-      }
+      },
+      "dependsOn": [
+        "logAnalyticsWorkspace"
+      ]
     },
     "logAnalyticsWorkspace": {
       "condition": "[parameters('enableMonitoring')]",
@@ -46467,7 +46600,7 @@
             "value": "[parameters('tags')]"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "enableTelemetry": {
             "value": "[parameters('enableTelemetry')]"
@@ -49570,7 +49703,7 @@
             "value": "[variables('ApplicationInsightsName')]"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "kind": {
             "value": "web"
@@ -50304,7 +50437,7 @@
             "value": "[parameters('tags')]"
           },
           "location": {
-            "value": "[variables('solutionLocation')]"
+            "value": "[parameters('location')]"
           },
           "kind": {
             "value": "app,linux,container"
@@ -50314,7 +50447,7 @@
           },
           "siteConfig": {
             "value": {
-              "linuxFxVersion": "DOCKER|byoaiacontainerreg.azurecr.io/byoaia-app:latest",
+              "linuxFxVersion": "[format('DOCKER|{0}/{1}:{2}', parameters('containerRegistryHostname'), parameters('containerImageName'), parameters('containerImageTag'))]",
               "minTlsVersion": "1.2"
             }
           },
@@ -50323,7 +50456,7 @@
               {
                 "name": "appsettings",
                 "properties": {
-                  "solutionLocation": "[variables('solutionLocation')]",
+                  "location": "[parameters('location')]",
                   "AZURE_SEARCH_SERVICE": "[reference('azSearchService').outputs.name.value]",
                   "AZURE_SEARCH_INDEX": "articlesindex",
                   "AZURE_SEARCH_INDEX_ARTICLES": "articlesindex",
