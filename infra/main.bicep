@@ -731,9 +731,9 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
 
 // Reference existing Azure OpenAI resource
 resource existingOpenAI 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
-  name: cognitiveServicesResourceName
+  name: openAiResourceName
   dependsOn: [
-    azAIMultiServiceAccount
+    azOpenAI
   ]
 }
 
