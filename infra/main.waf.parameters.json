@@ -33,7 +33,7 @@
       "value": "${AZURE_OPENAI_EMBEDDING_MODEL_CAPACITY}"
     },
     "containerImageTag": {
-      "value": "${AZURE_ENV_IMAGETAG=latest_waf}"
+      "value": "${AZURE_ENV_IMAGETAG=latest}"
     },
     "enableTelemetry": {
       "value": "${AZURE_ENV_ENABLE_TELEMETRY}"
