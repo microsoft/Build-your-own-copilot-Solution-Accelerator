@@ -95,7 +95,7 @@ The next steps are optional for additional learning. Not required to deploy the 
 
 ### Deploying with AZD
 
-Once you've opened the project in [Codespaces](#github-codespaces), [Dev Containers](#vs-code-dev-containers), or [locally](#local-environment), you can deploy it to Azure by following these steps:
+Once you've opened the project [locally](#local-environment), you can deploy it to Azure by following these steps:
 
 1. Login to Azure:
 
