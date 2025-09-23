@@ -51,7 +51,7 @@ param embeddingModelVersion string = '2'
 param embeddingDeploymentCapacity int = 45
 
 @description('Optional. The Container Registry hostname where the docker images for the webapp are located.')
-param containerRegistryHostname string = 'byoaiacontainerreg.azurecr.io'
+param containerRegistryHostname string = 'racontainerreg52.azurecr.io'
 
 @description('Optional. The Container Image Name to deploy on the webapp.')
 param containerImageName string = 'byoaia-app'
@@ -245,7 +245,6 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
     enableTelemetry: enableTelemetry
     tags: tags
     managedIdentities: { 
-      systemAssigned: true
       userAssignedResourceIds: [ userAssignedIdentity!.outputs.resourceId ]
     }
     accessTier: 'Hot'
@@ -365,7 +364,7 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
     disableLocalAuth: false
     hostingMode: 'default'
     managedIdentities: {
-      systemAssigned: true
+      userAssignedResourceIds: [ userAssignedIdentity!.outputs.resourceId ]
     }
     networkRuleSet: {
       bypass: 'AzureServices'
@@ -420,7 +419,7 @@ module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     }
     runOnce: true
     primaryScriptUri: '${baseUrl}infra/scripts/copy_kb_files.sh'
-    arguments: '${storageAccountName} ${containerName} ${baseUrl}'
+    arguments: '${storageAccountName} ${containerName} ${baseUrl} ${userAssignedIdentity.outputs.clientId}'
     tags: tags
     timeout: 'PT1H'
     retentionInterval: 'PT1H'
@@ -749,7 +748,6 @@ module hubStorageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0
     enableTelemetry: enableTelemetry
     tags: tags
     managedIdentities: { 
-      systemAssigned: true
       userAssignedResourceIds: [ userAssignedIdentity!.outputs.resourceId ]
     }
     accessTier: 'Hot'

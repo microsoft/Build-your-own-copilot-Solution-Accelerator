@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "5318771381289513238"
+      "templateHash": "14147264028499128204"
     }
   },
   "parameters": {
@@ -102,7 +102,7 @@
     },
     "containerRegistryHostname": {
       "type": "string",
-      "defaultValue": "byoaiacontainerreg.azurecr.io",
+      "defaultValue": "racontainerreg52.azurecr.io",
       "metadata": {
         "description": "Optional. The Container Registry hostname where the docker images for the webapp are located."
       }
@@ -19966,7 +19966,6 @@
           },
           "managedIdentities": {
             "value": {
-              "systemAssigned": true,
               "userAssignedResourceIds": [
                 "[reference('userAssignedIdentity').outputs.resourceId.value]"
               ]
@@ -25722,10 +25721,10 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "network",
         "userAssignedIdentity"
       ]
@@ -25758,7 +25757,9 @@
           },
           "managedIdentities": {
             "value": {
-              "systemAssigned": true
+              "userAssignedResourceIds": [
+                "[reference('userAssignedIdentity').outputs.resourceId.value]"
+              ]
             }
           },
           "networkRuleSet": {
@@ -28126,7 +28127,7 @@
             "value": "[format('{0}infra/scripts/copy_kb_files.sh', variables('baseUrl'))]"
           },
           "arguments": {
-            "value": "[format('{0} {1} {2}', variables('storageAccountName'), variables('containerName'), variables('baseUrl'))]"
+            "value": "[format('{0} {1} {2} {3}', variables('storageAccountName'), variables('containerName'), variables('baseUrl'), reference('userAssignedIdentity').outputs.clientId.value)]"
           },
           "tags": {
             "value": "[parameters('tags')]"
@@ -37161,7 +37162,6 @@
           },
           "managedIdentities": {
             "value": {
-              "systemAssigned": true,
               "userAssignedResourceIds": [
                 "[reference('userAssignedIdentity').outputs.resourceId.value]"
               ]
