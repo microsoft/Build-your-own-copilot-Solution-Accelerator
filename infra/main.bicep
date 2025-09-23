@@ -442,7 +442,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
     location: location
     tags: tags
     sku: 'standard'
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: 'Enabled' // keeping it as enabled for draftflow deployment
     networkAcls: {
       defaultAction: 'Allow'
     }
@@ -631,7 +631,7 @@ module azOpenAI 'br/public:avm/res/cognitive-services/account:0.10.1' = {
           }
         ]
       : []
-    publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: 'Enabled'
   }
 }
 
@@ -739,6 +739,44 @@ resource existingOpenAI 'Microsoft.CognitiveServices/accounts@2023-05-01' existi
 
 var openaiKey = existingOpenAI.listKeys().key1
 
+// ========== Storage Account for Hub ========== //
+var hubStorageAccountName = 'sthub${solutionSuffix}'
+module hubStorageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' = {
+  name: take('avm.res.storage.storage-account.${hubStorageAccountName}', 64)
+  params: {
+    name: hubStorageAccountName
+    location: location
+    enableTelemetry: enableTelemetry
+    tags: tags
+    managedIdentities: { 
+      systemAssigned: true
+      userAssignedResourceIds: [ userAssignedIdentity!.outputs.resourceId ]
+    }
+    accessTier: 'Hot'
+    supportsHttpsTrafficOnly: true
+    allowSharedKeyAccess: true    // needed by scripts if MI fails
+    allowBlobPublicAccess: true
+    publicNetworkAccess: 'Enabled'
+    minimumTlsVersion: 'TLS1_2'
+    networkAcls: {
+      bypass: 'AzureServices, Logging, Metrics'
+      defaultAction: 'Allow'
+      virtualNetworkRules: []
+    }
+    blobServices: {
+      corsRules: []
+      deleteRetentionPolicyEnabled: false
+    }
+    roleAssignments: [
+      {
+        principalId: userAssignedIdentity.outputs.principalId
+        roleDefinitionIdOrName: 'Storage Blob Data Contributor'
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
+
 var aihubworkspaceName = 'hub-${solutionSuffix}'
 var openAIKeyUri = azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri
 module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
@@ -749,7 +787,7 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
     sku: 'Basic'
     // Non-required parameters
     associatedKeyVaultResourceId: keyvault.outputs.resourceId
-    associatedStorageAccountResourceId: storageAccountModule.outputs.resourceId
+    associatedStorageAccountResourceId: hubStorageAccountModule.outputs.resourceId
     kind: 'Hub'
     location: location
     // workspaceHubConfig: {
