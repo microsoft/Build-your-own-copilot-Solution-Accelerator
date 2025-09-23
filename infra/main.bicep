@@ -775,6 +775,10 @@ module hubStorageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0
   }
 }
 
+// ========== AVM AI Hub Workspace ========== //
+// Creates a Hub-level Azure ML workspace with KV, Storage, identities, 
+// and private endpoint configuration.
+
 var aihubworkspaceName = 'hub-${solutionSuffix}'
 var openAIKeyUri = azOpenAI.outputs.exportedSecrets['AZURE-OPENAI-KEY'].secretUri
 module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
@@ -788,10 +792,6 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
     associatedStorageAccountResourceId: hubStorageAccountModule.outputs.resourceId
     kind: 'Hub'
     location: location
-    // workspaceHubConfig: {
-    //   additionalWorkspaceStorageAccounts: '<additionalWorkspaceStorageAccounts>'
-    //   defaultWorkspaceResourceGroup: '<defaultWorkspaceResourceGroup>'
-    // }
     connections: [
       {
         name: 'Azure_OpenAI'
@@ -859,6 +859,9 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
       : []
   }
 }
+
+// ========== AVM AI Project Workspace ========== //
+// Creates a Project-level Azure ML workspace linked to the Hub workspace.
 
 var aiProjectworkspaceName = 'proj-${solutionSuffix}'
 module aiProjectWorkspace 'br/public:avm/res/machine-learning-services/workspace:0.13.0' = {
