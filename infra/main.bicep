@@ -83,12 +83,12 @@ param enableRedundancy bool = false
 @description('Optional. Admin username for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
 @secure()
 //param vmAdminUsername string = take(newGuid(), 20)
-param vmAdminUsername string?
+param vmAdminUsername string = ''
 
 @description('Optional. Admin password for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
 @secure()
 //param vmAdminPassword string = newGuid()
-param vmAdminPassword string?
+param vmAdminPassword string = ''
 
 @description('Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true.')
 param vmSize string = 'Standard_DS2_v2' // Default VM size
