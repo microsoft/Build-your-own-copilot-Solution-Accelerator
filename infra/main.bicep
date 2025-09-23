@@ -275,6 +275,7 @@ resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces
 
 var logAnalyticsWorkspaceResourceId = useExistingLogAnalytics  ? existingLogAnalyticsWorkspaceId  : logAnalyticsWorkspace!.outputs.resourceId
 
+@description('Tag, Created by user name')
 param createdBy string = contains(deployer(), 'userPrincipalName')? split(deployer().userPrincipalName, '@')[0]: deployer().objectId
 
 // ========== Resource Group Tag ========== //
