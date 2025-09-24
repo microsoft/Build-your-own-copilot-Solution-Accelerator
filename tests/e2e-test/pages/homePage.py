@@ -56,8 +56,9 @@ class HomePage(BasePage):
         else:
             self.page.locator(self.CLEAR_CHAT_HISTORY_MENU).click()
             self.page.locator(self.CLEAR_CHAT_HISTORY).click()
+            self.page.wait_for_timeout(4000)
             self.page.get_by_role("button", name="Clear All").click()
-            self.page.wait_for_timeout(10000)
+            self.page.wait_for_timeout(6000)
             self.page.locator(self.HIDE_CHAT_HISTORY_BUTTON).click()
             self.page.wait_for_load_state('networkidle')
             self.page.wait_for_timeout(2000)

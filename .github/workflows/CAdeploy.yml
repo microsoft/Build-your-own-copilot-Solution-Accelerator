@@ -141,10 +141,13 @@ jobs:
           # Install azd (Azure Developer CLI) - required by process_sample_data.sh
           curl -fsSL https://aka.ms/install-azd.sh | bash
 
+          # Generate current timestamp in desired format: YYYY-MM-DDTHH:MM:SS.SSSSSSSZ
+            current_date=$(date -u +"%Y-%m-%dT%H:%M:%S.%7NZ")
+          
           DEPLOY_OUTPUT=$(az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters location=${{ env.AZURE_LOCATION }} azureAiServiceLocation=${{ env.AZURE_LOCATION }} solutionName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptModelCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} imageTag=${{ env.IMAGE_TAG }} createdBy="Pipeline" \
+            --parameters location=${{ env.AZURE_LOCATION }} azureAiServiceLocation=${{ env.AZURE_LOCATION }} solutionName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptModelCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} imageTag=${{ env.IMAGE_TAG }} createdBy="Pipeline" tags="{'SecurityControl':'Ignore','Purpose':'Deploying and Cleaning Up Resources for Validation','CreatedDate':'$current_date'}" \
             --query "properties.outputs" -o json)
 
           echo "Deployment output: $DEPLOY_OUTPUT"
