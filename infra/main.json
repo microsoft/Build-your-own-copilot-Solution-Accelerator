@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "5697823549145490212"
+      "templateHash": "9256656329528314291"
     }
   },
   "parameters": {
@@ -1023,15 +1023,9 @@
           "logAnalyticsWorkSpaceResourceId": {
             "value": "[reference('logAnalyticsWorkspace').outputs.resourceId.value]"
           },
-          "vmAdminUsername": {
-            "value": "[coalesce(parameters('vmAdminUsername'), 'JumpboxAdminUser')]"
-          },
-          "vmAdminPassword": {
-            "value": "[coalesce(parameters('vmAdminPassword'), 'JumpboxAdminP@ssw0rd1234!')]"
-          },
-          "vmSize": {
-            "value": "[coalesce(parameters('vmSize'), 'Standard_DS2_v2')]"
-          },
+          "vmAdminUsername": "[if(empty(parameters('vmAdminUsername')), createObject('value', 'JumpboxAdminUser'), createObject('value', parameters('vmAdminUsername')))]",
+          "vmAdminPassword": "[if(empty(parameters('vmAdminPassword')), createObject('value', 'JumpboxAdminP@ssw0rd1234!'), createObject('value', parameters('vmAdminPassword')))]",
+          "vmSize": "[if(empty(parameters('vmSize')), createObject('value', 'Standard_DS2_v2'), createObject('value', parameters('vmSize')))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -25721,9 +25715,9 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "network",
         "userAssignedIdentity"
@@ -47366,8 +47360,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').machineLearningServices)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').notebook)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').machineLearningServices)]",
         "azOpenAI",
         "azSearchService",
         "hubStorageAccountModule",
