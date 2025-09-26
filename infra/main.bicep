@@ -8,7 +8,7 @@ param solutionName string = 'resassistant'
 
 @metadata({ azd: { type: 'location' } })
 @description('Required. Azure region for all services.')
-param location string
+param location string = resourceGroup().location
 
 @minLength(1)
 @description('Optional. GPT model deployment type:')
@@ -51,7 +51,7 @@ param embeddingModelVersion string = '2'
 param embeddingDeploymentCapacity int = 45
 
 @description('Optional. The Container Registry hostname where the docker images for the webapp are located.')
-param containerRegistryHostname string = 'racontainerreg52.azurecr.io'
+param containerRegistryHostname string = 'byoaiacontainerreg.azurecr.io'
 
 @description('Optional. The Container Image Name to deploy on the webapp.')
 param containerImageName string = 'byoaia-app'
