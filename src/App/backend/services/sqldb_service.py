@@ -17,8 +17,7 @@ server = config.SQL_SERVER
 database = config.SQL_DATABASE
 username = config.SQL_USERNAME
 password = config.SQL_PASSWORD
-mid_id = config.MID_ID
-
+mid_id = config.SQL_MID_ID
 
 def dict_cursor(cursor):
     """

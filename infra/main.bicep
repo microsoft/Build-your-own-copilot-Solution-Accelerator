@@ -388,6 +388,19 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
   }
 }
 
+// ========== SQL Operations User Assigned Identity ========== //
+// Dedicated identity for backend SQL operations with limited permissions (db_datareader, db_datawriter)
+var sqlUserAssignedIdentityResourceName = 'id-sql-${solutionSuffix}'
+module sqlUserAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = {
+  name: take('avm.res.managed-identity.user-assigned-identity.${sqlUserAssignedIdentityResourceName}', 64)
+  params: {
+    name: sqlUserAssignedIdentityResourceName
+    location: solutionLocation
+    tags: tags
+    enableTelemetry: enableTelemetry
+  }
+}
+
 // ========== Network Module ========== //
 module network 'modules/network.bicep' = if (enablePrivateNetworking) {
   name: take('network-${solutionSuffix}-deployment', 64)
@@ -509,6 +522,11 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
         principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Key Vault Administrator'
       }
+      {
+        principalId: sqlUserAssignedIdentity.outputs.principalId
+        principalType: 'ServicePrincipal'
+        roleDefinitionIdOrName: 'Key Vault Secrets User'
+      }
     ]
     secrets: [
         {
@@ -538,6 +556,10 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
         {
           name: 'AZURE-SEARCH-ENDPOINT'
           value: 'https://${aiSearchName}.search.windows.net'
+        }
+        {
+          name: 'SQLDB-USER-MID'
+          value: sqlUserAssignedIdentity.outputs.clientId
         }
     ]
     enableTelemetry: enableTelemetry
@@ -918,6 +940,7 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
       systemAssigned: true
       userAssignedResourceIds: [
         userAssignedIdentity.outputs.resourceId
+        sqlUserAssignedIdentity.outputs.resourceId
       ]
     }
     primaryUserAssignedIdentityResourceId: userAssignedIdentity.outputs.resourceId
@@ -988,7 +1011,7 @@ module webSite 'modules/web-sites.bicep' = {
     name: webSiteResourceName
     tags: tags
     location: solutionLocation
-    managedIdentities: { userAssignedResourceIds: [userAssignedIdentity!.outputs.resourceId] }
+    managedIdentities: { userAssignedResourceIds: [userAssignedIdentity!.outputs.resourceId, sqlUserAssignedIdentity!.outputs.resourceId] }
     kind: 'app,linux,container'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
     siteConfig: {
@@ -1035,7 +1058,7 @@ module webSite 'modules/web-sites.bicep' = {
           AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: collectionName
           AZURE_COSMOSDB_DATABASE: cosmosDbDatabaseName
           AZURE_COSMOSDB_ENABLE_FEEDBACK: azureCosmosDbEnableFeedback
-          SQLDB_USER_MID: userAssignedIdentity.outputs.clientId
+          SQLDB_USER_MID: sqlUserAssignedIdentity.outputs.clientId
           AZURE_AI_SEARCH_ENDPOINT: 'https://${aiSearchName}.search.windows.net'
           AZURE_SQL_SYSTEM_PROMPT: functionAppSqlPrompt
           AZURE_CALL_TRANSCRIPT_SYSTEM_PROMPT: functionAppCallTranscriptSystemPrompt
@@ -1226,6 +1249,12 @@ output MANAGEDIDENTITY_WEBAPP_NAME string = userAssignedIdentity.outputs.name
 
 @description('Client ID of the managed identity used by the web app.')
 output MANAGEDIDENTITY_WEBAPP_CLIENTID string = userAssignedIdentity.outputs.clientId
+
+@description('Name of the managed identity used for SQL database operations.')
+output MANAGEDIDENTITY_SQL_NAME string = sqlUserAssignedIdentity.outputs.name
+
+@description('Client ID of the managed identity used for SQL database operations.')
+output MANAGEDIDENTITY_SQL_CLIENTID string = sqlUserAssignedIdentity.outputs.clientId
 @description('Name of the AI Search service.')
 output AI_SEARCH_SERVICE_NAME string = aiSearchName 
 
@@ -1367,3 +1396,6 @@ output USE_AI_PROJECT_CLIENT string = useAIProjectClientFlag
 
 @description('Indicates whether the internal stream should be used.')
 output USE_INTERNAL_STREAM string = useInternalStream
+
+@description('The client ID of the managed identity.')
+output AZURE_CLIENT_ID string = userAssignedIdentity.outputs.clientId

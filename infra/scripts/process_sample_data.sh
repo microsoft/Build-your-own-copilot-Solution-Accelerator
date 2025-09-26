@@ -8,8 +8,8 @@
 	keyvaultName="$5"
 	sqlServerName="$6"
 	SqlDatabaseName="$7"
-	webAppManagedIdentityClientId="$8"
-	webAppManagedIdentityDisplayName="$9"
+	sqlManagedIdentityClientId="$8"
+	sqlManagedIdentityDisplayName="$9"
 	aiSearchName="${10}"
 	aif_resource_id="${11}"
 
@@ -316,12 +316,14 @@
 		SqlDatabaseName=$(azd env get-value SQLDB_DATABASE)
 	fi
 
-	if [ -z "$webAppManagedIdentityClientId" ]; then
-		webAppManagedIdentityClientId=$(azd env get-value MANAGEDIDENTITY_WEBAPP_CLIENTID)
+	if [ -z "$sqlManagedIdentityClientId" ]; then
+		# Use the SQL-specific managed identity for database operations with limited permissions
+		sqlManagedIdentityClientId=$(azd env get-value MANAGEDIDENTITY_SQL_CLIENTID)
 	fi
 
-	if [ -z "$webAppManagedIdentityDisplayName" ]; then
-		webAppManagedIdentityDisplayName=$(azd env get-value MANAGEDIDENTITY_WEBAPP_NAME)
+	if [ -z "$sqlManagedIdentityDisplayName" ]; then
+		# Use the SQL-specific managed identity for database operations with limited permissions
+		sqlManagedIdentityDisplayName=$(azd env get-value MANAGEDIDENTITY_SQL_NAME)
 	fi
 
 	if [ -z "$aiSearchName" ]; then
@@ -335,8 +337,8 @@
 	azSubscriptionId=$(azd env get-value AZURE_SUBSCRIPTION_ID)
 
 	# Check if all required arguments are provided
-	if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$webAppManagedIdentityClientId" ] || [ -z "$webAppManagedIdentityDisplayName" ] || [ -z "$aiSearchName" ] || [ -z "$aif_resource_id" ]; then
-		echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName> <aiSearchName> <aiFoundryResourceGroup> <aif_resource_id>"
+	if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$sqlManagedIdentityClientId" ] || [ -z "$sqlManagedIdentityDisplayName" ] || [ -z "$aiSearchName" ] || [ -z "$aif_resource_id" ]; then
+		echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <sqlManagedIdentityClientId> <sqlManagedIdentityDisplayName> <aiSearchName> <aiFoundryResourceGroup> <aif_resource_id>"
 		exit 1
 	fi
 
@@ -437,8 +439,8 @@
 	# Call create_sql_user_and_role.sh
 	echo "Running create_sql_user_and_role.sh"
 	bash infra/scripts/add_user_scripts/create_sql_user_and_role.sh "$sqlServerName.database.windows.net" "$SqlDatabaseName" '[
-		{"clientId":"'"$webAppManagedIdentityClientId"'", "displayName":"'"$webAppManagedIdentityDisplayName"'", "role":"db_datareader"},
-		{"clientId":"'"$webAppManagedIdentityClientId"'", "displayName":"'"$webAppManagedIdentityDisplayName"'", "role":"db_datawriter"}
+		{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datareader"},
+		{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datawriter"}
 	]'
 	if [ $? -ne 0 ]; then
 		echo "Error: create_sql_user_and_role.sh failed."
