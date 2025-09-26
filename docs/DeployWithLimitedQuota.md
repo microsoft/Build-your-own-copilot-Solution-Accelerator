@@ -76,7 +76,7 @@ azd up
 
 ⚠️ **Important**: Using reduced TPM limits may impact application performance:
 
-For optimal performance, we recommend maintaining at least 150,000 TPM for GPT models when possible.
+For optimal performance, we recommend maintaining at least 200,000 TPM for GPT models when possible.
 
 ## Additional Resources
 
