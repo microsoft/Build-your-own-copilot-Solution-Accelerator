@@ -8,9 +8,6 @@
     "location": {
       "value": "${AZURE_LOCATION}"
     },
-    "azureAiServiceLocation": {
-      "value": "${AZURE_ENV_OPENAI_LOCATION}"
-    },
     "gptModelDeploymentType": {
       "value": "${AZURE_OPENAI_MODEL_DEPLOYMENT_TYPE}"
     },

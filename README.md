@@ -95,35 +95,10 @@ The next steps are optional for additional learning. Not required to deploy the 
 
 ### Deploying with AZD
 
-Once you've opened the project [locally](#local-environment), you can deploy it to Azure by following these steps:
+Follow the quick deploy steps on the deployment guide to deploy this solution to your own Azure subscription.
 
-1. Login to Azure:
-
-    ```shell
-    azd auth login
-    ```
-
-    #### To authenticate with Azure Developer CLI (`azd`), use the following command with your **Tenant ID**:
-
-    ```sh
-    azd auth login --tenant-id <tenant-id>
-    ```
-
-2. Provision and deploy all the resources:
-
-    ```shell
-    azd up
-    ```
-
-3. Provide an `azd` environment name (e.g., "ckmapp").
-4. Select a subscription from your Azure account and choose a location that has quota for all the resources. 
-    -- This deployment will take *15-20 minutes* to provision the resources in your account and set up the solution with sample data.
-    - If you encounter an error or timeout during deployment, changing the location may help, as there could be availability constraints for the resources.
-
-5. Once the deployment has completed successfully, open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service, and get the app URL from `Default domain`.
-
-6. If you are done trying out the application, you can delete the resources by running `azd down`.
-
+[Click here to launch the deployment guide](./docs/DeploymentGuide.md)
+<br/><br/>
 
 
 <br/>
