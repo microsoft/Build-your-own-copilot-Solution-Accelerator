@@ -4,6 +4,7 @@
 storageAccount="$1"
 fileSystem="$2"
 baseUrl="$3"
+managedIdentityClientId="$4"
 
 zipFileName1="demodata1.zip"
 extractedFolder1="demodata"
@@ -29,7 +30,8 @@ unzip /mnt/azscripts/azscriptinput/"$zipFileName2" -d /mnt/azscripts/azscriptinp
 unzip /mnt/azscripts/azscriptinput/"$zipFileName3" -d /mnt/azscripts/azscriptinput/"$extractedFolder3"
 
 # Authenticate with Azure using managed identity
-az login --identity
+# az login --identity
+az login --identity --client-id ${managedIdentityClientId}
 # Using az storage blob upload-batch to upload files with managed identity authentication, as the az storage fs directory upload command is not working with managed identity authentication.
 az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder1" --source /mnt/azscripts/azscriptinput/"$extractedFolder1" --auth-mode login --pattern '*'
 az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder2" --source /mnt/azscripts/azscriptinput/"$extractedFolder2" --auth-mode login --pattern '*'

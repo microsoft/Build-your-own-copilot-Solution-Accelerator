@@ -1,4 +1,7 @@
 # AI Foundry Deployment Guide 
+
+> **Note for WAF-Aligned Production Deployment:** For WAF-aligned production deployment, please login to the virtual machine first, then follow the steps below.
+
 Please follow the steps below to configure the Prompt flow endpoint in App service configuration.
 
 ## Step 1: OpenAI Foundry Project

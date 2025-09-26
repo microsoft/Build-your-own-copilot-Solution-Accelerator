@@ -1,6 +1,7 @@
 # Get Azure Key Vault Client
 key_vault_name = 'kv_to-be-replaced'
 
+import os
 from azure.ai.ml import MLClient
 from azure.ai.ml.entities import (
     Hub,
@@ -13,12 +14,14 @@ from azure.keyvault.secrets import SecretClient
 
 from azure_credential_utils import get_azure_credential
 
+azure_client_id = os.environ.get("AZURE_CLIENT_ID")
+
 def get_secrets_from_kv(kv_name, secret_name):
     # Set the name of the Azure Key Vault
     key_vault_name = kv_name
 
     # Create a credential object using the default Azure credentials
-    credential = get_azure_credential()
+    credential = get_azure_credential(client_id=azure_client_id)
 
     # Create a secret client object using the credential and Key Vault name
     secret_client = SecretClient(
@@ -37,6 +40,7 @@ aihub_name = 'ai_hub_' + 'solutionname_to-be-replaced'
 project_name = 'ai_project_' + 'solutionname_to-be-replaced'
 deployment_name = 'draftsinference-' + 'solutionname_to-be-replaced'
 solutionLocation = 'solutionlocation_to-be-replaced'
+# azure_client_id = "azureclientid_to-be-replaced"
 
 # Open AI Details
 open_ai_key = get_secrets_from_kv(key_vault_name, "AZURE-OPENAI-KEY")
@@ -61,7 +65,7 @@ ai_search_res_name = (
 ai_search_key = get_secrets_from_kv(key_vault_name, "AZURE-SEARCH-KEY")
 
 # Credentials
-credential = get_azure_credential()
+credential = get_azure_credential(client_id=azure_client_id)
 
 # Create an ML client
 ml_client = MLClient(

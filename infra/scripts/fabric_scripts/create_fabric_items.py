@@ -3,13 +3,14 @@ import base64
 import json
 import requests
 import pandas as pd
+import os
 
-
-
+azure_client_id = os.environ.get("AZURE_CLIENT_ID")
 # credential = DefaultAzureCredential()
 
 from azure_credential_utils import get_azure_credential
-credential = get_azure_credential()
+
+credential = get_azure_credential(client_id=azure_client_id)
 
 cred = credential.get_token('https://api.fabric.microsoft.com/.default')
 token = cred.token
