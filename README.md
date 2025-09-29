@@ -77,7 +77,7 @@ https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-regi
 
    [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FBuild-your-own-copilot-Solution-Accelerator%2Fbyoc-researcher%2Finfra%2Fmain.json)
 
-3. You will need to select an Azure Subscription, create/select a Resource group, Region, and a unique Solution Prefix.
+3. You will need to select an Azure Subscription, create/select a Resource group, Region, and a unique Solution Name.
 
    ![image](docs/images/readMe/armDeployment.png)
 
@@ -95,7 +95,7 @@ The next steps are optional for additional learning. Not required to deploy the 
 
 ### **Deploying with Azure Developer CLI (AZD)**
 
-Follow the quick deploy steps on the deployment guide to deploy this solution to your own Azure subscription.
+Follow the quick deploy steps on the deployment guide to deploy this solution using Azure Developer CLI(AZD) to your own Azure subscription.
 
 [Click here to launch the deployment guide](./docs/DeploymentGuide.md)
 <br/><br/>

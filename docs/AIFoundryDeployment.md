@@ -1,6 +1,6 @@
 # AI Foundry Deployment Guide 
 
-> **Note for WAF-Aligned Production Deployment:** For WAF-aligned production deployment, please login to the virtual machine first, then follow the steps below.
+> **Important**: For WAF-aligned production deployments, ensure you are logged into the designated virtual machine before proceeding the below steps.
 
 Please follow the steps below to configure the Prompt flow endpoint in App service configuration.
 
