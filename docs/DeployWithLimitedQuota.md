@@ -1,6 +1,6 @@
 # Deploying with Limited OpenAI Quota
 
-This document provides guidance on deploying the Build your own copilot Solution Accelerator when you have limited Azure OpenAI model quota available.
+This document provides guidance on deploying the Build Your Own Copilot Solution Accelerator when you have limited Azure OpenAI model quota available.
 
 ## Overview
 
@@ -46,7 +46,7 @@ Update the values on lines 77-78 in [`infra/main.bicep`](../infra/main.bicep) to
   azd: {
     type: 'location'
     usageName: [
-        'OpenAI.GlobalStandard.gpt4.1, 50'           // Changed from 200
+        'OpenAI.GlobalStandard.gpt-4o-mini, 50'           // Changed from 200
         'OpenAI.GlobalStandard.text-embedding-ada-002, 50'  // Changed from 80
     ]
   }
