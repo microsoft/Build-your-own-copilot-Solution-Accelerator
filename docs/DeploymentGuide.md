@@ -1,18 +1,5 @@
 # Deployment Guide 
 
-## **Pre-requisites**
-
-To deploy this solution accelerator, ensure you have access to an [Azure subscription](https://azure.microsoft.com/free/) with the necessary permissions to create **resource groups, resources, and assign roles at the resource group level***. Follow the steps in  [Azure Account Set Up](AzureAccountSetUp.md) 
-
-Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/table) page and select a **region** where the following services are available: 
-
-- [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) 
-- [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) 
-- [Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/) 
-
-
-Depending on your subscription quota and capacity, you can [adjust quota settings](QuotaCheck.md) to better meet your specific needs. You can also [adjust the deployment parameters](CustomizingAzdParameters.md) for additional optimization.
-­
 ## Deployment Options
 
 ### Sandbox or WAF Aligned Deployment Options
@@ -28,12 +15,12 @@ For **production deployments**, the repository also provides [`main.waf.paramete
   - Logging, monitoring, and diagnostics enabled by default
   - Resource tagging and cost management recommendations
 
+---
+
 **How to choose your deployment configuration:**
 
 * Use the default `main.parameters.json` file for a **sandbox/dev environment**
 * For a **WAF-aligned, production-ready deployment**, copy the contents of `main.waf.parameters.json` into `main.parameters.json` before running `azd up`
-
----
 
 ### VM Credentials Configuration
 
