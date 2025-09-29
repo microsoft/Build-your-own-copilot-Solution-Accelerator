@@ -533,20 +533,6 @@ If the server was deleted, either restore it (if possible) or update references 
 </details>
 
 
-<details><summary><b>DeploymentCanceled(user.canceled)</b></summary>
-
-- Indicates the deployment was manually canceled by the user (Portal, CLI, or pipeline).
-
-- Check deployment history and logs to confirm who/when it was canceled.
-
-- If accidental, retry the deployment.
-
-- For pipelines, ensure no automation or timeout is triggering cancellation.
-
-- Use deployment locks or retry logic to prevent accidental cancellations.
-
-</details>
-
 <details><summary><b>BadRequest - DatabaseAccount is in a failed provisioning state because the previous attempt to create it was not successful</b></summary>
 
 - This error occurs when a user attempts to redeploy a resource that previously failed to provision.
