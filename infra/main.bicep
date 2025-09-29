@@ -557,10 +557,6 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
           name: 'AZURE-SEARCH-ENDPOINT'
           value: 'https://${aiSearchName}.search.windows.net'
         }
-        {
-          name: 'SQLDB-USER-MID'
-          value: sqlUserAssignedIdentity.outputs.clientId
-        }
     ]
     enableTelemetry: enableTelemetry
   }
@@ -940,7 +936,6 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
       systemAssigned: true
       userAssignedResourceIds: [
         userAssignedIdentity.outputs.resourceId
-        sqlUserAssignedIdentity.outputs.resourceId
       ]
     }
     primaryUserAssignedIdentityResourceId: userAssignedIdentity.outputs.resourceId
