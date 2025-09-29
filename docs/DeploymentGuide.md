@@ -69,7 +69,7 @@ Once you've opened the project in locally, you can deploy it to Azure by followi
     -- This deployment will take *15-20 minutes* to provision the resources in your account and set up the solution with sample data.
     - If you encounter an error or timeout during deployment, changing the location may help, as there could be availability constraints for the resources.
 
-5. When Deployment is complete, follow steps in [AI Foundry Deployment guide](./docs/AIFoundryDeployment.md) to configure the grant draft proposal endpoint.
+5. When Deployment is complete, follow steps in [AI Foundry Deployment guide](./AIFoundryDeployment.md) to configure the grant draft proposal endpoint.
 
 5. Open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service, and get the app URL from `Default domain`.
 
