@@ -1,4 +1,40 @@
 # AI Foundry Deployment Guide 
+
+> **Important**: For WAF-aligned production deployments, ensure you are logged into the designated virtual machine before proceeding with the below steps.
+
+### Accessing the Virtual Machine via Azure Bastion
+
+For WAF-aligned production environments, you must perform these deployment steps from within the designated virtual machine. Follow these steps to connect:
+
+1. **Navigate to your Virtual Machine in Azure Portal**
+   - Go to [Azure Portal](https://portal.azure.com/)
+   - Search for "Virtual machines" in the top search bar
+   - Click on your VM named `vm-{your-deployment-prefix}` or similar
+
+2. **Connect using Azure Bastion**
+   - In your VM overview page, click the **Connect** button
+   - Select **Connect via Bastion** from the dropdown menu
+
+3. **Enter your credentials**
+   - **Username**: Use the admin username you specified during the initial deployment (e.g., `JumpboxAdminUser` or the custom username you provided)
+   - **Password**: Enter the admin password you set during the deployment process
+   - **Authentication Type**: Select "Password" 
+   - Click **Connect**
+
+4. **Wait for connection**
+   - The Bastion connection may take 30-60 seconds to establish
+   - A new browser tab will open with your VM desktop environment
+
+5. **Open a web browser in the VM**
+   - Once connected to the VM, open Microsoft Edge or Chrome
+   - Navigate to [AI Foundry](https://ai.azure.com/) from within the VM
+   - Sign in with your Azure credentials
+
+> **Troubleshooting**: If you forgot your VM credentials:
+> - You can reset the password in Azure Portal: Go to your VM → **Reset password** in the left menu
+> - Or contact your Azure administrator for assistance
+---
+
 Please follow the steps below to configure the Prompt flow endpoint in App service configuration.
 
 ## Step 1: OpenAI Foundry Project

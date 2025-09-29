@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: byoc-research-assistant
+
+requiredVersions:
+  azd: ">= 1.15.0"
+
+metadata:
+  template: byoc-research-assistant@1.0
