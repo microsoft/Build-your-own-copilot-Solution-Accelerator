@@ -463,7 +463,7 @@ var aiRelatedDnsZoneIndices = [
 @batchSize(5)
 module avmPrivateDnsZones 'br/public:avm/res/network/private-dns-zone:0.7.1' = [
   for (zone, i) in privateDnsZones: if (enablePrivateNetworking && (empty(existingFoundryProjectResourceId) || !contains(aiRelatedDnsZoneIndices, i))) {
-    name: 'dns-zone-${i}'
+    name: 'avm.res.network.private-dns-zone.${split(zone, '.')[1]}'
     params: {
       name: zone
       tags: tags
@@ -914,7 +914,11 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
     connectionPolicy: 'Redirect'
     databases: [
       {
-        availabilityZone: enableRedundancy ? 1 : -1
+        zoneRedundant: enableRedundancy ? true : false
+        // When enableRedundancy is true (zoneRedundant=true), set availabilityZone to -1
+        // to let Azure automatically manage zone placement across multiple zones.
+        // When enableRedundancy is false, also use -1 (no specific zone assignment).
+        availabilityZone: -1
         collation: 'SQL_Latin1_General_CP1_CI_AS'
         diagnosticSettings: enableMonitoring
           ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }]
