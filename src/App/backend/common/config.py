@@ -145,7 +145,6 @@ class Config:
         self.MID_ID = os.getenv("AZURE_CLIENT_ID")
         self.SQL_MID_ID = os.getenv("SQLDB_USER_MID")
 
-
         # System Prompts
         self.SQL_SYSTEM_PROMPT = os.environ.get("AZURE_SQL_SYSTEM_PROMPT")
         self.CALL_TRANSCRIPT_SYSTEM_PROMPT = os.environ.get(

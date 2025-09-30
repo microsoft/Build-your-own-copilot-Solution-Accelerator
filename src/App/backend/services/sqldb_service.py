@@ -19,6 +19,7 @@ username = config.SQL_USERNAME
 password = config.SQL_PASSWORD
 mid_id = config.SQL_MID_ID
 
+
 def dict_cursor(cursor):
     """
     Converts rows fetched by the cursor into a list of dictionaries.
