@@ -113,8 +113,6 @@ openai_api_key  = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-KEY")
 openai_api_base = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-ENDPOINT")
 openai_api_version = get_secrets_from_kv(key_vault_name,"AZURE-OPENAI-PREVIEW-API-VERSION")
 
-azure_client_id = get_secrets_from_kv(key_vault_name, "AZURE-CLIENT-ID")
-
 # Set up your Azure Text Analytics service and credentials  
 COG_SERVICES_NAME = get_secrets_from_kv(key_vault_name,"COG-SERVICES-NAME")
 COG_SERVICES_ENDPOINT = get_secrets_from_kv(key_vault_name,"COG-SERVICES-ENDPOINT")
