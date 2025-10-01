@@ -23,6 +23,7 @@ jobs:
         id: validation 
         with: 
             useDevContainer: false
+            validateTests: ''
         env: 
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} 
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }} 
