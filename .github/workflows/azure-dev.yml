@@ -26,6 +26,8 @@ jobs:
       - name: Validate Azure Template
         uses: microsoft/template-validation-action@v0.4.2
         id: validation
+        with: 
+          useDevContainer: false
         env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
