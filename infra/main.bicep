@@ -287,6 +287,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
       TemplateName: 'Client Advisor'
       Type: enablePrivateNetworking ? 'WAF' : 'Non-WAF'
       CreatedBy: createdBy
+      DeploymentName: deployment().name
     }
   }
 }
@@ -1367,3 +1368,6 @@ output USE_AI_PROJECT_CLIENT string = useAIProjectClientFlag
 
 @description('Indicates whether the internal stream should be used.')
 output USE_INTERNAL_STREAM string = useInternalStream
+
+@description('The subscription ID where the resources are deployed.')
+output AZURE_SUBSCRIPTION_ID string = subscription().subscriptionId
