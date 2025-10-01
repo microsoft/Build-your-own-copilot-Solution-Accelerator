@@ -81,10 +81,13 @@
 		aif_resource_name=$(basename "$aif_account_resource_id")
 		# Extract resource group from the AI Foundry account resource ID
 		aif_resource_group=$(echo "$aif_account_resource_id" | sed -n 's|.*/resourceGroups/\([^/]*\)/.*|\1|p')
-		
+		# Extract subscription ID from the AI Foundry account resource ID
+    	aif_subscription_id=$(echo "$aif_account_resource_id" | sed -n 's|.*/subscriptions/\([^/]*\)/.*|\1|p')
+
 		original_foundry_public_access=$(az cognitiveservices account show \
 			--name "$aif_resource_name" \
 			--resource-group "$aif_resource_group" \
+			--subscription "$aif_subscription_id" \
 			--query "properties.publicNetworkAccess" \
 			--output tsv)
 		if [ -z "$original_foundry_public_access" ] || [ "$original_foundry_public_access" = "null" ]; then
