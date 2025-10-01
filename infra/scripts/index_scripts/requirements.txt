@@ -4,10 +4,10 @@ openai
 pypdf
 # pyodbc
 # tiktoken
-msal[broker]==1.33.0
+msal[broker]==1.34.0
 azure-identity
 azure-ai-textanalytics
-azure-search-documents==11.6.0b12
+azure-search-documents==11.7.0b1
 azure-keyvault-secrets
 pandas
 datetime
