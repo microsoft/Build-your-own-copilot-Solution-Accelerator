@@ -899,7 +899,7 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
     connectionPolicy: 'Redirect'
     databases: [
       {
-        zoneRedundant: enableRedundancy ? true : false
+        zoneRedundant: enableRedundancy
         // When enableRedundancy is true (zoneRedundant=true), set availabilityZone to -1
         // to let Azure automatically manage zone placement across multiple zones.
         // When enableRedundancy is false, also use -1 (no specific zone assignment).
