@@ -172,9 +172,9 @@ jobs:
           echo "SQL_SERVER_NAME=$SQL_SERVER_NAME" >> $GITHUB_ENV
           export SQL_DATABASE=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_DATABASE.value')
           echo "SQL_DATABASE=$SQL_DATABASE" >> $GITHUB_ENV
-          export CLIENT_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_WEBAPP_CLIENTID.value')
+          export CLIENT_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_SQL_CLIENTID.value')
           echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
-          export CLIENT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_WEBAPP_NAME.value')
+          export CLIENT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_SQL_NAME.value')
           echo "CLIENT_NAME=$CLIENT_NAME" >> $GITHUB_ENV
           export RG_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.resourcE_GROUP_NAME.value')
           echo "RG_NAME=$RG_NAME" >> $GITHUB_ENV
