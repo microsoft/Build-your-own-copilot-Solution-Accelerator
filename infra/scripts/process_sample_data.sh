@@ -72,10 +72,13 @@
 		aif_resource_name=$(basename "$aif_account_resource_id")
 		# Extract resource group from the AI Foundry account resource ID
 		aif_resource_group=$(echo "$aif_account_resource_id" | sed -n 's|.*/resourceGroups/\([^/]*\)/.*|\1|p')
-		
+		# Extract subscription ID from the AI Foundry account resource ID
+    	aif_subscription_id=$(echo "$aif_account_resource_id" | sed -n 's|.*/subscriptions/\([^/]*\)/.*|\1|p')
+
 		original_foundry_public_access=$(az cognitiveservices account show \
 			--name "$aif_resource_name" \
 			--resource-group "$aif_resource_group" \
+			--subscription "$aif_subscription_id" \
 			--query "properties.publicNetworkAccess" \
 			--output tsv)
 		if [ -z "$original_foundry_public_access" ] || [ "$original_foundry_public_access" = "null" ]; then
@@ -321,18 +324,6 @@ if az deployment group show --resource-group "$resourceGroupName" --name "$deplo
 			--query "properties.outputs.sqldB_SERVER_NAME.value" -o tsv)
 		echo "SQL Server Name (from outputs): $sqlServerName"
 
-		SqlDatabaseName=$(az deployment group show \
-			--name "$deploymentName" \
-			--resource-group "$resourceGroupName" \
-			--query "properties.outputs.sqldB_DATABASE.value" -o tsv)
-		echo "SQL Database Name (from outputs): $SqlDatabaseName"
-
-		webAppManagedIdentityClientId=$(az deployment group show \
-			--name "$deploymentName" \
-			--resource-group "$resourceGroupName" \
-			--query "properties.outputs.managedidentitY_WEBAPP_CLIENTID.value" -o tsv)
-		echo "Web App Managed Identity Client ID (from outputs): $webAppManagedIdentityClientId"
-
 		webAppManagedIdentityDisplayName=$(az deployment group show \
 			--name "$deploymentName" \
 			--resource-group "$resourceGroupName" \
@@ -375,8 +366,8 @@ else
 fi  
 
 	# Check if all required arguments are provided
-	if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$webAppManagedIdentityClientId" ] || [ -z "$webAppManagedIdentityDisplayName" ] || [ -z "$aiSearchName" ] || [ -z "$aif_resource_id" ]; then
-		echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName> <aiSearchName> <aiFoundryResourceGroup> <aif_resource_id>"
+	if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$sqlManagedIdentityClientId" ] || [ -z "$sqlManagedIdentityDisplayName" ] || [ -z "$aiSearchName" ] || [ -z "$aif_resource_id" ]; then
+		echo "Usage: $0 <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <sqlManagedIdentityClientId> <sqlManagedIdentityDisplayName> <aiSearchName> <aiFoundryResourceGroup> <aif_resource_id>"
 		exit 1
 	fi
 
@@ -477,8 +468,8 @@ fi
 	# Call create_sql_user_and_role.sh
 	echo "Running create_sql_user_and_role.sh"
 	bash infra/scripts/add_user_scripts/create_sql_user_and_role.sh "$sqlServerName.database.windows.net" "$SqlDatabaseName" '[
-		{"clientId":"'"$webAppManagedIdentityClientId"'", "displayName":"'"$webAppManagedIdentityDisplayName"'", "role":"db_datareader"},
-		{"clientId":"'"$webAppManagedIdentityClientId"'", "displayName":"'"$webAppManagedIdentityDisplayName"'", "role":"db_datawriter"}
+		{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datareader"},
+		{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datawriter"}
 	]'
 	if [ $? -ne 0 ]; then
 		echo "Error: create_sql_user_and_role.sh failed."

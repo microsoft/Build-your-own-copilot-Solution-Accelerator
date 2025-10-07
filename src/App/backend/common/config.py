@@ -142,7 +142,8 @@ class Config:
         self.SQL_USERNAME = os.getenv("SQLDB_USERNAME")
         self.SQL_PASSWORD = os.getenv("SQLDB_PASSWORD")
         self.ODBC_DRIVER = "{ODBC Driver 18 for SQL Server}"
-        self.MID_ID = os.getenv("SQLDB_USER_MID")
+        self.MID_ID = os.getenv("AZURE_CLIENT_ID")
+        self.SQL_MID_ID = os.getenv("SQLDB_USER_MID")
 
         # System Prompts
         self.SQL_SYSTEM_PROMPT = os.environ.get("AZURE_SQL_SYSTEM_PROMPT")
