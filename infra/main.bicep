@@ -272,6 +272,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
       TemplateName: 'Client Advisor'
       Type: enablePrivateNetworking ? 'WAF' : 'Non-WAF'
       CreatedBy: createdBy
+      DeploymentName: deployment().name
     }
   }
 }
@@ -1381,5 +1382,3 @@ output USE_AI_PROJECT_CLIENT string = useAIProjectClientFlag
 @description('Indicates whether the internal stream should be used.')
 output USE_INTERNAL_STREAM string = useInternalStream
 
-@description('The client ID of the managed identity.')
-output AZURE_CLIENT_ID string = userAssignedIdentity.outputs.clientId

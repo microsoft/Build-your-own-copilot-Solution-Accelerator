@@ -2,16 +2,6 @@
 
 	# Variables
 	resourceGroupName="$1"
-	cosmosDbAccountName="$2"
-	storageAccount="$3"
-	fileSystem="$4"
-	keyvaultName="$5"
-	sqlServerName="$6"
-	SqlDatabaseName="$7"
-	sqlManagedIdentityClientId="$8"
-	sqlManagedIdentityDisplayName="$9"
-	aiSearchName="${10}"
-	aif_resource_id="${11}"
 
 	# Global variables to track original network access states
 	original_storage_public_access=""
@@ -20,6 +10,7 @@
 	aif_resource_group=""
 	aif_account_resource_id=""
 	# Add global variable for SQL Server public access
+
 	original_sql_public_access=""
 	created_sql_allow_all_firewall_rule="false"
 	original_full_range_rule_present="false"
@@ -289,55 +280,90 @@
 	# Set up trap to ensure cleanup happens on exit
 	trap cleanup_on_exit EXIT INT TERM
 
-	# get parameters from azd env, if not provided
-	if [ -z "$resourceGroupName" ]; then
-		resourceGroupName=$(azd env get-value RESOURCE_GROUP_NAME)
+	if az account show &> /dev/null; then
+    echo "Already authenticated with Azure."
+	else
+		echo "Authenticating with Azure CLI..."
+		az login
+		echo "Authenticated with Azure CLI."
 	fi
 
+	# fetch all variables from deployment outputs
 
-	if [ -z "$cosmosDbAccountName" ]; then
-		cosmosDbAccountName=$(azd env get-value COSMOSDB_ACCOUNT_NAME)
-	fi
+	deploymentName=$(az group show --name "$resourceGroupName" --query "tags.DeploymentName" -o tsv) 
+	echo "Deployment Name (from tag): $deploymentName"
 
-	if [ -z "$storageAccount" ]; then
-		storageAccount=$(azd env get-value STORAGE_ACCOUNT_NAME)
-	fi
+if az deployment group show --resource-group "$resourceGroupName" --name "$deploymentName" &>/dev/null; then
+		cosmosDbAccountName=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.cosmosdB_ACCOUNT_NAME.value" -o tsv)
+		echo "Cosmos DB Account Name (from outputs): $cosmosDbAccountName"
 
-	if [ -z "$fileSystem" ]; then
-		fileSystem=$(azd env get-value STORAGE_CONTAINER_NAME)
-	fi
+		storageAccount=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.storagE_ACCOUNT_NAME.value" -o tsv)
+		echo "Storage Account Name (from outputs): $storageAccount"
 
-	if [ -z "$keyvaultName" ]; then
-		keyvaultName=$(azd env get-value KEY_VAULT_NAME)
-	fi
+		fileSystem=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.storagE_CONTAINER_NAME.value" -o tsv)
+		echo "Storage Container Name (from outputs): $fileSystem"
 
-	if [ -z "$sqlServerName" ]; then
-		sqlServerName=$(azd env get-value SQLDB_SERVER_NAME)
-	fi
+		keyvaultName=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.keY_VAULT_NAME.value" -o tsv)
+		echo "Key Vault Name (from outputs): $keyvaultName"
 
-	if [ -z "$SqlDatabaseName" ]; then
-		SqlDatabaseName=$(azd env get-value SQLDB_DATABASE)
-	fi
+		sqlServerName=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.sqldB_SERVER_NAME.value" -o tsv)
+		echo "SQL Server Name (from outputs): $sqlServerName"
 
-	if [ -z "$sqlManagedIdentityClientId" ]; then
-		# Use the SQL-specific managed identity for database operations with limited permissions
-		sqlManagedIdentityClientId=$(azd env get-value MANAGEDIDENTITY_SQL_CLIENTID)
-	fi
+		webAppManagedIdentityDisplayName=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.managedidentitY_WEBAPP_NAME.value" -o tsv)
+		echo "Web App Managed Identity Display Name (from outputs): $webAppManagedIdentityDisplayName"
 
-	if [ -z "$sqlManagedIdentityDisplayName" ]; then
-		# Use the SQL-specific managed identity for database operations with limited permissions
-		sqlManagedIdentityDisplayName=$(azd env get-value MANAGEDIDENTITY_SQL_NAME)
-	fi
+		aiSearchName=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.aI_SEARCH_SERVICE_NAME.value" -o tsv)
+		echo "AI Search Service Name (from outputs): $aiSearchName"
 
-	if [ -z "$aiSearchName" ]; then
-		aiSearchName=$(azd env get-value AI_SEARCH_SERVICE_NAME)
-	fi
+		aif_resource_id=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.aI_FOUNDRY_RESOURCE_ID.value" -o tsv)
+		echo "AI Foundry Resource ID (from outputs): $aif_resource_id"
 
-	if [ -z "$aif_resource_id" ]; then
-		aif_resource_id=$(azd env get-value AI_FOUNDRY_RESOURCE_ID)
-	fi
+		azSubscriptionId=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.azurE_SUBSCRIPTION_ID.value" -o tsv)
 
-	azSubscriptionId=$(azd env get-value AZURE_SUBSCRIPTION_ID)
+		echo "Azure Subscription ID (from outputs): $azSubscriptionId"
+else
+    echo "Deployment does NOT exist in resource group $resourceGroupName."
+    echo "Please enter required values manually."
+
+    read -rp "Enter Cosmos DB Account Name: " cosmosDbAccountName
+    read -rp "Enter Storage Account Name: " storageAccount
+    read -rp "Enter Storage Container/File System Name: " fileSystem
+	read -rp "Enter SQL Server Name: " sqlServerName
+	read -rp "Enter SQL Database Name: " SqlDatabaseName
+    read -rp "Enter Key Vault Name: " keyvaultName
+	read -rp "Enter Web App Managed Identity Display Name: " webAppManagedIdentityDisplayName
+	read -rp "Enter Web App Managed Identity Client ID: " webAppManagedIdentityClientId
+    read -rp "Enter AI Search Service Name: " aiSearchName
+    read -rp "Enter AI Foundry Resource ID: " aif_resource_id
+    read -rp "Enter Azure Subscription ID: " azSubscriptionId
+fi  
 
 	# Check if all required arguments are provided
 	if  [ -z "$resourceGroupName" ] || [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$sqlManagedIdentityClientId" ] || [ -z "$sqlManagedIdentityDisplayName" ] || [ -z "$aiSearchName" ] || [ -z "$aif_resource_id" ]; then
