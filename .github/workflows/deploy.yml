@@ -191,7 +191,7 @@ jobs:
           azd config set defaults.subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         
           
-          # Set additional parameters for tags
+          # Set additional parameters
           azd env set AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           azd env set AZURE_ENV_OPENAI_LOCATION="${{ env.AZURE_LOCATION }}"
           azd env set AZURE_RESOURCE_GROUP="${{ env.RESOURCE_GROUP_NAME }}"
@@ -212,8 +212,8 @@ jobs:
           # Extract values from azd output (adjust these based on actual output variable names)
           export AI_FOUNDRY_RESOURCE_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.AI_FOUNDRY_RESOURCE_ID // empty')
           echo "AI_FOUNDRY_RESOURCE_ID=$AI_FOUNDRY_RESOURCE_ID" >> $GITHUB_ENV
-          export SEARCH_SERVICE_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.AI_SEARCH_SERVICE_NAME // empty')
-          echo "SEARCH_SERVICE_NAME=$SEARCH_SERVICE_NAME" >> $GITHUB_ENV
+          export AI_SEARCH_SERVICE_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.AI_SEARCH_SERVICE_NAME // empty')
+          echo "AI_SEARCH_SERVICE_NAME=$AI_SEARCH_SERVICE_NAME" >> $GITHUB_ENV
           export COSMOS_DB_ACCOUNT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.COSMOS_DB_ACCOUNT_NAME // empty')
           echo "COSMOS_DB_ACCOUNT_NAME=$COSMOS_DB_ACCOUNT_NAME" >> $GITHUB_ENV
           export STORAGE_ACCOUNT=$(echo "$DEPLOY_OUTPUT" | jq -r '.STORAGE_ACCOUNT_NAME // empty')
@@ -247,93 +247,27 @@ jobs:
 
           sleep 30
 
-      - name: Deploy Infra and Import Sample Data
+      - name: Run Post-Deployment Script
+        id: post_deploy
+        env: 
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         run: |
           set -e
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-
           echo "Running post-deployment script..."
-
-          bash ./infra/scripts/add_cosmosdb_access.sh \
+          bash ./infra/scripts/process_sample_data.sh \
             "${{ env.RG_NAME }}" \
             "${{ env.COSMOS_DB_ACCOUNT_NAME }}" \
-            "${{ secrets.AZURE_CLIENT_ID }}"
-
-          bash ./infra/scripts/copy_kb_files.sh \
             "${{ env.STORAGE_ACCOUNT }}" \
             "${{ env.STORAGE_CONTAINER }}" \
-            "" \
-            "${{ secrets.AZURE_CLIENT_ID }}"
-
-          bash ./infra/scripts/run_create_index_scripts.sh \
             "${{ env.KEYVAULT_NAME }}" \
-            "" \
-            "${{ secrets.AZURE_CLIENT_ID }}" \
-            "${{ env.RG_NAME }}" \
             "${{ env.SQL_SERVER_NAME }}" \
-            "${{ env.SEARCH_SERVICE_NAME }}" \
-            "${{ env.AI_FOUNDRY_RESOURCE_ID}}"
-
-
-          user_roles_json='[
-            {"clientId":"${{ env.CLIENT_ID }}","displayName":"${{ env.CLIENT_NAME }}","role":"db_datareader"},
-            {"clientId":"${{ env.CLIENT_ID }}","displayName":"${{ env.CLIENT_NAME }}","role":"db_owner"}
-          ]'
-
-          bash ./infra/scripts/add_user_scripts/create_sql_user_and_role.sh \
-            "${{ env.SQL_SERVER_NAME }}.database.windows.net" \
             "${{ env.SQL_DATABASE }}" \
-            "$user_roles_json" \
-            "${{ secrets.AZURE_CLIENT_ID }}"
-          echo "=== Post-Deployment Script Completed Successfully ==="
+            "${{ env.CLIENT_ID }}" \
+            "${{ env.CLIENT_NAME }}" \
+            "${{ env.AI_SEARCH_SERVICE_NAME }}" \
+            "${{ env.AI_FOUNDRY_RESOURCE_ID }}" \
 
-      - name: Get AI Services name and store in variable
-        if: always() && steps.generate_env_name.outcome == 'success'
-        id: get_ai_services_name
-        run: |
-          set -e
-          echo "Getting AI Services name..."
-          # Get the AI Services name
-          ai_services_name=$(az cognitiveservices account list -g ${{ env.RESOURCE_GROUP_NAME }} --query "[0].name" -o tsv)
-          if [ -z "$ai_services_name" ]; then
-            echo "No AI Services resource found in the resource group."
-            echo "AI_SERVICES_NAME=" >> $GITHUB_OUTPUT
-          else
-            echo "AI_SERVICES_NAME=${ai_services_name}" >> $GITHUB_OUTPUT
-            echo "Found AI Services resource: $ai_services_name"
-          fi
-
-      - name: List KeyVaults and Store in Array
-        if: always() && steps.generate_env_name.outcome == 'success'
-        id: list_keyvaults
-        run: |
-          set -e
-          echo "Listing all KeyVaults in the resource group ${{ env.RESOURCE_GROUP_NAME }}..."
-          # Get the list of KeyVaults in the specified resource group
-          keyvaults=$(az resource list --resource-group ${{ env.RESOURCE_GROUP_NAME }} --query "[?type=='Microsoft.KeyVault/vaults'].name" -o tsv)
-
-          if [ -z "$keyvaults" ]; then
-            echo "No KeyVaults found in resource group ${{ env.RESOURCE_GROUP_NAME }}."
-            echo "KEYVAULTS=[]" >> $GITHUB_OUTPUT  # If no KeyVaults found, set an empty array
-          else
-            echo "KeyVaults found: $keyvaults"
-
-            # Format the list into an array with proper formatting (no trailing comma)
-            keyvault_array="["
-            first=true
-            for kv in $keyvaults; do
-              if [ "$first" = true ]; then
-                keyvault_array="$keyvault_array\"$kv\""
-                first=false
-              else
-                keyvault_array="$keyvault_array,\"$kv\""
-              fi
-            done
-            keyvault_array="$keyvault_array]"
-
-            # Output the formatted array and save it to the job output
-            echo "KEYVAULTS=$keyvault_array" >> $GITHUB_OUTPUT
-          fi
       - name: Set Deployment Status
         id: deployment_status
         if: always()
@@ -391,8 +325,6 @@ jobs:
             azd env set AZURE_RESOURCE_GROUP "${{ env.RESOURCE_GROUP_NAME }}"
             azd env set AZURE_SUBSCRIPTION_ID "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
             azd env set AZURE_ENV_OPENAI_LOCATION="${{ env.AZURE_LOCATION }}"
-            azd env set AZURE_ENV_USE_WAF_ALIGNED_ARCHITECTURE=false
-
           fi
 
       - name: Delete deployment using azd
