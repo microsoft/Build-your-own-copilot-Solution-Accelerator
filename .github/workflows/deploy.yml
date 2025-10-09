@@ -35,7 +35,7 @@ jobs:
   deploy:
     runs-on: ubuntu-22.04
     outputs:
-      RESOURCE_GROUP_NAME: ${{ steps.generate_env_name.outputs.RESOURCE_GROUP_NAME }}
+      RESOURCE_GROUP_NAME: ${{ steps.check_create_rg.outputs.RESOURCE_GROUP_NAME }}
       WEBAPP_URL: ${{ steps.get_output.outputs.WEBAPP_URL }}
       DEPLOYMENT_SUCCESS: ${{ steps.deployment_status.outputs.SUCCESS }}
       AI_SERVICES_NAME: ${{ steps.get_ai_services_name.outputs.AI_SERVICES_NAME }}
