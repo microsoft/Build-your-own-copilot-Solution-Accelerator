@@ -159,6 +159,17 @@ jobs:
           else TAG="latest_Non-waf"; fi
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
           echo "Image Tag: $TAG"
+
+      - name: Generate Unique Environment Name
+        id: generate_env_name
+        run: |
+          COMMON_PART="macae"
+          TIMESTAMP=$(date +%s)
+          UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 6)
+          UNIQUE_ENV_NAME="${COMMON_PART}${UPDATED_TIMESTAMP}"
+          echo "ENV_NAME=${UNIQUE_ENV_NAME}" >> $GITHUB_ENV
+          echo "Generated Environment Name: ${UNIQUE_ENV_NAME}"
+          echo "ENV_NAME=${UNIQUE_ENV_NAME}" >> $GITHUB_OUTPUT
       - name: Deploy using azd up and extract values
         id: get_output
         run: |
