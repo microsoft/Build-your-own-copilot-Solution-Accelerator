@@ -42,6 +42,7 @@ jobs:
       KEYVAULTS: ${{ steps.list_keyvaults.outputs.KEYVAULTS }}
       AZURE_LOCATION: ${{ steps.set_region.outputs.AZURE_LOCATION }}
       SOLUTION_PREFIX: ${{ steps.generate_solution_prefix.outputs.SOLUTION_PREFIX }}
+      ENV_NAME: ${{ steps.generate_env_name.outputs.ENV_NAME }}
 
     steps:
       - name: Checkout
@@ -163,7 +164,7 @@ jobs:
       - name: Generate Unique Environment Name
         id: generate_env_name
         run: |
-          COMMON_PART="macae"
+          COMMON_PART="pslc"
           TIMESTAMP=$(date +%s)
           UPDATED_TIMESTAMP=$(echo $TIMESTAMP | tail -c 6)
           UNIQUE_ENV_NAME="${COMMON_PART}${UPDATED_TIMESTAMP}"
@@ -355,229 +356,72 @@ jobs:
       CA_WEB_URL: ${{ needs.deploy.outputs.WEBAPP_URL }}
     secrets: inherit
 
-  cleanup:
-    if: always()
+  cleanup-deployment:
+    if: always() && needs.deploy.outputs.RESOURCE_GROUP_NAME != ''
     needs: [deploy, e2e-test]
     runs-on: ubuntu-latest
     env:
       RESOURCE_GROUP_NAME: ${{ needs.deploy.outputs.RESOURCE_GROUP_NAME }}
-      AI_SERVICES_NAME: ${{ needs.deploy.outputs.AI_SERVICES_NAME }}
-      KEYVAULTS: ${{ needs.deploy.outputs.KEYVAULTS }}
       AZURE_LOCATION: ${{ needs.deploy.outputs.AZURE_LOCATION }}
-      SOLUTION_PREFIX: ${{ needs.deploy.outputs.SOLUTION_PREFIX }}
+      ENV_NAME: ${{ needs.deploy.outputs.ENV_NAME }}
     steps:
-      - name: Setup Azure CLI
-        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Azure Developer CLI
+        run: |
+          curl -fsSL https://aka.ms/install-azd.sh | sudo bash
+          azd version
 
       - name: Login to Azure
         run: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
-          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          
-          # Set environment variables for azd authentication
-          echo "AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
-          echo "AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
-          echo "AZURE_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          azd auth login --client-id ${{ secrets.AZURE_CLIENT_ID }} --client-secret ${{ secrets.AZURE_CLIENT_SECRET }} --tenant-id ${{ secrets.AZURE_TENANT_ID }}
+          azd config set defaults.subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Cleanup using azd down
-        if: always()
+      - name: Select Environment
         run: |
-          set -e  
-          echo "Cleaning up resources using azd down..."
-          
-          # Install azd (Azure Developer CLI)
-          curl -fsSL https://aka.ms/install-azd.sh | bash
-          
-          # Check if resource group exists before attempting cleanup
-          echo "Resource group name: ${{ env.RESOURCE_GROUP_NAME }}"
-          if [ -z "${{ env.RESOURCE_GROUP_NAME }}" ]; then
-            echo "Resource group name is empty. Skipping cleanup."
-            exit 0
-          fi
-          
-          rg_exists=$(az group exists --name "${{ env.RESOURCE_GROUP_NAME }}")
-          if [ "$rg_exists" = "true" ]; then
-            echo "Resource group exists. Cleaning up with azd down..."
-            
-            # Extract environment name from resource group name (remove rg- prefix)
-            ENV_NAME=$(echo "${{ env.RESOURCE_GROUP_NAME }}" | sed 's/^rg-//')
-            
-            # azd authentication environment variables are already set in the previous step
-            
-            # Try to clean up using azd down (if environment exists)
-            if azd env list | grep -q "$ENV_NAME"; then
-              echo "Found azd environment: $ENV_NAME"
-              azd env select "$ENV_NAME"
-              azd down --force --purge --no-prompt
-            else
-              echo "No azd environment found for $ENV_NAME, falling back to resource group deletion"
-              az group delete \
-                  --name "${{ env.RESOURCE_GROUP_NAME }}" \
-                  --yes \
-                  --no-wait
-            fi
-            echo "Resource cleanup initiated for: ${{ env.RESOURCE_GROUP_NAME }}"
+          # Try to select the environment if it exists, otherwise create a minimal environment for cleanup
+          azd env list
+          if azd env list | grep -q "${{ env.ENV_NAME }}"; then
+            echo "Environment ${{ env.ENV_NAME }} found, selecting it..."
+            azd env select ${{ env.ENV_NAME }}
           else
-            echo "Resource group does not exist."
+            echo "Environment ${{ env.ENV_NAME }} not found, creating minimal environment for cleanup..."
+            azd env new ${{ env.ENV_NAME }} --no-prompt
+            azd env set AZURE_RESOURCE_GROUP "${{ env.RESOURCE_GROUP_NAME }}"
+            azd env set AZURE_SUBSCRIPTION_ID "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            azd env set AZURE_ENV_OPENAI_LOCATION="${{ env.AZURE_LOCATION }}"
+            azd env set AZURE_ENV_USE_WAF_ALIGNED_ARCHITECTURE=false
+
           fi
 
-      - name: Wait for resource deletion to complete
-        if: always()
+      - name: Delete deployment using azd
         run: |
-          # Check if resource group name is available
-          if [ -z "${{ env.RESOURCE_GROUP_NAME }}" ]; then
-            echo "Resource group name is empty. Skipping resource check."
-            exit 0
-          fi
+          set -e
+          echo "Deleting deployment..."
+          azd down --purge --force --no-prompt
+          echo "Deployment deleted successfully."
 
-          # List of keyvaults 
-          KEYVAULTS="${{ env.KEYVAULTS }}"
-
-          # Remove the surrounding square brackets and quotes, if they exist
-          stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g' | sed 's/"//g')
-          # Convert the comma-separated string into an array
-          IFS=',' read -r -a resources_to_check <<< "$stripped_keyvaults"
-          echo "List of resources to check: ${resources_to_check[@]}"
-          # Check if resource group still exists before listing resources
-          rg_exists=$(az group exists --name "${{ env.RESOURCE_GROUP_NAME }}")
-          if [ "$rg_exists" = "false" ]; then
-            echo "Resource group no longer exists. Skipping resource check."
-            exit 0
-          fi
-
-          # Get the list of resources in YAML format
-          resource_list=$(az resource list --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --output yaml || echo "")
-
-          # Maximum number of retries
-          max_retries=3
-
-          # Retry intervals in seconds (30, 60, 120)
-          retry_intervals=(30 60 120)
-
-          # Retry mechanism to check resources
-          retries=0
-          while true; do
-            resource_found=false
-
-            # Check if resource group still exists
-            rg_exists=$(az group exists --name "${{ env.RESOURCE_GROUP_NAME }}")
-            if [ "$rg_exists" = "false" ]; then
-              echo "Resource group no longer exists. Exiting resource check."
-              break
-            fi
-
-            # Iterate through the resources to check
-            for resource in "${resources_to_check[@]}"; do
-              # Skip empty resource names
-              if [ -z "$resource" ]; then
-                continue
-              fi
-              
-              echo "Checking resource: $resource"
-              if echo "$resource_list" | grep -q "name: $resource"; then
-                echo "Resource '$resource' exists in the resource group."
-                resource_found=true
-              else
-                echo "Resource '$resource' does not exist in the resource group."
-              fi
-            done
-
-            # If any resource exists, retry
-            if [ "$resource_found" = true ]; then
-              retries=$((retries + 1))
-              if [ "$retries" -ge "$max_retries" ]; then
-                echo "Maximum retry attempts reached. Exiting."
-                break
-              else
-                # Wait for the appropriate interval for the current retry
-                echo "Waiting for ${retry_intervals[$retries-1]} seconds before retrying..."
-                sleep ${retry_intervals[$retries-1]}
-                # Refresh resource list
-                resource_list=$(az resource list --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --output yaml || echo "")
-              fi
-            else
-              echo "No resources found. Exiting."
-              break
-            fi
-          done
-
-      - name: Purging the Resources
-        if: always()
-        run: |
-          set -e 
-
-          # Check if resource group name is available
-          if [ -z "${{ env.RESOURCE_GROUP_NAME }}" ]; then
-            echo "Resource group name is empty. Skipping resource purging."
-            exit 0
-          fi
-
-          # Purge AI Services
-          if [ -z "${{ env.AI_SERVICES_NAME }}" ]; then
-            echo "AI_SERVICES_NAME is not set. Skipping AI Services purge."
-          else
-            echo "Purging AI Services..."
-            if [ -n "$(az cognitiveservices account list-deleted --query "[?name=='${{ env.AI_SERVICES_NAME }}']" -o tsv)" ]; then
-              echo "AI Services '${{ env.AI_SERVICES_NAME }}' is soft-deleted. Proceeding to purge..."
-              az cognitiveservices account purge --location "${{ env.AZURE_LOCATION }}" --resource-group "${{ env.RESOURCE_GROUP_NAME }}" --name "${{ env.AI_SERVICES_NAME }}"
-            else
-              echo "AI Services '${{ env.AI_SERVICES_NAME }}' is not soft-deleted. No action taken."
-            fi
-          fi
-
-          # Ensure KEYVAULTS is properly formatted as a comma-separated string
-          KEYVAULTS="${{ env.KEYVAULTS }}"
-
-          # Check if KEYVAULTS is empty or null
-          if [ -z "$KEYVAULTS" ] || [ "$KEYVAULTS" = "[]" ]; then
-            echo "No KeyVaults to purge."
-            exit 0
-          fi
-
-          # Remove the surrounding square brackets and quotes, if they exist
-          stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g' | sed 's/"//g')
-          # Convert the comma-separated string into an array
-          IFS=',' read -r -a keyvault_array <<< "$stripped_keyvaults"
-
-          echo "Using KeyVaults Array..."
-          for keyvault_name in "${keyvault_array[@]}"; do
-            # Skip empty keyvault names
-            if [ -z "$keyvault_name" ]; then
-              continue
-            fi
-            
-            echo "Processing KeyVault: $keyvault_name"
-            # Check if the KeyVault is soft-deleted
-            deleted_vaults=$(az keyvault list-deleted --query "[?name=='$keyvault_name']" -o json --subscription ${{ env.AZURE_SUBSCRIPTION_ID }})
-
-            # If the KeyVault is found in the soft-deleted state, purge it
-            if [ "$(echo "$deleted_vaults" | jq length)" -gt 0 ]; then
-              echo "KeyVault '$keyvault_name' is soft-deleted. Proceeding to purge..."
-              az keyvault purge --name "$keyvault_name" --no-wait
-            else
-              echo "KeyVault '$keyvault_name' is not soft-deleted. No action taken."
-            fi
-          done
-
-          echo "Resource purging completed successfully"
-
-      - name: Logout
-        if: always()
-        run: az logout
-
-      - name: Notify on Failure
-        if: failure() || needs.deploy.result == 'failure' || needs.e2e-test.result == 'failure'
+      - name: Send Notification on Failure
+        if: always() && (failure() || needs.deploy.result == 'failure')
         run: |
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
           # Construct the email body
           EMAIL_BODY=$(cat <<EOF
           {
-            "body": "<p>Dear Team,</p><p>We would like to inform you that the Build-your-own-copilot-Solution-Accelerator(Client Advisior) Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
+            "body": "<p>Dear Team,</p><p>We would like to inform you that the Multi-Agent-Custom-Automation-Engine-Solution-Accelerator Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
           }
           EOF
           )
+
           # Send the notification
           curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \
             -d "$EMAIL_BODY" || echo "Failed to send notification"
+
+      - name: Logout from Azure
+        if: always()
+        run: |
+          azd auth logout
+          echo "Logged out from Azure."
