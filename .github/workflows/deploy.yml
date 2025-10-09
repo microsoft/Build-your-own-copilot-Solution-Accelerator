@@ -230,6 +230,8 @@ jobs:
           echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
           export CLIENT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.MANAGEDIDENTITY_SQL_NAME // empty')
           echo "CLIENT_NAME=$CLIENT_NAME" >> $GITHUB_ENV
+          export MANAGEDIDENTITY_WEBAPP_CLIENTID=$(echo "$DEPLOY_OUTPUT" | jq -r '.MANAGEDIDENTITY_WEBAPP_CLIENTID // empty')
+          echo "MANAGEDIDENTITY_WEBAPP_CLIENTID=$MANAGEDIDENTITY_WEBAPP_CLIENTID" >> $GITHUB_ENV
           export RG_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.RESOURCE_GROUP_NAME // .AZURE_RESOURCE_GROUP // empty')
           [[ -z "$RG_NAME" ]] && export RG_NAME="${{ env.RESOURCE_GROUP_NAME }}"
           echo "RG_NAME=$RG_NAME" >> $GITHUB_ENV
@@ -247,6 +249,15 @@ jobs:
 
           sleep 30
 
+      - name: Set Deployment Status
+        id: deployment_status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "SUCCESS=true" >> $GITHUB_OUTPUT
+          else
+            echo "SUCCESS=false" >> $GITHUB_OUTPUT
+          fi
       - name: Run Post-Deployment Script
         id: post_deploy
         env: 
@@ -267,16 +278,7 @@ jobs:
             "${{ env.CLIENT_NAME }}" \
             "${{ env.AI_SEARCH_SERVICE_NAME }}" \
             "${{ env.AI_FOUNDRY_RESOURCE_ID }}" \
-
-      - name: Set Deployment Status
-        id: deployment_status
-        if: always()
-        run: |
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "SUCCESS=true" >> $GITHUB_OUTPUT
-          else
-            echo "SUCCESS=false" >> $GITHUB_OUTPUT
-          fi
+            "${{ env.MANAGEDIDENTITY_WEBAPP_CLIENTID }}"
 
       - name: Logout
         if: always()

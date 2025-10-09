@@ -12,6 +12,7 @@
 	sqlManagedIdentityDisplayName="$9"
 	aiSearchName="${10}"
 	aif_resource_id="${11}"
+	managedIdentityClientId="${12}"
 
 	# Global variables to track original network access states
 	original_storage_public_access=""
@@ -324,6 +325,11 @@
 		sqlManagedIdentityClientId=$(azd env get-value MANAGEDIDENTITY_SQL_CLIENTID)
 	fi
 
+	if [ -z "$managedIdentityClientId" ]; then
+		# Use the web app managed identity for general operations
+		managedIdentityClientId=$(azd env get-value MANAGEDIDENTITY_WEBAPP_CLIENTID)
+	fi
+
 	if [ -z "$sqlManagedIdentityDisplayName" ]; then
 		# Use the SQL-specific managed identity for database operations with limited permissions
 		sqlManagedIdentityDisplayName=$(azd env get-value MANAGEDIDENTITY_SQL_NAME)
@@ -414,7 +420,7 @@
 
 	# Call add_cosmosdb_access.sh
 	echo "Running add_cosmosdb_access.sh"
-	bash infra/scripts/add_cosmosdb_access.sh "$resourceGroupName" "$cosmosDbAccountName"
+	bash infra/scripts/add_cosmosdb_access.sh "$resourceGroupName" "$cosmosDbAccountName" "$managedIdentityClientId"
 	if [ $? -ne 0 ]; then
 		echo "Error: add_cosmosdb_access.sh failed."
 		exit 1
@@ -423,7 +429,7 @@
 
 	# Call copy_kb_files.sh
 	echo "Running copy_kb_files.sh"
-	bash infra/scripts/copy_kb_files.sh "$storageAccount" "$fileSystem"
+	bash infra/scripts/copy_kb_files.sh "$storageAccount" "$fileSystem" "" "$managedIdentityClientId"
 	if [ $? -ne 0 ]; then
 		echo "Error: copy_kb_files.sh failed."
 		exit 1
@@ -432,7 +438,7 @@
 
 	# Call run_create_index_scripts.sh
 	echo "Running run_create_index_scripts.sh"
-	bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "" "$resourceGroupName" "$sqlServerName" "$aiSearchName" "$aif_resource_id"
+	bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "$managedIdentityClientId" "$resourceGroupName" "$sqlServerName" "$aiSearchName" "$aif_resource_id"
 	if [ $? -ne 0 ]; then
 		echo "Error: run_create_index_scripts.sh failed."
 		exit 1
@@ -444,7 +450,7 @@
 	bash infra/scripts/add_user_scripts/create_sql_user_and_role.sh "$sqlServerName.database.windows.net" "$SqlDatabaseName" '[
 		{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datareader"},
 		{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datawriter"}
-	]'
+	]' "$sqlManagedIdentityClientId"
 	if [ $? -ne 0 ]; then
 		echo "Error: create_sql_user_and_role.sh failed."
 		exit 1
