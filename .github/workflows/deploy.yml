@@ -52,16 +52,7 @@ jobs:
           sudo add-apt-repository "$(curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list)"
           sudo apt-get update
           sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
-          sudo apt-get install -y unixodbc-dev
-
-      - name: Setup Azure CLI
-        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
-      - name: Login to Azure
-        run: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
-          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
+          sudo apt-get install -y unixodbc-dev        
       - name: Run Quota Check
         id: quota-check
         run: |
@@ -95,14 +86,31 @@ jobs:
         if: env.QUOTA_FAILED == 'true'
         run: exit 1
 
-      - name: Install Bicep CLI
-        run: az bicep install
       - name: Set Deployment Region
         id: set_region
         run: |
           echo "Selected Region: $VALID_REGION"
           echo "AZURE_LOCATION=$VALID_REGION" >> $GITHUB_ENV
           echo "AZURE_LOCATION=$VALID_REGION" >> $GITHUB_OUTPUT
+
+      - name: Setup Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az --version  # Verify installation
+
+      - name: Setup Azure Developer CLI
+        run: |
+          curl -fsSL https://aka.ms/install-azd.sh | sudo bash
+          azd version           
+
+      - name: Login to Azure
+        id: login-azure
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          azd auth login --client-id ${{ secrets.AZURE_CLIENT_ID }} --client-secret ${{ secrets.AZURE_CLIENT_SECRET }} --tenant-id ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Install Bicep CLI
+        run: az bicep install
 
       - name: Generate Environment Name for azd
         id: generate_env_name
