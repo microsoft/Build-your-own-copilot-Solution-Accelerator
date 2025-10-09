@@ -330,6 +330,30 @@ if az deployment group show --resource-group "$resourceGroupName" --name "$deplo
 			--query "properties.outputs.managedidentitY_WEBAPP_NAME.value" -o tsv)
 		echo "Web App Managed Identity Display Name (from outputs): $webAppManagedIdentityDisplayName"
 
+		webAppManagedIdentityClientId=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.managedidentitY_WEBAPP_CLIENTID.value" -o tsv)
+		echo "Web App Managed Identity Client ID (from outputs): $webAppManagedIdentityClientId"
+
+		SqlDatabaseName=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.sqldB_DATABASE.value" -o tsv)
+		echo "SQL Database Name (from outputs): $SqlDatabaseName"
+
+		sqlManagedIdentityClientId=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.managedidentitY_SQL_CLIENTID.value" -o tsv)
+		echo "SQL Managed Identity Client ID (from outputs): $sqlManagedIdentityClientId"
+
+		sqlManagedIdentityDisplayName=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.managedidentitY_SQL_NAME.value" -o tsv)
+		echo "SQL Managed Identity Display Name (from outputs): $sqlManagedIdentityDisplayName"
+
 		aiSearchName=$(az deployment group show \
 			--name "$deploymentName" \
 			--resource-group "$resourceGroupName" \
@@ -360,6 +384,8 @@ else
     read -rp "Enter Key Vault Name: " keyvaultName
 	read -rp "Enter Web App Managed Identity Display Name: " webAppManagedIdentityDisplayName
 	read -rp "Enter Web App Managed Identity Client ID: " webAppManagedIdentityClientId
+	read -rp "Enter SQL Managed Identity Display Name: " sqlManagedIdentityDisplayName
+	read -rp "Enter SQL Managed Identity Client ID: " sqlManagedIdentityClientId
     read -rp "Enter AI Search Service Name: " aiSearchName
     read -rp "Enter AI Foundry Resource ID: " aif_resource_id
     read -rp "Enter Azure Subscription ID: " azSubscriptionId

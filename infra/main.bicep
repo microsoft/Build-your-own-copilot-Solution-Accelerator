@@ -1382,3 +1382,5 @@ output USE_AI_PROJECT_CLIENT string = useAIProjectClientFlag
 @description('Indicates whether the internal stream should be used.')
 output USE_INTERNAL_STREAM string = useInternalStream
 
+@description('The Azure Subscription ID where the resources are deployed.')
+output AZURE_SUBSCRIPTION_ID string = subscription().subscriptionId
