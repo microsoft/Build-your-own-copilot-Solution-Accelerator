@@ -14,7 +14,7 @@ This document provides guidance on post-deployment steps after deploying the Bui
 2. Import Sample Data -Run bash command printed in the terminal. The bash command will look like the following:
 
     ```bash 
-    ./infra/scripts/process_sample_data.sh <resourceGroupName> 
+    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> 
     ```
     If the deployment does not exist or has been deleted – The script will prompt you to manually enter the required values
 

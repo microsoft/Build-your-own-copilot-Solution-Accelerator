@@ -330,6 +330,24 @@ if az deployment group show --resource-group "$resourceGroupName" --name "$deplo
 			--query "properties.outputs.managedidentitY_WEBAPP_NAME.value" -o tsv)
 		echo "Web App Managed Identity Display Name (from outputs): $webAppManagedIdentityDisplayName"
 
+		SqlDatabaseName=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.sqldB_DATABASE.value" -o tsv)
+		echo "SQL Database Name (from outputs): $SqlDatabaseName"
+
+		sqlManagedIdentityClientId=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.managedidentitY_SQL_CLIENTID.value" -o tsv)
+		echo "SQL Managed Identity Client ID (from outputs): $sqlManagedIdentityClientId"
+
+		sqlManagedIdentityDisplayName=$(az deployment group show \
+			--name "$deploymentName" \
+			--resource-group "$resourceGroupName" \
+			--query "properties.outputs.managedidentitY_SQL_NAME.value" -o tsv)
+		echo "SQL Managed Identity Display Name (from outputs): $sqlManagedIdentityDisplayName"
+
 		aiSearchName=$(az deployment group show \
 			--name "$deploymentName" \
 			--resource-group "$resourceGroupName" \
