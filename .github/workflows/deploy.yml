@@ -93,6 +93,16 @@ jobs:
           echo "AZURE_LOCATION=$VALID_REGION" >> $GITHUB_ENV
           echo "AZURE_LOCATION=$VALID_REGION" >> $GITHUB_OUTPUT
 
+      - name: Generate Resource Group Name
+        id: generate_rg_name
+        run: |
+          echo "Generating a unique resource group name..."
+          ACCL_NAME="ca"  # Account name as specified
+          SHORT_UUID=$(uuidgen | cut -d'-' -f1)
+          UNIQUE_RG_NAME="arg-${ACCL_NAME}-${SHORT_UUID}"
+          echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
+          echo "Generated RESOURCE_GROUP_NAME: ${UNIQUE_RG_NAME}"
+
       - name: Setup Azure CLI
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
@@ -112,20 +122,21 @@ jobs:
       - name: Install Bicep CLI
         run: az bicep install
 
-      - name: Generate Environment Name for azd
-        id: generate_env_name
+      - name: Check and Create Resource Group
+        id: check_create_rg
         run: |
-          echo "Generating a unique environment name for azd..."
-          ACCL_NAME="ca"  # Account name as specified
-          SHORT_UUID=$(uuidgen | cut -d'-' -f1)
-          UNIQUE_ENV_NAME="${ACCL_NAME}-${SHORT_UUID}"
-          echo "AZURE_ENV_NAME=${UNIQUE_ENV_NAME}" >> $GITHUB_ENV
-          echo "Generated AZURE_ENV_NAME: ${UNIQUE_ENV_NAME}"
-          # Generate resource group name following azd convention
-          UNIQUE_RG_NAME="rg-${UNIQUE_ENV_NAME}"
-          echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
-          echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_OUTPUT
-          echo "Generated RESOURCE_GROUP_NAME: ${UNIQUE_RG_NAME}"
+          echo "RESOURCE_GROUP: ${{ env.RESOURCE_GROUP_NAME }}"
+          set -e  
+          echo "Checking if resource group exists..."
+          rg_exists=$(az group exists --name ${{ env.RESOURCE_GROUP_NAME }})
+          if [ "$rg_exists" = "false" ]; then
+            echo "Resource group does not exist. Creating..."
+            az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location ${{ env.AZURE_LOCATION }} || { echo "Error creating resource group"; exit 1; }
+          else
+            echo "Resource group already exists."
+          fi
+          # Set output for other jobs
+          echo "RESOURCE_GROUP_NAME=${{ env.RESOURCE_GROUP_NAME }}" >> $GITHUB_OUTPUT
       - name: Generate Unique Solution Prefix
         id: generate_solution_prefix
         run: |
@@ -145,7 +156,7 @@ jobs:
           if [[ "$BRANCH" == "main" ]]; then TAG="latest_waf"
           elif [[ "$BRANCH" == "dev" ]]; then TAG="dev"
           elif [[ "$BRANCH" == "demo" ]]; then TAG="demo"
-          else TAG="latest_waf"; fi
+          else TAG="latest_Non-waf"; fi
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
           echo "Image Tag: $TAG"
       - name: Deploy using azd up and extract values
@@ -158,28 +169,20 @@ jobs:
 
           # Generate current timestamp in desired format: YYYY-MM-DDTHH:MM:SS.SSSSSSSZ
           current_date=$(date -u +"%Y-%m-%dT%H:%M:%S.%7NZ")
-          
-          # Set azd environment variables
-          export AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          export AZURE_ENV_COSMOS_LOCATION="westus"
-          export AZURE_ENV_MODEL_DEPLOYMENT_TYPE="Standard"
-          export AZURE_ENV_MODEL_NAME="gpt-4o"
-          export AZURE_ENV_MODEL_VERSION="2024-08-06"
-          export AZURE_ENV_MODEL_CAPACITY="${{ env.GPT_MIN_CAPACITY }}"
-          export AZURE_ENV_EMBEDDING_MODEL_NAME="text-embedding-3-large"
-          export AZURE_ENV_EMBEDDING_MODEL_CAPACITY="${{ env.TEXT_EMBEDDING_MIN_CAPACITY }}"
-          export AZURE_ENV_IMAGETAG="${{ env.IMAGE_TAG }}"
-          export AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID=""
-          export AZURE_EXISTING_AI_PROJECT_RESOURCE_ID=""
-          
-          # Initialize azd environment
-          azd env new ${{ env.AZURE_ENV_NAME }} --location ${{ env.AZURE_LOCATION }}
+
+
+          echo "Creating environment..."
+          azd env new ${{ env.ENV_NAME }} --no-prompt
+          echo "Environment created: ${{ env.ENV_NAME }}"
+
+          echo "Setting default subscription..."
+          azd config set defaults.subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        
           
           # Set additional parameters for tags
-          azd env set AZURE_ENV_CREATED_BY "Pipeline"
-          azd env set AZURE_ENV_SECURITY_CONTROL "Ignore"
-          azd env set AZURE_ENV_PURPOSE "Deploying and Cleaning Up Resources for Validation"
-          azd env set AZURE_ENV_CREATED_DATE "$current_date"
+          azd env set AZURE_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          azd env set AZURE_ENV_OPENAI_LOCATION="${{ env.AZURE_LOCATION }}"
+          azd env set AZURE_RESOURCE_GROUP="${{ env.RESOURCE_GROUP_NAME }}"
 
           # Deploy using azd up
           azd up --no-prompt
