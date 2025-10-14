@@ -170,9 +170,9 @@ if [ -n "$managedIdentityClientId" ]; then
 fi
 
 # Determine the correct Python command
-if command -v python3 &> /dev/null; then
+if command -v python3 && python3 --version &> /dev/null; then
     PYTHON_CMD="python3"
-elif command -v python &> /dev/null; then
+elif command -v python && python --version &> /dev/null; then
     PYTHON_CMD="python"
 else
     echo "Python is not installed on this system. Or it is not added in the PATH."
