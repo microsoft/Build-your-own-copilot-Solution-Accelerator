@@ -143,15 +143,148 @@
 
 
 .contentColumn {
-  /* width: 75%; */
-  padding: 20px;
-  /* overflow-y: auto; */
+  display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #FFF 59.5%, #EBF3FC 100%);
+  gap: 2rem;
+  padding: 20px;
+  background: linear-gradient(180deg, #fff 59.5%, #ebf3fc 100%);
   border-radius: 8px;
   height: 100%;
   box-shadow: 0px 0.83px 3.33px 0px #00000052;
   margin: 4rem 1rem 1rem;
+}
+
+.heroSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2.4rem 2rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f5f9ff 0%, #ffffff 100%);
+  box-shadow: 0 28px 50px -35px rgba(15, 108, 189, 0.55);
+}
+
+.heroContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.heroGreeting {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #0f6cbd;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.heroSubtitle {
+  margin: 0;
+  color: #464646;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.heroChecklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #1f1f1f;
+}
+
+.heroChecklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.heroChecklist li::before {
+  content: '•';
+  color: #0f6cbd;
+  font-weight: 700;
+}
+
+.heroActions {
+  margin-top: 1.2rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.primaryAction {
+  background-color: #0f6cbd;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.7rem 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 18px 36px -24px rgba(15, 108, 189, 0.85);
+}
+
+.primaryAction:hover {
+  background-color: #0d5c9f;
+}
+
+.secondaryAction {
+  background: transparent;
+  color: #0f6cbd;
+  border-radius: 12px;
+  border: 1px solid #0f6cbd;
+  padding: 0.7rem 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondaryAction:hover {
+  background: rgba(15, 108, 189, 0.08);
+}
+
+.heroImage {
+  flex: 0 0 220px;
+  display: flex;
+  justify-content: center;
+}
+
+.heroImage img {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+
+.chatSection {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.75rem 1.5rem;
+  box-shadow: 0 24px 48px -36px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+}
+
+.chatHeader h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.chatHeader p {
+  margin: 0.3rem 0 0;
+  color: #5a5a5a;
+  font-size: 0.95rem;
 }
 
 .welcomeMessage {
@@ -310,6 +443,30 @@
   cursor: pointer;
   position: absolute;
   right: 0.8rem;
+}
+
+@media (max-width: 1024px) {
+  .heroSection {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .heroImage {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .chatSection {
+    padding: 1.25rem 1rem;
+  }
 }
 
 @media screen and (-ms-high-contrast: active), (forced-colors: active) {

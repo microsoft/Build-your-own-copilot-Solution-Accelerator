@@ -16,7 +16,7 @@ class Config:
     def __init__(self):
 
         # UI configuration (optional)
-        self.UI_TITLE = os.environ.get("UI_TITLE") or "Woodgrove Bank"
+        self.UI_TITLE = os.environ.get("UI_TITLE") or "Mira-Wise"
         self.UI_LOGO = os.environ.get("UI_LOGO")
         self.UI_CHAT_LOGO = os.environ.get("UI_CHAT_LOGO")
         self.UI_CHAT_TITLE = os.environ.get("UI_CHAT_TITLE") or "Start chatting"

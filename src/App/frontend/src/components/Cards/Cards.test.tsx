@@ -1,202 +1,176 @@
 import Cards from './Cards'
-import { renderWithContext, screen, waitFor, fireEvent, act } from '../../test/test.utils'
-import { getUsers } from '../../api'
+import { renderWithContext, screen, waitFor, within } from '../../test/test.utils'
 import userEvent from '@testing-library/user-event'
+import { fetchPlannerItems, createPlannerItem, updatePlannerItem } from '../../api/reminders'
+import { fetchCalendarEvents } from '../../api/calendar'
+import type { PlannerItem } from '../../api/reminders'
+import type { CalendarEvent } from '../../api/calendar'
 
-// Mock API
-jest.mock('../../api/api', () => ({
-  getUsers: jest.fn()
-}))
+jest.mock('../../api/reminders')
+jest.mock('../../api/calendar')
 
-beforeEach(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {})
-})
+const mockFetchPlannerItems = fetchPlannerItems as jest.MockedFunction<typeof fetchPlannerItems>
+const mockCreatePlannerItem = createPlannerItem as jest.MockedFunction<typeof createPlannerItem>
+const mockUpdatePlannerItem = updatePlannerItem as jest.MockedFunction<typeof updatePlannerItem>
+const mockFetchCalendarEvents = fetchCalendarEvents as jest.MockedFunction<typeof fetchCalendarEvents>
 
-afterEach(() => {
-  jest.clearAllMocks()
-})
-
-const mockDispatch = jest.fn()
-const mockOnCardClick = jest.fn()
-
-jest.mock('../UserCard/UserCard', () => ({
-  UserCard: (props: any) => (
-    <div data-testid="user-card-mock" onClick={() => props.onCardClick(props)}>
-      {props.ClientName}
-      <span>{props.isSelected ? 'Selected' : 'not selected'}</span>
-    </div>
-  )
-}))
-
-const mockUsers = [
-  {
-    ClientId: '1',
-    ClientName: 'Client 1',
-    NextMeeting: 'Test Meeting 1',
-    NextMeetingTime: '10:00',
-    AssetValue: 10000,
-    LastMeeting: 'Last Meeting 1',
-    ClientSummary: 'Summary for User One',
-    chartUrl: ''
-  }
-]
-
-const multipleUsers = [
-  {
-    ClientId: '1',
-    ClientName: 'Client 1',
-    NextMeeting: 'Test Meeting 1',
-    NextMeetingTime: '10:00 AM',
-    AssetValue: 10000,
-    LastMeeting: 'Last Meeting 1',
-    ClientSummary: 'Summary for User One',
-    chartUrl: ''
-  },
-  {
-    ClientId: '2',
-    ClientName: 'Client 2',
-    NextMeeting: 'Test Meeting 2',
-    NextMeetingTime: '2:00 PM',
-    AssetValue: 20000,
-    LastMeeting: 'Last Meeting 2',
-    ClientSummary: 'Summary for User Two',
-    chartUrl: ''
-  }
-]
-
-describe('Card Component', () => {
+describe('Cards component (Mira dashboard)', () => {
   beforeEach(() => {
-    global.fetch = mockDispatch
-    jest.spyOn(console, 'error').mockImplementation(() => {})
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-10-14T15:30:00Z'))
+
+    const reminderFixtures: PlannerItem[] = [
+      {
+        id: 'rem-1',
+        label: 'Evening medication',
+        time: '20:00',
+        completed: false,
+        itemType: 'reminder'
+      }
+    ]
+
+    const todoFixtures: PlannerItem[] = [
+      {
+        id: 'todo-1',
+        label: 'Call Dr. Lee',
+        completed: false,
+        itemType: 'todo',
+        time: null
+      }
+    ]
+
+    const calendarFixtures: CalendarEvent[] = [
+      {
+        id: 'event-1',
+        subject: 'Clinic visit',
+        start: { dateTime: '2025-10-15T14:00:00Z', timeZone: 'UTC' },
+        end: { dateTime: '2025-10-15T15:00:00Z', timeZone: 'UTC' },
+        location: 'Seattle Children\'s Hospital'
+      }
+    ]
+
+    mockFetchPlannerItems.mockImplementation(async (type: Parameters<typeof fetchPlannerItems>[0]) =>
+      type === 'reminder' ? reminderFixtures : todoFixtures
+    )
+    mockCreatePlannerItem.mockImplementation(async (
+      type: Parameters<typeof createPlannerItem>[0],
+      payload: Parameters<typeof createPlannerItem>[1]
+    ) => ({
+      id: `${type}-new`,
+      label: payload.label ?? '',
+      time: payload.time ?? null,
+      completed: payload.completed ?? false,
+      itemType: type
+    }))
+    mockUpdatePlannerItem.mockImplementation(async (
+      type: Parameters<typeof updatePlannerItem>[0],
+      id: Parameters<typeof updatePlannerItem>[1],
+      updates: Parameters<typeof updatePlannerItem>[2]
+    ) => ({
+      id,
+      label: updates.label ?? 'Updated item',
+      time: updates.time ?? null,
+      completed: updates.completed ?? false,
+      itemType: type
+    }))
+    mockFetchCalendarEvents.mockResolvedValue(calendarFixtures)
+
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        Heading: 'Sickle cell care',
+        AbstractText: 'Stay hydrated and monitor pain levels closely.',
+        AbstractURL: 'https://duckduckgo.com'
+      })
+    }) as unknown as typeof fetch
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
-    //(console.error as jest.Mock).mockRestore();
+    jest.useRealTimers()
+    jest.resetAllMocks()
   })
 
-  test('displays loading message while fetching users', async () => {
-    ;(getUsers as jest.Mock).mockResolvedValueOnce([])
+  test('renders the daily summary with greeting and quick actions', async () => {
+    renderWithContext(<Cards />)
 
-    renderWithContext(<Cards onCardClick={mockDispatch} />)
+    await waitFor(() => expect(mockFetchPlannerItems).toHaveBeenCalledTimes(2))
 
-    expect(screen.queryByText('Loading...')).toBeInTheDocument()
-
-    await waitFor(() => expect(getUsers).toHaveBeenCalled())
+    expect(await screen.findByText('Good afternoon, Mira!')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Take 15 min breather/i })).toBeInTheDocument()
+    expect(await screen.findByText('Evening medication')).toBeInTheDocument()
   })
 
-  test('displays no meetings message when there are no users', async () => {
-    ;(getUsers as jest.Mock).mockResolvedValueOnce([])
+  test('allows adding a new reminder', async () => {
+    renderWithContext(<Cards />)
 
-    renderWithContext(<Cards onCardClick={mockDispatch} />)
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
 
-    await waitFor(() => expect(getUsers).toHaveBeenCalled())
+  const remindersHeading = await screen.findByText('Upcoming reminders')
+  const remindersCard = remindersHeading.closest('article') as HTMLElement
+    const reminderInput = within(remindersCard).getByPlaceholderText('Add a reminder')
+    await user.type(reminderInput, 'Pick up groceries')
 
-    expect(screen.getByText('No meetings have been arranged')).toBeInTheDocument()
+    const addButton = within(remindersCard).getByRole('button', { name: /^add$/i })
+    await user.click(addButton)
+
+    await waitFor(() =>
+      expect(mockCreatePlannerItem).toHaveBeenCalledWith('reminder', { label: 'Pick up groceries', time: 'Anytime' })
+    )
+    expect(await screen.findByText('Pick up groceries')).toBeInTheDocument()
   })
 
-  test('displays user cards when users are fetched', async () => {
-    ;(getUsers as jest.Mock).mockResolvedValueOnce(mockUsers)
+  test('toggles a todo item', async () => {
+    renderWithContext(<Cards />)
 
-    renderWithContext(<Cards onCardClick={mockDispatch} />)
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
 
-    await waitFor(() => expect(getUsers).toHaveBeenCalled())
+    const todoItem = await screen.findByText('Call Dr. Lee')
+    const todoCheckbox = within(todoItem.closest('li') as HTMLElement).getByRole('checkbox') as HTMLInputElement
 
-    expect(screen.getByText('Client 1')).toBeInTheDocument()
-  })
+    await user.click(todoCheckbox)
 
-  test('handles API failure and stops loading', async () => {
-    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {})
-
-    ;(getUsers as jest.Mock).mockRejectedValueOnce(new Error('API Error'))
-
-    renderWithContext(<Cards onCardClick={mockDispatch} />)
-
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
-
-    await waitFor(() => {
-      expect(getUsers).toHaveBeenCalled()
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-    })
-
-    const mockError = new Error('API Error')
-
-    expect(console.error).toHaveBeenCalledWith('Error fetching users:', mockError)
-
-    consoleErrorMock.mockRestore()
-  })
-
-  test('handles card click and updates context with selected user', async () => {
-    ;(getUsers as jest.Mock).mockResolvedValueOnce(mockUsers)
-
-    const mockOnCardClick = mockDispatch
-
-    renderWithContext(<Cards onCardClick={mockOnCardClick} />)
-
-    await waitFor(() => expect(getUsers).toHaveBeenCalled())
-
-    const userCard = screen.getByTestId('user-card-mock')
-
-    await act(() => {
-      fireEvent.click(userCard)
-    })
-  })
-
-  test('display "No future meetings have been arranged" when there is only one user', async () => {
-    ;(getUsers as jest.Mock).mockResolvedValueOnce(mockUsers)
-
-    renderWithContext(<Cards onCardClick={mockDispatch} />)
-
-    await waitFor(() => expect(getUsers).toHaveBeenCalled())
-
-    expect(screen.getByText('No future meetings have been arranged')).toBeInTheDocument()
-  })
-
-  test('renders future meetings when there are multiple users', async () => {
-    ;(getUsers as jest.Mock).mockResolvedValueOnce(multipleUsers)
-
-    renderWithContext(<Cards onCardClick={mockDispatch} />)
-
-    await waitFor(() => expect(getUsers).toHaveBeenCalled())
-
-    expect(screen.getByText('Client 2')).toBeInTheDocument()
-    expect(screen.queryByText('No future meetings have been arranged')).not.toBeInTheDocument()
-  })
-
-  test('logs error when user does not have a ClientId and ClientName', async () => {
-    ;(getUsers as jest.Mock).mockResolvedValueOnce([
-      {
-        ClientId: null,
-        ClientName: '',
-        NextMeeting: 'Test Meeting 1',
-        NextMeetingTime: '10:00 AM',
-        AssetValue: 10000,
-        LastMeeting: 'Last Meeting 1',
-        ClientSummary: 'Summary for User One',
-        chartUrl: ''
-      }
-    ])
-
-    renderWithContext(<Cards onCardClick={mockDispatch} />, {
-      context: {
-        AppStateContext: { dispatch: mockDispatch }
-      }
-    })
-
-    await waitFor(() => {
-      expect(screen.getByTestId('user-card-mock')).toBeInTheDocument()
-    })
-
-    const userCard = screen.getByTestId('user-card-mock')
-    fireEvent.click(userCard)
-
-    expect(console.error).toHaveBeenCalledWith(
-      'User does not have a ClientId and clientName:',
-      expect.objectContaining({
-        ClientId: null,
-        ClientName: ''
-      })
+    expect(todoCheckbox).toBeChecked()
+    await waitFor(() =>
+      expect(mockUpdatePlannerItem).toHaveBeenCalledWith('todo', 'todo-1', expect.objectContaining({ completed: true }))
     )
   })
 
+  test('fetches live health info when the topic changes', async () => {
+    renderWithContext(<Cards />)
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
+
+    await waitFor(() => expect(globalThis.fetch).toHaveBeenCalled())
+
+    const topicInput = screen.getByPlaceholderText('Search health advice')
+    await user.clear(topicInput)
+    await user.type(topicInput, 'child hydration tips')
+
+    await waitFor(() => expect((globalThis.fetch as jest.Mock).mock.calls.length).toBeGreaterThan(1))
+    const calls = (globalThis.fetch as jest.Mock).mock.calls
+    const lastCall = calls[calls.length - 1][0]
+    expect(lastCall).toContain('child%20hydration%20tips')
+  })
+
+  test('adds a health note to the log', async () => {
+    renderWithContext(<Cards />)
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
+
+    const noteInput = screen.getByPlaceholderText('Add a health note')
+    await user.type(noteInput, 'Checked temperature, all good.')
+
+    const logButton = screen.getByRole('button', { name: /log/i })
+    await user.click(logButton)
+
+    expect(screen.getAllByText('Checked temperature, all good.')).toHaveLength(2)
+  })
+
+  test('shows upcoming calendar events from the API', async () => {
+    renderWithContext(<Cards />)
+
+    await waitFor(() => expect(mockFetchCalendarEvents).toHaveBeenCalledTimes(1))
+    expect(await screen.findByText('Clinic visit')).toBeInTheDocument()
+    expect(screen.getByText(/Seattle Children/)).toBeInTheDocument()
+  })
 })

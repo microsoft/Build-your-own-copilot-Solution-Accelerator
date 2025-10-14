@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import { Link, Outlet } from 'react-router-dom';
 import { Dialog, Stack, TextField, Pivot, PivotItem } from '@fluentui/react';
 import { CopyRegular } from '@fluentui/react-icons';
 import { CosmosDBStatus } from '../../api';
@@ -12,15 +11,12 @@ import Cards from '../../components/Cards/Cards';
 import Chat from '../chat/Chat'; // Import the Chat component
 import { AppStateContext } from '../../state/AppProvider';
 import { getUserInfo } from '../../api';
-import { User } from '../../types/User';
 import TickIcon from '../../assets/TickIcon.svg';
 import DismissIcon from '../../assets/Dismiss.svg';
-import welcomeIcon from '../../assets/welcomeIcon.png';
 import styles from './Layout.module.css';
 import { SpinnerComponent } from '../../components/Spinner/SpinnerComponent';
 
 const Layout = () => {
-  const [isChatDialogOpen, setIsChatDialogOpen] = useState<boolean>(false);
   const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false);
   const [copyClicked, setCopyClicked] = useState<boolean>(false);
   const [copyText, setCopyText] = useState<string>('Copy URL');
@@ -29,10 +25,21 @@ const Layout = () => {
   const [showHistoryLabel, setShowHistoryLabel] = useState<string>('Show chat history');
   const appStateContext = useContext(AppStateContext);
   const ui = appStateContext?.state.frontendSettings?.ui;
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [showWelcomeCard, setShowWelcomeCard] = useState<boolean>(true);
   const [name, setName] = useState<string>('');
   
+  const personalName = name ? name.split(' ')[0] : 'there';
+
+  const scrollToSection = (elementId: string) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const element = document.getElementById(elementId);
+    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleOpenChat = () => scrollToSection('mira-chat');
+  const handleOpenCommandCenter = () => scrollToSection('mira-command-center');
+
   // Removed PowerBI related state and effects
   // const [pbiurl, setPbiUrl] = useState<string>('');
   // useEffect(() => {
@@ -49,8 +56,7 @@ const Layout = () => {
 
   const resetClientId = () => {
     appStateContext?.dispatch({ type: 'RESET_CLIENT_ID' });
-    setSelectedUser(null);
-    setShowWelcomeCard(true);
+    handleOpenChat();
   };
 
   const closePopup = () => {
@@ -67,11 +73,6 @@ const Layout = () => {
       return () => clearTimeout(timer); // Cleanup the timer on component unmount
     }
   }, [isVisible]);
-
-  const handleCardClick = (user: User) => {
-    setSelectedUser(user);
-    setShowWelcomeCard(false);
-  };
 
   const handleShareClick = () => {
     setIsSharePanelOpen(true);
@@ -160,11 +161,11 @@ const Layout = () => {
         loading={appStateContext?.state.isLoader != undefined ? appStateContext?.state.isLoader : false}
         label="Please wait.....!"
       />
-      <div className={styles.cardsColumn}>
+      <div className={styles.cardsColumn} id="mira-command-center">
         <div className={styles.selectClientHeading}>
-          <h2 className={styles.meeting}>Upcoming meetings</h2>
+          <h2 className={styles.meeting}>Mira command center</h2>
         </div>
-        <Cards onCardClick={handleCardClick} />
+        <Cards />
       </div>
       <div className={styles.ContentContainer}>
         <header className={styles.header} role={'banner'}>
@@ -194,48 +195,46 @@ const Layout = () => {
           </Stack>
         </header>
         <div className={styles.contentColumn}>
-          {!selectedUser && showWelcomeCard ? (
-            <div>
-              <div className={styles.mainPage}>
-                <div className={styles.welcomeCard}>
-                  <div className={styles.welcomeCardContent}>
-                    <div className={styles.welcomeCardIcon}>
-                      <img src={welcomeIcon} alt="Icon" className={styles.icon} />
-                    </div>
-                    <h2 className={styles.welcomeTitle}>Select a client</h2>
-                    <p className={styles.welcomeText}>
-                      You can ask questions about their portfolio details and previous conversations or view their
-                      profile.
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.welcomeMessage}>
-                  <img src={Illustration} alt="Illustration" className={styles.illustration} />
-                  <h1>Welcome Back, {name}</h1>
-                </div>
+          <section className={styles.heroSection}>
+            <div className={styles.heroContent}>
+              <p className={styles.heroGreeting}>Hi {personalName},</p>
+              <h1 className={styles.heroTitle}>Mira is ready to organize your day</h1>
+              <p className={styles.heroSubtitle}>
+                Keep life admin, reminders, and Mukarram’s health updates flowing smoothly. Mira keeps everything in
+                one calm place so you can focus on what matters.
+              </p>
+              <ul className={styles.heroChecklist}>
+                <li>Set reminders, to-dos, and calendar events in seconds.</li>
+                <li>Track Mukarram’s health notes and medication countdowns.</li>
+                <li>Chat with Mira for planning help, summaries, or ideas.</li>
+              </ul>
+              <div className={styles.heroActions}>
+                <button type="button" className={styles.primaryAction} onClick={handleOpenChat}>
+                  Open chat
+                </button>
+                <button type="button" className={styles.secondaryAction} onClick={handleOpenCommandCenter}>
+                  View command center
+                </button>
               </div>
             </div>
-          ) : (
+            <div className={styles.heroImage}>
+              <img src={Illustration} alt="Mira personal assistant illustration" />
+            </div>
+          </section>
+
+          <section className={styles.chatSection} id="mira-chat">
+            <div className={styles.chatHeader}>
+              <h3>Chat with Mira</h3>
+              <p>Ask Mira to plan the day, log a note, or answer questions grounded in your workspace.</p>
+            </div>
             <div className={styles.pivotContainer}>
-              {selectedUser && (
-                <div className={styles.selectedClient}>
-                  Client selected:{' '}
-                  <span className={styles.selectedName}>{selectedUser ? selectedUser.ClientName : 'None'}</span>
-                </div>
-              )}
-              <Pivot defaultSelectedKey="chat" className="tabContainer" style={{ paddingTop: 10 }}>
+              <Pivot defaultSelectedKey="chat" className="tabContainer">
                 <PivotItem headerText="Chat" itemKey="chat">
                   <Chat setIsVisible={setIsVisible} />
                 </PivotItem>
-                {/*
-                // Removed the PivotItem for "Client 360 Profile" which loaded the PowerBIChart.
-                <PivotItem headerText="Client 360 Profile" itemKey="profile">
-                  <PowerBIChart chartUrl={calculateChartUrl(selectedUser)} />
-                </PivotItem>
-                */}
               </Pivot>
             </div>
-          )}
+          </section>
         </div>
       </div>
       <Dialog

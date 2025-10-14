@@ -4,8 +4,10 @@ import logging
 import os
 import time
 import uuid
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
+import httpx
 from azure.identity import get_bearer_token_provider
 from backend.helpers.azure_credential_utils import get_azure_credential
 from azure.monitor.opentelemetry import configure_azure_monitor
@@ -36,6 +38,8 @@ from backend.common.utils import (
 from backend.services import sqldb_service
 from backend.services.chat_service import stream_response_from_wealth_assistant
 from backend.services.cosmosdb_service import CosmosConversationClient
+from backend.services.reminders_service import PlannerItemService
+from backend.helpers.graph_client import fetch_calendar_events
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
@@ -918,10 +922,7 @@ async def delete_conversation():
         if not cosmos_conversation_client:
             raise Exception("CosmosDB is not configured or not working")
 
-        # delete the conversation messages from cosmos first
         await cosmos_conversation_client.delete_messages(conversation_id, user_id)
-
-        # Now delete the conversation
         await cosmos_conversation_client.delete_conversation(user_id, conversation_id)
 
         await cosmos_conversation_client.cosmosdb_client.close()
@@ -1310,6 +1311,240 @@ async def ensure_cosmos():
             )
         else:
             return jsonify({"error": "CosmosDB is not working"}), 500
+
+
+def _create_planner_service():
+    cosmos_client = init_cosmosdb_client()
+    if not cosmos_client:
+        return None, None
+    return PlannerItemService(cosmos_client), cosmos_client
+
+
+def _serialize_planner_item(document):
+    return {
+        "id": document.get("id"),
+        "label": document.get("label"),
+        "time": document.get("time"),
+        "completed": document.get("completed", False),
+        "itemType": document.get("itemType"),
+        "createdAt": document.get("createdAt"),
+        "updatedAt": document.get("updatedAt"),
+    }
+
+
+async def _require_authenticated_user_id():
+    authenticated_user = get_authenticated_user_details(request_headers=request.headers)
+    user_id = authenticated_user.get("user_principal_id")
+    if not user_id:
+        return None
+    return user_id
+
+
+@bp.route("/api/reminders", methods=["GET", "POST"])
+async def planner_reminders():
+    user_id = await _require_authenticated_user_id()
+    if not user_id:
+        return jsonify({"error": "User authentication required"}), 401
+
+    service, cosmos_client = _create_planner_service()
+    if not service or not cosmos_client:
+        return jsonify({"error": "Planner storage is not configured"}), 501
+
+    try:
+        if request.method == "GET":
+            items = await service.list_items(user_id, item_type="reminder")
+            return jsonify([_serialize_planner_item(item) for item in items]), 200
+
+        payload = await request.get_json() or {}
+        label = (payload.get("label") or "").strip()
+        time_value = payload.get("time") or None
+
+        if not label:
+            return jsonify({"error": "label is required"}), 400
+
+        created = await service.create_item(
+            user_id=user_id,
+            item_type="reminder",
+            label=label,
+            time=time_value,
+        )
+        return jsonify(_serialize_planner_item(created)), 201
+    finally:
+        await cosmos_client.cosmosdb_client.close()
+
+
+@bp.route("/api/reminders/<item_id>", methods=["PATCH", "DELETE"])
+async def planner_reminder_detail(item_id: str):
+    user_id = await _require_authenticated_user_id()
+    if not user_id:
+        return jsonify({"error": "User authentication required"}), 401
+
+    service, cosmos_client = _create_planner_service()
+    if not service or not cosmos_client:
+        return jsonify({"error": "Planner storage is not configured"}), 501
+
+    try:
+        if request.method == "DELETE":
+            deleted = await service.delete_item(
+                user_id=user_id,
+                item_id=item_id,
+                expected_item_type="reminder",
+            )
+            return ("", 204) if deleted else (jsonify({"error": "Reminder not found"}), 404)
+
+        payload = await request.get_json() or {}
+        updates = {}
+        if "label" in payload:
+            updates["label"] = (payload.get("label") or "").strip()
+        if "time" in payload:
+            updates["time"] = payload.get("time") or None
+        if "completed" in payload:
+            updates["completed"] = bool(payload.get("completed"))
+
+        if not updates:
+            return jsonify({"error": "No valid fields supplied"}), 400
+
+        updated = await service.update_item(
+            user_id=user_id,
+            item_id=item_id,
+            updates=updates,
+            expected_item_type="reminder",
+        )
+        if not updated:
+            return jsonify({"error": "Reminder not found"}), 404
+
+        return jsonify(_serialize_planner_item(updated)), 200
+    finally:
+        await cosmos_client.cosmosdb_client.close()
+
+
+@bp.route("/api/todos", methods=["GET", "POST"])
+async def planner_todos():
+    user_id = await _require_authenticated_user_id()
+    if not user_id:
+        return jsonify({"error": "User authentication required"}), 401
+
+    service, cosmos_client = _create_planner_service()
+    if not service or not cosmos_client:
+        return jsonify({"error": "Planner storage is not configured"}), 501
+
+    try:
+        if request.method == "GET":
+            items = await service.list_items(user_id, item_type="todo")
+            return jsonify([_serialize_planner_item(item) for item in items]), 200
+
+        payload = await request.get_json() or {}
+        label = (payload.get("label") or "").strip()
+        if not label:
+            return jsonify({"error": "label is required"}), 400
+
+        created = await service.create_item(
+            user_id=user_id,
+            item_type="todo",
+            label=label,
+        )
+        return jsonify(_serialize_planner_item(created)), 201
+    finally:
+        await cosmos_client.cosmosdb_client.close()
+
+
+@bp.route("/api/todos/<item_id>", methods=["PATCH", "DELETE"])
+async def planner_todo_detail(item_id: str):
+    user_id = await _require_authenticated_user_id()
+    if not user_id:
+        return jsonify({"error": "User authentication required"}), 401
+
+    service, cosmos_client = _create_planner_service()
+    if not service or not cosmos_client:
+        return jsonify({"error": "Planner storage is not configured"}), 501
+
+    try:
+        if request.method == "DELETE":
+            deleted = await service.delete_item(
+                user_id=user_id,
+                item_id=item_id,
+                expected_item_type="todo",
+            )
+            return ("", 204) if deleted else (jsonify({"error": "To-do not found"}), 404)
+
+        payload = await request.get_json() or {}
+        updates = {}
+        if "label" in payload:
+            updates["label"] = (payload.get("label") or "").strip()
+        if "completed" in payload:
+            updates["completed"] = bool(payload.get("completed"))
+
+        if not updates:
+            return jsonify({"error": "No valid fields supplied"}), 400
+
+        updated = await service.update_item(
+            user_id=user_id,
+            item_id=item_id,
+            updates=updates,
+            expected_item_type="todo",
+        )
+        if not updated:
+            return jsonify({"error": "To-do not found"}), 404
+
+        return jsonify(_serialize_planner_item(updated)), 200
+    finally:
+        await cosmos_client.cosmosdb_client.close()
+
+
+def _parse_client_datetime(value: str) -> datetime:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("Invalid datetime format; use ISO-8601") from exc
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+@bp.route("/api/calendar/events", methods=["GET"])
+async def calendar_events():
+    access_token = request.headers.get("X-MS-TOKEN-AAD-ACCESS-TOKEN", "")
+    if not access_token:
+        return jsonify({"error": "Calendar access requires delegated Microsoft Graph token"}), 401
+
+    tz_param = request.args.get("timezone", "UTC")
+    start_param = request.args.get("start")
+    end_param = request.args.get("end")
+    days_param = request.args.get("days")
+
+    now_utc = datetime.now(timezone.utc)
+    start = _parse_client_datetime(start_param) if start_param else now_utc
+
+    if end_param:
+        end = _parse_client_datetime(end_param)
+    else:
+        try:
+            days = max(int(days_param), 1) if days_param else 3
+        except ValueError:
+            return jsonify({"error": "days must be a number"}), 400
+        end = start + timedelta(days=days)
+
+    if end <= start:
+        return jsonify({"error": "end must be after start"}), 400
+
+    try:
+        events = await fetch_calendar_events(
+            access_token,
+            start=start,
+            end=end,
+            timezone=tz_param,
+        )
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except httpx.HTTPStatusError as exc:
+        status_code = exc.response.status_code if exc.response else 502
+        message = exc.response.text if exc.response else "Calendar request failed"
+        return jsonify({"error": message}), status_code
+    except httpx.RequestError:
+        logging.exception("Network error calling Microsoft Graph calendar API")
+        return jsonify({"error": "Unable to reach Microsoft Graph"}), 502
+
+    return jsonify({"events": events}), 200
 
 
 async def generate_title(conversation_messages):

@@ -19,7 +19,7 @@
     // "typeRoots": [
     //   "./node_modules/@types" // Ensure Jest types are found
     // ],
-    "types": ["vite/client", "jest", "mocha", "node"],
+  "types": ["vite/client", "jest", "mocha", "node", "react", "react-dom"],
     "noUnusedLocals": false
   },
   "include": [
