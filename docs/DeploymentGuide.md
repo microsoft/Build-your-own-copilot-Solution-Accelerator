@@ -22,7 +22,9 @@ For **production deployments**, the repository also provides [`main.waf.paramete
 * Use the default `main.parameters.json` file for a **sandbox/dev environment**
 * For a **WAF-aligned, production-ready deployment**, copy the contents of `main.waf.parameters.json` into `main.parameters.json` before running `azd up`
 
-### VM Credentials Configuration
+### Configuration Options
+
+#### VM Credentials Configuration
 
 By default, the solution sets the VM administrator username and password from environment variables.
 
@@ -33,12 +35,12 @@ azd env set AZURE_ENV_VM_ADMIN_USERNAME <your-username>
 azd env set AZURE_ENV_VM_ADMIN_PASSWORD <your-password>
 ```
 
+#### Additional Configuration
+
 <details>
-
   <summary><b>Reusing an Existing Log Analytics Workspace</b></summary>
-
+  
   Guide to get your [Existing Workspace ID](/docs/re-use-log-analytics.md)
-
 </details>
 
 > [!TIP]
