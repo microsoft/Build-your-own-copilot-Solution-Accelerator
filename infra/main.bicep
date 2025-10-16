@@ -180,7 +180,7 @@ module roleAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:
 module network 'modules/network.bicep' = if (enablePrivateNetworking) {
   name: take('module.network.${solutionSuffix}', 64)
   params: {
-    resourcesName: resourceGroupName
+    resourcesName: solutionSuffix
     logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspaceResourceId
     vmAdminUsername: empty(vmAdminUsername) ? 'JumpboxAdminUser' : vmAdminUsername
     vmAdminPassword: empty(vmAdminPassword) ? 'JumpboxAdminP@ssw0rd1234!' : vmAdminPassword
