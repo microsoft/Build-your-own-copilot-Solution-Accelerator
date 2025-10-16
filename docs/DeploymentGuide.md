@@ -33,6 +33,14 @@ azd env set AZURE_ENV_VM_ADMIN_USERNAME <your-username>
 azd env set AZURE_ENV_VM_ADMIN_PASSWORD <your-password>
 ```
 
+<details>
+
+  <summary><b>Reusing an Existing Log Analytics Workspace</b></summary>
+
+  Guide to get your [Existing Workspace ID](/docs/re-use-log-analytics.md)
+
+</details>
+
 > [!TIP]
 > Always review and adjust parameter values (such as region, capacity, security settings and log analytics workspace configuration) to match your organization’s requirements before deploying. For production, ensure you have sufficient quota and follow the principle of least privilege for all identities and role assignments.
 

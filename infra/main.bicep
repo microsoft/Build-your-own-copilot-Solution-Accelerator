@@ -97,6 +97,9 @@ param vmSize string = 'Standard_DS2_v2' // Default VM size
 @description('Optional. A unique text value for the solution. This is used to ensure resource names are unique for global resources. Defaults to a 5-character substring of the unique string generated from the subscription ID, resource group name, and solution name.')
 param solutionUniqueText string = substring(uniqueString(subscription().id, resourceGroup().name, solutionName), 0, 5)
 
+@description('Optional. Resource ID of an existing Log Analytics Workspace.')
+param existingLogAnalyticsWorkspaceId string = ''
+
 var solutionSuffix = toLower(trim(replace(
   replace(
     replace(replace(replace(replace('${solutionName}${solutionUniqueText}', '-', ''), '_', ''), '.', ''), '/', ''),
@@ -178,7 +181,7 @@ module network 'modules/network.bicep' = if (enablePrivateNetworking) {
   name: take('module.network.${solutionSuffix}', 64)
   params: {
     resourcesName: resourceGroupName
-    logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspace!.outputs.resourceId
+    logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspaceResourceId
     vmAdminUsername: empty(vmAdminUsername) ? 'JumpboxAdminUser' : vmAdminUsername
     vmAdminPassword: empty(vmAdminPassword) ? 'JumpboxAdminP@ssw0rd1234!' : vmAdminPassword
     vmSize: empty(vmSize) ?  'Standard_DS2_v2' : vmSize
@@ -456,7 +459,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
     enableSoftDelete: true
     enablePurgeProtection: enablePurgeProtection
     softDeleteRetentionInDays: 7
-    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : []
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }] : []
     // WAF aligned configuration for Private Networking
     privateEndpoints: enablePrivateNetworking
       ? [
@@ -842,7 +845,7 @@ module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
     reserved: true
     kind: 'linux'
     // WAF aligned configuration for Monitoring
-    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }] : null
     // WAF aligned configuration for Scalability
     skuName: enableScalability || enableRedundancy ? 'P1v3' : 'B3'
     skuCapacity: enableScalability ? 3 : 1
@@ -850,8 +853,10 @@ module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
   }
 }
 
+// Extracts subscription, resource group, and workspace name from the resource ID when using an existing Log Analytics workspace
+var useExistingLogAnalytics = !empty(existingLogAnalyticsWorkspaceId)
 var logAnalyticsWorkspaceResourceName = 'log-${solutionSuffix}'
-module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (enableMonitoring) {
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (enableMonitoring && !useExistingLogAnalytics) {
   name: take('avm.res.operational-insights.workspace.${logAnalyticsWorkspaceResourceName}', 64)
   params: {
     name: logAnalyticsWorkspaceResourceName
@@ -909,6 +914,11 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
   }
 }
 
+// Log Analytics workspace ID) 
+var logAnalyticsWorkspaceResourceId = useExistingLogAnalytics
+  ? existingLogAnalyticsWorkspaceId
+  : logAnalyticsWorkspace!.outputs.resourceId
+
 var ApplicationInsightsName = 'appi-${solutionSuffix}'
 module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = if (enableMonitoring) {
   name: take('avm.res.insights.component.${ApplicationInsightsName}', 64)
@@ -920,8 +930,8 @@ module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = if (en
     applicationType: 'web'
     // Tags (align with organizational tagging policy)
     // WAF aligned configuration for Monitoring
-    workspaceResourceId: enableMonitoring ? logAnalyticsWorkspace!.outputs.resourceId : ''
-    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+    workspaceResourceId: enableMonitoring ? logAnalyticsWorkspaceResourceId : ''
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }] : null
     tags: {
       'hidden-link:${resourceId('Microsoft.Web/sites',ApplicationInsightsName)}': 'Resource'
     }
@@ -1013,8 +1023,8 @@ module webSite 'modules/web-sites.bicep' = {
         applicationInsightResourceId: enableMonitoring ? applicationInsights!.outputs.resourceId : null
       }
     ]
-    
-    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspace!.outputs.resourceId }] : null
+
+    diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }] : null
     // WAF aligned configuration for Private Networking
     vnetRouteAllEnabled: enablePrivateNetworking ? true : false
     vnetImagePullEnabled: enablePrivateNetworking ? true : false
