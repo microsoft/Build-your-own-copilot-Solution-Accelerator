@@ -22,6 +22,7 @@ By default this template will use the environment name as the prefix to prevent 
 | `AZURE_ENV_ENABLE_TELEMETRY`                  | boolean  | `true`            | Enable or disable telemetry collection for the deployment.                                             |
 | `AZURE_ENV_VM_ADMIN_USERNAME`            | string  | `<Set when enablePrivateNetworking=true>`         | Admin username for the jumpbox VM when private networking is enabled.   |
 | `AZURE_ENV_VM_ADMIN_PASSWORD`            | string  | `<Set when enablePrivateNetworking=true>`         | Admin password for the jumpbox VM when private networking is enabled.   |
+| `AZURE_ENV_LOG_ANALYTICS_WORKSPACE_ID` | string  | Guide to get your [Existing Workspace ID](/docs/re-use-log-analytics.md) | Reuses an existing Log Analytics Workspace instead of provisioning a new one.         |
 
 
 ## How to Set a Parameter
