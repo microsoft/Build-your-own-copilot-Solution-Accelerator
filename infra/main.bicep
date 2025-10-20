@@ -82,13 +82,11 @@ param enableRedundancy bool = false
 
 @description('Optional. Admin username for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
 @secure()
-//param vmAdminUsername string = take(newGuid(), 20)
-param vmAdminUsername string = ''
+param virtualMachineAdminUsername string?
 
 @description('Optional. Admin password for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
 @secure()
-//param vmAdminPassword string = newGuid()
-param vmAdminPassword string = ''
+param virtualMachineAdminPassword string?
 
 @description('Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true.')
 param vmSize string = 'Standard_DS2_v2' // Default VM size
@@ -177,20 +175,106 @@ module roleAssignment 'br/public:avm/res/authorization/role-assignment/rg-scope:
   }
 }
 
-module network 'modules/network.bicep' = if (enablePrivateNetworking) {
-  name: take('module.network.${solutionSuffix}', 64)
+module virtualNetwork 'modules/virtualNetwork.bicep' = if (enablePrivateNetworking) {
+  name: take('module.virtualNetwork.${solutionSuffix}', 64)
   params: {
-    resourcesName: solutionSuffix
-    logAnalyticsWorkSpaceResourceId: logAnalyticsWorkspaceResourceId
-    vmAdminUsername: empty(vmAdminUsername) ? 'JumpboxAdminUser' : vmAdminUsername
-    vmAdminPassword: empty(vmAdminPassword) ? 'JumpboxAdminP@ssw0rd1234!' : vmAdminPassword
-    vmSize: empty(vmSize) ?  'Standard_DS2_v2' : vmSize
+    name: 'vnet-${solutionSuffix}'
+    addressPrefixes: ['10.0.0.0/20'] // 4096 addresses (enough for 8 /23 subnets or 16 /24)
     location: location
     tags: allTags
+    logAnalyticsWorkspaceId: logAnalyticsWorkspaceResourceId
+    resourceSuffix: solutionSuffix
     enableTelemetry: enableTelemetry
   }
 }
+// Azure Bastion Host
+var bastionHostName = 'bas-${solutionSuffix}'
+module bastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (enablePrivateNetworking) {
+  name: take('avm.res.network.bastion-host.${bastionHostName}', 64)
+  params: {
+    name: bastionHostName
+    skuName: 'Standard'
+    location: location
+    virtualNetworkResourceId: virtualNetwork!.outputs.resourceId
+    diagnosticSettings: [
+      {
+        name: 'bastionDiagnostics'
+        workspaceResourceId: logAnalyticsWorkspaceResourceId
+        logCategoriesAndGroups: [
+          {
+            categoryGroup: 'allLogs'
+            enabled: true
+          }
+        ]
+      }
+    ]
+    tags: tags
+    enableTelemetry: enableTelemetry
+    publicIPAddressObject: {
+      name: 'pip-${bastionHostName}'
+      zones: []
+    }
+  }
+}
 
+// Jumpbox Virtual Machine
+var jumpboxVmName = take('vm-jumpbox-${solutionSuffix}', 15)
+module jumpboxVM 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (enablePrivateNetworking) {
+  name: take('avm.res.compute.virtual-machine.${jumpboxVmName}', 64)
+  params: {
+    name: take(jumpboxVmName, 15) // Shorten VM name to 15 characters to avoid Azure limits
+    vmSize: vmSize ?? 'Standard_DS2_v2'
+    location: location
+    adminUsername: virtualMachineAdminUsername ?? 'JumpboxAdminUser'
+    adminPassword: virtualMachineAdminPassword ?? 'JumpboxAdminP@ssw0rd1234!'
+    tags: tags
+    zone: 0
+    imageReference: {
+      offer: 'WindowsServer'
+      publisher: 'MicrosoftWindowsServer'
+      sku: '2019-datacenter'
+      version: 'latest'
+    }
+    osType: 'Windows'
+    osDisk: {
+      name: 'osdisk-${jumpboxVmName}'
+      managedDisk: {
+        storageAccountType: 'Standard_LRS'
+      }
+    }
+    encryptionAtHost: false // Some Azure subscriptions do not support encryption at host
+    nicConfigurations: [
+      {
+        name: 'nic-${jumpboxVmName}'
+        ipConfigurations: [
+          {
+            name: 'ipconfig1'
+            subnetResourceId: virtualNetwork!.outputs.jumpboxSubnetResourceId
+          }
+        ]
+        diagnosticSettings: [
+          {
+            name: 'jumpboxDiagnostics'
+            workspaceResourceId: logAnalyticsWorkspaceResourceId
+            logCategoriesAndGroups: [
+              {
+                categoryGroup: 'allLogs'
+                enabled: true
+              }
+            ]
+            metricCategories: [
+              {
+                category: 'AllMetrics'
+                enabled: true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+    enableTelemetry: enableTelemetry
+  }
+}
 // ========== Private DNS Zones ========== //
 var privateDnsZones = [
   'privatelink.cognitiveservices.azure.com'
@@ -233,8 +317,8 @@ module avmPrivateDnsZones 'br/public:avm/res/network/private-dns-zone:0.7.1' = [
       enableTelemetry: enableTelemetry
       virtualNetworkLinks: [
         {
-          name: take('vnetlink-${network!.outputs.vnetName}-${split(zone, '.')[1]}', 80)
-          virtualNetworkResourceId: network!.outputs.vnetResourceId
+          name: take('vnetlink-${virtualNetwork!.outputs.name}-${split(zone, '.')[1]}', 80)
+          virtualNetworkResourceId: virtualNetwork!.outputs.resourceId
         }
       ]
     }
@@ -270,7 +354,7 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
           {
             name: 'pep-blob-${solutionSuffix}'
             service: 'blob'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
             privateDnsZoneGroup: {
               privateDnsZoneGroupConfigs: [
                 {
@@ -283,7 +367,7 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
           {
             name: 'pep-queue-${solutionSuffix}'
             service: 'queue'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
             privateDnsZoneGroup: {
               privateDnsZoneGroupConfigs: [
                 {
@@ -296,7 +380,7 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
           {
             name: 'pep-file-${solutionSuffix}'
             service: 'file'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
             privateDnsZoneGroup: {
               privateDnsZoneGroupConfigs: [
                 {
@@ -309,7 +393,7 @@ module storageAccountModule 'br/public:avm/res/storage/storage-account:0.20.0' =
           {
             name: 'pep-dfs-${solutionSuffix}'
             service: 'dfs'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
             privateDnsZoneGroup: {
               privateDnsZoneGroupConfigs: [
                 {
@@ -401,7 +485,7 @@ module azSearchService 'br/public:avm/res/search/search-service:0.11.1' = {
             ]
           }
           service: 'searchService'
-          subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+          subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
         }
       ]
     : []
@@ -433,7 +517,7 @@ module uploadFiles 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     // ✅ Explicit storage account + subnet for private networking
     storageAccountResourceId: storageAccountModule.outputs.resourceId
     subnetResourceIds: enablePrivateNetworking ? [
-      network!.outputs.subnetDeploymentScriptsResourceId
+      virtualNetwork!.outputs.deploymentScriptsSubnetResourceId
     ] : null
     cleanupPreference: 'OnSuccess'
   }
@@ -475,7 +559,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
               ]
             }
             service: 'vault'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
           }
         ]
       : []
@@ -649,7 +733,7 @@ module azAIMultiServiceAccount 'br/public:avm/res/cognitive-services/account:0.1
               ]
             }
             service: 'account'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
           }
         ]
       : []
@@ -707,7 +791,7 @@ module createIndex 'br/public:avm/res/resources/deployment-script:0.5.1' = {
     cleanupPreference: 'OnSuccess'
     storageAccountResourceId: storageAccountModule.outputs.resourceId
     subnetResourceIds: enablePrivateNetworking ? [
-      network!.outputs.subnetDeploymentScriptsResourceId
+      virtualNetwork!.outputs.deploymentScriptsSubnetResourceId
     ] : null
   }
   dependsOn: [
@@ -804,7 +888,7 @@ module aihubworkspace 'br/public:avm/res/machine-learning-services/workspace:0.1
               ]
             }
             service: 'amlworkspace'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
           }
         ]
       : []
@@ -1028,7 +1112,7 @@ module webSite 'modules/web-sites.bicep' = {
     // WAF aligned configuration for Private Networking
     vnetRouteAllEnabled: enablePrivateNetworking ? true : false
     vnetImagePullEnabled: enablePrivateNetworking ? true : false
-    virtualNetworkSubnetId: enablePrivateNetworking ? network!.outputs.subnetWebResourceId : null
+    virtualNetworkSubnetId: enablePrivateNetworking ? virtualNetwork!.outputs.webSubnetResourceId : null
     publicNetworkAccess: 'Enabled'
     privateEndpoints: enablePrivateNetworking
       ? [
@@ -1041,7 +1125,7 @@ module webSite 'modules/web-sites.bicep' = {
               ]
             }
             service: 'sites'
-            subnetResourceId: network!.outputs.subnetPrivateEndpointsResourceId
+            subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
           }
         ]
       : null
