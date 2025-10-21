@@ -82,11 +82,11 @@ param enableRedundancy bool = false
 
 @description('Optional. Admin username for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
 @secure()
-param virtualMachineAdminUsername string?
+param virtualMachineAdminUsername string = ''
 
 @description('Optional. Admin password for the Jumpbox Virtual Machine. Set to custom value if enablePrivateNetworking is true.')
 @secure()
-param virtualMachineAdminPassword string?
+param virtualMachineAdminPassword string = ''
 
 @description('Optional. Size of the Jumpbox Virtual Machine when created. Set to custom value if enablePrivateNetworking is true.')
 param vmSize string = 'Standard_DS2_v2' // Default VM size
@@ -225,8 +225,8 @@ module jumpboxVM 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (enable
     name: take(jumpboxVmName, 15) // Shorten VM name to 15 characters to avoid Azure limits
     vmSize: vmSize ?? 'Standard_DS2_v2'
     location: location
-    adminUsername: virtualMachineAdminUsername ?? 'JumpboxAdminUser'
-    adminPassword: virtualMachineAdminPassword ?? 'JumpboxAdminP@ssw0rd1234!'
+    adminUsername: !empty(virtualMachineAdminUsername) ? virtualMachineAdminUsername : 'JumpboxAdminUser'
+    adminPassword: !empty(virtualMachineAdminPassword) ? virtualMachineAdminPassword : 'JumpboxAdminP@ssw0rd1234!'
     tags: tags
     zone: 0
     imageReference: {
