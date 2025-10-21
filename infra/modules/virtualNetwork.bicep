@@ -155,14 +155,14 @@ param subnets subnetType[] = [
     }
   }
   {
-        name: 'deployment-scripts'
-        addressPrefixes: ['10.0.4.0/24']
-        networkSecurityGroup: {
-          name: 'nsg-deployment-scripts'
-          securityRules: []
-        }
-        delegation: 'Microsoft.ContainerInstance/containerGroups'
-        serviceEndpoints: ['Microsoft.Storage']
+    name: 'deployment-scripts'
+    addressPrefixes: ['10.0.4.0/24']
+    networkSecurityGroup: {
+     name: 'nsg-deployment-scripts'
+     securityRules: []
+    }
+    delegation: 'Microsoft.ContainerInstance/containerGroups'
+    serviceEndpoints: ['Microsoft.Storage']
   }
 ]
 
