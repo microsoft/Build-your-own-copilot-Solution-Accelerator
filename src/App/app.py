@@ -6,7 +6,8 @@ import time
 import uuid
 from types import SimpleNamespace
 
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from azure.identity import get_bearer_token_provider
+from backend.helpers.azure_credential_utils import get_azure_credential
 from azure.monitor.opentelemetry import configure_azure_monitor
 
 # from quart.sessions import SecureCookieSessionInterface
@@ -81,16 +82,25 @@ def create_app():
         app.wealth_advisor_agent = await AgentFactory.get_wealth_advisor_agent()
         logging.info("Wealth Advisor Agent initialized during application startup")
         app.search_agent = await AgentFactory.get_search_agent()
-        logging.info(
-            "Call Transcript Search Agent initialized during application startup"
-        )
+        logging.info("Call Transcript Search Agent initialized during application startup")
+        app.sql_agent = await AgentFactory.get_sql_agent()
+        logging.info("SQL Agent initialized during application startup")
 
     @app.after_serving
     async def shutdown():
-        await AgentFactory.delete_all_agent_instance()
-        app.wealth_advisor_agent = None
-        app.search_agent = None
-        logging.info("Agents cleaned up during application shutdown")
+        try:
+            logging.info("Application shutdown initiated...")
+            await AgentFactory.delete_all_agent_instance()
+            if hasattr(app, 'wealth_advisor_agent'):
+                app.wealth_advisor_agent = None
+            if hasattr(app, 'search_agent'):
+                app.search_agent = None
+            if hasattr(app, 'sql_agent'):
+                app.sql_agent = None
+            logging.info("Agents cleaned up successfully")
+        except Exception as e:
+            logging.error(f"Error during shutdown: {e}")
+            logging.exception("Detailed error during shutdown")
 
     # app.secret_key = secrets.token_hex(16)
     # app.session_interface = SecureCookieSessionInterface()
@@ -137,7 +147,6 @@ frontend_settings = {
 }
 # Enable Microsoft Defender for Cloud Integration
 MS_DEFENDER_ENABLED = os.environ.get("MS_DEFENDER_ENABLED", "false").lower() == "true"
-
 # VITE_POWERBI_EMBED_URL = os.environ.get("VITE_POWERBI_EMBED_URL")
 
 
@@ -185,7 +194,7 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
         if not aoai_api_key:
             logging.debug("No AZURE_OPENAI_KEY found, using Azure AD auth")
             ad_token_provider = get_bearer_token_provider(
-                DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+                get_azure_credential(config.MID_ID), "https://cognitiveservices.azure.com/.default"
             )
 
         # Deployment
@@ -233,7 +242,7 @@ def init_cosmosdb_client():
             )
 
             if not config.AZURE_COSMOSDB_ACCOUNT_KEY:
-                credential = DefaultAzureCredential()
+                credential = get_azure_credential(config.MID_ID)
             else:
                 credential = config.AZURE_COSMOSDB_ACCOUNT_KEY
 

@@ -7,7 +7,7 @@ on:
       - dev
       - demo
   schedule:
-    - cron: '0 6,18 * * *'  # Runs at 6:00 AM and 6:00 PM GMT
+    - cron: "0 6,18 * * *" # Runs at 6:00 AM and 6:00 PM GMT
 
 env:
   GPT_MIN_CAPACITY: 200
@@ -29,7 +29,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
       - name: Install ODBC Driver 18 for SQL Server
         run: |
           curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
@@ -81,7 +80,6 @@ jobs:
 
       - name: Install Bicep CLI
         run: az bicep install
-        
       - name: Set Deployment Region
         id: set_region
         run: |
@@ -98,7 +96,6 @@ jobs:
           UNIQUE_RG_NAME="arg-${ACCL_NAME}-${SHORT_UUID}"
           echo "RESOURCE_GROUP_NAME=${UNIQUE_RG_NAME}" >> $GITHUB_ENV
           echo "Generated RESOURCE_GROUP_NAME: ${UNIQUE_RG_NAME}"
-      
       - name: Check and Create Resource Group
         id: check_create_rg
         run: |
@@ -114,7 +111,6 @@ jobs:
           fi
           # Set output for other jobs
           echo "RESOURCE_GROUP_NAME=${{ env.RESOURCE_GROUP_NAME }}" >> $GITHUB_OUTPUT
-      
       - name: Generate Unique Solution Prefix
         id: generate_solution_prefix
         run: |
@@ -131,13 +127,12 @@ jobs:
         id: determine_tag
         run: |
           BRANCH=${{ github.ref_name }}
-          if [[ "$BRANCH" == "main" ]]; then TAG="latest"
+          if [[ "$BRANCH" == "main" ]]; then TAG="latest_waf"
           elif [[ "$BRANCH" == "dev" ]]; then TAG="dev"
           elif [[ "$BRANCH" == "demo" ]]; then TAG="demo"
-          else TAG="latest"; fi
+          else TAG="latest_waf"; fi
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
           echo "Image Tag: $TAG"
-      
       - name: Deploy and extract values from deployment output
         id: get_output
         run: |
@@ -146,13 +141,14 @@ jobs:
           # Install azd (Azure Developer CLI) - required by process_sample_data.sh
           curl -fsSL https://aka.ms/install-azd.sh | bash
 
+          # Generate current timestamp in desired format: YYYY-MM-DDTHH:MM:SS.SSSSSSSZ
+            current_date=$(date -u +"%Y-%m-%dT%H:%M:%S.%7NZ")
+          
           DEPLOY_OUTPUT=$(az deployment group create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --template-file infra/main.bicep \
-            --parameters aiDeploymentsLocation=${{ env.AZURE_LOCATION }} environmentName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptDeploymentCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} imageTag=${{ env.IMAGE_TAG }} \
+            --parameters location=${{ env.AZURE_LOCATION }} azureAiServiceLocation=${{ env.AZURE_LOCATION }} solutionName=${{ env.SOLUTION_PREFIX }} cosmosLocation=westus gptModelCapacity=${{ env.GPT_MIN_CAPACITY }} embeddingDeploymentCapacity=${{ env.TEXT_EMBEDDING_MIN_CAPACITY }} imageTag=${{ env.IMAGE_TAG }} createdBy="Pipeline" tags="{'SecurityControl':'Ignore','Purpose':'Deploying and Cleaning Up Resources for Validation','CreatedDate':'$current_date'}" \
             --query "properties.outputs" -o json)
-
-          
 
           echo "Deployment output: $DEPLOY_OUTPUT"
           if [[ -z "$DEPLOY_OUTPUT" ]]; then
@@ -160,8 +156,8 @@ jobs:
             exit 1
           fi
 
-          export AI_FOUNDARY_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.aI_FOUNDRY_NAME.value')
-          echo "AI_FOUNDARY_NAME=$AI_FOUNDARY_NAME" >> $GITHUB_ENV
+          export AI_FOUNDRY_RESOURCE_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.aI_FOUNDRY_RESOURCE_ID.value')
+          echo "AI_FOUNDRY_RESOURCE_ID=$AI_FOUNDRY_RESOURCE_ID" >> $GITHUB_ENV
           export SEARCH_SERVICE_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.aI_SEARCH_SERVICE_NAME.value')
           echo "SEARCH_SERVICE_NAME=$SEARCH_SERVICE_NAME" >> $GITHUB_ENV
           export COSMOS_DB_ACCOUNT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.cosmosdB_ACCOUNT_NAME.value')
@@ -172,18 +168,16 @@ jobs:
           echo "STORAGE_CONTAINER=$STORAGE_CONTAINER" >> $GITHUB_ENV
           export KEYVAULT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.keY_VAULT_NAME.value')
           echo "KEYVAULT_NAME=$KEYVAULT_NAME" >> $GITHUB_ENV
-          export SQL_SERVER=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_SERVER.value')
-          echo "SQL_SERVER=$SQL_SERVER" >> $GITHUB_ENV
+          export SQL_SERVER_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_SERVER_NAME.value')
+          echo "SQL_SERVER_NAME=$SQL_SERVER_NAME" >> $GITHUB_ENV
           export SQL_DATABASE=$(echo "$DEPLOY_OUTPUT" | jq -r '.sqldB_DATABASE.value')
           echo "SQL_DATABASE=$SQL_DATABASE" >> $GITHUB_ENV
-          export CLIENT_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_WEBAPP_CLIENTID.value')
+          export CLIENT_ID=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_SQL_CLIENTID.value')
           echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
-          export CLIENT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_WEBAPP_NAME.value')
+          export CLIENT_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.managedidentitY_SQL_NAME.value')
           echo "CLIENT_NAME=$CLIENT_NAME" >> $GITHUB_ENV
           export RG_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.resourcE_GROUP_NAME.value')
           echo "RG_NAME=$RG_NAME" >> $GITHUB_ENV
-          export RESOURCE_GROUP_NAME_FOUNDRY=$(echo "$DEPLOY_OUTPUT" | jq -r '.resourcE_GROUP_NAME_FOUNDRY.value')
-          echo "RESOURCE_GROUP_NAME_FOUNDRY=$RESOURCE_GROUP_NAME_FOUNDRY" >> $GITHUB_ENV
           WEBAPP_URL=$(echo $DEPLOY_OUTPUT | jq -r '.weB_APP_URL.value')
           echo "WEBAPP_URL=$WEBAPP_URL" >> $GITHUB_OUTPUT
           WEB_APP_NAME=$(echo $DEPLOY_OUTPUT | jq -r '.weB_APP_NAME.value')
@@ -195,9 +189,7 @@ jobs:
 
           sleep 30
 
-
-
-      - name: Deploy Infra and Import Sample Data 
+      - name: Deploy Infra and Import Sample Data
         run: |
           set -e
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
@@ -220,10 +212,9 @@ jobs:
             "" \
             "${{ secrets.AZURE_CLIENT_ID }}" \
             "${{ env.RG_NAME }}" \
-            "${{ env.SQL_SERVER }}" \
-            "${{ env.AI_FOUNDARY_NAME }}" \
+            "${{ env.SQL_SERVER_NAME }}" \
             "${{ env.SEARCH_SERVICE_NAME }}" \
-            "${{ env.RESOURCE_GROUP_NAME_FOUNDRY }}"
+            "${{ env.AI_FOUNDRY_RESOURCE_ID}}"
 
 
           user_roles_json='[
@@ -232,13 +223,11 @@ jobs:
           ]'
 
           bash ./infra/scripts/add_user_scripts/create_sql_user_and_role.sh \
-            "${{ env.SQL_SERVER }}.database.windows.net" \
+            "${{ env.SQL_SERVER_NAME }}.database.windows.net" \
             "${{ env.SQL_DATABASE }}" \
             "$user_roles_json" \
             "${{ secrets.AZURE_CLIENT_ID }}"
-          
           echo "=== Post-Deployment Script Completed Successfully ==="
-            
 
       - name: Get AI Services name and store in variable
         if: always() && steps.check_create_rg.outcome == 'success'
@@ -262,7 +251,6 @@ jobs:
         run: |
           set -e
           echo "Listing all KeyVaults in the resource group ${{ env.RESOURCE_GROUP_NAME }}..."
-          
           # Get the list of KeyVaults in the specified resource group
           keyvaults=$(az resource list --resource-group ${{ env.RESOURCE_GROUP_NAME }} --query "[?type=='Microsoft.KeyVault/vaults'].name" -o tsv)
 
@@ -288,7 +276,6 @@ jobs:
             # Output the formatted array and save it to the job output
             echo "KEYVAULTS=$keyvault_array" >> $GITHUB_OUTPUT
           fi
-          
       - name: Set Deployment Status
         id: deployment_status
         if: always()
@@ -312,7 +299,7 @@ jobs:
     secrets: inherit
 
   cleanup:
-    if: always() 
+    if: always()
     needs: [deploy, e2e-test]
     runs-on: ubuntu-latest
     env:
@@ -336,12 +323,10 @@ jobs:
           set -e  
           echo "Checking if resource group exists..."
           echo "Resource group name: ${{ env.RESOURCE_GROUP_NAME }}"
-          
           if [ -z "${{ env.RESOURCE_GROUP_NAME }}" ]; then
             echo "Resource group name is empty. Skipping deletion."
             exit 0
           fi
-          
           rg_exists=$(az group exists --name "${{ env.RESOURCE_GROUP_NAME }}")
           if [ "$rg_exists" = "true" ]; then
             echo "Resource group exists. Cleaning..."
@@ -368,12 +353,9 @@ jobs:
 
           # Remove the surrounding square brackets and quotes, if they exist
           stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g' | sed 's/"//g')
-          
           # Convert the comma-separated string into an array
           IFS=',' read -r -a resources_to_check <<< "$stripped_keyvaults"
-          
           echo "List of resources to check: ${resources_to_check[@]}"
-         
           # Check if resource group still exists before listing resources
           rg_exists=$(az group exists --name "${{ env.RESOURCE_GROUP_NAME }}")
           if [ "$rg_exists" = "false" ]; then
@@ -472,7 +454,6 @@ jobs:
 
           # Remove the surrounding square brackets and quotes, if they exist
           stripped_keyvaults=$(echo "$KEYVAULTS" | sed 's/\[\|\]//g' | sed 's/"//g')
-          
           # Convert the comma-separated string into an array
           IFS=',' read -r -a keyvault_array <<< "$stripped_keyvaults"
 
@@ -506,7 +487,6 @@ jobs:
         if: failure() || needs.deploy.result == 'failure' || needs.e2e-test.result == 'failure'
         run: |
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-      
           # Construct the email body
           EMAIL_BODY=$(cat <<EOF
           {
@@ -514,7 +494,6 @@ jobs:
           }
           EOF
           )
-      
           # Send the notification
           curl -X POST "${{ secrets.LOGIC_APP_URL }}" \
             -H "Content-Type: application/json" \

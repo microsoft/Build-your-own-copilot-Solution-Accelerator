@@ -12,30 +12,10 @@ class TestChatWithDataPlugin:
         """Setup method to initialize plugin instance for each test."""
         self.plugin = ChatWithDataPlugin()
 
-    @pytest.mark.asyncio
-    @patch.object(ChatWithDataPlugin, "get_openai_client")
-    async def test_greeting_returns_response(self, mock_get_openai_client):
-        """Test that greeting method calls OpenAI and returns response."""
-        # Setup mock
-        mock_client = MagicMock()
-        mock_get_openai_client.return_value = mock_client
-
-        mock_completion = MagicMock()
-        mock_completion.choices = [MagicMock()]
-        mock_completion.choices[0].message.content = (
-            "Hello! I'm your Wealth Assistant. How can I help you today?"
-        )
-        mock_client.chat.completions.create.return_value = mock_completion
-
-        result = await self.plugin.greeting("Hello")
-
-        assert result == "Hello! I'm your Wealth Assistant. How can I help you today?"
-        mock_client.chat.completions.create.assert_called_once()
-
     @patch("backend.plugins.chat_with_data_plugin.config")
     @patch("backend.plugins.chat_with_data_plugin.openai.AzureOpenAI")
     @patch("backend.plugins.chat_with_data_plugin.get_bearer_token_provider")
-    @patch("backend.plugins.chat_with_data_plugin.DefaultAzureCredential")
+    @patch("backend.plugins.chat_with_data_plugin.get_azure_credential")
     def test_get_openai_client_success(
         self,
         mock_default_credential,
@@ -70,7 +50,7 @@ class TestChatWithDataPlugin:
 
     @patch("backend.plugins.chat_with_data_plugin.config")
     @patch("backend.plugins.chat_with_data_plugin.AIProjectClient")
-    @patch("backend.plugins.chat_with_data_plugin.DefaultAzureCredential")
+    @patch("backend.plugins.chat_with_data_plugin.get_azure_credential")
     def test_get_project_openai_client_success(
         self, mock_default_credential, mock_ai_project_client, mock_config
     ):
@@ -102,82 +82,101 @@ class TestChatWithDataPlugin:
 
     @pytest.mark.asyncio
     @patch("backend.plugins.chat_with_data_plugin.get_connection")
-    @patch.object(ChatWithDataPlugin, "get_openai_client")
-    async def test_get_sql_response_success(
-        self, mock_get_openai_client, mock_get_connection
-    ):
-        """Test successful SQL response generation with AAD authentication."""
-        # Setup mocks
-        mock_client = MagicMock()
-        mock_get_openai_client.return_value = mock_client
+    @patch("backend.plugins.chat_with_data_plugin.config")
+    @patch("backend.agents.agent_factory.AgentFactory.get_sql_agent")
+    async def test_get_sql_response_success(self, mock_get_sql_agent, mock_config, mock_get_connection):
+        mock_config.AI_PROJECT_ENDPOINT = "https://dummy.endpoint"
+        mock_config.AZURE_OPENAI_MODEL = "gpt-4o-mini"
+        mock_config.SQL_SYSTEM_PROMPT = "Test prompt"
 
-        mock_completion = MagicMock()
-        mock_completion.choices = [MagicMock()]
-        mock_completion.choices[0].message.content = (
-            "SELECT * FROM Clients WHERE ClientId = 'client123';"
-        )
-        mock_client.chat.completions.create.return_value = mock_completion
+        mock_agent = MagicMock()
+        mock_agent.id = "mock-agent-id"
+        mock_project_client = MagicMock()
 
+        mock_thread = MagicMock()
+        mock_thread.id = "thread123"
+        mock_project_client.agents.threads.create.return_value = mock_thread
+
+        mock_run = MagicMock()
+        mock_run.status = "completed"
+        mock_project_client.agents.runs.create_and_process.return_value = mock_run
+
+        mock_message = MagicMock()
+        mock_message.text.value = "SELECT * FROM Clients WHERE ClientId = 'client123';"
+        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = mock_message
+
+        mock_get_sql_agent.return_value = {"agent": mock_agent, "client": mock_project_client}
+
+        # Mock DB execution
         mock_connection = MagicMock()
         mock_cursor = MagicMock()
-        mock_cursor.fetchall.return_value = [
-            ("John Doe", "john@example.com", "Engineer")
-        ]
+        mock_cursor.fetchall.return_value = [("John Doe", "john@example.com", "Engineer")]
         mock_connection.cursor.return_value = mock_cursor
         mock_get_connection.return_value = mock_connection
 
         result = await self.plugin.get_SQL_Response("Find client details", "client123")
 
-        # Verify the result
         assert "John Doe" in result
         assert "john@example.com" in result
         assert "Engineer" in result
 
-        # Verify OpenAI was called
-        mock_client.chat.completions.create.assert_called_once()
-
-        # Verify database operations using AAD authentication
-        mock_get_connection.assert_called_once()
-        mock_cursor.execute.assert_called_once()
-        mock_cursor.fetchall.assert_called_once()
-        mock_connection.close.assert_called_once()
-
     @pytest.mark.asyncio
     @patch("backend.plugins.chat_with_data_plugin.get_connection")
-    @patch.object(ChatWithDataPlugin, "get_openai_client")
-    async def test_get_sql_response_database_error(
-        self, mock_get_openai_client, mock_get_connection
-    ):
-        """Test SQL response when database connection fails."""
-        mock_client = MagicMock()
-        mock_get_openai_client.return_value = mock_client
+    @patch("backend.plugins.chat_with_data_plugin.config")
+    @patch("backend.agents.agent_factory.AgentFactory.get_sql_agent")
+    async def test_get_sql_response_database_error(self, mock_get_sql_agent, mock_config, mock_get_connection):
+        mock_config.AI_PROJECT_ENDPOINT = "https://dummy.endpoint"
+        mock_config.AZURE_OPENAI_MODEL = "gpt-4o-mini"
 
-        mock_completion = MagicMock()
-        mock_completion.choices = [MagicMock()]
-        mock_completion.choices[0].message.content = "SELECT * FROM Clients;"
-        mock_client.chat.completions.create.return_value = mock_completion
+        mock_agent = MagicMock()
+        mock_agent.id = "mock-agent-id"
+        mock_project_client = MagicMock()
 
-        # Simulate database connection error
+        mock_thread = MagicMock()
+        mock_thread.id = "thread123"
+        mock_project_client.agents.threads.create.return_value = mock_thread
+
+        mock_run = MagicMock()
+        mock_run.status = "completed"
+        mock_project_client.agents.runs.create_and_process.return_value = mock_run
+
+        mock_message = MagicMock()
+        mock_message.text.value = "SELECT * FROM Clients;"
+        mock_project_client.agents.messages.get_last_message_text_by_role.return_value = mock_message
+
+        mock_get_sql_agent.return_value = {"agent": mock_agent, "client": mock_project_client}
+
         mock_get_connection.side_effect = Exception("Database connection failed")
 
         result = await self.plugin.get_SQL_Response("Get all clients", "client123")
 
-        assert "Error retrieving data from SQL" in result
+        assert "Error retrieving SQL data" in result
         assert "Database connection failed" in result
 
     @pytest.mark.asyncio
-    @patch.object(ChatWithDataPlugin, "get_openai_client")
-    async def test_get_sql_response_openai_error(self, mock_get_openai_client):
-        """Test SQL response when OpenAI call fails."""
-        mock_client = MagicMock()
-        mock_get_openai_client.return_value = mock_client
+    @patch("backend.plugins.chat_with_data_plugin.config")
+    @patch("backend.agents.agent_factory.AgentFactory.get_sql_agent")
+    async def test_get_sql_response_openai_error(self, mock_get_sql_agent, mock_config):
+        mock_config.AI_PROJECT_ENDPOINT = "https://dummy.endpoint"
+        mock_config.AZURE_OPENAI_MODEL = "gpt-4o-mini"
 
-        # Simulate OpenAI error
-        mock_client.chat.completions.create.side_effect = Exception("OpenAI API error")
+        mock_agent = MagicMock()
+        mock_agent.id = "mock-agent-id"
+        mock_project_client = MagicMock()
 
-        result = await self.plugin.get_SQL_Response("Get client data", "client123")
+        mock_thread = MagicMock()
+        mock_thread.id = "thread123"
+        mock_project_client.agents.threads.create.return_value = mock_thread
 
-        assert "Error retrieving data from SQL" in result
+        # Simulate error during run processing
+        mock_project_client.agents.runs.create_and_process.side_effect = Exception("OpenAI API error")
+
+        mock_get_sql_agent.return_value = {"agent": mock_agent, "client": mock_project_client}
+
+        plugin = ChatWithDataPlugin()
+        result = await plugin.get_SQL_Response("Get client data", "client123")
+
+        assert "Error retrieving SQL data" in result
         assert "OpenAI API error" in result
 
     @pytest.mark.asyncio

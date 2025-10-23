@@ -42,20 +42,33 @@ export const getpbi = async (): Promise<string> => {
   return '';
 }
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const getUsers = async (): Promise<User[]> => {
-  try {
-    const response = await fetch('/api/users');
-    if (!response.ok) {
-      throw new Error(`Failed to fetch users: ${response.statusText}`);
+  const maxRetries = 1;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch('/api/users', {
+        signal: AbortSignal.timeout(60000)
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users: ${response.statusText}`);
+      }
+      const data: User[] = await response.json();
+      console.log('Fetched users:', data);
+      return data;
+    } catch (error) {
+      if (attempt < maxRetries && 
+          error instanceof Error) {
+        console.warn(`Retrying fetch users... (retry ${attempt + 1}/${maxRetries})`);
+        await sleep(5000); // Simple 5 second delay
+      } else {
+        console.error('Error fetching users:', error);
+        return [];
+      }
     }
-    const data: User[] = await response.json();
-    console.log('Fetched users:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    return [];
-    // throw error;
   }
+  return [];
 };
 
 // export const fetchChatHistoryInit = async (): Promise<Conversation[] | null> => {

@@ -123,10 +123,12 @@ echo "Uploading files to Azure Blob Storage"
 # Using az storage blob upload-batch to upload files with managed identity authentication, as the az storage fs directory upload command is not working with managed identity authentication.
 az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder1" --source $extractionPath1 --auth-mode login --pattern '*' --overwrite --output none
 if [ $? -ne 0 ]; then
-    retries=3
+    maxRetries=5
+    retries=$maxRetries
     sleepTime=10
-    echo "Error: Failed to upload files to Azure Blob Storage. Retrying upload...($((4 - retries)) of 3)"
+    attempt=1
     while [ $retries -gt 0 ]; do
+        echo "Error: Failed to upload files to Azure Blob Storage. Retrying upload...$attempt of $maxRetries in $sleepTime seconds"
         sleep $sleepTime
         az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder1" --source $extractionPath1 --auth-mode login --pattern '*' --overwrite --output none
         if [ $? -eq 0 ]; then
@@ -134,22 +136,26 @@ if [ $? -ne 0 ]; then
             break
         else
             ((retries--))
-            echo "Retrying upload... ($((4 - retries)) of 3)"
+            ((attempt++))
             sleepTime=$((sleepTime * 2))
-            sleep $sleepTime
         fi
     done
-    exit 1
+    if [ $retries -eq 0 ]; then
+        echo "Error: Failed to upload files after all retry attempts."
+        exit 1
+    fi
 else
     echo "Files uploaded successfully to Azure Blob Storage."
 fi
 
 az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder2" --source $extractionPath2 --auth-mode login --pattern '*' --overwrite --output none
 if [ $? -ne 0 ]; then
-    retries=3
+    maxRetries=5
+    retries=$maxRetries
+    attempt=1
     sleepTime=10
-    echo "Error: Failed to upload files to Azure Blob Storage. Retrying upload...($((4 - retries)) of 3)"
     while [ $retries -gt 0 ]; do
+        echo "Error: Failed to upload files to Azure Blob Storage. Retrying upload...$attempt of $maxRetries in $sleepTime seconds"
         sleep $sleepTime
         az storage blob upload-batch --account-name "$storageAccount" --destination data/"$extractedFolder2" --source $extractionPath2 --auth-mode login --pattern '*' --overwrite --output none
         if [ $? -eq 0 ]; then
@@ -157,12 +163,14 @@ if [ $? -ne 0 ]; then
             break
         else
             ((retries--))
-            echo "Retrying upload... ($((4 - retries)) of 3)"
+            ((attempt++))
             sleepTime=$((sleepTime * 2))
-            sleep $sleepTime
         fi
     done
-    exit 1
+    if [ $retries -eq 0 ]; then
+        echo "Error: Failed to upload files after all retry attempts."
+        exit 1
+    fi
 else
     echo "Files uploaded successfully to Azure Blob Storage."
 fi

@@ -9,7 +9,8 @@ from azure.ai.agents.models import (
     MessageRole,
 )
 from azure.ai.projects import AIProjectClient
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from azure.identity import get_bearer_token_provider
+from backend.helpers.azure_credential_utils import get_azure_credential
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 
 from backend.common.config import config
@@ -21,42 +22,6 @@ from backend.services.sqldb_service import get_connection
 
 
 class ChatWithDataPlugin:
-
-    @kernel_function(
-        name="GreetingsResponse",
-        description="Respond to any greeting or general questions",
-    )
-    async def greeting(
-        self, input: Annotated[str, "the question"]
-    ) -> Annotated[str, "The output is a string"]:
-        """
-        Simple greeting handler using Azure OpenAI.
-        """
-        try:
-            if config.USE_AI_PROJECT_CLIENT:
-                client = self.get_project_openai_client()
-
-            else:
-                client = self.get_openai_client()
-
-            completion = client.chat.completions.create(
-                model=config.AZURE_OPENAI_MODEL,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant to respond to greetings or general questions.",
-                    },
-                    {"role": "user", "content": input},
-                ],
-                temperature=0,
-                top_p=1,
-                n=1,
-            )
-
-            answer = completion.choices[0].message.content
-        except Exception as e:
-            answer = f"Error retrieving greeting response: {str(e)}"
-        return answer
 
     @kernel_function(
         name="ChatWithSQLDatabase",
@@ -77,87 +42,78 @@ class ChatWithDataPlugin:
         if not input or not input.strip():
             return "Error: Query input is required"
 
-        clientid = ClientId
-        query = input
-
-        # Retrieve the SQL prompt from environment variables (if available)
-        sql_prompt = config.SQL_SYSTEM_PROMPT
-        if sql_prompt:
-            sql_prompt = sql_prompt.replace("{query}", query).replace(
-                "{clientid}", clientid
-            )
-        else:
-            # Fallback prompt if not set in environment
-            sql_prompt = f"""Generate a valid T-SQL query to find {query} for tables and columns provided below:
-            1. Table: Clients
-            Columns: ClientId, Client, Email, Occupation, MaritalStatus, Dependents
-            2. Table: InvestmentGoals
-            Columns: ClientId, InvestmentGoal
-            3. Table: Assets
-            Columns: ClientId, AssetDate, Investment, ROI, Revenue, AssetType
-            4. Table: ClientSummaries
-            Columns: ClientId, ClientSummary
-            5. Table: InvestmentGoalsDetails
-            Columns: ClientId, InvestmentGoal, TargetAmount, Contribution
-            6. Table: Retirement
-            Columns: ClientId, StatusDate, RetirementGoalProgress, EducationGoalProgress
-            7. Table: ClientMeetings
-            Columns: ClientId, ConversationId, Title, StartTime, EndTime, Advisor, ClientEmail
-            Always use the Investment column from the Assets table as the value.
-            Assets table has snapshots of values by date. Do not add numbers across different dates for total values.
-            Do not use client name in filters.
-            Do not include assets values unless asked for.
-            ALWAYS use ClientId = {clientid} in the query filter.
-            ALWAYS select Client Name (Column: Client) in the query.
-            Query filters are IMPORTANT. Add filters like AssetType, AssetDate, etc. if needed.
-            When answering scheduling or time-based meeting questions, always use the StartTime column from ClientMeetings table. Use correct logic to return the most recent past meeting (last/previous) or the nearest future meeting (next/upcoming), and ensure only StartTime column is used for meeting timing comparisons.
-            Only return the generated SQL query. Do not return anything else."""
-
+        thread = None
         try:
-            if config.USE_AI_PROJECT_CLIENT:
-                client = self.get_project_openai_client()
+            # TEMPORARY: Use AgentFactory directly to debug the issue
+            logging.info(f"Using AgentFactory directly for SQL agent for ClientId: {ClientId}")
+            from backend.agents.agent_factory import AgentFactory
+            agent_info = await AgentFactory.get_sql_agent()
 
-            else:
-                # Initialize the Azure OpenAI client
-                client = self.get_openai_client()
+            logging.info(f"SQL agent retrieved: {agent_info is not None}")
+            agent = agent_info["agent"]
+            project_client = agent_info["client"]
 
-            completion = client.chat.completions.create(
-                model=config.AZURE_OPENAI_MODEL,
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": sql_prompt},
-                ],
-                temperature=0,
-                top_p=1,
-                n=1,
+            thread = project_client.agents.threads.create()
+
+            # Send question as message
+            project_client.agents.messages.create(
+                thread_id=thread.id,
+                role=MessageRole.USER,
+                content=f"ClientId: {ClientId}\nQuestion: {input}",
             )
 
-            sql_query = completion.choices[0].message.content
+            # Run the agent
+            run = project_client.agents.runs.create_and_process(
+                thread_id=thread.id,
+                agent_id=agent.id,
+                temperature=0,
+            )
 
-            # Remove any triple backticks if present
+            if run.status == "failed":
+                return f"Error: Agent run failed: {run.last_error}"
+
+            # Get SQL query from the agent's final response
+            message = project_client.agents.messages.get_last_message_text_by_role(
+                thread_id=thread.id,
+                role=MessageRole.AGENT
+            )
+            sql_query = message.text.value.strip() if message else None
+            logging.info(f"Generated SQL query: {sql_query}")
+
+            if not sql_query:
+                return "No SQL query was generated."
+
+            # Clean up triple backticks (if any)
             sql_query = sql_query.replace("```sql", "").replace("```", "")
+            logging.info(f"Cleaned SQL query: {sql_query}")
 
-            # print("Generated SQL:", sql_query)
-
+            # Execute the query
             conn = get_connection()
-            # conn = pyodbc.connect(connectionString)
             cursor = conn.cursor()
             cursor.execute(sql_query)
-
             rows = cursor.fetchall()
+            logging.info(f"Query returned {len(rows)} rows")
+
             if not rows:
-                answer = "No data found for that client."
+                result = "No data found for that client."
             else:
-                answer = ""
-                for row in rows:
-                    answer += str(row) + "\n"
+                result = "\n".join(str(row) for row in rows)
+                logging.info(f"Result preview: {result[:200]}...")
 
             conn.close()
-            answer = answer[:20000] if len(answer) > 20000 else answer
 
+            return result[:20000] if len(result) > 20000 else result
         except Exception as e:
-            answer = f"Error retrieving data from SQL: {str(e)}"
-        return answer
+            logging.exception("Error in get_SQL_Response")
+            return f"Error retrieving SQL data: {str(e)}"
+        finally:
+            if thread:
+                try:
+                    logging.info(f"Attempting to delete thread {thread.id}")
+                    await project_client.agents.threads.delete(thread.id)
+                    logging.info(f"Thread {thread.id} deleted successfully")
+                except Exception as e:
+                    logging.error(f"Error deleting thread {thread.id}: {str(e)}")
 
     @kernel_function(
         name="ChatWithCallTranscripts",
@@ -176,12 +132,13 @@ class ChatWithDataPlugin:
         if not question or not question.strip():
             return "Error: Question input is required"
 
+        thread = None
         try:
             response_text = ""
 
             from backend.agents.agent_factory import AgentFactory
 
-            agent_info: dict = await AgentFactory.get_search_agent()
+            agent_info = await AgentFactory.get_search_agent()
 
             agent: Agent = agent_info["agent"]
             project_client: AIProjectClient = agent_info["client"]
@@ -252,7 +209,11 @@ class ChatWithDataPlugin:
 
             finally:
                 if thread:
-                    project_client.agents.threads.delete(thread.id)
+                    try:
+                        await project_client.agents.threads.delete(thread.id)
+                        logging.info(f"Thread {thread.id} deleted successfully")
+                    except Exception as e:
+                        logging.error(f"Error deleting thread {thread.id}: {str(e)}")
 
             if not response_text.strip():
                 return "No data found for that client."
@@ -264,7 +225,7 @@ class ChatWithDataPlugin:
 
     def get_openai_client(self):
         token_provider = get_bearer_token_provider(
-            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+            get_azure_credential(config.MID_ID), "https://cognitiveservices.azure.com/.default"
         )
         openai_client = openai.AzureOpenAI(
             azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
@@ -275,7 +236,7 @@ class ChatWithDataPlugin:
 
     def get_project_openai_client(self):
         project = AIProjectClient(
-            endpoint=config.AI_PROJECT_ENDPOINT, credential=DefaultAzureCredential()
+            endpoint=config.AI_PROJECT_ENDPOINT, credential=get_azure_credential(config.MID_ID)
         )
         openai_client = project.inference.get_azure_openai_client(
             api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION
