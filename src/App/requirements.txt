@@ -26,7 +26,7 @@ pytest-cov==7.0.0
 pyodbc==5.2.0
 
 
-semantic_kernel==1.33.0
+semantic_kernel==1.32.0
 azure-search-documents==11.7.0b1
 azure-ai-projects==1.0.0
 azure-ai-inference==1.0.0b9
