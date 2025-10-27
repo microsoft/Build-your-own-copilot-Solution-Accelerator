@@ -154,7 +154,7 @@ class ChatWithDataPlugin:
                 project_index = project_client.indexes.create_or_update(
                     name=f"project-index-{config.AZURE_SEARCH_INDEX}",
                     version="1",
-                    body={
+                    index={
                         "connectionName": config.AZURE_SEARCH_CONNECTION_NAME,
                         "indexName": config.AZURE_SEARCH_INDEX,
                         "type": "AzureSearch",
