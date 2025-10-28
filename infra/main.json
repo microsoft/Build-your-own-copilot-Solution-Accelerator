@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "4337548567990578963"
+      "templateHash": "7195801196475709586"
     }
   },
   "parameters": {
@@ -311,7 +311,7 @@
       "apiVersion": "2021-04-01",
       "name": "default",
       "properties": {
-        "tags": "[shallowMerge(createArray(parameters('tags'), createObject('TemplateName', 'Research Assistant', 'CreatedBy', parameters('createdBy'))))]"
+        "tags": "[shallowMerge(createArray(resourceGroup().tags, parameters('tags'), createObject('TemplateName', 'Research Assistant', 'CreatedBy', parameters('createdBy'))))]"
       }
     },
     "cogEndpointSecret": {
@@ -22463,10 +22463,10 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "userAssignedIdentity",
         "virtualNetwork"
       ]
@@ -38337,8 +38337,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').machineLearningServices)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').notebook)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').machineLearningServices)]",
         "azOpenAI",
         "azSearchService",
         "existingOpenAI",
