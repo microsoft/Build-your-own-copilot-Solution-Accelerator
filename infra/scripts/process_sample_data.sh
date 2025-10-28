@@ -10,7 +10,6 @@
 	aif_resource_group=""
 	aif_account_resource_id=""
 	# Add global variable for SQL Server public access
-
 	original_sql_public_access=""
 	created_sql_allow_all_firewall_rule="false"
 	original_full_range_rule_present="false"
