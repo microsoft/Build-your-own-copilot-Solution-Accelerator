@@ -85,4 +85,8 @@ Once you've opened the project in locally, you can deploy it to Azure by followi
 
 6. If you are done trying out the application, you can delete the resources by running `azd down`.
 
----
+
+## Next Steps
+Now that you've completed your deployment, you can start using the solution. 
+
+To help you get started, here are some [Sample Questions](./SampleQuestions.md) you can follow to try it out.
