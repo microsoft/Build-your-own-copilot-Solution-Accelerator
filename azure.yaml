@@ -26,7 +26,7 @@ hooks:
         echo $WEB_APP_URL
         echo ""
         echo "Run the following command in your Bash terminal. It will grant the necessary permissions between resources and your user account, and also process and load the sample data into the application."
-        echo "bash ./infra/scripts/process_sample_data.sh $env:AZURE_RESOURCE_GROUP"
+        echo "bash ./infra/scripts/process_sample_data.sh $AZURE_RESOURCE_GROUP"
       shell: sh
       continueOnError: false
       interactive: true
