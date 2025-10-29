@@ -86,7 +86,7 @@ You can run this solution using [GitHub Codespaces](https://docs.github.com/en/c
 </details>
 
 <details>
-  <summary><b>Deploy in VS Code</b></summary>
+  <summary><b>Deploy in VS Code Dev Containers</b></summary>
 
 ### VS Code Dev Containers
 
@@ -136,26 +136,7 @@ Consider the following settings during your deployment to modify specific settin
 <details>
   <summary><b>Configurable Deployment Settings</b></summary>
 
-When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](CustomizingAzdParameters.md):  
-
-
-| **Setting**                          | **Description**                                                                                    | **Default value**        |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------ |
-| **Environment Name**                 | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources.      | `azdtemp`                |
-| **Cosmos Location**                  | A **less busy** region for **CosmosDB**, useful in case of availability constraints.               | `eastus2`                |
-| **Deployment Type**                  | Select from a drop-down list (`Standard`, `GlobalStandard`).                                       | `GlobalStandard`         |
-| **GPT Model**                        | Azure OpenAI GPT model to deploy.                                                                  | `gpt-4o-mini`            |
-| **GPT Model Deployment Capacity**    | Configure capacity for **GPT models**. Choose based on Azure OpenAI quota.                         | `30`                     |
-| **Embedding Model**                  | OpenAI embedding model used for vector similarity.                                                 | `text-embedding-ada-002` |
-| **Embedding Model Capacity**         | Set the capacity for **embedding models**. Choose based on usage and quota.                        | `80`                     |
-| **Image Tag**                        | The version of the Docker image to use (e.g., `latest_waf`, `dev`, `hotfix`).                          | `latest_waf`                 |
-| **Azure OpenAI API Version**         | Set the API version for OpenAI model deployments.                                                  | `2025-04-01-preview`     |
-| **AZURE_LOCATION**                  | Sets the Azure region for resource deployment. | `<User selects during deployment>`              |
-| **Existing Log Analytics Workspace** | To reuse an existing Log Analytics Workspace ID instead of creating a new one.                     | *(empty)*                |
-| **Existing AI Foundry Project Resource ID** | To reuse an existing AI Foundry Project Resource ID instead of creating a new one.                     | *(empty)*                |
-
-
-
+When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](CustomizingAzdParameters.md)
 
 </details>
 
@@ -258,9 +239,9 @@ This will rebuild the source code, package it into a container, and push it to t
 ## Post Deployment Steps
 
 1. **Import Sample Data**
-   -Run  bash command printed in the terminal. The bash command will look like the following: 
+   -please open a **Git Bash** terminal and run the bash command printed below. The bash command will look like the following ( need to replace with newly created "**Azure Resource Group Name**" with "**<AZURE_RESOURCE_GROUP>**" ): 
     ```shell 
-    bash ./infra/scripts/process_sample_data.sh
+    bash ./infra/scripts/process_sample_data.sh <AZURE_RESOURCE_GROUP>
     ```
     if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
     ```shell
