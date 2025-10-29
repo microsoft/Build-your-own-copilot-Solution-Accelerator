@@ -239,9 +239,9 @@ This will rebuild the source code, package it into a container, and push it to t
 ## Post Deployment Steps
 
 1. **Import Sample Data**
-   -please open a **Git Bash** terminal and run the bash command printed below. The bash command will look like the following ( need to replace with newly created "**Azure Resource Group Name**" with "**<AZURE_RESOURCE_GROUP>**" ): 
+   -please open a **Git Bash** terminal and run the bash command printed below. The bash command will look like the following: 
     ```shell 
-    bash ./infra/scripts/process_sample_data.sh <AZURE_RESOURCE_GROUP>
+    bash ./infra/scripts/process_sample_data.sh
     ```
     if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
     ```shell
