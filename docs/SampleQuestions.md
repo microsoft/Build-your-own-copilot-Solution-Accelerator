@@ -26,7 +26,7 @@ The Drafts section allows users to generate and refine grant proposal drafts wit
 _Sample Questions:_
 
 - Enter the topic name **the effects of influenza on immunocompromised persons** in  and click **Generate** button
-![GenerateDraft](images/generate_draft.png)
+![GenerateDraft](images/generate_draft1.png)
 - In **Project narrative** section customize Generate text and  click **Re-generate** button
    > text: consolidate summary into a single paragraph"._ 
 
