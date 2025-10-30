@@ -396,19 +396,15 @@ get_values_from_user() {
 
 # Authenticate with Azure
 echo ""
-if az account show &> /dev/null; then
-	echo "Already authenticated with Azure."
+echo "Attempting to authenticate with Azure..."
+if [ -n "$managedIdentityClientId" ]; then
+	# Use managed identity if running in Azure
+	echo "Authenticating with Managed Identity..."
+	az login --identity --client-id ${managedIdentityClientId}
 else
-	echo "Not authenticated with Azure. Attempting to authenticate..."
-	if [ -n "$managedIdentityClientId" ]; then
-		# Use managed identity if running in Azure
-		echo "Authenticating with Managed Identity..."
-		az login --identity --client-id ${managedIdentityClientId}
-	else
-		# Use Azure CLI login if running locally
-		echo "Authenticating with Azure CLI..."
-		az login
-	fi
+	# Use Azure CLI login if running locally
+	echo "Authenticating with Azure CLI..."
+	az login
 fi
 echo ""
 
