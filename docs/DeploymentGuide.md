@@ -238,22 +238,35 @@ This will rebuild the source code, package it into a container, and push it to t
 
 ## Post Deployment Steps
 
-1. **Import Sample Data**
-   -please open a **Git Bash** terminal and run the bash command printed below. The bash command will look like the following: 
-    ```shell 
-    bash ./infra/scripts/process_sample_data.sh
-    ```
-    if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
-    ```shell
-    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName> <aiFoundryResourceName> <aiSearchResourceName>
-    ```
+### 1. Import Sample Data 
 
-2. **Add Authentication Provider**  
-    - Follow steps in [App Authentication](./AppAuthentication.md) to configure authentication in app service. Note that Authentication changes can take up to 10 minutes. 
+**Choose the appropriate command based on your deployment method:**
 
-3. **Deleting Resources After a Failed Deployment**  
+**If you deployed using `azd up` command:**
+```bash 
+bash ./infra/scripts/process_sample_data.sh 
+```
+> **Note**: The script will automatically take required values from your `azd` environment.
 
-     - Follow steps in [Delete Resource Group](DeleteResourceGroup.md) if your deployment fails and/or you need to clean up the resources.
+**If you deployed using custom templates, ARM/Bicep deployments, or `az deployment group` commands:**
+```bash 
+bash ./infra/scripts/process_sample_data.sh <your-resource-group-name>
+```
+> **Note**: Replace `<your-resource-group-name>` with the actual name of the resource group containing your deployed Azure resources.
+
+> **💡 Tip**: If the deployment metadata does not exist in Azure or has been deleted, the script will prompt you to manually enter the required configuration values.
+
+> **💡 Tip**: Since this guide is for azd deployment, you'll most likely use the first command without resource group name.
+
+### 2. Configure Authentication
+
+Follow the steps in [App Authentication](./AppAuthentication.md) to configure authentication in App Service. 
+
+> **Note**: Authentication changes can take up to 10 minutes to propagate.
+
+### 3. Troubleshooting: Cleaning Up After a Failed Deployment
+
+If your deployment fails and you need to clean up resources, follow the steps in [Delete Resource Group](./DeleteResourceGroup.md).
 
 ## Environment configuration for local development & debugging
 > Set APP_ENV in your .env file to control Azure authentication. Set the environment variable to dev to use Azure CLI credentials, or to prod to use Managed Identity for production. **Ensure you're logged in via az login when using dev in local**.
