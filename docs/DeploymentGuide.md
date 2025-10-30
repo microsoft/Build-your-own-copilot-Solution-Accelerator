@@ -241,12 +241,9 @@ This will rebuild the source code, package it into a container, and push it to t
 1. **Import Sample Data**
    -please open a **Git Bash** terminal and run the bash command printed below. The bash command will look like the following: 
     ```shell 
-    bash ./infra/scripts/process_sample_data.sh
+    bash ./infra/scripts/process_sample_data.sh <resourceGroupName>
     ```
-    if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
-    ```shell
-    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName> <aiFoundryResourceName> <aiSearchResourceName>
-    ```
+   If the deployment does not exist or has been deleted – The script will prompt you to manually enter the required values
 
 2. **Add Authentication Provider**  
     - Follow steps in [App Authentication](./AppAuthentication.md) to configure authentication in app service. Note that Authentication changes can take up to 10 minutes. 
