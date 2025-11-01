@@ -12,4 +12,4 @@ azure-keyvault-secrets
 pandas
 datetime
 
-pyodbc==5.2.0
+pyodbc==5.3.0
