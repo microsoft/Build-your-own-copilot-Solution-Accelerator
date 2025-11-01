@@ -1,32 +1,32 @@
 # Core requirements
-azure-identity==1.25.0
+azure-identity==1.25.1
 # Flask[async]==2.3.2
-openai==2.0.1
-azure-storage-blob==12.26.0
-python-dotenv==1.1.1
-azure-cosmos==4.9.0
+openai==2.6.1
+azure-storage-blob==12.27.1
+python-dotenv==1.2.1
+azure-cosmos==4.14.0
 quart==0.20.0
-uvicorn==0.37.0
-aiohttp==3.12.15
+uvicorn==0.38.0
+aiohttp==3.13.2
 quart-session==3.0.0
-pymssql==2.3.7
+pymssql==2.3.8
 httpx==0.28.1
 
 # Linting and formatting tools
 flake8==7.3.0
 black==25.9.0
 autoflake==2.3.1
-isort==6.1.0
+isort==7.0.0
 
 # Testing tools
 pytest>=8.2,<9  # Compatible version for pytest-asyncio
 pytest-asyncio==1.2.0
 pytest-cov==7.0.0
 
-pyodbc==5.2.0
+pyodbc==5.3.0
 
 
-semantic_kernel==1.33.0
+semantic_kernel==1.37.1
 azure-search-documents==11.7.0b1
 azure-ai-projects==1.0.0
 azure-ai-inference==1.0.0b9
@@ -35,8 +35,8 @@ opentelemetry-exporter-otlp-proto-grpc
 opentelemetry-exporter-otlp-proto-http
 opentelemetry-exporter-otlp-proto-grpc
 azure-monitor-events-extension
-opentelemetry-sdk==1.37.0
-opentelemetry-api==1.37.0
-opentelemetry-semantic-conventions==0.58b0
-opentelemetry-instrumentation==0.58b0
+opentelemetry-sdk==1.38.0
+opentelemetry-api==1.38.0
+opentelemetry-semantic-conventions==0.59b0
+opentelemetry-instrumentation==0.59b0
 azure-monitor-opentelemetry==1.8.1
