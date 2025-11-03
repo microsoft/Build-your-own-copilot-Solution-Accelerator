@@ -137,48 +137,48 @@ enable_public_access() {
 	fi
 
 	# Add (or verify) a firewall rule allowing all IPs (TEMPORARY)
-    echo "Ensuring temporary wide-open firewall rule exists for data load"
-    sql_allow_all_rule_name="temp-allow-all-ip"
+	echo "Ensuring temporary wide-open firewall rule exists for data load"
+	sql_allow_all_rule_name="temp-allow-all-ip"
 
-    # Detect if a full-range rule (any name) already existed before we potentially create one
-    pre_existing_full_range_rule=$(az sql server firewall-rule list \
-        --server "$sqlServerName" \
-        --resource-group "$resourceGroupName" \
-        --query "[?startIpAddress=='0.0.0.0' && endIpAddress=='255.255.255.255'] | [0].name" \
-        -o tsv 2>/dev/null)
-    if [ -n "$pre_existing_full_range_rule" ]; then
-        original_full_range_rule_present="true"
-    fi
+	# Detect if a full-range rule (any name) already existed before we potentially create one
+	pre_existing_full_range_rule=$(az sql server firewall-rule list \
+	    --server "$sqlServerName" \
+	    --resource-group "$resourceGroupName" \
+	    --query "[?startIpAddress=='0.0.0.0' && endIpAddress=='255.255.255.255'] | [0].name" \
+	    -o tsv 2>/dev/null)
+	if [ -n "$pre_existing_full_range_rule" ]; then
+	    original_full_range_rule_present="true"
+	fi
 
-    existing_allow_all_rule=$(az sql server firewall-rule list \
-        --server "$sqlServerName" \
-        --resource-group "$resourceGroupName" \
-        --query "[?name=='${sql_allow_all_rule_name}'] | [0].name" \
-        -o tsv 2>/dev/null)
+	existing_allow_all_rule=$(az sql server firewall-rule list \
+	    --server "$sqlServerName" \
+	    --resource-group "$resourceGroupName" \
+	    --query "[?name=='${sql_allow_all_rule_name}'] | [0].name" \
+	    -o tsv 2>/dev/null)
 
-    if [ -z "$existing_allow_all_rule" ]; then
-        if [ -n "$pre_existing_full_range_rule" ]; then
-            echo "✓ Existing rule ($pre_existing_full_range_rule) already allows full IP range."
-        else
-            echo "Creating temporary allow-all firewall rule ($sql_allow_all_rule_name)..."
-            if az sql server firewall-rule create \
-                --resource-group "$resourceGroupName" \
-                --server "$sqlServerName" \
-                --name "$sql_allow_all_rule_name" \
-                --start-ip-address 0.0.0.0 \
-                --end-ip-address 255.255.255.255 \
-                --output none; then
-                created_sql_allow_all_firewall_rule="true"
-                echo "✓ Temporary allow-all firewall rule created"
-            else
-                echo "⚠ Warning: Failed to create allow-all firewall rule"
-            fi
-        fi
-    else
-        echo "✓ Temporary allow-all firewall rule already present"
-        # Since it was present beforehand, mark that a full-range rule existed originally
-        original_full_range_rule_present="true"
-    fi
+	if [ -z "$existing_allow_all_rule" ]; then
+	    if [ -n "$pre_existing_full_range_rule" ]; then
+	        echo "✓ Existing rule ($pre_existing_full_range_rule) already allows full IP range."
+	    else
+	        echo "Creating temporary allow-all firewall rule ($sql_allow_all_rule_name)..."
+	        if az sql server firewall-rule create \
+	            --resource-group "$resourceGroupName" \
+	            --server "$sqlServerName" \
+	            --name "$sql_allow_all_rule_name" \
+	            --start-ip-address 0.0.0.0 \
+	            --end-ip-address 255.255.255.255 \
+	            --output none; then
+	            created_sql_allow_all_firewall_rule="true"
+	            echo "✓ Temporary allow-all firewall rule created"
+	        else
+	            echo "⚠ Warning: Failed to create allow-all firewall rule"
+	        fi
+	    fi
+	else
+	    echo "✓ Temporary allow-all firewall rule already present"
+	    # Since it was present beforehand, mark that a full-range rule existed originally
+	    original_full_range_rule_present="true"
+	fi
 	
 	# Wait a bit for changes to take effect
 	echo "Waiting for network access changes to propagate..."
@@ -276,7 +276,6 @@ restore_network_access() {
 	echo "=== Network access restoration completed ==="
 }
 
-	
 # Function to handle script cleanup on exit
 cleanup_on_exit() {
 	exit_code=$?
@@ -294,10 +293,10 @@ trap cleanup_on_exit EXIT INT TERM
 
 # check if azd cli is installed
 check_azd_installed() {
-    if command -v azd &> /dev/null; then
-        return 0
-    else
-        return 1
+	if command -v azd &> /dev/null; then
+		return 0
+	else
+		return 1
 	fi
 }
 
