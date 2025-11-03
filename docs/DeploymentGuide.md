@@ -86,7 +86,7 @@ You can run this solution using [GitHub Codespaces](https://docs.github.com/en/c
 </details>
 
 <details>
-  <summary><b>Deploy in VS Code</b></summary>
+  <summary><b>Deploy in VS Code Dev Containers</b></summary>
 
 ### VS Code Dev Containers
 
@@ -136,26 +136,7 @@ Consider the following settings during your deployment to modify specific settin
 <details>
   <summary><b>Configurable Deployment Settings</b></summary>
 
-When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](CustomizingAzdParameters.md):  
-
-
-| **Setting**                          | **Description**                                                                                    | **Default value**        |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------ |
-| **Environment Name**                 | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources.      | `azdtemp`                |
-| **Cosmos Location**                  | A **less busy** region for **CosmosDB**, useful in case of availability constraints.               | `eastus2`                |
-| **Deployment Type**                  | Select from a drop-down list (`Standard`, `GlobalStandard`).                                       | `GlobalStandard`         |
-| **GPT Model**                        | Azure OpenAI GPT model to deploy.                                                                  | `gpt-4o-mini`            |
-| **GPT Model Deployment Capacity**    | Configure capacity for **GPT models**. Choose based on Azure OpenAI quota.                         | `30`                     |
-| **Embedding Model**                  | OpenAI embedding model used for vector similarity.                                                 | `text-embedding-ada-002` |
-| **Embedding Model Capacity**         | Set the capacity for **embedding models**. Choose based on usage and quota.                        | `80`                     |
-| **Image Tag**                        | The version of the Docker image to use (e.g., `latest_waf`, `dev`, `hotfix`).                          | `latest_waf`                 |
-| **Azure OpenAI API Version**         | Set the API version for OpenAI model deployments.                                                  | `2025-04-01-preview`     |
-| **AZURE_LOCATION**                  | Sets the Azure region for resource deployment. | `<User selects during deployment>`              |
-| **Existing Log Analytics Workspace** | To reuse an existing Log Analytics Workspace ID instead of creating a new one.                     | *(empty)*                |
-| **Existing AI Foundry Project Resource ID** | To reuse an existing AI Foundry Project Resource ID instead of creating a new one.                     | *(empty)*                |
-
-
-
+When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](CustomizingAzdParameters.md)
 
 </details>
 
@@ -257,22 +238,35 @@ This will rebuild the source code, package it into a container, and push it to t
 
 ## Post Deployment Steps
 
-1. **Import Sample Data**
-   -Run  bash command printed in the terminal. The bash command will look like the following: 
-    ```shell 
-    bash ./infra/scripts/process_sample_data.sh
-    ```
-    if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
-    ```shell
-    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName> <aiFoundryResourceName> <aiSearchResourceName>
-    ```
+### 1. Import Sample Data 
 
-2. **Add Authentication Provider**  
-    - Follow steps in [App Authentication](./AppAuthentication.md) to configure authentication in app service. Note that Authentication changes can take up to 10 minutes. 
+**Choose the appropriate command based on your deployment method:**
 
-3. **Deleting Resources After a Failed Deployment**  
+**If you deployed using `azd up` command:**
+```bash 
+bash ./infra/scripts/process_sample_data.sh 
+```
+> **Note**: The script will automatically take required values from your `azd` environment.
 
-     - Follow steps in [Delete Resource Group](DeleteResourceGroup.md) if your deployment fails and/or you need to clean up the resources.
+**If you deployed using custom templates, ARM/Bicep deployments, or `az deployment group` commands:**
+```bash 
+bash ./infra/scripts/process_sample_data.sh <your-resource-group-name>
+```
+> **Note**: Replace `<your-resource-group-name>` with the actual name of the resource group containing your deployed Azure resources.
+
+> **💡 Tip**: If the deployment metadata does not exist in Azure or has been deleted, the script will prompt you to manually enter the required configuration values.
+
+> **💡 Tip**: Since this guide is for azd deployment, you'll most likely use the first command without resource group name.
+
+### 2. Configure Authentication
+
+Follow the steps in [App Authentication](./AppAuthentication.md) to configure authentication in App Service. 
+
+> **Note**: Authentication changes can take up to 10 minutes to propagate.
+
+### 3. Troubleshooting: Cleaning Up After a Failed Deployment
+
+If your deployment fails and you need to clean up resources, follow the steps in [Delete Resource Group](./DeleteResourceGroup.md).
 
 ## Environment configuration for local development & debugging
 > Set APP_ENV in your .env file to control Azure authentication. Set the environment variable to dev to use Azure CLI credentials, or to prod to use Managed Identity for production. **Ensure you're logged in via az login when using dev in local**.
