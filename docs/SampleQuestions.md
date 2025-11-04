@@ -10,7 +10,7 @@ The Articles section allows users to explore and retrieve information from publi
 _Sample Questions:_
 
 - What are the effects of influenza vaccine on immunocompromised populations?
-- How do co-morbidities such as hypertensiona and obesity affect vaccine effectiveness?
+- How do co-morbidities such as hypertension and obesity affect vaccine effectiveness?
 
 ### **Grants**
 The Grants section enables users to discover funding opportunities and ongoing research grants related to studies.
