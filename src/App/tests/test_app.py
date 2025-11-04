@@ -8,7 +8,7 @@ from app import (
     delete_all_conversations,
     generate_title,
     init_cosmosdb_client,
-    init_openai_client,
+    init_ai_projects_client,
     stream_chat_request,
 )
 from quart import Response
@@ -78,15 +78,16 @@ def test_create_app():
     assert "routes" in app.blueprints
 
 
-@patch("app.get_bearer_token_provider")
-@patch("app.AsyncAzureOpenAI")
-def test_init_openai_client(mock_async_openai, mock_token_provider):
-    mock_token_provider.return_value = MagicMock()
-    mock_async_openai.return_value = MagicMock()
+@patch("app.AIProjectClient")
+def test_init_ai_projects_client(mock_ai_projects_client):
+    mock_project_instance = MagicMock()
+    mock_openai_client = MagicMock()
+    mock_project_instance.inference.get_azure_openai_client.return_value = mock_openai_client
+    mock_ai_projects_client.return_value = mock_project_instance
 
-    client = init_openai_client()
+    client = init_ai_projects_client()
     assert client is not None
-    mock_async_openai.assert_called_once()
+    mock_ai_projects_client.assert_called_once()
 
 
 @patch("app.CosmosConversationClient")
@@ -1179,15 +1180,15 @@ async def test_add_conversation_conversation_not_found(
 
 
 @pytest.mark.asyncio
-@patch("app.init_openai_client")
-async def test_generate_title_success(mock_init_openai_client):
+@patch("app.init_ai_projects_client")
+async def test_generate_title_success(mock_init_ai_projects_client):
     mock_openai_client = AsyncMock()
     mock_openai_client.chat.completions.create.return_value = MagicMock(
         choices=[
             MagicMock(message=MagicMock(content=json.dumps({"title": "Test Title"})))
         ]
     )
-    mock_init_openai_client.return_value = mock_openai_client
+    mock_init_ai_projects_client.return_value = mock_openai_client
 
     conversation_messages = [{"role": "user", "content": "Hello"}]
     title = await generate_title(conversation_messages)
@@ -1195,11 +1196,11 @@ async def test_generate_title_success(mock_init_openai_client):
 
 
 @pytest.mark.asyncio
-@patch("app.init_openai_client")
-async def test_generate_title_exception(mock_init_openai_client):
+@patch("app.init_ai_projects_client")
+async def test_generate_title_exception(mock_init_ai_projects_client):
     mock_openai_client = AsyncMock()
     mock_openai_client.chat.completions.create.side_effect = Exception("API error")
-    mock_init_openai_client.return_value = mock_openai_client
+    mock_init_ai_projects_client.return_value = mock_openai_client
 
     conversation_messages = [{"role": "user", "content": "Hello"}]
     title = await generate_title(conversation_messages)
