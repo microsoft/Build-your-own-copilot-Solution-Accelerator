@@ -206,7 +206,7 @@ def init_ai_projects_client(use_data=SHOULD_USE_DATA):
 
         return openai_client
     except Exception as e:
-        logging.exception("Exception in Azure AI Projects initialization", e)
+        logging.exception("Exception in Azure AI Projects initialization")
         span = trace.get_current_span()
         if span is not None:
             span.record_exception(e)
@@ -247,7 +247,7 @@ def init_cosmosdb_client():
                 },
             )
         except Exception as e:
-            logging.exception("Exception in CosmosDB initialization", e)
+            logging.exception("Exception in CosmosDB initialization")
             span = trace.get_current_span()
             if span is not None:
                 span.record_exception(e)
