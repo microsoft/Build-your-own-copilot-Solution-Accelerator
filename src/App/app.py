@@ -9,9 +9,9 @@ from types import SimpleNamespace
 from azure.identity import get_bearer_token_provider
 from backend.helpers.azure_credential_utils import get_azure_credential
 from azure.monitor.opentelemetry import configure_azure_monitor
+from azure.ai.projects import AIProjectClient
 
 # from quart.sessions import SecureCookieSessionInterface
-from openai import AsyncAzureOpenAI
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 from quart import (
@@ -129,7 +129,7 @@ DEBUG = os.environ.get("DEBUG", "false")
 if DEBUG.lower() == "true":
     logging.basicConfig(level=logging.DEBUG)
 
-USER_AGENT = "GitHubSampleWebApp/AsyncAzureOpenAI/1.0.0"
+USER_AGENT = "GitHubSampleWebApp/AzureAIProjects/1.0.0"
 
 frontend_settings = {
     "auth_enabled": config.AUTH_ENABLED,
@@ -163,9 +163,9 @@ def should_use_data():
 SHOULD_USE_DATA = should_use_data()
 
 
-# Initialize Azure OpenAI Client
-def init_openai_client(use_data=SHOULD_USE_DATA):
-    azure_openai_client = None
+# Initialize Azure AI Projects Client
+def init_ai_projects_client(use_data=SHOULD_USE_DATA):
+    ai_projects_client = None
     try:
         # API version check
         if (
@@ -177,59 +177,42 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
             )
 
         # Endpoint
-        if not config.AZURE_OPENAI_ENDPOINT and not config.AZURE_OPENAI_RESOURCE:
+        if not config.AI_PROJECT_ENDPOINT:
             raise Exception(
-                "AZURE_OPENAI_ENDPOINT or AZURE_OPENAI_RESOURCE is required"
+                "AI_PROJECT_ENDPOINT is required for Azure AI Projects client"
             )
 
-        endpoint = (
-            config.AZURE_OPENAI_ENDPOINT
-            if config.AZURE_OPENAI_ENDPOINT
-            else f"https://{config.AZURE_OPENAI_RESOURCE}.openai.azure.com/"
+        # Authentication using managed identity
+        credential = get_azure_credential(config.MID_ID)
+        # Create AI Projects client
+        ai_projects_client = AIProjectClient(
+            endpoint=config.AI_PROJECT_ENDPOINT,
+            credential=credential,
+            api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION,
         )
 
-        # Authentication
-        aoai_api_key = config.AZURE_OPENAI_KEY
-        ad_token_provider = None
-        if not aoai_api_key:
-            logging.debug("No AZURE_OPENAI_KEY found, using Azure AD auth")
-            ad_token_provider = get_bearer_token_provider(
-                get_azure_credential(config.MID_ID), "https://cognitiveservices.azure.com/.default"
-            )
-
-        # Deployment
-        deployment = config.AZURE_OPENAI_MODEL
-        if not deployment:
-            raise Exception("AZURE_OPENAI_MODEL is required")
-
-        # Default Headers
-        default_headers = {"x-ms-useragent": USER_AGENT}
-
-        azure_openai_client = AsyncAzureOpenAI(
-            api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION,
-            api_key=aoai_api_key,
-            azure_ad_token_provider=ad_token_provider,
-            default_headers=default_headers,
-            azure_endpoint=endpoint,
+       # Get the OpenAI client from the AI Projects client
+        openai_client = ai_projects_client.get_openai_client(
+            api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION
         )
 
         track_event_if_configured(
-            "AzureOpenAIClientInitialized",
+            "AzureAIProjectsClientInitialized",
             {
                 "status": "success",
-                "endpoint": endpoint,
-                "use_api_key": bool(aoai_api_key),
+                "endpoint": config.AI_PROJECT_ENDPOINT,
+                "use_managed_identity": True,
             },
         )
-
-        return azure_openai_client
+        
+        return openai_client
     except Exception as e:
-        logging.exception("Exception in Azure OpenAI initialization", e)
+        logging.exception("Exception in Azure AI Projects initialization", e)
         span = trace.get_current_span()
         if span is not None:
             span.record_exception(e)
             span.set_status(Status(StatusCode.ERROR, str(e)))
-        azure_openai_client = None
+        ai_projects_client = None
         raise e
 
 
@@ -521,7 +504,7 @@ async def send_chat_request(request_body, request_headers):
     model_args = prepare_model_args(request_body, request_headers)
 
     try:
-        azure_openai_client = init_openai_client()
+        azure_openai_client = init_ai_projects_client()
         raw_response = (
             await azure_openai_client.chat.completions.with_raw_response.create(
                 **model_args
@@ -1324,7 +1307,7 @@ async def generate_title(conversation_messages):
     messages.append({"role": "user", "content": title_prompt})
 
     try:
-        azure_openai_client = init_openai_client(use_data=False)
+        azure_openai_client = init_ai_projects_client(use_data=False)
         response = await azure_openai_client.chat.completions.create(
             model=config.AZURE_OPENAI_MODEL,
             messages=messages,
@@ -1333,6 +1316,7 @@ async def generate_title(conversation_messages):
         )
 
         title = json.loads(response.choices[0].message.content)["title"]
+
         return title
     except Exception:
         return messages[-2]["content"]
