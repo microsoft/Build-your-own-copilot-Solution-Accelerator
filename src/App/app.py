@@ -6,7 +6,6 @@ import time
 import uuid
 from types import SimpleNamespace
 
-from azure.identity import get_bearer_token_provider
 from backend.helpers.azure_credential_utils import get_azure_credential
 from azure.monitor.opentelemetry import configure_azure_monitor
 from azure.ai.projects import AIProjectClient
@@ -191,7 +190,7 @@ def init_ai_projects_client(use_data=SHOULD_USE_DATA):
             api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION,
         )
 
-       # Get the OpenAI client from the AI Projects client
+        # Get the OpenAI client from the AI Projects client
         openai_client = ai_projects_client.get_openai_client(
             api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION
         )
@@ -204,7 +203,7 @@ def init_ai_projects_client(use_data=SHOULD_USE_DATA):
                 "use_managed_identity": True,
             },
         )
-        
+
         return openai_client
     except Exception as e:
         logging.exception("Exception in Azure AI Projects initialization", e)
