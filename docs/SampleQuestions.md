@@ -28,6 +28,6 @@ _Sample Operations:_
 - Task: Enter the topic name **the effects of influenza on immunocompromised persons** in the **Topic** field and click the **Generate** button
 ![GenerateDraft](images/generate_draft.png)
 - Task: In **Project narrative** section customize Generate text and click **Re-generate** button
-   > text: consolidate summary into a single paragraph".
+   > text: "consolidate summary into a single paragraph".
 
 The application helps users quickly find and summarize articles and grant information, generate and refine grant proposals, and efficiently export the results.
