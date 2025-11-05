@@ -328,7 +328,7 @@ hooks:
 infra:
   provider: bicep
   path: infra
-  module: main.bicep
+  module: main
   parameters:
     containerRegistryHostname: ${CONTAINER_REGISTRY_HOSTNAME=""}
     containerImageName: ${CONTAINER_IMAGE_NAME="byc-wa-app"}
