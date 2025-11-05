@@ -927,6 +927,7 @@ module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
     blobServices: {
       corsRules: []
       deleteRetentionPolicyEnabled: false
+      containerDeleteRetentionPolicyEnabled: false
       containers: [
         {
           name: 'data'
