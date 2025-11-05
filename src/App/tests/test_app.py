@@ -49,6 +49,8 @@ def set_env_vars():
     ), patch(
         "backend.common.config.config.AZURE_OPENAI_KEY", "valid_key"
     ), patch(
+        "backend.common.config.config.AI_PROJECT_ENDPOINT", "https://test-ai-project.com/"
+    ), patch(
         "backend.common.config.config.UI_TITLE", "Woodgrove Bank"
     ), patch(
         "backend.common.config.config.UI_FAVICON", "/favicon.ico"
