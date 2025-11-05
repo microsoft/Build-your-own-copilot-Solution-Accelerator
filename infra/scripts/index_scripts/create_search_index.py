@@ -32,6 +32,7 @@ from azure.storage.filedatalake import (
     FileSystemClient,
 )
 from openai import AzureOpenAI
+from azure.storage.blob import BlobServiceClient
 
 # Get Azure Key Vault Client
 key_vault_name = "kv_to-be-replaced"  #'nc6262-kv-2fpeafsylfd2e'
@@ -199,16 +200,13 @@ def chunk_data(text):
 # paths = os.listdir(path_name)
 
 
-account_url = f"https://{account_name}.dfs.core.windows.net"
+account_url = f"https://{account_name}.blob.core.windows.net"
+blob_service_client = BlobServiceClient(account_url, credential=credential)
+container_client = blob_service_client.get_container_client(file_system_client_name)
 
-service_client = DataLakeServiceClient(
-    account_url, credential=credential, api_version="2023-01-03"
-)
+print(f"Listing blobs under '{directory}' using BlobServiceClient...")
+paths = [blob.name for blob in container_client.list_blobs(name_starts_with=directory)]
 
-file_system_client = service_client.get_file_system_client(file_system_client_name)
-directory_name = directory
-paths = file_system_client.get_paths(path=directory_name)
-print(paths)
 
 search_client = SearchClient(search_endpoint, index_name, credential)
 # index_client = SearchIndexClient(endpoint=search_endpoint, credential=credential)
@@ -221,22 +219,22 @@ search_client = SearchClient(search_endpoint, index_name, credential)
 # Read the CSV file into a Pandas DataFrame
 file_path = csv_file_name
 print(file_path)
-file_client = file_system_client.get_file_client(file_path)
-csv_file = file_client.download_file()
-df_metadata = pd.read_csv(csv_file, encoding="utf-8")
+blob_client = container_client.get_blob_client(file_path)
+download_stream = blob_client.download_blob()
+df_metadata = pd.read_csv(download_stream, encoding="utf-8")
 
 docs = []
 counter = 0
-for path in paths:
-    # file_path = f'Data/{foldername}/meeting_transcripts/' + path
-    # with open(file_path, "r") as file:
-    #     data = json.load(file)
-    file_client = file_system_client.get_file_client(path.name)
-    data_file = file_client.download_file()
-    data = json.load(data_file)
-    text = data["Content"]
+for blob_name in paths:
+    if not blob_name.endswith(".json"):
+        continue
 
-    filename = path.name.split("/")[-1]
+    blob_client = container_client.get_blob_client(blob_name)
+    download_stream = blob_client.download_blob()
+    data = json.loads(download_stream.readall())
+    text = data.get("Content", "")
+
+    filename = blob_name.split("/")[-1]
     document_id = filename.replace(".json", "").replace("convo_", "")
     # print(document_id)
     df_file_metadata = df_metadata[
@@ -276,7 +274,7 @@ for path in paths:
                 "chunk_id": d["chunk_id"],
                 "client_id": d["client_id"],
                 "content": d["content"],
-                "sourceurl": path.name.split("/")[-1],
+                "sourceurl":  blob_name.split("/")[-1],
                 "contentVector": v_contentVector,
             }
         )
@@ -284,7 +282,7 @@ for path in paths:
         if counter % 10 == 0:
             result = search_client.upload_documents(documents=docs)
             docs = []
-            print(f" {str(counter)} uploaded")
+            print(f"{counter} documents uploaded...")
 
 # upload the last batch
 if docs != []:
