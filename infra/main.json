@@ -33821,7 +33821,6 @@
             "value": {
               "corsRules": [],
               "deleteRetentionPolicyEnabled": false,
-              "containerDeleteRetentionPolicyEnabled": false,
               "containers": [
                 {
                   "name": "data",
