@@ -14,12 +14,6 @@ Check the [Azure Products by Region](https://azure.microsoft.com/en-us/explore/g
 
 Here are some example regions where the services are available: East US, East US2, Australia East, UK South, France Central.
 
-
-### **Important: Check Azure OpenAI Quota Availability**
-
-⚠️ To ensure sufficient quota is available in your subscription, please follow [quota check instructions guide](./QuotaCheck.md) before you deploy the solution.
-
-
 ### [Optional] Quota Recommendations  
 By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tokens**, so we recommend updating the following:
 
@@ -27,6 +21,46 @@ By default, the **Gpt-4o-mini model capacity** in deployment is set to **30k tok
 
 Depending on your subscription quota and capacity, you can [adjust quota settings](AzureGPTQuotaSettings.md) to better meet your specific needs. You can also [adjust the deployment parameters](CustomizingAzdParameters.md) for additional optimization.
 ­
+## Deployment Options
+
+### Sandbox or WAF Aligned Deployment Options
+
+The [`infra`](../infra) folder of the Build-your-own-copilot-Solution-Accelerator contains the [`main.bicep`](../infra/main.bicep) Bicep script, which defines all Azure infrastructure components for this solution.
+
+By default, the `azd up` command uses the [`main.parameters.json`](../infra/main.parameters.json) file to deploy the solution. This file is pre-configured for a **sandbox environment** — ideal for development and proof-of-concept scenarios, with minimal security and cost controls for rapid iteration.
+
+For **production deployments**, the repository also provides [`main.waf.parameters.json`](../infra/main.waf.parameters.json), which applies a [Well-Architected Framework (WAF) aligned](https://learn.microsoft.com/en-us/azure/well-architected/) configuration. This option enables additional Azure best practices for reliability, security, cost optimization, operational excellence, and performance efficiency, such as:
+
+  - Enhanced network security (e.g., Network protection with private endpoints)
+  - Stricter access controls and managed identities
+  - Logging, monitoring, and diagnostics enabled by default
+  - Resource tagging and cost management recommendations
+
+**How to choose your deployment configuration:**
+
+* Use the default `main.parameters.json` file for a **sandbox/dev environment**
+* For a **WAF-aligned, production-ready deployment**, copy the contents of `main.waf.parameters.json` into `main.parameters.json` before running `azd up`
+
+---
+
+### VM Credentials Configuration
+
+By default, the solution sets the VM administrator username and password from environment variables.
+
+To set your own VM credentials before deployment, use:
+
+```sh
+azd env set AZURE_ENV_VM_ADMIN_USERNAME <your-username>
+azd env set AZURE_ENV_VM_ADMIN_PASSWORD <your-password>
+```
+
+> [!TIP]
+> Always review and adjust parameter values (such as region, capacity, security settings and log analytics workspace configuration) to match your organization’s requirements before deploying. For production, ensure you have sufficient quota and follow the principle of least privilege for all identities and role assignments.
+
+
+> [!IMPORTANT]
+> The WAF-aligned configuration is under active development. More Azure Well-Architected recommendations will be added in future updates.
+
 ## Deployment Options & Steps
 
 Pick from the options below to see step-by-step instructions for GitHub Codespaces, VS Code Dev Containers, and Local Environments.
@@ -52,7 +86,7 @@ You can run this solution using [GitHub Codespaces](https://docs.github.com/en/c
 </details>
 
 <details>
-  <summary><b>Deploy in VS Code</b></summary>
+  <summary><b>Deploy in VS Code Dev Containers</b></summary>
 
 ### VS Code Dev Containers
 
@@ -77,7 +111,7 @@ If you're not using one of the above options for opening the project, then you'l
 
 1. Make sure the following tools are installed:
     - [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.5) <small>(v7.0+)</small> - available for Windows, macOS, and Linux.
-    - [Azure Developer CLI (azd)](https://aka.ms/install-azd) <small>(v1.15.0+)</small> - version
+    - [Azure Developer CLI (azd)](https://aka.ms/install-azd) <small>(v1.18.0+)</small> - version
     - [Python 3.9 to 3.11](https://www.python.org/downloads/)
     - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     - [Git](https://git-scm.com/downloads)
@@ -102,26 +136,7 @@ Consider the following settings during your deployment to modify specific settin
 <details>
   <summary><b>Configurable Deployment Settings</b></summary>
 
-When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](CustomizingAzdParameters.md):  
-
-
-| **Setting**                          | **Description**                                                                                    | **Default value**        |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------ |
-| **Environment Name**                 | A **3-20 character alphanumeric value** used to generate a unique ID to prefix the resources.      | `azdtemp`                |
-| **Cosmos Location**                  | A **less busy** region for **CosmosDB**, useful in case of availability constraints.               | `eastus2`                |
-| **Deployment Type**                  | Select from a drop-down list (`Standard`, `GlobalStandard`).                                       | `GlobalStandard`         |
-| **GPT Model**                        | Azure OpenAI GPT model to deploy.                                                                  | `gpt-4o-mini`            |
-| **GPT Model Deployment Capacity**    | Configure capacity for **GPT models**. Choose based on Azure OpenAI quota.                         | `30`                     |
-| **Embedding Model**                  | OpenAI embedding model used for vector similarity.                                                 | `text-embedding-ada-002` |
-| **Embedding Model Capacity**         | Set the capacity for **embedding models**. Choose based on usage and quota.                        | `80`                     |
-| **Image Tag**                        | The version of the Docker image to use (e.g., `latest`, `dev`, `hotfix`).                          | `latest`                 |
-| **Azure OpenAI API Version**         | Set the API version for OpenAI model deployments.                                                  | `2025-04-01-preview`     |
-| **AZURE\_LOCATION**                  | Sets the Azure region for resource deployment. | `japaneast`              |
-| **Existing Log Analytics Workspace** | To reuse an existing Log Analytics Workspace ID instead of creating a new one.                     | *(empty)*                |
-| **Existing AI Foundry Project Resource ID** | To reuse an existing AI Foundry Project Resource ID instead of creating a new one.                     | *(empty)*                |
-
-
-
+When you start the deployment, most parameters will have **default values**, but you can update the below settings by following the steps  [here](CustomizingAzdParameters.md)
 
 </details>
 
@@ -142,6 +157,13 @@ To adjust quota settings, follow these [steps](./AzureGPTQuotaSettings.md).
   <summary><b>Reusing an Existing Log Analytics Workspace</b></summary>
 
   Guide to get your [Existing Workspace ID](/docs/re-use-log-analytics.md)
+
+</details>
+<details>
+
+  <summary><b>Reusing an Existing Azure AI Foundry Project</b></summary>
+
+  Guide to get your [Existing Project ID](/docs/re-use-foundry-project.md)
 
 </details>
 
@@ -172,6 +194,7 @@ Once you've opened the project in [Codespaces](#github-codespaces), [Dev Contain
     ```shell
     azd up
     ```
+    > **Note:** This solution accelerator requires **Azure Developer CLI (azd) version 1.18.0 or higher**. Please ensure you have the latest version installed before proceeding with deployment. [Download azd here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
 
 3. Provide an `azd` environment name (e.g., "byocaapp").
 4. Select a subscription from your Azure account and choose a location that has quota for all the resources. 
@@ -210,21 +233,47 @@ If you need to rebuild the source code and push the updated container to the dep
 
 This will rebuild the source code, package it into a container, and push it to the Azure Container Registry associated with your deployment.
 
+### 🛠️ Troubleshooting
+ If you encounter any issues during the deployment process, please refer [troubleshooting](../docs/TroubleShootingSteps.md) document for detailed steps and solutions
+
 ## Post Deployment Steps
 
-1. **Import Sample Data**
-   -Run  bash command printed in the terminal. The bash command will look like the following: 
-    ```shell 
-    bash ./infra/scripts/process_sample_data.sh
-    ```
-    if you don't have azd env then you need to pass parameters along with the command. Then the command will look like the following:
-    ```shell
-    bash ./infra/scripts/process_sample_data.sh <resourceGroupName> <cosmosDbAccountName> <storageAccount> <storageContainerName> <keyvaultName> <sqlServerName> <sqlDatabaseName> <webAppUserManagedIdentityClientId> <webAppUserManagedIdentityDisplayName> <aiFoundryResourceName> <aiSearchResourceName>
-    ```
+### 1. Import Sample Data 
 
-2. **Add Authentication Provider**  
-    - Follow steps in [App Authentication](./AppAuthentication.md) to configure authentication in app service. Note that Authentication changes can take up to 10 minutes. 
+**Choose the appropriate command based on your deployment method:**
 
-3. **Deleting Resources After a Failed Deployment**  
+**If you deployed using `azd up` command:**
+```bash 
+bash ./infra/scripts/process_sample_data.sh 
+```
+> **Note**: The script will automatically take required values from your `azd` environment.
 
-     - Follow steps in [Delete Resource Group](DeleteResourceGroup.md) if your deployment fails and/or you need to clean up the resources.
+**If you deployed using custom templates, ARM/Bicep deployments, or `az deployment group` commands:**
+```bash 
+bash ./infra/scripts/process_sample_data.sh <your-resource-group-name>
+```
+> **Note**: Replace `<your-resource-group-name>` with the actual name of the resource group containing your deployed Azure resources.
+
+> **💡 Tip**: If the deployment metadata does not exist in Azure or has been deleted, the script will prompt you to manually enter the required configuration values.
+
+> **💡 Tip**: Since this guide is for azd deployment, you'll most likely use the first command without resource group name.
+
+### 2. Configure Authentication
+
+Follow the steps in [App Authentication](./AppAuthentication.md) to configure authentication in App Service. 
+
+> **Note**: Authentication changes can take up to 10 minutes to propagate.
+
+### 3. Troubleshooting: Cleaning Up After a Failed Deployment
+
+If your deployment fails and you need to clean up resources, follow the steps in [Delete Resource Group](./DeleteResourceGroup.md).
+
+## Environment configuration for local development & debugging
+> Set APP_ENV in your .env file to control Azure authentication. Set the environment variable to dev to use Azure CLI credentials, or to prod to use Managed Identity for production. **Ensure you're logged in via az login when using dev in local**.
+
+To configure your environment, follow these steps:
+
+	1. Navigate to the `src\App` folder.
+	2. Create a `.env` file based on the `.env.sample` file.
+	3. Fill in the `.env` file using the deployment output or by retrieving values from the Azure Portal under "Deployments" in your resource group.
+	4. Ensure that the `APP_ENV` variable is set to "**dev**".
