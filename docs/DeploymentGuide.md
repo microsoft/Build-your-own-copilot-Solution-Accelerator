@@ -255,6 +255,13 @@ This will rebuild the source code, package it into a container, and push it to t
 ### 🛠️ Troubleshooting
  If you encounter any issues during the deployment process, please refer [troubleshooting](../docs/TroubleShootingSteps.md) document for detailed steps and solutions
 
+## Deploy Your local changes
+To Deploy your local changes rename the below files.
+   1. Rename `azure.yaml` to `azure_custom2.yaml` and `azure_custom.yaml` to `azure.yaml`.
+   2. Go to `infra` directory
+        - Rename `main.bicep` to `main_custom2.bicep` and `main_custom.bicep` to `main.bicep`.
+Continue with the [deploying steps](#deploying-with-azd).
+
 ## Post Deployment Steps
 
 1. **Import Sample Data**

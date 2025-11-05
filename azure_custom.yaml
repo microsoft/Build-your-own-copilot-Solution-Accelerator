@@ -276,14 +276,10 @@ hooks:
         Write-Host "Container Registry: " -NoNewline
         Write-Host "$env:AZURE_CONTAINER_REGISTRY_NAME.azurecr.io" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "Next steps:" -ForegroundColor Yellow
-        Write-Host "1. Run the following command to grant permissions and load sample data:" -ForegroundColor White
+        Write-Host "Next step:" -ForegroundColor Yellow
+        Write-Host " Run the following command to grant permissions and load sample data:" -ForegroundColor White
         Write-Host "   bash ./infra/scripts/process_sample_data.sh $env:AZURE_RESOURCE_GROUP" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "2. For local development, see ./docs/LocalDevelopmentGuide.md" -ForegroundColor White
-        Write-Host ""
-        Write-Host "3. To build and deploy custom containers:" -ForegroundColor White
-        Write-Host "   azd deploy" -ForegroundColor Cyan
       shell: pwsh
       continueOnError: false
       interactive: true
@@ -295,14 +291,10 @@ hooks:
         echo ""
         echo "Container Registry: $AZURE_CONTAINER_REGISTRY_NAME.azurecr.io"
         echo ""
-        echo "Next steps:"
-        echo "1. Run the following command to grant permissions and load sample data:"
+        echo "Next step:"
+        echo " Run the following command to grant permissions and load sample data:"
         echo "   bash ./infra/scripts/process_sample_data.sh $AZURE_RESOURCE_GROUP"
         echo ""
-        echo "2. For local development, see ./docs/LocalDevelopmentGuide.md"
-        echo ""
-        echo "3. To build and deploy custom containers:"
-        echo "   azd deploy"
       shell: sh
       continueOnError: false
       interactive: true
