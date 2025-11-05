@@ -263,7 +263,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
     tags: {
       ...resourceGroup().tags
       ...tags
-      TemplateName: 'Client Advisor -'
+      TemplateName: 'Client Advisor - Developer Experience'
       Type: enablePrivateNetworking ? 'WAF' : 'Non-WAF'
       CreatedBy: createdBy
       DeploymentName: deployment().name
