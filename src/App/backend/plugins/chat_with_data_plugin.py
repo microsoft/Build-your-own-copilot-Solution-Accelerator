@@ -8,7 +8,6 @@ from azure.ai.agents.models import (
     MessageRole,
 )
 from azure.ai.projects import AIProjectClient
-from azure.identity import get_bearer_token_provider
 from backend.helpers.azure_credential_utils import get_azure_credential
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 
