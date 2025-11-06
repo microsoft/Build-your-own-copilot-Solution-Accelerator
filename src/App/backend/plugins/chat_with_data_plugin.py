@@ -1,7 +1,6 @@
 import logging
 from typing import Annotated
 
-import openai
 from azure.ai.agents.models import (
     Agent,
     AzureAISearchQueryType,
@@ -222,17 +221,6 @@ class ChatWithDataPlugin:
         except Exception as e:
             logging.error(f"Error in get_answers_from_calltranscripts: {str(e)}")
             return "Error retrieving data from call transcripts"
-
-    def get_openai_client(self):
-        token_provider = get_bearer_token_provider(
-            get_azure_credential(config.MID_ID), "https://cognitiveservices.azure.com/.default"
-        )
-        openai_client = openai.AzureOpenAI(
-            azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
-            azure_ad_token_provider=token_provider,
-            api_version=config.AZURE_OPENAI_PREVIEW_API_VERSION,
-        )
-        return openai_client
 
     def get_project_openai_client(self):
         project = AIProjectClient(
