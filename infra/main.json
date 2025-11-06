@@ -359,7 +359,7 @@
       "[variables('dnsZoneIndex').openAI]",
       "[variables('dnsZoneIndex').aiServices]"
     ],
-    "keyVaultName": "[format('KV-{0}', variables('solutionSuffix'))]",
+    "keyVaultName": "[format('kv-{0}', variables('solutionSuffix'))]",
     "useExistingAiFoundryAiProject": "[not(empty(parameters('existingFoundryProjectResourceId')))]",
     "aiFoundryAiServicesSubscriptionId": "[if(variables('useExistingAiFoundryAiProject'), split(parameters('existingFoundryProjectResourceId'), '/')[2], subscription().id)]",
     "aiFoundryAiServicesResourceGroupName": "[if(variables('useExistingAiFoundryAiProject'), split(parameters('existingFoundryProjectResourceId'), '/')[4], format('rg-{0}', variables('solutionSuffix')))]",

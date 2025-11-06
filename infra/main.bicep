@@ -553,7 +553,7 @@ module avmPrivateDnsZones 'br/public:avm/res/network/private-dns-zone:0.7.1' = [
 ]
 
 // ==========Key Vault Module ========== //
-var keyVaultName = 'KV-${solutionSuffix}'
+var keyVaultName = 'kv-${solutionSuffix}'
 module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
   name: take('avm.res.key-vault.vault.${keyVaultName}', 64)
   params: {
