@@ -8,7 +8,7 @@
     "cosmosLocation": {
       "value": "${AZURE_ENV_COSMOS_LOCATION}"
     },
-    "deploymentType": {
+    "gptModelDeploymentType": {
       "value": "${AZURE_ENV_MODEL_DEPLOYMENT_TYPE}"
     },
     "gptModelName": {
