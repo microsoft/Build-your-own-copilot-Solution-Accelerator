@@ -157,6 +157,7 @@ def get_client_data():
 
         if len(rows) <= 6:
             update_sample_data(conn)
+            cursor = conn.cursor()
             cursor.execute(sql_stmt)
             rows = dict_cursor(cursor)
 
