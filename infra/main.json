@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "17524393707520710386"
+      "templateHash": "6551365020701659932"
     }
   },
   "parameters": {
@@ -33814,7 +33814,9 @@
               "defaultAction": "[if(parameters('enablePrivateNetworking'), 'Deny', 'Allow')]"
             }
           },
-          "allowBlobPublicAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', true()), createObject('value', false()))]",
+          "allowBlobPublicAccess": {
+            "value": false
+          },
           "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-blob-{0}', variables('solutionSuffix')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-blob', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)).outputs.resourceId.value))), 'subnetResourceId', reference('virtualNetwork').outputs.pepsSubnetResourceId.value, 'service', 'blob'), createObject('name', format('pep-queue-{0}', variables('solutionSuffix')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-queue', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)).outputs.resourceId.value))), 'subnetResourceId', reference('virtualNetwork').outputs.pepsSubnetResourceId.value, 'service', 'queue'))), createObject('value', createArray()))]",
           "blobServices": {

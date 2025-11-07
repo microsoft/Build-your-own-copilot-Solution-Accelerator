@@ -891,7 +891,7 @@ module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
       bypass: 'AzureServices'
       defaultAction: enablePrivateNetworking ? 'Deny' : 'Allow'
     }
-    allowBlobPublicAccess: enablePrivateNetworking ? true : false
+    allowBlobPublicAccess: false
     publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
     // Private endpoints for blob and queue
     privateEndpoints: enablePrivateNetworking

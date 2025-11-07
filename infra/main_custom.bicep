@@ -94,7 +94,7 @@ var solutionLocation = empty(location) ? resourceGroup().location : location
 @description('Optional. A unique token for the solution. This is used to ensure resource names are unique for global resources.')
 param solutionUniqueToken string = substring(uniqueString(subscription().id, resourceGroup().name, solutionName), 0, 5)
 
-var solutionSuffix= toLower(trim(replace(
+var solutionSuffix = toLower(trim(replace(
   replace(
     replace(replace(replace(replace('${solutionName}${solutionUniqueToken}', '-', ''), '_', ''), '.', ''), '/', ''),
     ' ',
@@ -782,7 +782,7 @@ module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
       bypass: 'AzureServices'
       defaultAction: enablePrivateNetworking ? 'Deny' : 'Allow'
     }
-    allowBlobPublicAccess: enablePrivateNetworking ? true : false
+    allowBlobPublicAccess: false
     publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
     privateEndpoints: enablePrivateNetworking
       ? [
