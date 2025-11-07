@@ -260,3 +260,4 @@ def update_sample_data(conn):
     except Exception as e:
         logging.exception("Error updating sample data")
         raise e
+    
