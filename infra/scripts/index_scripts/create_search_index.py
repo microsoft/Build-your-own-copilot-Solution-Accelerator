@@ -31,7 +31,7 @@ from azure.storage.filedatalake import (
     DataLakeServiceClient,
     FileSystemClient,
 )
-from openai import AzureOpenAI
+from azure.ai.projects import AIProjectClient
 
 # Get Azure Key Vault Client
 key_vault_name = "kv_to-be-replaced"  #'nc6262-kv-2fpeafsylfd2e'
@@ -61,6 +61,7 @@ openai_api_base = secret_client.get_secret("AZURE-OPENAI-ENDPOINT").value
 openai_api_version = secret_client.get_secret("AZURE-OPENAI-PREVIEW-API-VERSION").value
 openai_embedding_model = secret_client.get_secret("AZURE-OPENAI-EMBEDDING-MODEL").value
 account_name = secret_client.get_secret("ADLS-ACCOUNT-NAME").value
+ai_project_endpoint = secret_client.get_secret("AZURE-AI-AGENT-ENDPOINT").value
 
 # Create a search index
 index_client = SearchIndexClient(endpoint=search_endpoint, credential=credential)
@@ -132,15 +133,22 @@ print(f" {result.name} created")
 
 
 # Function: Get Embeddings
-def get_embeddings(text: str, openai_api_base, openai_api_version, azure_token_provider):
+def get_embeddings(text: str, ai_project_endpoint, openai_api_version, credential):
     model_id = openai_embedding_model or "text-embedding-ada-002"
-    client = AzureOpenAI(
+    
+    # Create AI Projects client
+    project_client = AIProjectClient(
+        endpoint=ai_project_endpoint,
+        credential=credential,
         api_version=openai_api_version,
-        azure_endpoint=openai_api_base,
-        azure_ad_token_provider=azure_token_provider,
+    )
+    
+    # Get the OpenAI client from the AI Projects client
+    openai_client = project_client.get_openai_client(
+        api_version=openai_api_version
     )
 
-    embedding = client.embeddings.create(input=text, model=model_id).data[0].embedding
+    embedding = openai_client.embeddings.create(input=text, model=model_id).data[0].embedding
 
     return embedding
 
@@ -260,12 +268,12 @@ for path in paths:
 
         try:
             v_contentVector = get_embeddings(
-                d["content"], openai_api_base, openai_api_version, token_provider
+                d["content"], ai_project_endpoint, openai_api_version, credential
             )
         except:
             time.sleep(30)
             v_contentVector = get_embeddings(
-                d["content"], openai_api_base, openai_api_version, token_provider
+                d["content"], ai_project_endpoint, openai_api_version, credential
             )
 
         docs.append(

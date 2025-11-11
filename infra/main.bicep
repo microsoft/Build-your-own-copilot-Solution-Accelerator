@@ -33,8 +33,8 @@ param gptModelVersion string = '2024-07-18'
 @description('Optional. Version of the GPT model to deploy.')
 param embeddingModelVersion string = '2'
 
-@description('Optional. API version for the Azure OpenAI service.')
-param azureOpenaiAPIVersion string = '2025-04-01-preview'
+@description('Optional. API version for the Azure AI Services.')
+param azureAIServicesAPIVersion string = '2025-04-01-preview'
 
 @minValue(10)
 @description('Optional. Capacity of the GPT deployment:')
@@ -494,7 +494,6 @@ module jumpboxVM 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (enable
 // ========== Private DNS Zones ========== //
 var privateDnsZones = [
   'privatelink.cognitiveservices.azure.com'
-  'privatelink.openai.azure.com'
   'privatelink.services.ai.azure.com'
   'privatelink.azurewebsites.net'
   'privatelink.blob.${environment().suffixes.storage}'
@@ -509,22 +508,20 @@ var privateDnsZones = [
 // DNS Zone Index Constants
 var dnsZoneIndex = {
   cognitiveServices: 0
-  openAI: 1
-  aiServices: 2
-  appService: 3
-  storageBlob: 4
-  storageQueue: 5
-  storageFile: 6
-  cosmosDB: 7
-  keyVault: 8
-  sqlServer: 9
-  searchService: 10
+  aiServices: 1
+  appService: 2
+  storageBlob: 3
+  storageQueue: 4
+  storageFile: 5
+  cosmosDB: 6
+  keyVault: 7
+  sqlServer: 8
+  searchService: 9
 }
 
 // List of DNS zone indices that correspond to AI-related services.
 var aiRelatedDnsZoneIndices = [
   dnsZoneIndex.cognitiveServices
-  dnsZoneIndex.openAI
   dnsZoneIndex.aiServices
 ]
 
@@ -613,11 +610,11 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
         }
         {
           name: 'AZURE-OPENAI-PREVIEW-API-VERSION'
-          value: azureOpenaiAPIVersion
+          value: azureAIServicesAPIVersion
         }
         {
           name: 'AZURE-OPENAI-ENDPOINT'
-          value: aiFoundryAiServices.outputs.endpoints['OpenAI Language Model Instance API']
+          value: aiFoundryAiServices.outputs.endpoint
         }
         {
           name: 'AZURE-OPENAI-EMBEDDING-MODEL'
@@ -630,6 +627,10 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
         {
           name: 'AZURE-SEARCH-ENDPOINT'
           value: 'https://${aiSearchName}.search.windows.net'
+        }
+        {
+          name: 'AZURE-AI-AGENT-ENDPOINT'
+          value: aiFoundryAiServices.outputs.aiProjectInfo.apiEndpoint
         }
     ]
     enableTelemetry: enableTelemetry
@@ -732,10 +733,6 @@ module aiFoundryAiServices 'modules/ai-services.bicep' = if (aiFoundryAIservices
                 {
                   name: 'ai-services-dns-zone-cognitiveservices'
                   privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.cognitiveServices]!.outputs.resourceId
-                }
-                {
-                  name: 'ai-services-dns-zone-openai'
-                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.openAI]!.outputs.resourceId
                 }
                 {
                   name: 'ai-services-dns-zone-aiservices'
@@ -1110,20 +1107,20 @@ module webSite 'modules/web-sites.bicep' = {
           AZURE_SEARCH_URL_COLUMN: azureSearchUrlColumn
           AZURE_OPENAI_RESOURCE: aiFoundryAiServices.outputs.name
           AZURE_OPENAI_MODEL: gptModelName
-          AZURE_OPENAI_ENDPOINT: aiFoundryAiServices.outputs.endpoints['OpenAI Language Model Instance API']
+          AZURE_OPENAI_ENDPOINT: aiFoundryAiServices.outputs.endpoint
           AZURE_OPENAI_TEMPERATURE: azureOpenAITemperature
           AZURE_OPENAI_TOP_P: azureOpenAITopP
           AZURE_OPENAI_MAX_TOKENS: azureOpenAIMaxTokens
           AZURE_OPENAI_STOP_SEQUENCE: azureOpenAIStopSequence
           AZURE_OPENAI_SYSTEM_MESSAGE: azureOpenAISystemMessage
-          AZURE_OPENAI_PREVIEW_API_VERSION: azureOpenaiAPIVersion
+          AZURE_OPENAI_PREVIEW_API_VERSION: azureAIServicesAPIVersion
           AZURE_OPENAI_STREAM: azureOpenAIStream
           AZURE_SEARCH_QUERY_TYPE: azureSearchQueryType
           AZURE_SEARCH_VECTOR_COLUMNS: azureSearchVectorFields
           AZURE_SEARCH_PERMITTED_GROUPS_COLUMN: azureSearchPermittedGroupsField
           AZURE_SEARCH_STRICTNESS: azureSearchStrictness
           AZURE_OPENAI_EMBEDDING_NAME: embeddingModel
-          AZURE_OPENAI_EMBEDDING_ENDPOINT : aiFoundryAiServices.outputs.endpoints['OpenAI Language Model Instance API']
+          AZURE_OPENAI_EMBEDDING_ENDPOINT : aiFoundryAiServices.outputs.endpoint
           SQLDB_SERVER: sqlServerFqdn
           SQLDB_DATABASE: sqlDbName
           USE_INTERNAL_STREAM: useInternalStream
@@ -1139,7 +1136,7 @@ module webSite 'modules/web-sites.bicep' = {
           USE_AI_PROJECT_CLIENT: useAIProjectClientFlag
           AZURE_AI_AGENT_ENDPOINT: aiFoundryAiServices.outputs.aiProjectInfo.apiEndpoint
           AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME: gptModelName
-          AZURE_AI_AGENT_API_VERSION: azureOpenaiAPIVersion
+          AZURE_AI_AGENT_API_VERSION: azureAIServicesAPIVersion
           AZURE_SEARCH_CONNECTION_NAME: aiSearchName
           AZURE_CLIENT_ID: userAssignedIdentity.outputs.clientId
         }
@@ -1344,8 +1341,8 @@ output APPLICATIONINSIGHTS_CONNECTION_STRING string = enableMonitoring
   ? applicationInsights!.outputs.connectionString
   : ''
 
-@description('The API version used for the Azure AI Agent service.')
-output AZURE_AI_AGENT_API_VERSION string = azureOpenaiAPIVersion
+  @description('The API version used for the Azure AI Agent service.')
+output AZURE_AI_AGENT_API_VERSION string = azureAIServicesAPIVersion
 
 @description('The endpoint URL of the Azure AI Agent project.')
 output AZURE_AI_AGENT_ENDPOINT string = aiFoundryAiServices.outputs.aiProjectInfo.apiEndpoint
@@ -1372,13 +1369,13 @@ output AZURE_COSMOSDB_DATABASE string = cosmosDbDatabaseName
 output AZURE_COSMOSDB_ENABLE_FEEDBACK string = azureCosmosDbEnableFeedback
 
 @description('The endpoint URL for the Azure OpenAI Embedding model.')
-output AZURE_OPENAI_EMBEDDING_ENDPOINT string = aiFoundryAiServices.outputs.endpoints['OpenAI Language Model Instance API']
+output AZURE_OPENAI_EMBEDDING_ENDPOINT string = aiFoundryAiServices.outputs.endpoint
 
 @description('The name of the Azure OpenAI Embedding model.')
 output AZURE_OPENAI_EMBEDDING_NAME string = embeddingModel
 
 @description('The endpoint URL for the Azure OpenAI service.')
-output AZURE_OPENAI_ENDPOINT string = aiFoundryAiServices.outputs.endpoints['OpenAI Language Model Instance API']
+output AZURE_OPENAI_ENDPOINT string = aiFoundryAiServices.outputs.endpoint
 
 @description('The maximum number of tokens for Azure OpenAI responses.')
 output AZURE_OPENAI_MAX_TOKENS string = azureOpenAIMaxTokens
@@ -1387,7 +1384,7 @@ output AZURE_OPENAI_MAX_TOKENS string = azureOpenAIMaxTokens
 output AZURE_OPENAI_MODEL string = gptModelName
 
 @description('The preview API version for Azure OpenAI.')
-output AZURE_OPENAI_PREVIEW_API_VERSION string = azureOpenaiAPIVersion
+output AZURE_OPENAI_PREVIEW_API_VERSION string = azureAIServicesAPIVersion
 
 @description('The Azure OpenAI resource name.')
 output AZURE_OPENAI_RESOURCE string = aiFoundryAiServices.outputs.name
