@@ -31,8 +31,7 @@ from azure.storage.filedatalake import (
     DataLakeServiceClient,
     FileSystemClient,
 )
-from openai import AzureOpenAI
-from azure.storage.blob import BlobServiceClient
+from azure.ai.projects import AIProjectClient
 
 # Get Azure Key Vault Client
 key_vault_name = "kv_to-be-replaced"  #'nc6262-kv-2fpeafsylfd2e'
@@ -62,6 +61,7 @@ openai_api_base = secret_client.get_secret("AZURE-OPENAI-ENDPOINT").value
 openai_api_version = secret_client.get_secret("AZURE-OPENAI-PREVIEW-API-VERSION").value
 openai_embedding_model = secret_client.get_secret("AZURE-OPENAI-EMBEDDING-MODEL").value
 account_name = secret_client.get_secret("ADLS-ACCOUNT-NAME").value
+ai_project_endpoint = secret_client.get_secret("AZURE-AI-AGENT-ENDPOINT").value
 
 # Create a search index
 index_client = SearchIndexClient(endpoint=search_endpoint, credential=credential)
@@ -133,15 +133,22 @@ print(f" {result.name} created")
 
 
 # Function: Get Embeddings
-def get_embeddings(text: str, openai_api_base, openai_api_version, azure_token_provider):
+def get_embeddings(text: str, ai_project_endpoint, openai_api_version, credential):
     model_id = openai_embedding_model or "text-embedding-ada-002"
-    client = AzureOpenAI(
+    
+    # Create AI Projects client
+    project_client = AIProjectClient(
+        endpoint=ai_project_endpoint,
+        credential=credential,
         api_version=openai_api_version,
-        azure_endpoint=openai_api_base,
-        azure_ad_token_provider=azure_token_provider,
+    )
+    
+    # Get the OpenAI client from the AI Projects client
+    openai_client = project_client.get_openai_client(
+        api_version=openai_api_version
     )
 
-    embedding = client.embeddings.create(input=text, model=model_id).data[0].embedding
+    embedding = openai_client.embeddings.create(input=text, model=model_id).data[0].embedding
 
     return embedding
 
@@ -200,13 +207,16 @@ def chunk_data(text):
 # paths = os.listdir(path_name)
 
 
-account_url = f"https://{account_name}.blob.core.windows.net"
-blob_service_client = BlobServiceClient(account_url, credential=credential)
-container_client = blob_service_client.get_container_client(file_system_client_name)
+account_url = f"https://{account_name}.dfs.core.windows.net"
 
-print(f"Listing blobs under '{directory}' using BlobServiceClient...")
-paths = [blob.name for blob in container_client.list_blobs(name_starts_with=directory)]
+service_client = DataLakeServiceClient(
+    account_url, credential=credential, api_version="2023-01-03"
+)
 
+file_system_client = service_client.get_file_system_client(file_system_client_name)
+directory_name = directory
+paths = file_system_client.get_paths(path=directory_name)
+print(paths)
 
 search_client = SearchClient(search_endpoint, index_name, credential)
 # index_client = SearchIndexClient(endpoint=search_endpoint, credential=credential)
@@ -219,22 +229,22 @@ search_client = SearchClient(search_endpoint, index_name, credential)
 # Read the CSV file into a Pandas DataFrame
 file_path = csv_file_name
 print(file_path)
-blob_client = container_client.get_blob_client(file_path)
-download_stream = blob_client.download_blob()
-df_metadata = pd.read_csv(download_stream, encoding="utf-8")
+file_client = file_system_client.get_file_client(file_path)
+csv_file = file_client.download_file()
+df_metadata = pd.read_csv(csv_file, encoding="utf-8")
 
 docs = []
 counter = 0
-for blob_name in paths:
-    if not blob_name.endswith(".json"):
-        continue
+for path in paths:
+    # file_path = f'Data/{foldername}/meeting_transcripts/' + path
+    # with open(file_path, "r") as file:
+    #     data = json.load(file)
+    file_client = file_system_client.get_file_client(path.name)
+    data_file = file_client.download_file()
+    data = json.load(data_file)
+    text = data["Content"]
 
-    blob_client = container_client.get_blob_client(blob_name)
-    download_stream = blob_client.download_blob()
-    data = json.loads(download_stream.readall())
-    text = data.get("Content", "")
-
-    filename = blob_name.split("/")[-1]
+    filename = path.name.split("/")[-1]
     document_id = filename.replace(".json", "").replace("convo_", "")
     # print(document_id)
     df_file_metadata = df_metadata[
@@ -258,12 +268,12 @@ for blob_name in paths:
 
         try:
             v_contentVector = get_embeddings(
-                d["content"], openai_api_base, openai_api_version, token_provider
+                d["content"], ai_project_endpoint, openai_api_version, credential
             )
         except:
             time.sleep(30)
             v_contentVector = get_embeddings(
-                d["content"], openai_api_base, openai_api_version, token_provider
+                d["content"], ai_project_endpoint, openai_api_version, credential
             )
 
         docs.append(
@@ -274,7 +284,7 @@ for blob_name in paths:
                 "chunk_id": d["chunk_id"],
                 "client_id": d["client_id"],
                 "content": d["content"],
-                "sourceurl":  blob_name.split("/")[-1],
+                "sourceurl": path.name.split("/")[-1],
                 "contentVector": v_contentVector,
             }
         )
@@ -282,7 +292,7 @@ for blob_name in paths:
         if counter % 10 == 0:
             result = search_client.upload_documents(documents=docs)
             docs = []
-            print(f"{counter} documents uploaded...")
+            print(f" {str(counter)} uploaded")
 
 # upload the last batch
 if docs != []:
