@@ -2,6 +2,8 @@
 
 To help you get started, here are some **Sample Prompts** you can ask after selecting the **Karen Berg** client:
 
+> _Note: Average response time is 08-30 seconds._ <br>
+
 1. Click on **Karen Berg** client.
 2. Ask the following questions:
    - What were Karen's concerns during our last meeting?
