@@ -1,5 +1,7 @@
 -r requirements.txt
 azure-identity==1.25.0
+azure-ai-projects==1.0.0
+azure-ai-inference==1.0.0b9
 openai==2.0.1
 azure-search-documents==11.7.0b1
 azure-storage-blob==12.26.0
