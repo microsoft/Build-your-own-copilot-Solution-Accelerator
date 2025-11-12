@@ -332,41 +332,77 @@ get_values_from_azd_env() {
 }
 
 get_values_from_az_deployment() {
-	echo "Getting values from Azure deployment outputs..."
-
-	deploymentName=$(az group show --name "$resourceGroupName" --query "tags.DeploymentName" -o tsv) 
-	echo "Deployment Name (from tag): $deploymentName"
-
+    echo "Getting values from Azure deployment outputs..."
+ 
+    deploymentName=$(az group show --name "$resourceGroupName" --query "tags.DeploymentName" -o tsv)
+    echo "Deployment Name (from tag): $deploymentName"
+ 
     echo "Fetching deployment outputs..."
-
+ 
     # Get all outputs
     deploymentOutputs=$(az deployment group show \
         --name "$deploymentName" \
         --resource-group "$resourceGroupName" \
         --query "properties.outputs" -o json)
-
+ 
     # Extract each value
     cosmosDbAccountName=$(echo "$deploymentOutputs" | grep -A 3 '"cosmosdB_ACCOUNT_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$cosmosDbAccountName" ]; then
+        cosmosDbAccountName=$(echo "$deploymentOutputs" | grep -A 3 '"cosmosDbAccountName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     storageAccount=$(echo "$deploymentOutputs" | grep -A 3 '"storagE_ACCOUNT_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$storageAccount" ]; then
+        storageAccount=$(echo "$deploymentOutputs" | grep -A 3 '"storageAccountName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     fileSystem=$(echo "$deploymentOutputs" | grep -A 3 '"storagE_CONTAINER_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$fileSystem" ]; then
+        fileSystem=$(echo "$deploymentOutputs" | grep -A 3 '"storageContainerName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     keyvaultName=$(echo "$deploymentOutputs" | grep -A 3 '"keY_VAULT_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
-    sqlServerName=$(echo "$deploymentOutputs" | grep -A 3 '"sqldB_SERVER_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$keyvaultName" ]; then
+        keyvaultName=$(echo "$deploymentOutputs" | grep -A 3 '"keyVaultName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
+    sqlServerName=$(echo "$deploymentOutputs" | grep -A 3 '"sqlDb_SERVER_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$sqlServerName" ]; then
+        sqlServerName=$(echo "$deploymentOutputs" | grep -A 3 '"sqlDbServerName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     webAppManagedIdentityDisplayName=$(echo "$deploymentOutputs" | grep -A 3 '"managedidentitY_WEBAPP_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$webAppManagedIdentityDisplayName" ]; then
+        webAppManagedIdentityDisplayName=$(echo "$deploymentOutputs" | grep -A 3 '"managedIdentityWebAppName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     webAppManagedIdentityClientId=$(echo "$deploymentOutputs" | grep -A 3 '"managedidentitY_WEBAPP_CLIENTID"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
-    SqlDatabaseName=$(echo "$deploymentOutputs" | grep -A 3 '"sqldB_DATABASE"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$webAppManagedIdentityClientId" ]; then
+        webAppManagedIdentityClientId=$(echo "$deploymentOutputs" | grep -A 3 '"managedIdentityWebAppClientId"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
+    SqlDatabaseName=$(echo "$deploymentOutputs" | grep -A 3 '"sqlDb_DATABASE"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$SqlDatabaseName" ]; then
+        SqlDatabaseName=$(echo "$deploymentOutputs" | grep -A 3 '"sqlDbDatabase"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     sqlManagedIdentityClientId=$(echo "$deploymentOutputs" | grep -A 3 '"managedidentitY_SQL_CLIENTID"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$sqlManagedIdentityClientId" ]; then
+        sqlManagedIdentityClientId=$(echo "$deploymentOutputs" | grep -A 3 '"managedIdentitySqlClientId"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     sqlManagedIdentityDisplayName=$(echo "$deploymentOutputs" | grep -A 3 '"managedidentitY_SQL_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$sqlManagedIdentityDisplayName" ]; then
+        sqlManagedIdentityDisplayName=$(echo "$deploymentOutputs" | grep -A 3 '"managedIdentitySqlName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     aiSearchName=$(echo "$deploymentOutputs" | grep -A 3 '"aI_SEARCH_SERVICE_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$aiSearchName" ]; then
+        aiSearchName=$(echo "$deploymentOutputs" | grep -A 3 '"aiSearchServiceName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     aif_resource_id=$(echo "$deploymentOutputs" | grep -A 3 '"aI_FOUNDRY_RESOURCE_ID"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
-
-	# Validate that we extracted all required values
-	if [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$sqlManagedIdentityClientId" ] || [ -z "$sqlManagedIdentityDisplayName" ] || [ -z "$aiSearchName" ] || [ -z "$aif_resource_id" ]; then
-		echo "Error: One or more required values could not be retrieved from deployment outputs."
-		return 1
-	else
-		echo "All values retrieved successfully from deployment outputs."
-		return 0
-	fi
+    if [ -z "$aif_resource_id" ]; then
+        aif_resource_id=$(echo "$deploymentOutputs" | grep -A 3 '"aiFoundryResourceId"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
+ 
+    # Validate that we extracted all required values
+    if [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$sqlManagedIdentityClientId" ] || [ -z "$sqlManagedIdentityDisplayName" ] || [ -z "$aiSearchName" ] || [ -z "$aif_resource_id" ]; then
+        echo "Error: One or more required values could not be retrieved from deployment outputs."
+        return 1
+    else
+        echo "All values retrieved successfully from deployment outputs."
+        return 0
+    fi
 }
 
 get_values_from_user() {
