@@ -19,6 +19,7 @@ azSubscriptionId=""
 original_storage_public_access=""
 original_storage_default_action=""
 original_foundry_public_access=""
+original_keyvault_public_access=""
 aif_resource_group=""
 aif_account_resource_id=""
 # Add global variable for SQL Server public access
@@ -112,6 +113,28 @@ enable_public_access() {
 		echo "✓ AI Foundry public access already enabled"
 	fi
 
+	# Enable public access for Key Vault
+	echo "Enabling public access for Key Vault: $keyvaultName"
+	original_keyvault_public_access=$(az keyvault show \
+		--name "$keyvaultName" \
+		--resource-group "$resourceGroupName" \
+		--query "properties.publicNetworkAccess" \
+		-o tsv)
+	if [ "$original_keyvault_public_access" != "Enabled" ]; then
+		az keyvault update \
+			--name "$keyvaultName" \
+			--resource-group "$resourceGroupName" \
+			--public-network-access Enabled \
+			--output none
+		if [ $? -eq 0 ]; then
+			echo "✓ Key Vault public access enabled"
+		else
+			echo "✗ Failed to enable Key Vault public access"
+			return 1
+		fi
+	else
+		echo "✓ Key Vault public access already enabled"
+	fi
 
 	# Enable public access for SQL Server
 	echo "Enabling public access for SQL Server: $sqlServerName"
@@ -249,6 +272,29 @@ restore_network_access() {
 		fi
 	else
 		echo "AI Foundry access unchanged (already at desired state)"
+	fi
+	
+	# Restore Key Vault access
+	if [ -n "$original_keyvault_public_access" ] && [ "$original_keyvault_public_access" != "Enabled" ]; then
+		echo "Restoring Key Vault public access to: $original_keyvault_public_access"
+		# Handle case sensitivity - convert to proper case
+		case "$original_keyvault_public_access" in
+			"enabled"|"Enabled") restore_value="Enabled" ;;
+			"disabled"|"Disabled") restore_value="Disabled" ;;
+			*) restore_value="$original_keyvault_public_access" ;;
+		esac
+		az keyvault update \
+			--name "$keyvaultName" \
+			--resource-group "$resourceGroupName" \
+			--public-network-access "$restore_value" \
+			--output none
+		if [ $? -eq 0 ]; then
+			echo "✓ Key Vault access restored"
+		else
+			echo "✗ Failed to restore Key Vault access"
+		fi
+	else
+		echo "Key Vault access unchanged (already at desired state)"
 	fi
 
 	# Restore SQL Server public access
