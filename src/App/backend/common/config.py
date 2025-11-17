@@ -76,7 +76,13 @@ class Config:
             "AZURE_SEARCH_CONNECTION_NAME", "foundry-search-connection"
         )
 
-        # AOAI Integration Settings
+        # AI Project Client configuration
+        self.USE_AI_PROJECT_CLIENT = (
+            os.getenv("USE_AI_PROJECT_CLIENT", "True").lower() == "true"
+        )
+        self.AI_PROJECT_ENDPOINT = os.getenv("AZURE_AI_AGENT_ENDPOINT")
+
+        # AOAI Integration Settings (used via AI Project Client)
         self.AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")
         self.AZURE_OPENAI_MODEL = os.environ.get("AZURE_OPENAI_MODEL")
         self.AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
@@ -129,12 +135,6 @@ class Config:
         self.SANITIZE_ANSWER = (
             os.environ.get("SANITIZE_ANSWER", "false").lower() == "true"
         )
-
-        # AI Project Client configuration
-        self.USE_AI_PROJECT_CLIENT = (
-            os.getenv("USE_AI_PROJECT_CLIENT", "False").lower() == "true"
-        )
-        self.AI_PROJECT_ENDPOINT = os.getenv("AZURE_AI_AGENT_ENDPOINT")
 
         # SQL Database configuration
         self.SQL_DATABASE = os.getenv("SQLDB_DATABASE")
