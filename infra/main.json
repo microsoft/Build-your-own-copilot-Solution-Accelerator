@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "7195801196475709586"
+      "templateHash": "3418531138421621433"
     }
   },
   "parameters": {
@@ -31,7 +31,7 @@
     },
     "gptModelDeploymentType": {
       "type": "string",
-      "defaultValue": "Standard",
+      "defaultValue": "GlobalStandard",
       "allowedValues": [
         "Standard",
         "GlobalStandard"
@@ -43,14 +43,14 @@
     },
     "gptModelName": {
       "type": "string",
-      "defaultValue": "gpt-35-turbo",
+      "defaultValue": "gpt-4.1-mini",
       "metadata": {
         "description": "Optional. Name of the GPT model to deploy:"
       }
     },
     "gptModelVersion": {
       "type": "string",
-      "defaultValue": "0125",
+      "defaultValue": "2025-04-14",
       "metadata": {
         "description": "Optional. Version of the GPT model to deploy:"
       }
@@ -220,7 +220,6 @@
   },
   "variables": {
     "solutionSuffix": "[toLower(trim(replace(replace(replace(replace(replace(replace(format('{0}{1}', parameters('solutionName'), parameters('solutionUniqueText')), '-', ''), '_', ''), '.', ''), '/', ''), ' ', ''), '*', '')))]",
-    "resourceGroupName": "[resourceGroup().name]",
     "baseUrl": "https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/",
     "allTags": "[union(createObject('azd-env-name', parameters('solutionName')), parameters('tags'))]",
     "replicaRegionPairs": {
@@ -22463,10 +22462,10 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "userAssignedIdentity",
         "virtualNetwork"
       ]
@@ -47219,9 +47218,9 @@
                   "AZURE_SEARCH_URL_COLUMN": "publicurl",
                   "AZURE_OPENAI_RESOURCE": "[reference('azOpenAI').outputs.endpoint.value]",
                   "AZURE_OPENAI_ENDPOINT": "[reference('azOpenAI').outputs.endpoint.value]",
-                  "AZURE_OPENAI_MODEL": "gpt-35-turbo",
+                  "AZURE_OPENAI_MODEL": "[parameters('gptModelName')]",
                   "AZURE_OPENAI_KEY": "[format('@Microsoft.KeyVault(SecretUri={0})', reference('azOpenAI').outputs.exportedSecrets.value['AZURE-OPENAI-KEY'].secretUri)]",
-                  "AZURE_OPENAI_MODEL_NAME": "gpt-35-turbo",
+                  "AZURE_OPENAI_MODEL_NAME": "[parameters('gptModelName')]",
                   "AZURE_OPENAI_TEMPERATURE": "0",
                   "AZURE_OPENAI_TOP_P": "1",
                   "AZURE_OPENAI_MAX_TOKENS": "1000",
