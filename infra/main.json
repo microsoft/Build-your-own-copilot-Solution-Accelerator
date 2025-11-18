@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.38.33.27573",
-      "templateHash": "2150473040924531792"
+      "version": "0.37.4.10188",
+      "templateHash": "16197733130303817508"
     }
   },
   "parameters": {
@@ -70,11 +70,11 @@
         "description": "Optional. Version of the GPT model to deploy."
       }
     },
-    "azureOpenaiAPIVersion": {
+    "azureAIServicesAPIVersion": {
       "type": "string",
       "defaultValue": "2025-04-01-preview",
       "metadata": {
-        "description": "Optional. API version for the Azure OpenAI service."
+        "description": "Optional. API version for the Azure AI Services."
       }
     },
     "gptModelCapacity": {
@@ -330,7 +330,6 @@
     "jumpboxVmName": "[take(format('vm-jumpbox-{0}', variables('solutionSuffix')), 15)]",
     "privateDnsZones": [
       "privatelink.cognitiveservices.azure.com",
-      "privatelink.openai.azure.com",
       "privatelink.services.ai.azure.com",
       "privatelink.azurewebsites.net",
       "[format('privatelink.blob.{0}', environment().suffixes.storage)]",
@@ -343,23 +342,21 @@
     ],
     "dnsZoneIndex": {
       "cognitiveServices": 0,
-      "openAI": 1,
-      "aiServices": 2,
-      "appService": 3,
-      "storageBlob": 4,
-      "storageQueue": 5,
-      "storageFile": 6,
-      "cosmosDB": 7,
-      "keyVault": 8,
-      "sqlServer": 9,
-      "searchService": 10
+      "aiServices": 1,
+      "appService": 2,
+      "storageBlob": 3,
+      "storageQueue": 4,
+      "storageFile": 5,
+      "cosmosDB": 6,
+      "keyVault": 7,
+      "sqlServer": 8,
+      "searchService": 9
     },
     "aiRelatedDnsZoneIndices": [
       "[variables('dnsZoneIndex').cognitiveServices]",
-      "[variables('dnsZoneIndex').openAI]",
       "[variables('dnsZoneIndex').aiServices]"
     ],
-    "keyVaultName": "[format('KV-{0}', variables('solutionSuffix'))]",
+    "keyVaultName": "[format('kv-{0}', variables('solutionSuffix'))]",
     "useExistingAiFoundryAiProject": "[not(empty(parameters('existingFoundryProjectResourceId')))]",
     "aiFoundryAiServicesSubscriptionId": "[if(variables('useExistingAiFoundryAiProject'), split(parameters('existingFoundryProjectResourceId'), '/')[2], subscription().id)]",
     "aiFoundryAiServicesResourceGroupName": "[if(variables('useExistingAiFoundryAiProject'), split(parameters('existingFoundryProjectResourceId'), '/')[4], format('rg-{0}', variables('solutionSuffix')))]",
@@ -459,7 +456,7 @@
     "logAnalyticsWorkspace": {
       "condition": "[and(parameters('enableMonitoring'), not(variables('useExistingLogAnalytics')))]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.operational-insights.workspace.{0}', variables('logAnalyticsWorkspaceResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -3565,7 +3562,7 @@
     "applicationInsights": {
       "condition": "[parameters('enableMonitoring')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.insights.component.{0}', variables('applicationInsightsResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -4295,7 +4292,7 @@
     },
     "userAssignedIdentity": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.managed-identity.user-assigned-identity.{0}', variables('userAssignedIdentityResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -4777,7 +4774,7 @@
     },
     "sqlUserAssignedIdentity": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.managed-identity.user-assigned-identity.{0}', variables('sqlUserAssignedIdentityResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -5260,7 +5257,7 @@
     "virtualNetwork": {
       "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('module.virtualNetwork.{0}', variables('solutionSuffix')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -5297,8 +5294,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.38.33.27573",
-              "templateHash": "1734974014097019118"
+              "version": "0.37.4.10188",
+              "templateHash": "15908341678380884075"
             }
           },
           "definitions": {
@@ -5691,7 +5688,7 @@
               },
               "condition": "[not(empty(tryGet(parameters('subnets')[copyIndex()], 'networkSecurityGroup')))]",
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2022-09-01",
               "name": "[take(format('avm.res.network.network-security-group.{0}.{1}', tryGet(parameters('subnets')[copyIndex()], 'networkSecurityGroup', 'name'), parameters('resourceSuffix')), 64)]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -6343,7 +6340,7 @@
             },
             "virtualNetwork": {
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2022-09-01",
               "name": "[take(format('avm.res.network.virtual-network.{0}', parameters('name')), 64)]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -8070,7 +8067,7 @@
     "bastionHost": {
       "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.network.bastion-host.{0}', variables('bastionHostName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -9389,7 +9386,7 @@
     "jumpboxVM": {
       "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.compute.virtual-machine.{0}', variables('jumpboxVmName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -17739,7 +17736,7 @@
       },
       "condition": "[and(parameters('enablePrivateNetworking'), or(empty(parameters('existingFoundryProjectResourceId')), not(contains(variables('aiRelatedDnsZoneIndices'), copyIndex()))))]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[format('avm.res.network.private-dns-zone.{0}', split(variables('privateDnsZones')[copyIndex()], '.')[1])]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -20906,7 +20903,7 @@
     },
     "keyvault": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.key-vault.vault.{0}', variables('keyVaultName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -20981,11 +20978,11 @@
               },
               {
                 "name": "AZURE-OPENAI-PREVIEW-API-VERSION",
-                "value": "[parameters('azureOpenaiAPIVersion')]"
+                "value": "[parameters('azureAIServicesAPIVersion')]"
               },
               {
                 "name": "AZURE-OPENAI-ENDPOINT",
-                "value": "[reference('aiFoundryAiServices').outputs.endpoints.value['OpenAI Language Model Instance API']]"
+                "value": "[reference('aiFoundryAiServices').outputs.endpoint.value]"
               },
               {
                 "name": "AZURE-OPENAI-EMBEDDING-MODEL",
@@ -20998,6 +20995,10 @@
               {
                 "name": "AZURE-SEARCH-ENDPOINT",
                 "value": "[format('https://{0}.search.windows.net', variables('aiSearchName'))]"
+              },
+              {
+                "name": "AZURE-AI-AGENT-ENDPOINT",
+                "value": "[reference('aiFoundryAiServices').outputs.aiProjectInfo.value.apiEndpoint]"
               }
             ]
           },
@@ -24134,7 +24135,7 @@
     "aiFoundryAiServices": {
       "condition": "[variables('aiFoundryAIservicesEnabled')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.cognitive-services.account.{0}', variables('aiFoundryAiServicesResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -24210,7 +24211,7 @@
           },
           "diagnosticSettings": "[if(parameters('enableMonitoring'), createObject('value', createArray(createObject('workspaceResourceId', if(variables('useExistingLogAnalytics'), parameters('existingLogAnalyticsWorkspaceId'), reference('logAnalyticsWorkspace').outputs.resourceId.value)))), createObject('value', null()))]",
           "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
-          "privateEndpoints": "[if(and(parameters('enablePrivateNetworking'), empty(parameters('existingFoundryProjectResourceId'))), createObject('value', createArray(createObject('name', format('pep-{0}', variables('aiFoundryAiServicesResourceName')), 'customNetworkInterfaceName', format('nic-{0}', variables('aiFoundryAiServicesResourceName')), 'subnetResourceId', reference('virtualNetwork').outputs.pepsSubnetResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'ai-services-dns-zone-cognitiveservices', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)).outputs.resourceId.value), createObject('name', 'ai-services-dns-zone-openai', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)).outputs.resourceId.value), createObject('name', 'ai-services-dns-zone-aiservices', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').aiServices)).outputs.resourceId.value)))))), createObject('value', createArray()))]",
+          "privateEndpoints": "[if(and(parameters('enablePrivateNetworking'), empty(parameters('existingFoundryProjectResourceId'))), createObject('value', createArray(createObject('name', format('pep-{0}', variables('aiFoundryAiServicesResourceName')), 'customNetworkInterfaceName', format('nic-{0}', variables('aiFoundryAiServicesResourceName')), 'subnetResourceId', reference('virtualNetwork').outputs.pepsSubnetResourceId.value, 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'ai-services-dns-zone-cognitiveservices', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)).outputs.resourceId.value), createObject('name', 'ai-services-dns-zone-aiservices', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').aiServices)).outputs.resourceId.value)))))), createObject('value', createArray()))]",
           "deployments": {
             "value": [
               {
@@ -24249,8 +24250,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.38.33.27573",
-              "templateHash": "12531718623039828267"
+              "version": "0.37.4.10188",
+              "templateHash": "11586648700335054863"
             },
             "name": "Cognitive Services",
             "description": "This module deploys a Cognitive Service."
@@ -25430,7 +25431,7 @@
             "cognitive_service_dependencies": {
               "condition": "[not(variables('useExistingService'))]",
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2022-09-01",
               "name": "[format('cognitive_service_dependencies-{0}', uniqueString('cognitive_service_dependencies', deployment().name))]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -25482,8 +25483,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.38.33.27573",
-                      "templateHash": "1396927448823284485"
+                      "version": "0.37.4.10188",
+                      "templateHash": "8352858209491089788"
                     }
                   },
                   "definitions": {
@@ -26408,8 +26409,6 @@
                       "Cognitive Services LUIS Writer": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '6322a993-d5c9-4bed-b113-e49bbea25b27')]",
                       "Cognitive Services Metrics Advisor Administrator": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'cb43c632-a144-4ec5-977c-e80c4affc34a')]",
                       "Cognitive Services Metrics Advisor User": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3b20f47b-3825-43cb-8114-4bd2201156a8')]",
-                      "Cognitive Services OpenAI Contributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a001fd3d-188f-4b5d-821b-7da978bf7442')]",
-                      "Cognitive Services OpenAI User": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')]",
                       "Cognitive Services QnA Maker Editor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'f4cc2bf9-21be-47a1-bdf1-5c5804381025')]",
                       "Cognitive Services QnA Maker Reader": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '466ccd10-b268-4a11-b098-b4849f024126')]",
                       "Cognitive Services Speech Contributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '0e75ca1e-0464-4b4d-8b93-68208a576181')]",
@@ -26522,7 +26521,7 @@
                         "count": "[length(coalesce(parameters('privateEndpoints'), createArray()))]"
                       },
                       "type": "Microsoft.Resources/deployments",
-                      "apiVersion": "2025-04-01",
+                      "apiVersion": "2022-09-01",
                       "name": "[format('{0}-cognitiveService-PrivateEndpoint-{1}', uniqueString(deployment().name, parameters('location')), copyIndex())]",
                       "subscriptionId": "[split(coalesce(tryGet(coalesce(parameters('privateEndpoints'), createArray())[copyIndex()], 'resourceGroupResourceId'), resourceGroup().id), '/')[2]]",
                       "resourceGroup": "[split(coalesce(tryGet(coalesce(parameters('privateEndpoints'), createArray())[copyIndex()], 'resourceGroupResourceId'), resourceGroup().id), '/')[4]]",
@@ -27273,7 +27272,7 @@
                     "secretsExport": {
                       "condition": "[not(equals(parameters('secretsExportConfiguration'), null()))]",
                       "type": "Microsoft.Resources/deployments",
-                      "apiVersion": "2025-04-01",
+                      "apiVersion": "2022-09-01",
                       "name": "[format('{0}-secrets-kv', uniqueString(deployment().name, parameters('location')))]",
                       "subscriptionId": "[split(tryGet(parameters('secretsExportConfiguration'), 'keyVaultResourceId'), '/')[2]]",
                       "resourceGroup": "[split(tryGet(parameters('secretsExportConfiguration'), 'keyVaultResourceId'), '/')[4]]",
@@ -27297,8 +27296,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.38.33.27573",
-                              "templateHash": "7420599935384266971"
+                              "version": "0.37.4.10188",
+                              "templateHash": "2491273843075489892"
                             }
                           },
                           "definitions": {
@@ -27417,7 +27416,7 @@
                     "aiProject": {
                       "condition": "[or(not(empty(parameters('projectName'))), not(empty(parameters('existingFoundryProjectResourceId'))))]",
                       "type": "Microsoft.Resources/deployments",
-                      "apiVersion": "2025-04-01",
+                      "apiVersion": "2022-09-01",
                       "name": "[take(format('{0}-ai-project-{1}-deployment', parameters('name'), parameters('projectName')), 64)]",
                       "properties": {
                         "expressionEvaluationOptions": {
@@ -27451,8 +27450,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.38.33.27573",
-                              "templateHash": "5676565623284126112"
+                              "version": "0.37.4.10188",
+                              "templateHash": "346451728741152022"
                             }
                           },
                           "definitions": {
@@ -27631,7 +27630,7 @@
             "existing_cognitive_service_dependencies": {
               "condition": "[variables('useExistingService')]",
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2022-09-01",
               "name": "[format('existing_cognitive_service_dependencies-{0}', uniqueString('existing_cognitive_service_dependencies', deployment().name))]",
               "subscriptionId": "[variables('existingCognitiveServiceDetails')[2]]",
               "resourceGroup": "[variables('existingCognitiveServiceDetails')[4]]",
@@ -27688,8 +27687,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.38.33.27573",
-                      "templateHash": "1396927448823284485"
+                      "version": "0.37.4.10188",
+                      "templateHash": "8352858209491089788"
                     }
                   },
                   "definitions": {
@@ -28614,8 +28613,6 @@
                       "Cognitive Services LUIS Writer": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '6322a993-d5c9-4bed-b113-e49bbea25b27')]",
                       "Cognitive Services Metrics Advisor Administrator": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'cb43c632-a144-4ec5-977c-e80c4affc34a')]",
                       "Cognitive Services Metrics Advisor User": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3b20f47b-3825-43cb-8114-4bd2201156a8')]",
-                      "Cognitive Services OpenAI Contributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a001fd3d-188f-4b5d-821b-7da978bf7442')]",
-                      "Cognitive Services OpenAI User": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')]",
                       "Cognitive Services QnA Maker Editor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'f4cc2bf9-21be-47a1-bdf1-5c5804381025')]",
                       "Cognitive Services QnA Maker Reader": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '466ccd10-b268-4a11-b098-b4849f024126')]",
                       "Cognitive Services Speech Contributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '0e75ca1e-0464-4b4d-8b93-68208a576181')]",
@@ -28728,7 +28725,7 @@
                         "count": "[length(coalesce(parameters('privateEndpoints'), createArray()))]"
                       },
                       "type": "Microsoft.Resources/deployments",
-                      "apiVersion": "2025-04-01",
+                      "apiVersion": "2022-09-01",
                       "name": "[format('{0}-cognitiveService-PrivateEndpoint-{1}', uniqueString(deployment().name, parameters('location')), copyIndex())]",
                       "subscriptionId": "[split(coalesce(tryGet(coalesce(parameters('privateEndpoints'), createArray())[copyIndex()], 'resourceGroupResourceId'), resourceGroup().id), '/')[2]]",
                       "resourceGroup": "[split(coalesce(tryGet(coalesce(parameters('privateEndpoints'), createArray())[copyIndex()], 'resourceGroupResourceId'), resourceGroup().id), '/')[4]]",
@@ -29479,7 +29476,7 @@
                     "secretsExport": {
                       "condition": "[not(equals(parameters('secretsExportConfiguration'), null()))]",
                       "type": "Microsoft.Resources/deployments",
-                      "apiVersion": "2025-04-01",
+                      "apiVersion": "2022-09-01",
                       "name": "[format('{0}-secrets-kv', uniqueString(deployment().name, parameters('location')))]",
                       "subscriptionId": "[split(tryGet(parameters('secretsExportConfiguration'), 'keyVaultResourceId'), '/')[2]]",
                       "resourceGroup": "[split(tryGet(parameters('secretsExportConfiguration'), 'keyVaultResourceId'), '/')[4]]",
@@ -29503,8 +29500,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.38.33.27573",
-                              "templateHash": "7420599935384266971"
+                              "version": "0.37.4.10188",
+                              "templateHash": "2491273843075489892"
                             }
                           },
                           "definitions": {
@@ -29623,7 +29620,7 @@
                     "aiProject": {
                       "condition": "[or(not(empty(parameters('projectName'))), not(empty(parameters('existingFoundryProjectResourceId'))))]",
                       "type": "Microsoft.Resources/deployments",
-                      "apiVersion": "2025-04-01",
+                      "apiVersion": "2022-09-01",
                       "name": "[take(format('{0}-ai-project-{1}-deployment', parameters('name'), parameters('projectName')), 64)]",
                       "properties": {
                         "expressionEvaluationOptions": {
@@ -29657,8 +29654,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.38.33.27573",
-                              "templateHash": "5676565623284126112"
+                              "version": "0.37.4.10188",
+                              "templateHash": "346451728741152022"
                             }
                           },
                           "definitions": {
@@ -29917,7 +29914,6 @@
       "dependsOn": [
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').aiServices)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').openAI)]",
         "logAnalyticsWorkspace",
         "userAssignedIdentity",
         "virtualNetwork"
@@ -29925,7 +29921,7 @@
     },
     "cosmosDb": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.document-db.database-account.{0}', variables('cosmosDbResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -33765,7 +33761,7 @@
     },
     "avmStorageAccount": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.storage.storage-account.{0}', variables('storageAccountName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -33814,7 +33810,9 @@
               "defaultAction": "[if(parameters('enablePrivateNetworking'), 'Deny', 'Allow')]"
             }
           },
-          "allowBlobPublicAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', true()), createObject('value', false()))]",
+          "allowBlobPublicAccess": {
+            "value": false
+          },
           "publicNetworkAccess": "[if(parameters('enablePrivateNetworking'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
           "privateEndpoints": "[if(parameters('enablePrivateNetworking'), createObject('value', createArray(createObject('name', format('pep-blob-{0}', variables('solutionSuffix')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-blob', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)).outputs.resourceId.value))), 'subnetResourceId', reference('virtualNetwork').outputs.pepsSubnetResourceId.value, 'service', 'blob'), createObject('name', format('pep-queue-{0}', variables('solutionSuffix')), 'privateDnsZoneGroup', createObject('privateDnsZoneGroupConfigs', createArray(createObject('name', 'storage-dns-zone-group-queue', 'privateDnsZoneResourceId', reference(format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)).outputs.resourceId.value))), 'subnetResourceId', reference('virtualNetwork').outputs.pepsSubnetResourceId.value, 'service', 'queue'))), createObject('value', createArray()))]",
           "blobServices": {
@@ -39533,7 +39531,7 @@
     },
     "saveStorageAccountSecretsInKeyVault": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('saveStorageAccountSecretsInKeyVault.{0}', variables('keyVaultName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -39577,7 +39575,7 @@
               },
               {
                 "name": "ADLS-ACCOUNT-KEY",
-                "value": "[listOutputsWithSecureValues('avmStorageAccount', '2025-04-01').primaryAccessKey]"
+                "value": "[listOutputsWithSecureValues('avmStorageAccount', '2022-09-01').primaryAccessKey]"
               }
             ]
           }
@@ -42705,7 +42703,7 @@
     },
     "sqlDBModule": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.sql.server.{0}', variables('sqlDbName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -49347,7 +49345,7 @@
     },
     "webServerFarm": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.web.serverfarm.{0}', variables('webServerFarmResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -49920,7 +49918,7 @@
     },
     "webSite": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('module.web-sites.{0}', variables('webSiteResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -49977,20 +49975,20 @@
                   "AZURE_SEARCH_URL_COLUMN": "[variables('azureSearchUrlColumn')]",
                   "AZURE_OPENAI_RESOURCE": "[reference('aiFoundryAiServices').outputs.name.value]",
                   "AZURE_OPENAI_MODEL": "[parameters('gptModelName')]",
-                  "AZURE_OPENAI_ENDPOINT": "[reference('aiFoundryAiServices').outputs.endpoints.value['OpenAI Language Model Instance API']]",
+                  "AZURE_OPENAI_ENDPOINT": "[reference('aiFoundryAiServices').outputs.endpoint.value]",
                   "AZURE_OPENAI_TEMPERATURE": "[variables('azureOpenAITemperature')]",
                   "AZURE_OPENAI_TOP_P": "[variables('azureOpenAITopP')]",
                   "AZURE_OPENAI_MAX_TOKENS": "[variables('azureOpenAIMaxTokens')]",
                   "AZURE_OPENAI_STOP_SEQUENCE": "[variables('azureOpenAIStopSequence')]",
                   "AZURE_OPENAI_SYSTEM_MESSAGE": "[variables('azureOpenAISystemMessage')]",
-                  "AZURE_OPENAI_PREVIEW_API_VERSION": "[parameters('azureOpenaiAPIVersion')]",
+                  "AZURE_OPENAI_PREVIEW_API_VERSION": "[parameters('azureAIServicesAPIVersion')]",
                   "AZURE_OPENAI_STREAM": "[variables('azureOpenAIStream')]",
                   "AZURE_SEARCH_QUERY_TYPE": "[variables('azureSearchQueryType')]",
                   "AZURE_SEARCH_VECTOR_COLUMNS": "[variables('azureSearchVectorFields')]",
                   "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN": "[variables('azureSearchPermittedGroupsField')]",
                   "AZURE_SEARCH_STRICTNESS": "[variables('azureSearchStrictness')]",
                   "AZURE_OPENAI_EMBEDDING_NAME": "[parameters('embeddingModel')]",
-                  "AZURE_OPENAI_EMBEDDING_ENDPOINT": "[reference('aiFoundryAiServices').outputs.endpoints.value['OpenAI Language Model Instance API']]",
+                  "AZURE_OPENAI_EMBEDDING_ENDPOINT": "[reference('aiFoundryAiServices').outputs.endpoint.value]",
                   "SQLDB_SERVER": "[variables('sqlServerFqdn')]",
                   "SQLDB_DATABASE": "[variables('sqlDbName')]",
                   "USE_INTERNAL_STREAM": "[variables('useInternalStream')]",
@@ -50006,7 +50004,7 @@
                   "USE_AI_PROJECT_CLIENT": "[variables('useAIProjectClientFlag')]",
                   "AZURE_AI_AGENT_ENDPOINT": "[reference('aiFoundryAiServices').outputs.aiProjectInfo.value.apiEndpoint]",
                   "AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME": "[parameters('gptModelName')]",
-                  "AZURE_AI_AGENT_API_VERSION": "[parameters('azureOpenaiAPIVersion')]",
+                  "AZURE_AI_AGENT_API_VERSION": "[parameters('azureAIServicesAPIVersion')]",
                   "AZURE_SEARCH_CONNECTION_NAME": "[variables('aiSearchName')]",
                   "AZURE_CLIENT_ID": "[reference('userAssignedIdentity').outputs.clientId.value]"
                 },
@@ -50029,8 +50027,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.38.33.27573",
-              "templateHash": "14170137035624875111"
+              "version": "0.37.4.10188",
+              "templateHash": "4298119334635398540"
             }
           },
           "definitions": {
@@ -51007,7 +51005,7 @@
                 "count": "[length(coalesce(parameters('configs'), createArray()))]"
               },
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2022-09-01",
               "name": "[format('{0}-Site-Config-{1}', uniqueString(deployment().name, parameters('location')), copyIndex())]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -51042,8 +51040,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.38.33.27573",
-                      "templateHash": "16983009113856606195"
+                      "version": "0.37.4.10188",
+                      "templateHash": "4653685834544796273"
                     },
                     "name": "Site App Settings",
                     "description": "This module deploys a Site App Setting."
@@ -51188,7 +51186,7 @@
                 "count": "[length(coalesce(parameters('privateEndpoints'), createArray()))]"
               },
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2022-09-01",
               "name": "[format('{0}-app-PrivateEndpoint-{1}', uniqueString(deployment().name, parameters('location')), copyIndex())]",
               "subscriptionId": "[split(coalesce(tryGet(coalesce(parameters('privateEndpoints'), createArray())[copyIndex()], 'resourceGroupResourceId'), resourceGroup().id), '/')[2]]",
               "resourceGroup": "[split(coalesce(tryGet(coalesce(parameters('privateEndpoints'), createArray())[copyIndex()], 'resourceGroupResourceId'), resourceGroup().id), '/')[4]]",
@@ -52014,7 +52012,7 @@
     },
     "searchService": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "[take(format('avm.res.search.search-service.{0}', variables('aiSearchName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -54394,7 +54392,7 @@
     "existing_AIProject_SearchConnectionModule": {
       "condition": "[variables('useExistingAiFoundryAiProject')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "aiProjectSearchConnectionDeployment",
       "subscriptionId": "[variables('aiFoundryAiServicesSubscriptionId')]",
       "resourceGroup": "[variables('aiFoundryAiServicesResourceGroupName')]",
@@ -54429,8 +54427,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.38.33.27573",
-              "templateHash": "11311597701635556530"
+              "version": "0.37.4.10188",
+              "templateHash": "6038840175458269917"
             }
           },
           "parameters": {
@@ -54498,7 +54496,7 @@
     "searchServiceToExistingAiServicesRoleAssignment": {
       "condition": "[variables('useExistingAiFoundryAiProject')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "searchToExistingAiServices-roleAssignment",
       "subscriptionId": "[variables('aiFoundryAiServicesSubscriptionId')]",
       "resourceGroup": "[variables('aiFoundryAiServicesResourceGroupName')]",
@@ -54524,8 +54522,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.38.33.27573",
-              "templateHash": "9717690292313179013"
+              "version": "0.37.4.10188",
+              "templateHash": "3644919950024112374"
             }
           },
           "parameters": {
@@ -54706,7 +54704,7 @@
       "metadata": {
         "description": "The API version used for the Azure AI Agent service."
       },
-      "value": "[parameters('azureOpenaiAPIVersion')]"
+      "value": "[parameters('azureAIServicesAPIVersion')]"
     },
     "AZURE_AI_AGENT_ENDPOINT": {
       "type": "string",
@@ -54769,7 +54767,7 @@
       "metadata": {
         "description": "The endpoint URL for the Azure OpenAI Embedding model."
       },
-      "value": "[reference('aiFoundryAiServices').outputs.endpoints.value['OpenAI Language Model Instance API']]"
+      "value": "[reference('aiFoundryAiServices').outputs.endpoint.value]"
     },
     "AZURE_OPENAI_EMBEDDING_NAME": {
       "type": "string",
@@ -54783,7 +54781,7 @@
       "metadata": {
         "description": "The endpoint URL for the Azure OpenAI service."
       },
-      "value": "[reference('aiFoundryAiServices').outputs.endpoints.value['OpenAI Language Model Instance API']]"
+      "value": "[reference('aiFoundryAiServices').outputs.endpoint.value]"
     },
     "AZURE_OPENAI_MAX_TOKENS": {
       "type": "string",
@@ -54804,7 +54802,7 @@
       "metadata": {
         "description": "The preview API version for Azure OpenAI."
       },
-      "value": "[parameters('azureOpenaiAPIVersion')]"
+      "value": "[parameters('azureAIServicesAPIVersion')]"
     },
     "AZURE_OPENAI_RESOURCE": {
       "type": "string",
