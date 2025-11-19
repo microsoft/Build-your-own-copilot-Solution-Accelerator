@@ -116,7 +116,6 @@ If you're not using one of the above options for opening the project, then you'l
     - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     - [Git](https://git-scm.com/downloads)
     - [Microsoft ODBC Driver 18 for SQL Server](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16)
-    - [sqlcmd(ODBC-Windows)](https://learn.microsoft.com/en-us/sql/tools/sqlcmd/sqlcmd-utility?view=sql-server-ver16&tabs=odbc%2Cwindows%2Cwindows-support&pivots=cs1-bash#download-and-install-sqlcmd) / [sqlcmd(Linux/Mac)](https://learn.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-ver16&tabs=redhat-install)
 
 2. Clone the repository or download the project code via command-line:
 
