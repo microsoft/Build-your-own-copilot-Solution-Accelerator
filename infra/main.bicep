@@ -16,13 +16,13 @@ param location string = resourceGroup().location
   'Standard'
   'GlobalStandard'
 ])
-param gptModelDeploymentType string = 'Standard'
+param gptModelDeploymentType string = 'GlobalStandard'
 
 @description('Optional. Name of the GPT model to deploy:')
-param gptModelName string = 'gpt-35-turbo'
+param gptModelName string = 'gpt-4.1-mini'
 
 @description('Optional. Version of the GPT model to deploy:')
-param gptModelVersion string = '0125'
+param gptModelVersion string = '2025-04-14'
 
 @minValue(10)
 @description('Optional. Capacity of the GPT deployment:')
@@ -107,7 +107,7 @@ var solutionSuffix = toLower(trim(replace(
   '*',
   ''
 )))
-var resourceGroupName = resourceGroup().name
+
 var baseUrl = 'https://raw.githubusercontent.com/microsoft/Build-your-own-copilot-Solution-Accelerator/byoc-researcher/'
 
 var allTags = union(
@@ -1070,9 +1070,9 @@ module webSite 'modules/web-sites.bicep' = {
           AZURE_SEARCH_URL_COLUMN:'publicurl'
           AZURE_OPENAI_RESOURCE:azOpenAI.outputs.endpoint
           AZURE_OPENAI_ENDPOINT:azOpenAI.outputs.endpoint
-          AZURE_OPENAI_MODEL:'gpt-35-turbo'
+          AZURE_OPENAI_MODEL:gptModelName
           AZURE_OPENAI_KEY:'@Microsoft.KeyVault(SecretUri=${openAIKeyUri})'
-          AZURE_OPENAI_MODEL_NAME:'gpt-35-turbo'
+          AZURE_OPENAI_MODEL_NAME:gptModelName
           AZURE_OPENAI_TEMPERATURE:'0'
           AZURE_OPENAI_TOP_P:'1'
           AZURE_OPENAI_MAX_TOKENS:'1000'

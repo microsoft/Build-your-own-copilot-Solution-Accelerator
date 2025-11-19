@@ -1,7 +1,7 @@
 ## Check Quota Availability Before Deployment
 
 Before deploying the accelerator, **ensure sufficient quota availability** for the required model.
-> **For Global Standard | GPT-35-turbo - increase the capacity to at least 50K tokens for optimal performance.**
+> **For Global Standard | gpt-4.1-mini - increase the capacity to at least 50K tokens for optimal performance.**
 
 ### Login if you have not done so already
 ```
@@ -11,7 +11,7 @@ azd auth login
 
 ### 📌 Default Models & Capacities:
 ```
-gpt-35-turbo:30, text-embedding-ada-002:45
+gpt-4.1-mini:30, text-embedding-ada-002:45
 ```
 ### 📌 Default Regions:
 ```
@@ -37,7 +37,7 @@ australiaeast, francecentral, japaneast, northcentralus, southcentralus, westus,
    ```
 ✔️ Check specific model(s) in default regions:
   ```
-  ./quota_check_params.sh --models gpt-35-turbo:30,text-embedding-ada-002:45
+  ./quota_check_params.sh --models gpt-4.1-mini:30,text-embedding-ada-002:45
   ```
 ✔️ Check default models in specific region(s):
   ```
@@ -45,11 +45,11 @@ australiaeast, francecentral, japaneast, northcentralus, southcentralus, westus,
   ```
 ✔️ Passing Both models and regions:  
   ```
-  ./quota_check_params.sh --models gpt-35-turbo:30 --regions eastus,westus
+  ./quota_check_params.sh --models gpt-4.1-mini:30 --regions eastus,westus
   ```
 ✔️ All parameters combined:
   ```
- ./quota_check_params.sh --models gpt-35-turbo:30,text-embedding-ada-002:45 --regions eastus,westus --verbose
+ ./quota_check_params.sh --models gpt-4.1-mini:30,text-embedding-ada-002:45 --regions eastus,westus --verbose
   ```
 
 ### **Sample Output**

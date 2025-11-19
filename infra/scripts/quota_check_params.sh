@@ -47,7 +47,7 @@ log_verbose() {
 }
 
 # Default Models and Capacities (Comma-separated in "model:capacity" format)
-DEFAULT_MODEL_CAPACITY="gpt-35-turbo:30,text-embedding-ada-002:45"
+DEFAULT_MODEL_CAPACITY="gpt-4.1-mini:30,text-embedding-ada-002:45"
 
 # Convert the comma-separated string into an array
 IFS=',' read -r -a MODEL_CAPACITY_PAIRS <<< "$DEFAULT_MODEL_CAPACITY"
