@@ -617,24 +617,15 @@ echo "copy_kb_files.sh completed successfully."
 
 # Call run_create_index_scripts.sh
 echo "Running run_create_index_scripts.sh"
-bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "" "$resourceGroupName" "$sqlServerName" "$aiSearchName" "$aif_resource_id"
+# Pass SQL managed identity client id and display name so index script can perform role assignment centrally
+bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "" "$resourceGroupName" "$sqlServerName" "$aiSearchName" "$aif_resource_id" "$SqlDatabaseName" "$sqlManagedIdentityDisplayName" "$sqlManagedIdentityClientId"
 if [ $? -ne 0 ]; then
 	echo "Error: run_create_index_scripts.sh failed."
 	exit 1
 fi
 echo "run_create_index_scripts.sh completed successfully."
 
-# Call create_sql_user_and_role.sh
-echo "Running create_sql_user_and_role.sh"
-bash infra/scripts/add_user_scripts/create_sql_user_and_role.sh "$sqlServerName.database.windows.net" "$SqlDatabaseName" '[
-	{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datareader"},
-	{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datawriter"}
-]'
-if [ $? -ne 0 ]; then
-	echo "Error: create_sql_user_and_role.sh failed."
-	exit 1
-fi
-echo "create_sql_user_and_role.sh completed successfully."
+## SQL role assignment now centralized in run_create_index_scripts.sh; removed local duplicate block.
 
 echo "All scripts executed successfully."
 echo "Network access will be restored to original settings..."
