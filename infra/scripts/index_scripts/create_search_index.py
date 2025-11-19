@@ -32,6 +32,7 @@ from azure.storage.filedatalake import (
     FileSystemClient,
 )
 from azure.ai.projects import AIProjectClient
+from datetime import datetime
 
 # Get Azure Key Vault Client
 key_vault_name = "kv_to-be-replaced"  #'nc6262-kv-2fpeafsylfd2e'
@@ -79,6 +80,9 @@ fields = [
     SearchableField(name="content", type=SearchFieldDataType.String),
     SearchableField(name="sourceurl", type=SearchFieldDataType.String),
     SearchableField(name="client_id", type=SearchFieldDataType.String, filterable=True),
+    SimpleField(name="meeting_start_time", type=SearchFieldDataType.DateTimeOffset, sortable=True, filterable=True),
+    SimpleField(name="meeting_end_time", type=SearchFieldDataType.DateTimeOffset, sortable=True, filterable=True),
+    SearchableField(name="meeting_title", type=SearchFieldDataType.String),
     SearchField(
         name="contentVector",
         type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
@@ -253,14 +257,33 @@ for path in paths:
 
     chunks = chunk_data(text)
     chunk_num = 0
+    
+    def convert_to_iso8601(date_str):
+        """Convert datetime string to ISO 8601 format with UTC timezone"""
+        if pd.isna(date_str):
+            return None
+        try:
+            dt = pd.to_datetime(date_str)
+            return dt.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+        except:
+            return None
+    
+    meeting_start_time = convert_to_iso8601(df_file_metadata.get("StartTime"))
+    meeting_end_time = convert_to_iso8601(df_file_metadata.get("EndTime"))
+    meeting_title = str(df_file_metadata["Title"]) if pd.notna(df_file_metadata.get("Title")) else ""
+
+    meeting_start_time_display = str(df_file_metadata["StartTime"]) if pd.notna(df_file_metadata.get("StartTime")) else None
+    
     for chunk in chunks:
         chunk_num += 1
+        date_context = f"Meeting Date: {meeting_start_time_display}. " if meeting_start_time_display else ""
         d = {
             "chunk_id": document_id + "_" + str(chunk_num).zfill(2),
             "client_id": str(df_file_metadata["ClientId"]),
             "content": "ClientId is "
             + str(df_file_metadata["ClientId"])
             + " . "
+            + date_context
             + chunk,
         }
 
@@ -285,6 +308,9 @@ for path in paths:
                 "client_id": d["client_id"],
                 "content": d["content"],
                 "sourceurl": path.name.split("/")[-1],
+                "meeting_start_time": meeting_start_time,
+                "meeting_end_time": meeting_end_time,
+                "meeting_title": meeting_title,
                 "contentVector": v_contentVector,
             }
         )
