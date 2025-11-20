@@ -19,7 +19,7 @@ jobs:
       matrix:
         include:
           - app_name: byoaia-app
-            dockerfile: WebApp.Dockerfile
+            dockerfile: src/WebApp.Dockerfile
             password_secret: DOCKER_PASSWORD_RESEARCHASSISTANT
 
     uses: ./.github/workflows/build-docker.yml
