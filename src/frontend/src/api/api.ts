@@ -17,34 +17,14 @@ export async function conversationApi (options: ConversationRequest, abortSignal
 }
 
 export async function getUserInfo (): Promise<UserInfo[]> {
-  try {
-    const response = await fetch('/.auth/me');
-    if (!response.ok) {
-      console.log('No identity provider found. Access to chat will be blocked.');
-      return [];
-    }
-    
-    const payload = await response.json();
-    
-    if (payload && payload.length > 0) {
-      const userInfo: UserInfo = {
-        access_token: payload[0].access_token || '',
-        expires_on: payload[0].expires_on || '',
-        id_token: payload[0].id_token || '',
-        provider_name: payload[0].provider_name || '',
-        user_claims: payload[0].user_claims || [],
-        user_id: payload[0].user_claims?.find((claim: any) => 
-          claim.typ === 'http://schemas.microsoft.com/identity/claims/objectidentifier'
-        )?.val || payload[0].user_id || ''
-      };
-      return [userInfo];
-    }
-    
-    return payload;
-  } catch (e) {
-    console.error('Error fetching user info:', e);
-    return [];
+  const response = await fetch('/.auth/me')
+  if (!response.ok) {
+    console.log('No identity provider found. Access to chat will be blocked.')
+    return []
   }
+
+  const payload = await response.json()
+  return payload
 }
 
 export const frontendSettings = async (): Promise<Response | null> => {
