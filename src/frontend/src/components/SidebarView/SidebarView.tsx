@@ -39,8 +39,10 @@ export const SidebarView = (): JSX.Element => {
 
   useEffect(() => {
     getUserInfo().then((res) => {
-      const name: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? ''
-      setName(name)
+      if (res && res.length > 0 && res[0].user_claims) {
+        const name: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? ''
+        setName(name)
+      }
     }).catch((err) => {
       console.error('Error fetching user info: ', err)
     })
