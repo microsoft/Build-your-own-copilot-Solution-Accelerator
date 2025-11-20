@@ -19,7 +19,7 @@ param location string = resourceGroup().location
 param gptModelDeploymentType string = 'GlobalStandard'
 
 @description('Optional. Name of the GPT model to deploy:')
-param gptModelName string = 'gpt4.1-mini'
+param gptModelName string = 'gpt-4.1-mini'
 
 @description('Optional. Version of the GPT model to deploy:')
 param gptModelVersion string = '2025-04-14'
@@ -149,6 +149,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
       ...tags
       TemplateName: 'Research Assistant'
       CreatedBy: createdBy
+      SecurityControl: 'Ignore'
     }
   }
 }

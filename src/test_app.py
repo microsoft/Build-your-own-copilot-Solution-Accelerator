@@ -48,7 +48,7 @@ def test_is_chat_model_with_gpt35_turbo_4k():
 
 
 def test_is_chat_model_with_gpt35_turbo_16k():
-    with patch("app.AZURE_OPENAI_MODEL_NAME", "gpt4.1-mini"):
+    with patch("app.AZURE_OPENAI_MODEL_NAME", "gpt-4.1-mini"):
         assert is_chat_model() is True
 
 
@@ -291,7 +291,7 @@ def test_stream_with_data_azure_success():
     with patch("requests.Session.post") as mock_post:
         mock_response = MagicMock()
         mock_response.iter_lines.return_value = [
-            b'data: {"id":"1","model":"gpt4.1-mini","created":1736397875,"object":"extensions.chat.completion.chunk","choices":[{"index":0,"delta":{"context":{"messages":[{"role":"tool","content":"hello","end_turn":false}]}},"end_turn":false,"finish_reason":"None"}]}'
+            b'data: {"id":"1","model":"gpt-4.1-mini","created":1736397875,"object":"extensions.chat.completion.chunk","choices":[{"index":0,"delta":{"context":{"messages":[{"role":"tool","content":"hello","end_turn":false}]}},"end_turn":false,"finish_reason":"None"}]}'
         ]
         mock_response.headers = {"apim-request-id": "test-request-id"}
         mock_post.return_value.__enter__.return_value = mock_response
@@ -381,7 +381,7 @@ def test_stream_with_data_azure_error():
         #     body = mock_body
         mock_response = MagicMock()
         mock_response.iter_lines.return_value = [
-            b'data: {"id":"1","model":"gpt4.1-mini","created":1736397875,"object":"extensions.chat.completion.chunk","choices":[{"index":0,"delta":{"context":{"messages":[{"role":"tool","content":"hello","end_turn":false}]}},"end_turn":false,"finish_reason":"None"}]}'
+            b'data: {"id":"1","model":"gpt-4.1-mini","created":1736397875,"object":"extensions.chat.completion.chunk","choices":[{"index":0,"delta":{"context":{"messages":[{"role":"tool","content":"hello","end_turn":false}]}},"end_turn":false,"finish_reason":"None"}]}'
         ]
         mock_response.headers = {"apim-request-id": "test-request-id"}
         mock_post.return_value.__enter__.return_value = mock_response
