@@ -12,7 +12,7 @@ By default this template will use the environment name as the prefix to prevent 
 | `AZURE_ENV_NAME`            | string  | `azdtemp`           | Used as a prefix for all resource names to ensure uniqueness across environments.                    |
 | `AZURE_LOCATION`            | string  | `<User selects during deployment>`         | Sets the Azure region for resource deployment.  |
 | `AZURE_OPENAI_MODEL_DEPLOYMENT_TYPE`             | string  | `GlobalStandard`    | Change the Model Deployment Type (allowed values: Standard, GlobalStandard).                         |
-| `AZURE_OPENAI_DEPLOYMENT_MODEL`               | string  | `gpt-4.1-mini`            | Set the GPT model name (allowed values: `gpt-4.1-mini`, `gpt-4`, `gpt-4o`).                                                      |
+| `AZURE_OPENAI_DEPLOYMENT_MODEL`               | string  | `gpt4.1-mini`            | Set the GPT model name (allowed values: `gpt4.1-mini`, `gpt-4`, `gpt-4o`).                                                      |
 | `AZURE_OPENAI_API_VERSION`     | string  | `2025-04-14`        | Set the Azure OpenAI model version.                                       |
 | `AZURE_OPENAI_DEPLOYMENT_MODEL_CAPACITY`     | integer | `30`               | Set the model capacity for GPT deployment. Choose based on your Azure quota and usage needs.         |
 | `AZURE_OPENAI_EMBEDDING_MODEL`            | string  | `text-embedding-ada-002`  | Set the model name used for embeddings.                                                              |

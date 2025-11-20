@@ -86,7 +86,7 @@ AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get(
 )
 AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
 AZURE_OPENAI_MODEL_NAME = os.environ.get(
-    "AZURE_OPENAI_MODEL_NAME", "gpt-4.1-mini"
+    "AZURE_OPENAI_MODEL_NAME", "gpt4.1-mini"
 )
 AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT")
 AZURE_OPENAI_EMBEDDING_KEY = os.environ.get("AZURE_OPENAI_EMBEDDING_KEY")
@@ -108,7 +108,7 @@ asyncio.set_event_loop(loop)
 def is_chat_model():
     if (
         "gpt-4" in AZURE_OPENAI_MODEL_NAME.lower()
-        or AZURE_OPENAI_MODEL_NAME.lower() in ["gpt-35-turbo-4k", "gpt-4.1-mini"]
+        or AZURE_OPENAI_MODEL_NAME.lower() in ["gpt-35-turbo-4k", "gpt4.1-mini"]
     ):
         return True
     return False

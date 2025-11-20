@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "3418531138421621433"
+      "templateHash": "7824757243182327261"
     }
   },
   "parameters": {
@@ -43,7 +43,7 @@
     },
     "gptModelName": {
       "type": "string",
-      "defaultValue": "gpt-4.1-mini",
+      "defaultValue": "gpt4.1-mini",
       "metadata": {
         "description": "Optional. Name of the GPT model to deploy:"
       }
