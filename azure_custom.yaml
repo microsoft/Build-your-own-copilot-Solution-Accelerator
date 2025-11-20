@@ -23,8 +23,17 @@ hooks:
           azd env set AZURE_CONTAINER_REGISTRY_ENDPOINT "$acrName.azurecr.io"
           azd env set CONTAINER_REGISTRY_HOSTNAME "$acrName.azurecr.io"
         }
+        
+        # Build frontend
+        Write-Host "`nBuilding frontend..."
+        & ".\infra\scripts\package_frontend.ps1"
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Failed to build frontend"
+            exit 1
+        }
       shell: pwsh
-      continueOnError: true
+      continueOnError: false
     posix:
       run: |
         echo "Setting up container registry variables..."
@@ -37,8 +46,18 @@ hooks:
           azd env set AZURE_CONTAINER_REGISTRY_ENDPOINT "$ACR_NAME.azurecr.io"
           azd env set CONTAINER_REGISTRY_HOSTNAME "$ACR_NAME.azurecr.io"
         fi
+        
+        # Build frontend
+        echo ""
+        echo "Building frontend..."
+        bash ./infra/scripts/package_frontend.sh
+        
+        if [ $? -ne 0 ]; then
+            echo "❌ Failed to build frontend"
+            exit 1
+        fi
       shell: sh
-      continueOnError: true
+      continueOnError: false
 
   # Pre-deploy hook to build and push containers
   predeploy:
