@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "4472328872828310878"
+      "templateHash": "3418531138421621433"
     }
   },
   "parameters": {
@@ -103,7 +103,7 @@
     },
     "containerRegistryHostname": {
       "type": "string",
-      "defaultValue": "racontainerreg37.azurecr.io",
+      "defaultValue": "byoaiacontainerreg.azurecr.io",
       "metadata": {
         "description": "Optional. The Container Registry hostname where the docker images for the webapp are located."
       }
@@ -310,7 +310,7 @@
       "apiVersion": "2021-04-01",
       "name": "default",
       "properties": {
-        "tags": "[shallowMerge(createArray(resourceGroup().tags, parameters('tags'), createObject('TemplateName', 'Research Assistant', 'CreatedBy', parameters('createdBy'), 'SecurityControl', 'Ignore')))]"
+        "tags": "[shallowMerge(createArray(resourceGroup().tags, parameters('tags'), createObject('TemplateName', 'Research Assistant', 'CreatedBy', parameters('createdBy'))))]"
       }
     },
     "cogEndpointSecret": {
@@ -22462,10 +22462,10 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "userAssignedIdentity",
         "virtualNetwork"
       ]
@@ -38336,8 +38336,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').machineLearningServices)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').notebook)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').machineLearningServices)]",
         "azOpenAI",
         "azSearchService",
         "existingOpenAI",
