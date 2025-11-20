@@ -1,0 +1,379 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: byoc-research-assistant
+
+requiredVersions:
+  azd: ">= 1.18.0"
+
+metadata:
+  template: byoc-research-assistant@1.0
+  description: Research Assistant with local container builds
+
+hooks:
+  # Pre-package hook to set container registry variables
+  prepackage:
+    windows:
+      run: |
+        Write-Host "Setting up container registry variables..."
+        
+        # Get the ACR name from the deployed infrastructure
+        $acrName = azd env get-values --output json | ConvertFrom-Json | Select-Object -ExpandProperty "AZURE_CONTAINER_REGISTRY_NAME" -ErrorAction SilentlyContinue
+        
+        if ($acrName) {
+          Write-Host "Using deployed ACR: $acrName"
+          azd env set AZURE_CONTAINER_REGISTRY_ENDPOINT "$acrName.azurecr.io"
+          azd env set CONTAINER_REGISTRY_HOSTNAME "$acrName.azurecr.io"
+        }
+      shell: pwsh
+      continueOnError: true
+    posix:
+      run: |
+        echo "Setting up container registry variables..."
+        
+        # Get the ACR name from the deployed infrastructure
+        ACR_NAME=$(azd env get-values --output json | jq -r '.AZURE_CONTAINER_REGISTRY_NAME // empty')
+        
+        if [ ! -z "$ACR_NAME" ]; then
+          echo "Using deployed ACR: $ACR_NAME"
+          azd env set AZURE_CONTAINER_REGISTRY_ENDPOINT "$ACR_NAME.azurecr.io"
+          azd env set CONTAINER_REGISTRY_HOSTNAME "$ACR_NAME.azurecr.io"
+        fi
+      shell: sh
+      continueOnError: true
+
+  # Pre-deploy hook to build and push containers
+  predeploy:
+    windows:
+      run: |
+        Write-Host "`n========================================"
+        Write-Host "  Research Assistant Container Deployer"
+        Write-Host "  Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+        Write-Host "========================================`n"
+        
+        # Generate unique tag
+        $imageTag = "v$(Get-Date -Format 'yyyyMMddHHmmss')"
+        azd env set IMAGE_TAG $imageTag
+        
+        # Get environment variables from azd - auto-discover if not set
+        $resourceGroup = azd env get-value AZURE_RESOURCE_GROUP
+        if (-not $resourceGroup) {
+          Write-Host "🔍 Auto-discovering resource group..."
+          $resourceGroup = az group list --query "[?starts_with(name, 'rg-')].name" -o tsv | Select-Object -First 1
+          if ($resourceGroup) {
+            azd env set AZURE_RESOURCE_GROUP $resourceGroup
+            Write-Host "   Found: $resourceGroup"
+          } else {
+            Write-Host "❌ No resource group found. Run 'azd provision' first."
+            exit 1
+          }
+        }
+        
+        $acrName = azd env get-value AZURE_CONTAINER_REGISTRY_NAME
+        if (-not $acrName) {
+          Write-Host "🔍 Auto-discovering ACR in resource group..."
+          $acrName = az acr list --resource-group $resourceGroup --query "[0].name" -o tsv
+          if ($acrName) {
+            azd env set AZURE_CONTAINER_REGISTRY_NAME $acrName
+            Write-Host "   Found: $acrName"
+          } else {
+            Write-Host "❌ No ACR found in resource group. Run 'azd provision' first."
+            exit 1
+          }
+        }
+        
+        $webAppName = azd env get-value WEB_APP_NAME
+        if (-not $webAppName) {
+          Write-Host "🔍 Auto-discovering Web App in resource group..."
+          $webAppName = az webapp list --resource-group $resourceGroup --query "[0].name" -o tsv
+          if ($webAppName) {
+            azd env set WEB_APP_NAME $webAppName
+            Write-Host "   Found: $webAppName"
+          } else {
+            Write-Host "❌ No Web App found in resource group. Run 'azd provision' first."
+            exit 1
+          }
+        }
+        
+        $imageName = "byoaia-app"
+        
+        Write-Host "📋 Configuration:"
+        Write-Host "   ACR Name: $acrName"
+        Write-Host "   Resource Group: $resourceGroup"
+        Write-Host "   Web App: $webAppName"
+        Write-Host "   Image: ${imageName}:${imageTag}"
+        
+        # Login to ACR
+        Write-Host "`n🔐 Logging into ACR..."
+        az acr login --name $acrName
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Failed to login to ACR"
+            exit 1
+        }
+        
+        # Build and push the container image
+        Write-Host "`n🏗️  Building container image..."
+        $fullImageName = "$acrName.azurecr.io/${imageName}:${imageTag}"
+        Write-Host "   Command: docker build -f ./src/WebApp.Dockerfile -t $fullImageName ./src"
+        docker build --progress=plain -f "./src/WebApp.Dockerfile" -t $fullImageName "./src"
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Failed to build container image"
+            exit 1
+        }
+        
+        Write-Host "`n📤 Pushing container image to ACR..."
+        docker push $fullImageName
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Failed to push container image"
+            exit 1
+        }
+        
+        # Update environment variables
+        Write-Host "`n🔧 Updating azd environment variables..."
+        azd env set CONTAINER_REGISTRY_HOSTNAME "$acrName.azurecr.io"
+        azd env set CONTAINER_IMAGE_NAME $imageName
+        
+        # Configure web app ACR authentication using managed identity
+        Write-Host "`n🔑 Configuring ACR authentication for web app..."
+        $webappIdentity = az webapp identity show --name $webAppName --resource-group $resourceGroup --query principalId --output tsv
+        
+        if (-not $webappIdentity -or $webappIdentity -eq "null") {
+            Write-Host "🔄 Enabling managed identity for web app..."
+            $webappIdentity = az webapp identity assign --name $webAppName --resource-group $resourceGroup --query principalId --output tsv
+        }
+        
+        Write-Host "   Web app identity: $webappIdentity"
+        
+        # Assign AcrPull role to web app managed identity
+        Write-Host "`n🔐 Assigning AcrPull role to web app..."
+        $acrResourceId = az acr show --name $acrName --resource-group $resourceGroup --query id --output tsv
+        az role assignment create --assignee $webappIdentity --role AcrPull --scope $acrResourceId 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "⚠️  Role assignment may already exist (this is OK)"
+        }
+        
+        # Configure web app to use ACR with managed identity
+        Write-Host "`n🔧 Configuring web app container settings..."
+        az webapp config appsettings set --name $webAppName --resource-group $resourceGroup --settings `
+            DOCKER_REGISTRY_SERVER_URL="https://$acrName.azurecr.io" `
+            DOCKER_ENABLE_CI=true `
+            WEBSITES_ENABLE_APP_SERVICE_STORAGE=false
+        
+        # Configure web app to use managed identity for ACR authentication
+        Write-Host "`n🔐 Enabling ACR managed identity authentication..."
+        az webapp config set --name $webAppName --resource-group $resourceGroup --acr-use-identity true
+        
+        # Update web app to use the new container image
+        Write-Host "`n🚀 Updating web app container image..."
+        $dockerImage = "DOCKER|$fullImageName"
+        
+        # Use cmd to avoid PowerShell pipe interpretation issues
+        $cmd = "az webapp config set --name `"$webAppName`" --resource-group `"$resourceGroup`" --linux-fx-version `"$dockerImage`""
+        cmd /c $cmd
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Failed to update web app configuration"
+            exit 1
+        }
+        
+        # Restart the web app to ensure it picks up the new configuration
+        Write-Host "`n🔄 Restarting web app..."
+        az webapp restart --name $webAppName --resource-group $resourceGroup
+        
+        Write-Host "`n========================================"
+        Write-Host "✅ DEPLOYMENT COMPLETED SUCCESSFULLY!"
+        Write-Host "========================================"
+        Write-Host "🌐 Web app URL: https://$webAppName.azurewebsites.net"
+        Write-Host "📦 Container image: $fullImageName"
+        Write-Host "⏱️  Deployed at: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+        Write-Host ""
+        Write-Host "⏳ The web app may take 2-3 minutes to start with the new container..."
+        Write-Host "   Monitor logs with:"
+        Write-Host "   az webapp log tail --name $webAppName --resource-group $resourceGroup"
+        Write-Host "========================================`n"
+      shell: pwsh
+      continueOnError: false
+    posix:
+      run: |
+        echo ""
+        echo "========================================"
+        echo "  Research Assistant Container Deployer"
+        echo "  Time: $(date '+%Y-%m-%d %H:%M:%S')"
+        echo "========================================"
+        echo ""
+        
+        # Generate unique tag
+        IMAGE_TAG="v$(date +%Y%m%d%H%M%S)"
+        azd env set IMAGE_TAG $IMAGE_TAG
+        
+        # Get environment variables from azd - auto-discover if not set
+        RESOURCE_GROUP=$(azd env get-value AZURE_RESOURCE_GROUP)
+        if [ -z "$RESOURCE_GROUP" ]; then
+          echo "🔍 Auto-discovering resource group..."
+          RESOURCE_GROUP=$(az group list --query "[?starts_with(name, 'rg-')].name" -o tsv | head -n 1)
+          if [ ! -z "$RESOURCE_GROUP" ]; then
+            azd env set AZURE_RESOURCE_GROUP $RESOURCE_GROUP
+            echo "   Found: $RESOURCE_GROUP"
+          else
+            echo "❌ No resource group found. Run 'azd provision' first."
+            exit 1
+          fi
+        fi
+        
+        ACR_NAME=$(azd env get-value AZURE_CONTAINER_REGISTRY_NAME)
+        if [ -z "$ACR_NAME" ]; then
+          echo "🔍 Auto-discovering ACR in resource group..."
+          ACR_NAME=$(az acr list --resource-group $RESOURCE_GROUP --query "[0].name" -o tsv)
+          if [ ! -z "$ACR_NAME" ]; then
+            azd env set AZURE_CONTAINER_REGISTRY_NAME $ACR_NAME
+            echo "   Found: $ACR_NAME"
+          else
+            echo "❌ No ACR found in resource group. Run 'azd provision' first."
+            exit 1
+          fi
+        fi
+        
+        WEB_APP_NAME=$(azd env get-value WEB_APP_NAME)
+        if [ -z "$WEB_APP_NAME" ]; then
+          echo "🔍 Auto-discovering Web App in resource group..."
+          WEB_APP_NAME=$(az webapp list --resource-group $RESOURCE_GROUP --query "[0].name" -o tsv)
+          if [ ! -z "$WEB_APP_NAME" ]; then
+            azd env set WEB_APP_NAME $WEB_APP_NAME
+            echo "   Found: $WEB_APP_NAME"
+          else
+            echo "❌ No Web App found in resource group. Run 'azd provision' first."
+            exit 1
+          fi
+        fi
+        
+        IMAGE_NAME="byoaia-app"
+        
+        echo "📋 Configuration:"
+        echo "   ACR Name: $ACR_NAME"
+        echo "   Resource Group: $RESOURCE_GROUP"
+        echo "   Web App: $WEB_APP_NAME"
+        echo "   Image: $IMAGE_NAME:$IMAGE_TAG"
+        
+        # Login to ACR
+        echo ""
+        echo "🔐 Logging into ACR..."
+        az acr login --name $ACR_NAME
+        
+        # Build and push the container image
+        echo ""
+        echo "🏗️  Building container image..."
+        FULL_IMAGE_NAME="$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG"
+        echo "   Command: docker build -f ./src/WebApp.Dockerfile -t $FULL_IMAGE_NAME ./src"
+        docker build --progress=plain -f "./src/WebApp.Dockerfile" -t $FULL_IMAGE_NAME "./src"
+        
+        echo ""
+        echo "📤 Pushing container image to ACR..."
+        docker push $FULL_IMAGE_NAME
+        
+        # Update environment variables
+        echo ""
+        echo "🔧 Updating azd environment variables..."
+        azd env set CONTAINER_REGISTRY_HOSTNAME "$ACR_NAME.azurecr.io"
+        azd env set CONTAINER_IMAGE_NAME $IMAGE_NAME
+        
+        # Configure web app ACR authentication using managed identity
+        echo ""
+        echo "🔑 Configuring ACR authentication for web app..."
+        WEBAPP_IDENTITY=$(az webapp identity show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP --query principalId --output tsv)
+        
+        if [ -z "$WEBAPP_IDENTITY" ] || [ "$WEBAPP_IDENTITY" = "null" ]; then
+            echo "🔄 Enabling managed identity for web app..."
+            WEBAPP_IDENTITY=$(az webapp identity assign --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP --query principalId --output tsv)
+        fi
+        
+        echo "   Web app identity: $WEBAPP_IDENTITY"
+        
+        # Assign AcrPull role to web app managed identity
+        echo ""
+        echo "🔐 Assigning AcrPull role to web app..."
+        ACR_RESOURCE_ID=$(az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP --query id --output tsv)
+        az role assignment create --assignee $WEBAPP_IDENTITY --role AcrPull --scope $ACR_RESOURCE_ID || echo "⚠️  Role assignment may already exist (this is OK)"
+        
+        # Configure web app to use ACR with managed identity
+        echo ""
+        echo "🔧 Configuring web app container settings..."
+        az webapp config appsettings set --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP --settings \
+            DOCKER_REGISTRY_SERVER_URL="https://$ACR_NAME.azurecr.io" \
+            DOCKER_ENABLE_CI=true \
+            WEBSITES_ENABLE_APP_SERVICE_STORAGE=false
+        
+        # Configure web app to use managed identity for ACR authentication
+        echo ""
+        echo "🔐 Enabling ACR managed identity authentication..."
+        az webapp config set --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP --acr-use-identity true
+        
+        # Update web app to use the new container image
+        echo ""
+        echo "🚀 Updating web app container image..."
+        DOCKER_IMAGE="DOCKER|$FULL_IMAGE_NAME"
+        az webapp config set --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP --linux-fx-version "$DOCKER_IMAGE"
+        
+        # Restart the web app to ensure it picks up the new configuration
+        echo ""
+        echo "🔄 Restarting web app..."
+        az webapp restart --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP
+        
+        echo ""
+        echo "========================================"
+        echo "✅ DEPLOYMENT COMPLETED SUCCESSFULLY!"
+        echo "========================================"
+        echo "🌐 Web app URL: https://$WEB_APP_NAME.azurewebsites.net"
+        echo "📦 Container image: $FULL_IMAGE_NAME"
+        echo "⏱️  Deployed at: $(date '+%Y-%m-%d %H:%M:%S')"
+        echo ""
+        echo "⏳ The web app may take 2-3 minutes to start with the new container..."
+        echo "   Monitor logs with:"
+        echo "   az webapp log tail --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP"
+        echo "========================================"
+      shell: sh
+      continueOnError: false
+
+  postprovision:
+    windows:
+      run: |
+        Write-Host "✅ Infrastructure provisioned successfully!"
+        $webAppUrl = azd env get-value WEB_APP_URL
+        if ($webAppUrl) {
+          Write-Host "Web app URL: $webAppUrl"
+        }
+      shell: pwsh
+      continueOnError: true
+    posix:
+      run: |
+        echo "✅ Infrastructure provisioned successfully!"
+        WEB_APP_URL=$(azd env get-value WEB_APP_URL)
+        if [ ! -z "$WEB_APP_URL" ]; then
+          echo "Web app URL: $WEB_APP_URL"
+        fi
+      shell: sh
+      continueOnError: true
+
+  postdeploy:
+    windows:
+      run: |
+        Write-Host "✅ All deployment steps completed!"
+        Write-Host "Container deployment was handled by predeploy hook."
+      shell: pwsh
+      continueOnError: true
+    posix:
+      run: |
+        echo "✅ All deployment steps completed!"
+        echo "Container deployment was handled by predeploy hook."
+      shell: sh
+      continueOnError: true
+
+# Infrastructure configuration
+infra:
+  provider: bicep
+  path: infra
+  module: main
+  parameters:
+    containerRegistryHostname: ${CONTAINER_REGISTRY_HOSTNAME}
+    containerImageName: ${CONTAINER_IMAGE_NAME}
+    containerImageTag: ${IMAGE_TAG}
