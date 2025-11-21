@@ -8,6 +8,9 @@ resourceGroupName="$4"
 sqlServerName="$5"
 aiSearchName="$6"
 aif_resource_id="$7"
+sqlDatabaseName="$8"
+sqlManagedIdentityDisplayName="${9}"
+sqlManagedIdentityClientId="${10}"
 
 echo "Script Started"
 
@@ -147,9 +150,10 @@ if [ -n "$baseUrl" ] && [ -n "$managedIdentityClientId" ]; then
     requirementFile="requirements.txt"
     requirementFileUrl=${baseUrl}${pythonScriptPath}"requirements.txt"
 
-    # Download the create_index and create table python files
+    # Download the create_index, create table, assign_sql_roles python files
     curl --output "create_search_index.py" ${baseUrl}${pythonScriptPath}"create_search_index.py"
     curl --output "create_sql_tables.py" ${baseUrl}${pythonScriptPath}"create_sql_tables.py"
+    curl --output "assign_sql_roles.py" ${baseUrl}${pythonScriptPath}"assign_sql_roles.py"
 
     # Download the requirement file
     curl --output "$requirementFile" "$requirementFileUrl"
@@ -218,6 +222,28 @@ python $pythonScriptPath"create_sql_tables.py"
 if [ $? -ne 0 ]; then
     echo "Error: Failed to create SQL tables."
     error_flag=true
+fi
+
+# Assign SQL roles to managed identity using Python (pyodbc + azure-identity)
+if [ -n "$sqlManagedIdentityClientId" ] && [ -n "$sqlManagedIdentityDisplayName" ] && [ -n "$sqlDatabaseName" ]; then
+    mi_display_name="$sqlManagedIdentityDisplayName"
+    server_fqdn="$sqlServerName.database.windows.net"
+    roles_json="[{\"clientId\":\"$sqlManagedIdentityClientId\",\"displayName\":\"$mi_display_name\",\"role\":\"db_datareader\"},{\"clientId\":\"$sqlManagedIdentityClientId\",\"displayName\":\"$mi_display_name\",\"role\":\"db_datawriter\"}]"
+    echo "[RoleAssign] Invoking assign_sql_roles.py for roles: db_datareader, db_datawriter"
+
+    role_script_path="${pythonScriptPath}assign_sql_roles.py"
+    if [ -z "$pythonScriptPath" ]; then
+        role_script_path="./assign_sql_roles.py"
+    fi
+    python "$role_script_path" --server "$server_fqdn" --database "$sqlDatabaseName" --roles-json "$roles_json"
+    if [ $? -ne 0 ]; then
+        echo "[RoleAssign] Warning: SQL role assignment failed."
+        error_flag=true
+    else
+        echo "[RoleAssign] SQL roles assignment completed successfully."
+    fi
+else
+    echo "[RoleAssign] Skipped SQL role assignment due to missing required values (sqlManagedIdentityClientId, sqlManagedIdentityDisplayName, sqlDatabaseName)."
 fi
 
 # revert the key vault name and managed identity client id in the python files
