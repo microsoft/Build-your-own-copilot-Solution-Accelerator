@@ -90,3 +90,10 @@ Once you've opened the project in locally, you can deploy it to Azure by followi
 Now that you've completed your deployment, you can start using the solution. 
 
 To help you get started, here are some [Sample Questions](./SampleQuestions.md) you can follow to try it out.
+
+## Deploy Your local changes
+To deploy your local changes rename the below files.
+   1. Rename `azure.yaml` to `azure_custom2.yaml` and `azure_custom.yaml` to `azure.yaml`.
+   2. Go to `infra` directory
+        - Rename `main.bicep` to `main_custom2.bicep` and `main_custom.bicep` to `main.bicep`.
+Continue with the [deploying steps](#deploying-with-azd).
