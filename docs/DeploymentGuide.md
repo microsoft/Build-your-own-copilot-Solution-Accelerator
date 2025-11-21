@@ -203,7 +203,8 @@ Once you've opened the project in [Codespaces](#github-codespaces), [Dev Contain
 5. Once the deployment is complete, please follow the [Import Sample Data](#post-deployment-steps) instructions under **Post Deployment Steps** to load the sample data correctly.
 6. Open the [Azure Portal](https://portal.azure.com/), go to the deployed resource group, find the App Service and get the app URL from `Default domain`.
 7. Test the app locally with the sample question with any selected client: _Show latest asset value by asset type?_. For more sample questions you can test in the application, see [Sample Questions](SampleQuestions.md).
-8. You can now delete the resources by running `azd down`, if you are done trying out the application. 
+8. You can now delete the resources by running `azd down`, if you are done trying out the application.
+   > **Note:** If you deployed with `enableRedundancy=true` and Log Analytics workspace replication is enabled, you must first disable replication before running `azd down` else resource group delete will fail. Follow the steps in [Handling Log Analytics Workspace Deletion with Replication Enabled](./LogAnalyticsReplicationDisable.md), wait until replication returns `false`, then run `azd down`.
 
 ### Publishing Local Build Container to Azure Container Registry
 
