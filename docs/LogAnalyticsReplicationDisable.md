@@ -14,7 +14,7 @@ Replace:
 - `{resourceGroupName}` → The name of your resource group
 - `{logAnalyticsName}` → The name of your Log Analytics workspace
 
-Optional: Verify replication disabled (should output `false`):
+Optional: Verify replication is disabled (should output `false`):
 ```bash
 az resource show --ids "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{logAnalyticsName}" --query properties.replication.enabled -o tsv
 ```
