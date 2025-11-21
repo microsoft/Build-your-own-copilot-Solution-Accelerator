@@ -36,6 +36,24 @@ DEBUG_LOGGING = DEBUG.lower() == "true"
 if DEBUG_LOGGING:
     logging.basicConfig(level=logging.DEBUG)
 
+# Logging configuration from environment variables
+AZURE_BASIC_LOGGING_LEVEL = os.environ.get("AZURE_BASIC_LOGGING_LEVEL", "INFO")
+AZURE_PACKAGE_LOGGING_LEVEL = os.environ.get("AZURE_PACKAGE_LOGGING_LEVEL", "WARNING")
+AZURE_LOGGING_PACKAGES = os.environ.get("AZURE_LOGGING_PACKAGES", "").split(",")
+AZURE_LOGGING_PACKAGES = [pkg.strip() for pkg in AZURE_LOGGING_PACKAGES if pkg.strip()]
+
+# Configure logging levels from environment variables
+logging.basicConfig(
+    level=getattr(logging, AZURE_BASIC_LOGGING_LEVEL.upper(), logging.INFO)
+)
+
+# Configure Azure package logging levels only if packages are specified
+azure_level = getattr(
+    logging, AZURE_PACKAGE_LOGGING_LEVEL.upper(), logging.WARNING
+)
+for logger_name in AZURE_LOGGING_PACKAGES:
+    logging.getLogger(logger_name).setLevel(azure_level)
+
 # On Your Data Settings
 DATASOURCE_TYPE = os.environ.get("DATASOURCE_TYPE", "AzureCognitiveSearch")
 SEARCH_TOP_K = os.environ.get("SEARCH_TOP_K", 5)
