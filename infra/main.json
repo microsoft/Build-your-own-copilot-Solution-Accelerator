@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "3418531138421621433"
+      "templateHash": "10419838746251975414"
     }
   },
   "parameters": {
@@ -47243,7 +47243,9 @@
                   "UWSGI_PROCESSES": "2",
                   "UWSGI_THREADS": "2",
                   "APP_ENV": "prod",
-                  "AZURE_CLIENT_ID": "[reference('userAssignedIdentity').outputs.clientId.value]"
+                  "AZURE_CLIENT_ID": "[reference('userAssignedIdentity').outputs.clientId.value]",
+                  "AZURE_BASIC_LOGGING_LEVEL": "INFO",
+                  "AZURE_PACKAGE_LOGGING_LEVEL": "WARNING"
                 },
                 "applicationInsightResourceId": "[if(parameters('enableMonitoring'), reference('applicationInsights').outputs.resourceId.value, null())]"
               }
