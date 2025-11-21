@@ -30,6 +30,12 @@ def assets(path):
     return send_from_directory("static/assets", path)
 
 
+# Debug settings
+DEBUG = os.environ.get("DEBUG", "false")
+DEBUG_LOGGING = DEBUG.lower() == "true"
+if DEBUG_LOGGING:
+    logging.basicConfig(level=logging.DEBUG)
+    
 # Logging configuration from environment variables
 AZURE_BASIC_LOGGING_LEVEL = os.environ.get("AZURE_BASIC_LOGGING_LEVEL", "INFO")
 AZURE_PACKAGE_LOGGING_LEVEL = os.environ.get("AZURE_PACKAGE_LOGGING_LEVEL", "WARNING")
