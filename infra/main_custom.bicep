@@ -1098,6 +1098,7 @@ module webSite 'modules/web-sites.bicep' = {
           APPINSIGHTS_INSTRUMENTATIONKEY: enableMonitoring ? applicationInsights!.outputs.instrumentationKey : ''
           APPLICATIONINSIGHTS_CONNECTION_STRING: enableMonitoring ? applicationInsights!.outputs.connectionString : ''
           WEBSITES_PORT: '8000'
+          SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
           AZURE_SEARCH_SERVICE: aiSearchName
           AZURE_SEARCH_INDEX: azureSearchIndex
           AZURE_SEARCH_USE_SEMANTIC_SEARCH: azureSearchUseSemanticSearch
