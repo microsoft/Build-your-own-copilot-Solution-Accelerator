@@ -150,6 +150,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
       ...tags
       TemplateName: 'Research Assistant'
       CreatedBy: createdBy
+      SecurityControl: 'Ignore'
     }
   }
 }
@@ -1040,7 +1041,7 @@ module webSite 'modules/web-sites.bicep' = {
         userAssignedIdentity.outputs.resourceId
       ]
     }
-    tags: union(tags, { 'azd-service-name': 'webapp' })
+    tags: tags
     location: location
     kind: 'app,linux,container'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
