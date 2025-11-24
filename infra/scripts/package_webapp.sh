@@ -49,7 +49,7 @@ echo ""
 echo "Step 2: Copying backend files..."
 
 # Copy Python files and backend code
-for file in app.py requirements.txt; do
+for file in app.py requirements.txt start.sh start.cmd; do
     if [ -f "$SRC_DIR/$file" ]; then
         echo "  Copying $file"
         cp "$SRC_DIR/$file" "$DIST_DIR/"

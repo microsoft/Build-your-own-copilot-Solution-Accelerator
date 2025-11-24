@@ -63,7 +63,9 @@ Write-Host "`nStep 2: Copying backend files..."
 # Copy Python files and backend code
 $filesToCopy = @(
     "app.py",
-    "requirements.txt"
+    "requirements.txt",
+    "start.sh",
+    "start.cmd"
 )
 
 foreach ($file in $filesToCopy) {

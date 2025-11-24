@@ -1041,7 +1041,7 @@ module webSite 'modules/web-sites.bicep' = {
         userAssignedIdentity.outputs.resourceId
       ]
     }
-    tags: tags
+    tags: union(tags, { 'azd-service-name': 'webapp' })
     location: location
     kind: 'app,linux,container'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
