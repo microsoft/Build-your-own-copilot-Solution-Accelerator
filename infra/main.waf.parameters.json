@@ -14,7 +14,7 @@
     "gptModelName": {
       "value": "${AZURE_ENV_MODEL_NAME}"
     },
-    "azureOpenaiAPIVersion": {
+    "azureAIServicesAPIVersion": {
       "value": "${AZURE_ENV_MODEL_VERSION}"
     },
     "gptDeploymentCapacity": {

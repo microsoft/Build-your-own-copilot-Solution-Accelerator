@@ -13,48 +13,12 @@ class TestChatWithDataPlugin:
         self.plugin = ChatWithDataPlugin()
 
     @patch("backend.plugins.chat_with_data_plugin.config")
-    @patch("backend.plugins.chat_with_data_plugin.openai.AzureOpenAI")
-    @patch("backend.plugins.chat_with_data_plugin.get_bearer_token_provider")
-    @patch("backend.plugins.chat_with_data_plugin.get_azure_credential")
-    def test_get_openai_client_success(
-        self,
-        mock_default_credential,
-        mock_token_provider,
-        mock_azure_openai,
-        mock_config,
-    ):
-        """Test successful creation of OpenAI client with AAD authentication."""
-        # Mock config values
-        mock_config.AZURE_OPENAI_ENDPOINT = "https://test.openai.azure.com"
-        mock_config.AZURE_OPENAI_PREVIEW_API_VERSION = "2025-04-01-preview"
-
-        mock_client = MagicMock()
-        mock_azure_openai.return_value = mock_client
-        mock_credential = MagicMock()
-        mock_default_credential.return_value = mock_credential
-        mock_token = MagicMock()
-        mock_token_provider.return_value = mock_token
-
-        result = self.plugin.get_openai_client()
-
-        assert result == mock_client
-        mock_default_credential.assert_called_once()
-        mock_token_provider.assert_called_once_with(
-            mock_credential, "https://cognitiveservices.azure.com/.default"
-        )
-        mock_azure_openai.assert_called_once_with(
-            azure_endpoint="https://test.openai.azure.com",
-            azure_ad_token_provider=mock_token,
-            api_version="2025-04-01-preview",
-        )
-
-    @patch("backend.plugins.chat_with_data_plugin.config")
     @patch("backend.plugins.chat_with_data_plugin.AIProjectClient")
     @patch("backend.plugins.chat_with_data_plugin.get_azure_credential")
-    def test_get_project_openai_client_success(
+    def test_get_project_openai_client_success_updated(
         self, mock_default_credential, mock_ai_project_client, mock_config
     ):
-        """Test successful creation of project OpenAI client."""
+        """Test successful creation of project OpenAI client after removing direct OpenAI client method."""
         # Mock config values
         mock_config.AI_PROJECT_ENDPOINT = "https://test.ai.azure.com"
         mock_config.AZURE_OPENAI_PREVIEW_API_VERSION = "2025-04-01-preview"

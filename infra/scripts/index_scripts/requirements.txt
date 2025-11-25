@@ -9,6 +9,8 @@ azure-identity
 azure-ai-textanalytics
 azure-search-documents==11.7.0b1
 azure-keyvault-secrets
+azure-ai-projects==1.0.0
+azure-ai-inference==1.0.0b9
 pandas
 datetime
 

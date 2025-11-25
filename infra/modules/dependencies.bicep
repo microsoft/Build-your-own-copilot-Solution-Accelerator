@@ -129,14 +129,6 @@ var builtInRoleNames = {
     'Microsoft.Authorization/roleDefinitions',
     '3b20f47b-3825-43cb-8114-4bd2201156a8'
   )
-  'Cognitive Services OpenAI Contributor': subscriptionResourceId(
-    'Microsoft.Authorization/roleDefinitions',
-    'a001fd3d-188f-4b5d-821b-7da978bf7442'
-  )
-  'Cognitive Services OpenAI User': subscriptionResourceId(
-    'Microsoft.Authorization/roleDefinitions',
-    '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-  )
   'Cognitive Services QnA Maker Editor': subscriptionResourceId(
     'Microsoft.Authorization/roleDefinitions',
     'f4cc2bf9-21be-47a1-bdf1-5c5804381025'
