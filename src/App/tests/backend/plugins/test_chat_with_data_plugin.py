@@ -44,38 +44,6 @@ class TestChatWithDataPlugin:
             api_version="2025-04-01-preview"
         )
 
-    @patch("backend.plugins.chat_with_data_plugin.config")
-    @patch("backend.plugins.chat_with_data_plugin.AIProjectClient")
-    @patch("backend.plugins.chat_with_data_plugin.get_azure_credential")
-    def test_get_project_openai_client_success(
-        self, mock_default_credential, mock_ai_project_client, mock_config
-    ):
-        """Test successful creation of project OpenAI client."""
-        # Mock config values
-        mock_config.AI_PROJECT_ENDPOINT = "https://test.ai.azure.com"
-        mock_config.AZURE_OPENAI_PREVIEW_API_VERSION = "2025-04-01-preview"
-
-        mock_credential = MagicMock()
-        mock_default_credential.return_value = mock_credential
-
-        mock_project_instance = MagicMock()
-        mock_openai_client = MagicMock()
-        mock_project_instance.inference.get_azure_openai_client.return_value = (
-            mock_openai_client
-        )
-        mock_ai_project_client.return_value = mock_project_instance
-
-        result = self.plugin.get_project_openai_client()
-
-        assert result == mock_openai_client
-        mock_default_credential.assert_called_once()
-        mock_ai_project_client.assert_called_once_with(
-            endpoint="https://test.ai.azure.com", credential=mock_credential
-        )
-        mock_project_instance.inference.get_azure_openai_client.assert_called_once_with(
-            api_version="2025-04-01-preview"
-        )
-
     @pytest.mark.asyncio
     @patch("backend.plugins.chat_with_data_plugin.get_connection")
     @patch("backend.plugins.chat_with_data_plugin.config")
