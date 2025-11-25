@@ -121,6 +121,7 @@ param enableTelemetry bool = true
 @description('Optional. Enable redundancy for applicable resources, aligned with the Well Architected Framework recommendations. Defaults to false.')
 param enableRedundancy bool = false
 
+//The following parameters are commented out because container registry details are handled dynamically
 // @description('Optional. The Container Registry hostname where the docker images for the frontend are located.')
 // param containerRegistryHostname string = 'bycwacontainerreg.azurecr.io'
 
@@ -128,7 +129,7 @@ param enableRedundancy bool = false
 // param containerImageName string = 'byc-wa-app'
 
 @description('Optional. The Container Image Tag to deploy on the webapp.')
-param imageTag string = 'latest_waf'
+param imageTag string = 'latest_waf_2025-09-18_794'
 
 @description('Optional. Resource ID of an existing Foundry project')
 param existingFoundryProjectResourceId string = ''
