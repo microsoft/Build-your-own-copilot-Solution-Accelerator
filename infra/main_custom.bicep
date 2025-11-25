@@ -1043,10 +1043,11 @@ module webSite 'modules/web-sites.bicep' = {
     }
     tags: union(tags, { 'azd-service-name': 'webapp' })
     location: location
-    kind: 'app,linux,container'
+    kind: 'app,linux'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
     siteConfig: {
-      linuxFxVersion: 'DOCKER|${containerRegistryHostname}/${containerImageName}:${containerImageTag}'
+      linuxFxVersion: 'PYTHON|3.11'
+      appCommandLine: 'gunicorn --bind=0.0.0.0:8000 --timeout 600 app:app'
       minTlsVersion: '1.2'
     }
     configs: [

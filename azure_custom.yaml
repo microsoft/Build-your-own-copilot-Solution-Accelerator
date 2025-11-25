@@ -30,62 +30,13 @@ services:
           run: bash ../infra/scripts/package_webapp.sh
           interactive: true
           continueOnError: false
-      postdeploy:
-        windows:
-          shell: pwsh
-          run: |
-            Write-Host ""
-            Write-Host "🔄 Configuring App Service for code deployment..."
-            $rgName = (azd env get-value AZURE_RESOURCE_GROUP)
-            if ($rgName) {
-              $appName = (az webapp list --resource-group $rgName --query "[?kind=='app,linux'].name" -o tsv)
-              if ($appName) {
-                Write-Host "  Found App Service: $appName in $rgName"
-                Write-Host "  Setting Python 3.11 runtime and startup command..."
-                az webapp config set --resource-group $rgName --name $appName --linux-fx-version `"PYTHON`|3.11`" --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 app:app" --output none
-                Write-Host "  Restarting App Service..."
-                az webapp restart --resource-group $rgName --name $appName --output none
-                Write-Host "  ✅ App Service configured and restarted"
-              } else {
-                Write-Host "  ⚠️  Could not find App Service"
-              }
-            } else {
-              Write-Host "  ⚠️  Could not determine resource group"
-            }
-            Write-Host ""
-          interactive: true
-          continueOnError: true
-        posix:
-          shell: sh
-          run: |
-            echo ""
-            echo "🔄 Configuring App Service for code deployment..."
-            RG_NAME=$(azd env get-value AZURE_RESOURCE_GROUP)
-            if [ ! -z "$RG_NAME" ]; then
-              APP_NAME=$(az webapp list --resource-group "$RG_NAME" --query "[?kind=='app,linux'].name" -o tsv)
-              if [ ! -z "$APP_NAME" ]; then
-                echo "  Found App Service: $APP_NAME in $RG_NAME"
-                echo "  Setting Python 3.11 runtime and startup command..."
-                az webapp config set --resource-group "$RG_NAME" --name "$APP_NAME" --linux-fx-version "PYTHON|3.11" --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 app:app" --output none
-                echo "  Restarting App Service..."
-                az webapp restart --resource-group "$RG_NAME" --name "$APP_NAME" --output none
-                echo "  ✅ App Service configured and restarted"
-              else
-                echo "  ⚠️  Could not find App Service"
-              fi
-            else
-              echo "  ⚠️  Could not determine resource group"
-            fi
-            echo ""
-          interactive: true
-          continueOnError: true
 
 hooks:
   postprovision:
     windows:
       run: |
         Write-Host "✅ Infrastructure provisioned successfully!"
-        $webAppUrl = azd env get-value WEB_APP_URL
+        $webAppUrl = (azd env get-value WEB_APP_URL)
         if ($webAppUrl) {
           Write-Host "Web app URL: $webAppUrl"
         }
