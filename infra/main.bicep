@@ -1124,6 +1124,7 @@ module webSite 'modules/web-sites.bicep' = {
           AZURE_OPENAI_EMBEDDING_ENDPOINT : aiFoundryAiServices.outputs.endpoint
           AZURE_BASIC_LOGGING_LEVEL: 'INFO'
           AZURE_PACKAGE_LOGGING_LEVEL: 'WARNING'
+          AZURE_LOGGING_PACKAGES: ''
           SQLDB_SERVER: sqlServerFqdn
           SQLDB_DATABASE: sqlDbName
           USE_INTERNAL_STREAM: useInternalStream

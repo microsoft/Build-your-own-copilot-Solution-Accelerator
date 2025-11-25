@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "16197733130303817508"
+      "templateHash": "10200691163213391924"
     }
   },
   "parameters": {
@@ -29912,8 +29912,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').aiServices)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)]",
         "logAnalyticsWorkspace",
         "userAssignedIdentity",
         "virtualNetwork"
@@ -39522,8 +39522,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
         "keyvault",
         "userAssignedIdentity",
         "virtualNetwork"
@@ -49989,6 +49989,9 @@
                   "AZURE_SEARCH_STRICTNESS": "[variables('azureSearchStrictness')]",
                   "AZURE_OPENAI_EMBEDDING_NAME": "[parameters('embeddingModel')]",
                   "AZURE_OPENAI_EMBEDDING_ENDPOINT": "[reference('aiFoundryAiServices').outputs.endpoint.value]",
+                  "AZURE_BASIC_LOGGING_LEVEL": "INFO",
+                  "AZURE_PACKAGE_LOGGING_LEVEL": "WARNING",
+                  "AZURE_LOGGING_PACKAGES": "",
                   "SQLDB_SERVER": "[variables('sqlServerFqdn')]",
                   "SQLDB_DATABASE": "[variables('sqlDbName')]",
                   "USE_INTERNAL_STREAM": "[variables('useInternalStream')]",
