@@ -1,7 +1,6 @@
 # Core requirements
 azure-identity==1.25.0
 # Flask[async]==2.3.2
-openai==2.0.1
 azure-storage-blob==12.26.0
 python-dotenv==1.1.1
 azure-cosmos==4.9.0

@@ -116,7 +116,6 @@ If you're not using one of the above options for opening the project, then you'l
     - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     - [Git](https://git-scm.com/downloads)
     - [Microsoft ODBC Driver 18 for SQL Server](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16)
-    - [sqlcmd(ODBC-Windows)](https://learn.microsoft.com/en-us/sql/tools/sqlcmd/sqlcmd-utility?view=sql-server-ver16&tabs=odbc%2Cwindows%2Cwindows-support&pivots=cs1-bash#download-and-install-sqlcmd) / [sqlcmd(Linux/Mac)](https://learn.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-ver16&tabs=redhat-install)
 
 2. Clone the repository or download the project code via command-line:
 
@@ -235,6 +234,13 @@ This will rebuild the source code, package it into a container, and push it to t
 
 ### 🛠️ Troubleshooting
  If you encounter any issues during the deployment process, please refer [troubleshooting](../docs/TroubleShootingSteps.md) document for detailed steps and solutions
+
+## Deploy Your local changes
+To deploy your local changes rename the below files.
+   1. Rename `azure.yaml` to `azure_custom2.yaml` and `azure_custom.yaml` to `azure.yaml`.
+   2. Go to `infra` directory
+        - Rename `main.bicep` to `main_custom2.bicep` and `main_custom.bicep` to `main.bicep`.
+Continue with the [deploying steps](#deploying-with-azd).
 
 ## Post Deployment Steps
 

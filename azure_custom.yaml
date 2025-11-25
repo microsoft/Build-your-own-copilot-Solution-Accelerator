@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: build-your-own-copilot-solution-accelerator
+
+requiredVersions:
+  azd: ">= 1.18.0"
+
+metadata:
+  template: build-your-own-copilot-solution-accelerator@1.0
+  name: build-your-own-copilot-solution-accelerator@1.0
+
+# Infrastructure configuration
+infra:
+  path: ./infra
+  module: main
+  parameters:
+    solutionName: bs-azdtest
+    cosmosLocation: eastus2
+    baseUrl: 'https://github.com/microsoft/Build-your-own-copilot-Solution-Accelerator'
+
+services:
+  webapp:
+    project: ./src/App
+    language: py
+    host: appservice
+    dist: ./dist
+    hooks:
+      prepackage:
+        windows:
+          shell: pwsh
+          run: ../../infra/scripts/package_webapp.ps1
+          interactive: true
+          continueOnError: false
+        posix:
+          shell: sh
+          run: bash ../../infra/scripts/package_webapp.sh
+          interactive: true
+          continueOnError: false

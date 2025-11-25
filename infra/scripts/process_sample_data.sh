@@ -19,6 +19,7 @@ azSubscriptionId=""
 original_storage_public_access=""
 original_storage_default_action=""
 original_foundry_public_access=""
+original_keyvault_public_access=""
 aif_resource_group=""
 aif_account_resource_id=""
 # Add global variable for SQL Server public access
@@ -112,6 +113,28 @@ enable_public_access() {
 		echo "✓ AI Foundry public access already enabled"
 	fi
 
+	# Enable public access for Key Vault
+	echo "Enabling public access for Key Vault: $keyvaultName"
+	original_keyvault_public_access=$(az keyvault show \
+		--name "$keyvaultName" \
+		--resource-group "$resourceGroupName" \
+		--query "properties.publicNetworkAccess" \
+		-o tsv)
+	if [ "$original_keyvault_public_access" != "Enabled" ]; then
+		az keyvault update \
+			--name "$keyvaultName" \
+			--resource-group "$resourceGroupName" \
+			--public-network-access Enabled \
+			--output none
+		if [ $? -eq 0 ]; then
+			echo "✓ Key Vault public access enabled"
+		else
+			echo "✗ Failed to enable Key Vault public access"
+			return 1
+		fi
+	else
+		echo "✓ Key Vault public access already enabled"
+	fi
 
 	# Enable public access for SQL Server
 	echo "Enabling public access for SQL Server: $sqlServerName"
@@ -250,6 +273,29 @@ restore_network_access() {
 	else
 		echo "AI Foundry access unchanged (already at desired state)"
 	fi
+	
+	# Restore Key Vault access
+	if [ -n "$original_keyvault_public_access" ] && [ "$original_keyvault_public_access" != "Enabled" ]; then
+		echo "Restoring Key Vault public access to: $original_keyvault_public_access"
+		# Handle case sensitivity - convert to proper case
+		case "$original_keyvault_public_access" in
+			"enabled"|"Enabled") restore_value="Enabled" ;;
+			"disabled"|"Disabled") restore_value="Disabled" ;;
+			*) restore_value="$original_keyvault_public_access" ;;
+		esac
+		az keyvault update \
+			--name "$keyvaultName" \
+			--resource-group "$resourceGroupName" \
+			--public-network-access "$restore_value" \
+			--output none
+		if [ $? -eq 0 ]; then
+			echo "✓ Key Vault access restored"
+		else
+			echo "✗ Failed to restore Key Vault access"
+		fi
+	else
+		echo "Key Vault access unchanged (already at desired state)"
+	fi
 
 	# Restore SQL Server public access
 	if [ -n "$original_sql_public_access" ] && [ "$original_sql_public_access" != "Enabled" ]; then
@@ -332,41 +378,77 @@ get_values_from_azd_env() {
 }
 
 get_values_from_az_deployment() {
-	echo "Getting values from Azure deployment outputs..."
-
-	deploymentName=$(az group show --name "$resourceGroupName" --query "tags.DeploymentName" -o tsv) 
-	echo "Deployment Name (from tag): $deploymentName"
-
+    echo "Getting values from Azure deployment outputs..."
+ 
+    deploymentName=$(az group show --name "$resourceGroupName" --query "tags.DeploymentName" -o tsv)
+    echo "Deployment Name (from tag): $deploymentName"
+ 
     echo "Fetching deployment outputs..."
-
+ 
     # Get all outputs
     deploymentOutputs=$(az deployment group show \
         --name "$deploymentName" \
         --resource-group "$resourceGroupName" \
         --query "properties.outputs" -o json)
-
+ 
     # Extract each value
     cosmosDbAccountName=$(echo "$deploymentOutputs" | grep -A 3 '"cosmosdB_ACCOUNT_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$cosmosDbAccountName" ]; then
+        cosmosDbAccountName=$(echo "$deploymentOutputs" | grep -A 3 '"cosmosDbAccountName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     storageAccount=$(echo "$deploymentOutputs" | grep -A 3 '"storagE_ACCOUNT_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$storageAccount" ]; then
+        storageAccount=$(echo "$deploymentOutputs" | grep -A 3 '"storageAccountName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     fileSystem=$(echo "$deploymentOutputs" | grep -A 3 '"storagE_CONTAINER_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$fileSystem" ]; then
+        fileSystem=$(echo "$deploymentOutputs" | grep -A 3 '"storageContainerName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     keyvaultName=$(echo "$deploymentOutputs" | grep -A 3 '"keY_VAULT_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
-    sqlServerName=$(echo "$deploymentOutputs" | grep -A 3 '"sqldB_SERVER_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$keyvaultName" ]; then
+        keyvaultName=$(echo "$deploymentOutputs" | grep -A 3 '"keyVaultName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
+    sqlServerName=$(echo "$deploymentOutputs" | grep -A 3 '"sqlDb_SERVER_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$sqlServerName" ]; then
+        sqlServerName=$(echo "$deploymentOutputs" | grep -A 3 '"sqlDbServerName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     webAppManagedIdentityDisplayName=$(echo "$deploymentOutputs" | grep -A 3 '"managedidentitY_WEBAPP_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$webAppManagedIdentityDisplayName" ]; then
+        webAppManagedIdentityDisplayName=$(echo "$deploymentOutputs" | grep -A 3 '"managedIdentityWebAppName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     webAppManagedIdentityClientId=$(echo "$deploymentOutputs" | grep -A 3 '"managedidentitY_WEBAPP_CLIENTID"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
-    SqlDatabaseName=$(echo "$deploymentOutputs" | grep -A 3 '"sqldB_DATABASE"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$webAppManagedIdentityClientId" ]; then
+        webAppManagedIdentityClientId=$(echo "$deploymentOutputs" | grep -A 3 '"managedIdentityWebAppClientId"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
+    SqlDatabaseName=$(echo "$deploymentOutputs" | grep -A 3 '"sqlDb_DATABASE"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$SqlDatabaseName" ]; then
+        SqlDatabaseName=$(echo "$deploymentOutputs" | grep -A 3 '"sqlDbDatabase"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     sqlManagedIdentityClientId=$(echo "$deploymentOutputs" | grep -A 3 '"managedidentitY_SQL_CLIENTID"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$sqlManagedIdentityClientId" ]; then
+        sqlManagedIdentityClientId=$(echo "$deploymentOutputs" | grep -A 3 '"managedIdentitySqlClientId"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     sqlManagedIdentityDisplayName=$(echo "$deploymentOutputs" | grep -A 3 '"managedidentitY_SQL_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$sqlManagedIdentityDisplayName" ]; then
+        sqlManagedIdentityDisplayName=$(echo "$deploymentOutputs" | grep -A 3 '"managedIdentitySqlName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     aiSearchName=$(echo "$deploymentOutputs" | grep -A 3 '"aI_SEARCH_SERVICE_NAME"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    if [ -z "$aiSearchName" ]; then
+        aiSearchName=$(echo "$deploymentOutputs" | grep -A 3 '"aiSearchServiceName"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
     aif_resource_id=$(echo "$deploymentOutputs" | grep -A 3 '"aI_FOUNDRY_RESOURCE_ID"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
-
-	# Validate that we extracted all required values
-	if [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$sqlManagedIdentityClientId" ] || [ -z "$sqlManagedIdentityDisplayName" ] || [ -z "$aiSearchName" ] || [ -z "$aif_resource_id" ]; then
-		echo "Error: One or more required values could not be retrieved from deployment outputs."
-		return 1
-	else
-		echo "All values retrieved successfully from deployment outputs."
-		return 0
-	fi
+    if [ -z "$aif_resource_id" ]; then
+        aif_resource_id=$(echo "$deploymentOutputs" | grep -A 3 '"aiFoundryResourceId"' | grep '"value"' | sed 's/.*"value": *"\([^"]*\)".*/\1/')
+    fi
+ 
+    # Validate that we extracted all required values
+    if [ -z "$cosmosDbAccountName" ] || [ -z "$storageAccount" ] || [ -z "$fileSystem" ] || [ -z "$keyvaultName" ] || [ -z "$sqlServerName" ] || [ -z "$SqlDatabaseName" ] || [ -z "$sqlManagedIdentityClientId" ] || [ -z "$sqlManagedIdentityDisplayName" ] || [ -z "$aiSearchName" ] || [ -z "$aif_resource_id" ]; then
+        echo "Error: One or more required values could not be retrieved from deployment outputs."
+        return 1
+    else
+        echo "All values retrieved successfully from deployment outputs."
+        return 0
+    fi
 }
 
 get_values_from_user() {
@@ -535,24 +617,15 @@ echo "copy_kb_files.sh completed successfully."
 
 # Call run_create_index_scripts.sh
 echo "Running run_create_index_scripts.sh"
-bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "" "$resourceGroupName" "$sqlServerName" "$aiSearchName" "$aif_resource_id"
+# Pass SQL managed identity client id and display name so index script can perform role assignment centrally
+bash infra/scripts/run_create_index_scripts.sh "$keyvaultName" "" "" "$resourceGroupName" "$sqlServerName" "$aiSearchName" "$aif_resource_id" "$SqlDatabaseName" "$sqlManagedIdentityDisplayName" "$sqlManagedIdentityClientId"
 if [ $? -ne 0 ]; then
 	echo "Error: run_create_index_scripts.sh failed."
 	exit 1
 fi
 echo "run_create_index_scripts.sh completed successfully."
 
-# Call create_sql_user_and_role.sh
-echo "Running create_sql_user_and_role.sh"
-bash infra/scripts/add_user_scripts/create_sql_user_and_role.sh "$sqlServerName.database.windows.net" "$SqlDatabaseName" '[
-	{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datareader"},
-	{"clientId":"'"$sqlManagedIdentityClientId"'", "displayName":"'"$sqlManagedIdentityDisplayName"'", "role":"db_datawriter"}
-]'
-if [ $? -ne 0 ]; then
-	echo "Error: create_sql_user_and_role.sh failed."
-	exit 1
-fi
-echo "create_sql_user_and_role.sh completed successfully."
+## SQL role assignment now centralized in run_create_index_scripts.sh; removed local duplicate block.
 
 echo "All scripts executed successfully."
 echo "Network access will be restored to original settings..."

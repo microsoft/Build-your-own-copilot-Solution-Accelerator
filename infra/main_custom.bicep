@@ -1,4 +1,4 @@
-// ========== main.bicep ========== //
+// ========== main_custom.bicep ========== //
 targetScope = 'resourceGroup'
 
 @minLength(3)
@@ -121,11 +121,12 @@ param enableTelemetry bool = true
 @description('Optional. Enable redundancy for applicable resources, aligned with the Well Architected Framework recommendations. Defaults to false.')
 param enableRedundancy bool = false
 
-@description('Optional. The Container Registry hostname where the docker images for the frontend are located.')
-param containerRegistryHostname string = 'bycwacontainerreg.azurecr.io'
+//The following parameters are commented out because container registry details are handled dynamically
+// @description('Optional. The Container Registry hostname where the docker images for the frontend are located.')
+// param containerRegistryHostname string = 'bycwacontainerreg.azurecr.io'
 
-@description('Optional. The Container Image Name to deploy on the webapp.')
-param containerImageName string = 'byc-wa-app'
+// @description('Optional. The Container Image Name to deploy on the webapp.')
+// param containerImageName string = 'byc-wa-app'
 
 @description('Optional. The Container Image Tag to deploy on the webapp.')
 param imageTag string = 'latest_waf_2025-09-18_794'
@@ -270,7 +271,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
     tags: {
       ...resourceGroup().tags
       ...tags
-      TemplateName: 'Client Advisor'
+      TemplateName: 'Client Advisor- Developer Experience'
       Type: enablePrivateNetworking ? 'WAF' : 'Non-WAF'
       CreatedBy: createdBy
       DeploymentName: deployment().name
@@ -1080,14 +1081,15 @@ module webSite 'modules/web-sites.bicep' = {
   name: take('module.web-sites.${webSiteResourceName}', 64)
   params: {
     name: webSiteResourceName
-    tags: tags
+    tags: union(tags, { 'azd-service-name': 'webapp' })
     location: solutionLocation
     managedIdentities: { userAssignedResourceIds: [userAssignedIdentity!.outputs.resourceId, sqlUserAssignedIdentity!.outputs.resourceId] }
-    kind: 'app,linux,container'
+    kind: 'app,linux'
     serverFarmResourceId: webServerFarm.?outputs.resourceId
     siteConfig: {
-      linuxFxVersion: 'DOCKER|${containerRegistryHostname}/${containerImageName}:${imageTag}'
+      linuxFxVersion: 'PYTHON|3.11'
       minTlsVersion: '1.2'
+      appCommandLine: 'python -m uvicorn app:app --host 0.0.0.0 --port 8000'
     }
     configs: [
       {
@@ -1096,6 +1098,8 @@ module webSite 'modules/web-sites.bicep' = {
           APP_ENV: appEnvironment
           APPINSIGHTS_INSTRUMENTATIONKEY: enableMonitoring ? applicationInsights!.outputs.instrumentationKey : ''
           APPLICATIONINSIGHTS_CONNECTION_STRING: enableMonitoring ? applicationInsights!.outputs.connectionString : ''
+          WEBSITES_PORT: '8000'
+          SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
           AZURE_SEARCH_SERVICE: aiSearchName
           AZURE_SEARCH_INDEX: azureSearchIndex
           AZURE_SEARCH_USE_SEMANTIC_SEARCH: azureSearchUseSemanticSearch

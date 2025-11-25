@@ -31,7 +31,8 @@ from azure.storage.filedatalake import (
     DataLakeServiceClient,
     FileSystemClient,
 )
-from openai import AzureOpenAI
+from azure.ai.projects import AIProjectClient
+from datetime import datetime
 
 # Get Azure Key Vault Client
 key_vault_name = "kv_to-be-replaced"  #'nc6262-kv-2fpeafsylfd2e'
@@ -61,6 +62,7 @@ openai_api_base = secret_client.get_secret("AZURE-OPENAI-ENDPOINT").value
 openai_api_version = secret_client.get_secret("AZURE-OPENAI-PREVIEW-API-VERSION").value
 openai_embedding_model = secret_client.get_secret("AZURE-OPENAI-EMBEDDING-MODEL").value
 account_name = secret_client.get_secret("ADLS-ACCOUNT-NAME").value
+ai_project_endpoint = secret_client.get_secret("AZURE-AI-AGENT-ENDPOINT").value
 
 # Create a search index
 index_client = SearchIndexClient(endpoint=search_endpoint, credential=credential)
@@ -78,6 +80,9 @@ fields = [
     SearchableField(name="content", type=SearchFieldDataType.String),
     SearchableField(name="sourceurl", type=SearchFieldDataType.String),
     SearchableField(name="client_id", type=SearchFieldDataType.String, filterable=True),
+    SimpleField(name="meeting_start_time", type=SearchFieldDataType.DateTimeOffset, sortable=True, filterable=True),
+    SimpleField(name="meeting_end_time", type=SearchFieldDataType.DateTimeOffset, sortable=True, filterable=True),
+    SearchableField(name="meeting_title", type=SearchFieldDataType.String),
     SearchField(
         name="contentVector",
         type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
@@ -132,15 +137,22 @@ print(f" {result.name} created")
 
 
 # Function: Get Embeddings
-def get_embeddings(text: str, openai_api_base, openai_api_version, azure_token_provider):
+def get_embeddings(text: str, ai_project_endpoint, openai_api_version, credential):
     model_id = openai_embedding_model or "text-embedding-ada-002"
-    client = AzureOpenAI(
+    
+    # Create AI Projects client
+    project_client = AIProjectClient(
+        endpoint=ai_project_endpoint,
+        credential=credential,
         api_version=openai_api_version,
-        azure_endpoint=openai_api_base,
-        azure_ad_token_provider=azure_token_provider,
+    )
+    
+    # Get the OpenAI client from the AI Projects client
+    openai_client = project_client.get_openai_client(
+        api_version=openai_api_version
     )
 
-    embedding = client.embeddings.create(input=text, model=model_id).data[0].embedding
+    embedding = openai_client.embeddings.create(input=text, model=model_id).data[0].embedding
 
     return embedding
 
@@ -245,14 +257,33 @@ for path in paths:
 
     chunks = chunk_data(text)
     chunk_num = 0
+    
+    def convert_to_iso8601(date_str):
+        """Convert datetime string to ISO 8601 format with UTC timezone"""
+        if pd.isna(date_str):
+            return None
+        try:
+            dt = pd.to_datetime(date_str)
+            return dt.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+        except:
+            return None
+    
+    meeting_start_time = convert_to_iso8601(df_file_metadata.get("StartTime"))
+    meeting_end_time = convert_to_iso8601(df_file_metadata.get("EndTime"))
+    meeting_title = str(df_file_metadata["Title"]) if pd.notna(df_file_metadata.get("Title")) else ""
+
+    meeting_start_time_display = str(df_file_metadata["StartTime"]) if pd.notna(df_file_metadata.get("StartTime")) else None
+    
     for chunk in chunks:
         chunk_num += 1
+        date_context = f"Meeting Date: {meeting_start_time_display}. " if meeting_start_time_display else ""
         d = {
             "chunk_id": document_id + "_" + str(chunk_num).zfill(2),
             "client_id": str(df_file_metadata["ClientId"]),
             "content": "ClientId is "
             + str(df_file_metadata["ClientId"])
             + " . "
+            + date_context
             + chunk,
         }
 
@@ -260,12 +291,12 @@ for path in paths:
 
         try:
             v_contentVector = get_embeddings(
-                d["content"], openai_api_base, openai_api_version, token_provider
+                d["content"], ai_project_endpoint, openai_api_version, credential
             )
         except:
             time.sleep(30)
             v_contentVector = get_embeddings(
-                d["content"], openai_api_base, openai_api_version, token_provider
+                d["content"], ai_project_endpoint, openai_api_version, credential
             )
 
         docs.append(
@@ -277,6 +308,9 @@ for path in paths:
                 "client_id": d["client_id"],
                 "content": d["content"],
                 "sourceurl": path.name.split("/")[-1],
+                "meeting_start_time": meeting_start_time,
+                "meeting_end_time": meeting_end_time,
+                "meeting_title": meeting_title,
                 "contentVector": v_contentVector,
             }
         )
