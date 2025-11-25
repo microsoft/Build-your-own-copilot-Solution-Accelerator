@@ -30,29 +30,28 @@ def assets(path):
     return send_from_directory("static/assets", path)
 
 
-# Debug settings
-DEBUG = os.environ.get("DEBUG", "false")
-DEBUG_LOGGING = DEBUG.lower() == "true"
+# Debug and logging configuration
+DEBUG_LOGGING = os.environ.get("DEBUG", "false").lower() == "true"
+
+# Determine logging level (DEBUG override takes precedence)
 if DEBUG_LOGGING:
-    logging.basicConfig(level=logging.DEBUG)
+    basic_level = logging.DEBUG
+else:
+    level_name = os.environ.get("AZURE_BASIC_LOGGING_LEVEL", "INFO")
+    basic_level = getattr(logging, level_name.upper(), logging.INFO)
 
-# Logging configuration from environment variables
-AZURE_BASIC_LOGGING_LEVEL = os.environ.get("AZURE_BASIC_LOGGING_LEVEL", "INFO")
-AZURE_PACKAGE_LOGGING_LEVEL = os.environ.get("AZURE_PACKAGE_LOGGING_LEVEL", "WARNING")
-AZURE_LOGGING_PACKAGES = os.environ.get("AZURE_LOGGING_PACKAGES", "").split(",")
-AZURE_LOGGING_PACKAGES = [pkg.strip() for pkg in AZURE_LOGGING_PACKAGES if pkg.strip()]
+# Configure basic logging
+logging.basicConfig(level=basic_level)
 
-# Configure logging levels from environment variables
-logging.basicConfig(
-    level=getattr(logging, AZURE_BASIC_LOGGING_LEVEL.upper(), logging.INFO)
-)
-
-# Configure Azure package logging levels only if packages are specified
-azure_level = getattr(
-    logging, AZURE_PACKAGE_LOGGING_LEVEL.upper(), logging.WARNING
-)
-for logger_name in AZURE_LOGGING_PACKAGES:
-    logging.getLogger(logger_name).setLevel(azure_level)
+# Configure Azure package logging if specified
+azure_packages_env = os.environ.get("AZURE_LOGGING_PACKAGES", "").strip()
+if azure_packages_env:
+    azure_level_name = os.environ.get("AZURE_PACKAGE_LOGGING_LEVEL", "WARNING")
+    azure_level = getattr(logging, azure_level_name.upper(), logging.WARNING)
+    for pkg in azure_packages_env.split(","):
+        pkg = pkg.strip()
+        if pkg:
+            logging.getLogger(pkg).setLevel(azure_level)
 
 # On Your Data Settings
 DATASOURCE_TYPE = os.environ.get("DATASOURCE_TYPE", "AzureCognitiveSearch")
