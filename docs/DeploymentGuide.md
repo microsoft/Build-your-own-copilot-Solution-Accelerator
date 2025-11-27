@@ -113,7 +113,7 @@ You can run this solution in VS Code Web. The button will open a web-based VS Co
 
 ### Deploying with AZD
 
-Once you've opened the project in VS Code Web or local, you can deploy it to Azure by following these steps:
+Once you've opened the project in Visual Studio Code (WEB) or local, you can deploy it to Azure by following these steps:
 
 1. Login to Azure:
 
