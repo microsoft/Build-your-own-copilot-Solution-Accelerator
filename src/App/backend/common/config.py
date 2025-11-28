@@ -35,6 +35,14 @@ class Config:
             "APPLICATIONINSIGHTS_CONNECTION_STRING"
         )
 
+        # Azure Logging Configuration
+        self.AZURE_BASIC_LOGGING_LEVEL = os.environ.get(
+            "AZURE_BASIC_LOGGING_LEVEL", "INFO"
+        )
+        self.AZURE_PACKAGE_LOGGING_LEVEL = os.environ.get(
+            "AZURE_PACKAGE_LOGGING_LEVEL", "WARNING"
+        )
+
         self.DEBUG = os.environ.get("DEBUG", "false")
 
         # Current minimum Azure OpenAI version supported
