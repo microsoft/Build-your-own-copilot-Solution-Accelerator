@@ -56,18 +56,23 @@ else:
     )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-
-# Suppress INFO logs from 'azure.core.pipeline.policies.http_logging_policy'
-logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(
-    logging.WARNING
+basic_level = getattr(
+    logging, config.AZURE_BASIC_LOGGING_LEVEL.upper(), logging.INFO
 )
-logging.getLogger("azure.identity.aio._internal").setLevel(logging.WARNING)
+logging.basicConfig(level=basic_level)
 
-# Suppress info logs from OpenTelemetry exporter
-logging.getLogger("azure.monitor.opentelemetry.exporter.export._base").setLevel(
-    logging.WARNING
+# Configure Azure package logging levels
+azure_packages_env = os.environ.get("AZURE_LOGGING_PACKAGES")
+azure_packages = (
+    [pkg.strip() for pkg in azure_packages_env.split(',') if pkg.strip()]
+    if azure_packages_env else []
 )
+
+package_level = getattr(
+    logging, config.AZURE_PACKAGE_LOGGING_LEVEL.upper(), logging.WARNING
+)
+for package in azure_packages:
+    logging.getLogger(package).setLevel(package_level)
 
 
 def create_app():
