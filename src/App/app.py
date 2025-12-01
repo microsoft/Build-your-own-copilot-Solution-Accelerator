@@ -64,7 +64,7 @@ logging.basicConfig(level=basic_level)
 # Configure Azure package logging levels
 azure_packages_env = os.environ.get("AZURE_LOGGING_PACKAGES")
 azure_packages = (
-    [pkg.strip() for pkg in azure_packages_env.split(',')]
+    [pkg.strip() for pkg in azure_packages_env.split(',') if pkg.strip()]
     if azure_packages_env else []
 )
 
