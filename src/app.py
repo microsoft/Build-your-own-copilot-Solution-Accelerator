@@ -647,7 +647,7 @@ def draft_document_generate():
                 400,
             )
         else:
-            return "The request failed with status code: " + str(error.code)
+            return jsonify({"error": "The request failed with status code: " + str(error.code)}), error.code
 
 
 if __name__ == "__main__":

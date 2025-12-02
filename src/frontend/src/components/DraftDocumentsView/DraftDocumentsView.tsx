@@ -38,7 +38,7 @@ export const DraftDocumentsView = (): JSX.Element => {
   useEffect(() => {
     getUserInfo()
       .then((res) => {
-        const fetchedName: string = res[0].user_claims.find((claim: any) => claim.typ === 'name')?.val ?? ''
+        const fetchedName: string = res?.[0]?.user_claims?.find((claim: any) => claim.typ === 'name')?.val ?? ''
         setName(fetchedName)
       })
       .catch((err) => {
