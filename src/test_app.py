@@ -572,4 +572,6 @@ def test_draft_document_generate_http_error(mock_env_get, mock_urlopen, client):
         content_type="application/json",
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
+    assert response.json is not None
+    assert "error" in response.json or "The request failed with status code" in str(response.json)
