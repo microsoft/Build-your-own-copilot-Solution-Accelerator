@@ -90,7 +90,7 @@ Select one of the following options to deploy the Build Your Own Copilot Solutio
 
 💡 **Recommendation:** For fastest deployment, start with **GitHub Codespaces** - no local installation required.
 
-<details open>
+<details>
   <summary><b>Option A: GitHub Codespaces (Easiest)</b></summary>
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?repo=microsoft/Build-your-own-copilot-Solution-Accelerator)
