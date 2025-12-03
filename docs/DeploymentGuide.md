@@ -58,7 +58,7 @@ Ensure you have access to an [Azure subscription](https://azure.microsoft.com/fr
 
 **Recommended Regions:** East US, East US2, Australia East, UK South, France Central
 
-🔍 **Check Availability:** Use [Azure Products by Region](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/) to verify service availability.
+🔍 **Check Availability:** Use [Azure Products by Region](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/table) to verify service availability.
 
 ### 1.3 Quota Check (Optional)
 
