@@ -129,11 +129,9 @@ Select one of the following options to deploy the Build Your Own Copilot Solutio
 1. Click the badge above to open in VS Code Web
 2. Sign in with your Microsoft account linked to your Azure subscription
 3. Select the appropriate subscription to continue
-4. Wait for the AI Foundry terminal to automatically run:
-   ```shell
-   sh install.sh
-   ```
-5. When prompted, choose "**Overwrite with versions from template**" and provide a unique environment name
+4. Wait for the environment to initialize (includes all deployment tools)
+5. When prompted in the VS Code Web terminal, choose one of the available options shown below:
+  ![alt text](vscodeweb_intialize.png)
 6. Proceed to [Step 3: Configure Deployment Settings](#step-3-configure-deployment-settings)
 
 </details>
