@@ -79,6 +79,8 @@ package_level = getattr(
 for package in azure_packages:
     logging.getLogger(package).setLevel(package_level)
 
+logging.info(f"Logging configured - Basic: {basic_level}, Azure packages: {package_level}, Packages: {package_level}")
+
 
 def create_app():
     app = Quart(__name__)
