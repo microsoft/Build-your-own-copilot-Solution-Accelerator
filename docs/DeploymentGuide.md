@@ -417,15 +417,6 @@ Now that your deployment is complete and tested, explore these resources to enha
 - [Azure GPT Quota Settings](AzureGPTQuotaSettings.md) - Adjust model quotas
 - [Local Development Setup](LocalSetupAndDeploy.md) - Set up your local development environment
 
-🎯 **Advanced Topics:**
-
-- [Teams App Deployment](TeamsAppDeployment.md) - Deploy as Microsoft Teams application
-- [Fabric Deployment](FabricDeployment.md) - Integration with Microsoft Fabric
-- [ACR Build And Push Guide](ACRBuildAndPushGuide.md) - Container registry operations
-- [App Authentication](AppAuthentication.md) - Configure authentication settings
-- [Manual App Registration](ManualAppRegistrationConfiguration.md) - Manual auth configuration
-
----
 
 ## Need Help?
 
