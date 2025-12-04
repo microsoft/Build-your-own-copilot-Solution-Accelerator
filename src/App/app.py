@@ -59,7 +59,12 @@ else:
 basic_level = getattr(
     logging, config.AZURE_BASIC_LOGGING_LEVEL.upper(), logging.INFO
 )
-logging.basicConfig(level=basic_level)
+# Configure basic logging with format
+logging.basicConfig(
+    level=basic_level,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    force=True  # This ensures the configuration is applied
+)
 
 # Configure Azure package logging levels
 azure_packages_env = os.environ.get("AZURE_LOGGING_PACKAGES")
@@ -73,6 +78,8 @@ package_level = getattr(
 )
 for package in azure_packages:
     logging.getLogger(package).setLevel(package_level)
+
+logging.info(f"Logging configured - Basic: {basic_level}, Azure packages: {package_level}, Packages: {package_level}")
 
 
 def create_app():
