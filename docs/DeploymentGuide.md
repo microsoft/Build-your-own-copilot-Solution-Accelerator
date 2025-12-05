@@ -131,9 +131,9 @@ Select one of the following options to deploy the Build Your Own Copilot Solutio
 3. Select the appropriate subscription to continue
 4. Wait for the environment to initialize (includes all deployment tools)
 5. When prompted in the VS Code Web terminal, choose one of the available options shown below:
-  ![alt text](vscodeweb_intialize.png)
+  ![alt text](vscodeweb_initialize.png)
 6. Proceed to [Step 3: Configure Deployment Settings](#step-3-configure-deployment-settings)
-![alt text](images/vscodeweb_intialize.png)
+![alt text](images/vscodeweb_initialize.png)
 
 </details>
 
