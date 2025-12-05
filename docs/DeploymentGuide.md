@@ -288,7 +288,7 @@ After successful deployment:
 **If you deployed using `azd up` command:**
 
 ```bash 
-bash ./infra/scripts/process_sample_data.sh 
+bash ./infra/scripts/process_sample_data.sh
 ```
 
 > **Note:** The script will automatically take required values from your `azd` environment.
