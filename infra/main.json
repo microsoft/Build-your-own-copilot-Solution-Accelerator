@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "11724272711494177601"
+      "templateHash": "13588530747411109511"
     }
   },
   "parameters": {
@@ -37,7 +37,7 @@
       "type": "string",
       "defaultValue": "canadacentral",
       "metadata": {
-        "description": "Optional. Secondary CosmosDB Location for high availability and failover scenarios."
+        "description": "Optional. Secondary CosmosDB Location for high availability and failover scenarios. Not all Azure regions support zone redundancy for Cosmos DB. See https://learn.microsoft.com/azure/cosmos-db/high-availability#azure-regions-and-zone-redundancy for supported regions."
       }
     },
     "gptModelDeploymentType": {
@@ -392,7 +392,7 @@
       "apiVersion": "2021-04-01",
       "name": "default",
       "properties": {
-        "tags": "[shallowMerge(createArray(resourceGroup().tags, parameters('tags'), createObject('TemplateName', 'Client Advisorr12', 'Type', if(parameters('enablePrivateNetworking'), 'WAF', 'Non-WAF'), 'CreatedBy', parameters('createdBy'), 'DeploymentName', deployment().name)))]"
+        "tags": "[shallowMerge(createArray(resourceGroup().tags, parameters('tags'), createObject('TemplateName', 'Client Advisor', 'Type', if(parameters('enablePrivateNetworking'), 'WAF', 'Non-WAF'), 'CreatedBy', parameters('createdBy'), 'DeploymentName', deployment().name)))]"
       }
     },
     "existingAiFoundryAiServices": {
@@ -29904,8 +29904,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').aiServices)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').cognitiveServices)]",
         "logAnalyticsWorkspace",
         "userAssignedIdentity",
         "virtualNetwork"
@@ -39514,8 +39514,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "keyvault",
         "userAssignedIdentity",
         "virtualNetwork"
