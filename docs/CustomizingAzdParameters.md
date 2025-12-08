@@ -10,7 +10,8 @@ By default this template will use the environment name as the prefix to prevent 
 | Name                          | Type    | Default Value       | Purpose                                                                                              |
 | -----------------------------| ------- | ------------------- | ---------------------------------------------------------------------------------------------------- |
 | `AZURE_ENV_NAME`            | string  | `azdtemp`           | Used as a prefix for all resource names to ensure uniqueness across environments.                    |
-| `AZURE_ENV_COSMOS_LOCATION`             | string  | `eastus2`    | Location of the Cosmos DB instance. Choose from (allowed values: `swedencentral`, `australiaeast`).      |
+| `AZURE_ENV_COSMOS_LOCATION`             | string  | `Same as resource group location`    | Primary location for the Cosmos DB instance. When enabling redundancy, verify the region supports zone redundancy. [Check supported regions](https://learn.microsoft.com/en-us/azure/reliability/regions-list).      |
+| `AZURE_ENV_COSMOS_SECONDARY_LOCATION`   | string  | `canadacentral`    | Secondary failover location for Cosmos DB when enableRedundancy is true. [Check supported regions](https://learn.microsoft.com/en-us/azure/reliability/regions-list).      |
 | `AZURE_ENV_MODEL_DEPLOYMENT_TYPE`             | string  | `GlobalStandard`    | Change the Model Deployment Type (allowed values: Standard, GlobalStandard).                         |
 | `AZURE_ENV_MODEL_NAME`               | string  | `gpt-4o-mini`            | Set the GPT model name (allowed values: `gpt-4o`).                                                      |
 | `AZURE_ENV_MODEL_VERSION`     | string  | `2025-01-01-preview`        | Set the Azure OpenAI API version (allowed values: 2024-08-06).                                       |

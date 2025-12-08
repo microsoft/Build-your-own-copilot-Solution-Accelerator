@@ -10,7 +10,10 @@ param solutionName string = 'clientadvisor'
 param existingLogAnalyticsWorkspaceId string = ''
 
 @description('Optional. CosmosDB Location')
-param cosmosLocation string = 'eastus2'
+param cosmosLocation string = resourceGroup().location
+
+@description('Optional. Secondary CosmosDB Location for high availability and failover scenarios. Not all Azure regions support zone redundancy for Cosmos DB. See https://learn.microsoft.com/azure/cosmos-db/high-availability#azure-regions-and-zone-redundancy for supported regions.')
+param secondaryCosmosLocation string = 'canadacentral'
 
 @minLength(1)
 @description('Optional. GPT model deployment type:')
@@ -231,29 +234,12 @@ var replicaLocation = replicaRegionPairs[resourceGroup().location]
 @description('Optional. The tags to apply to all deployed Azure resources.')
 param tags resourceInput<'Microsoft.Resources/resourceGroups@2025-04-01'>.tags = {}
 
-// Region pairs list based on article in [Azure Database for MySQL Flexible Server - Azure Regions](https://learn.microsoft.com/azure/mysql/flexible-server/overview#azure-regions) for supported high availability regions for CosmosDB.
-var cosmosDbZoneRedundantHaRegionPairs = {
-  australiaeast: 'uksouth' //'southeastasia'
-  centralus: 'eastus2'
-  eastasia: 'southeastasia'
-  eastus: 'centralus'
-  eastus2: 'centralus'
-  japaneast: 'australiaeast'
-  northeurope: 'westeurope'
-  southeastasia: 'eastasia'
-  uksouth: 'westeurope'
-  westeurope: 'northeurope'
-}
-
 var allTags = union(
   {
     'azd-env-name': solutionName
   },
   tags
 )
-
-// Paired location calculated based on 'location' parameter. This location will be used by applicable resources if `enableScalability` is set to `true`
-var cosmosDbHaLocation = cosmosDbZoneRedundantHaRegionPairs[resourceGroup().location]
 
 // Extracts subscription, resource group, and workspace name from the resource ID when using an existing Log Analytics workspace
 var useExistingLogAnalytics = !empty(existingLogAnalyticsWorkspaceId)
@@ -557,7 +543,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
     name: keyVaultName
     location: solutionLocation
     tags: tags
-    sku: 'standard'
+    sku: enableScalability ? 'premium' : 'standard'
     publicNetworkAccess: enablePrivateNetworking ? 'Disabled' : 'Enabled'
     networkAcls: {
       defaultAction: 'Allow'
@@ -843,12 +829,12 @@ module cosmosDb 'br/public:avm/res/document-db/database-account:0.15.0' = {
           {
             failoverPriority: 0
             isZoneRedundant: true
-            locationName: solutionLocation
+            locationName: cosmosLocation
           }
           {
             failoverPriority: 1
             isZoneRedundant: true
-            locationName: cosmosDbHaLocation
+            locationName: secondaryCosmosLocation
           }
         ]
       : [
@@ -1014,22 +1000,6 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
       ]
     }
     primaryUserAssignedIdentityResourceId: userAssignedIdentity.outputs.resourceId
-    privateEndpoints: enablePrivateNetworking
-      ? [
-          {
-            privateDnsZoneGroup: {
-              privateDnsZoneGroupConfigs: [
-                {
-                  privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.sqlServer]!.outputs.resourceId
-                }
-              ]
-            }
-            service: 'sqlServer'
-            subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
-            tags: tags
-          }
-        ]
-      : []
     firewallRules: (!enablePrivateNetworking) ? [
       {
         endIpAddress: '255.255.255.255'
@@ -1043,6 +1013,34 @@ module sqlDBModule 'br/public:avm/res/sql/server:0.20.1' = {
       }
     ] : []
     tags: tags
+  }
+}
+// ========== SQL Server Private Endpoint (separated) ========== //
+module sqlDbPrivateEndpoint 'br/public:avm/res/network/private-endpoint:0.11.1' = if (enablePrivateNetworking) {
+  name: take('avm.res.network.private-endpoint.sql-${solutionSuffix}', 64)
+  params: {
+    name: 'pep-sql-${solutionSuffix}'
+    location: solutionLocation
+    tags: tags
+    enableTelemetry: enableTelemetry
+    subnetResourceId: virtualNetwork!.outputs.pepsSubnetResourceId
+    customNetworkInterfaceName: 'nic-sql-${solutionSuffix}'
+    privateLinkServiceConnections: [
+      {
+        name: 'pl-sqlserver-${solutionSuffix}'
+        properties: {
+          privateLinkServiceId: sqlDBModule.outputs.resourceId
+          groupIds: ['sqlServer']
+        }
+      }
+    ]
+    privateDnsZoneGroup: {
+      privateDnsZoneGroupConfigs: [
+        {
+          privateDnsZoneResourceId: avmPrivateDnsZones[dnsZoneIndex.sqlServer]!.outputs.resourceId
+        }
+      ]
+    }
   }
 }
 
@@ -1062,11 +1060,11 @@ module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
     // WAF aligned configuration for Monitoring
     diagnosticSettings: enableMonitoring ? [{ workspaceResourceId: logAnalyticsWorkspaceResourceId }] : null
     // WAF aligned configuration for Scalability
-    skuName: enableScalability || enableRedundancy ? 'P1v3' : 'B3'
+    skuName: 'B3'
     // skuCapacity: enableScalability ? 3 : 1
     skuCapacity: 1 // skuCapacity set to 1 (not 3) due to multiple agents created per type during WAF deployment
     // WAF aligned configuration for Redundancy
-    zoneRedundant: enableRedundancy ? true : false
+    zoneRedundant: false // zone redundancy requires a minimum of 2 instances; as we are keeping skuCapacity to 1, setting zoneRedundant to false
   }
 }
 
@@ -1218,7 +1216,7 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = {
     ]
     partitionCount: 1
     replicaCount: 1
-    sku: 'standard'
+    sku: enableScalability ? 'standard' : 'basic'
     semanticSearch: 'free'
     // Use the deployment tags provided to the template
     tags: tags
