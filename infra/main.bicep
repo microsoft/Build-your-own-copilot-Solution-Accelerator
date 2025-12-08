@@ -12,7 +12,7 @@ param existingLogAnalyticsWorkspaceId string = ''
 @description('Optional. CosmosDB Location')
 param cosmosLocation string = resourceGroup().location
 
-@description('Optional. Secondary CosmosDB Location for high availability and failover scenarios.')
+@description('Optional. Secondary CosmosDB Location for high availability and failover scenarios. Not all Azure regions support zone redundancy for Cosmos DB. See https://learn.microsoft.com/azure/cosmos-db/high-availability#azure-regions-and-zone-redundancy for supported regions.')
 param secondaryCosmosLocation string = 'canadacentral'
 
 @minLength(1)
