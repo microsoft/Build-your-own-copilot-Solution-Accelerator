@@ -1064,7 +1064,7 @@ module webServerFarm 'br/public:avm/res/web/serverfarm:0.5.0' = {
     // skuCapacity: enableScalability ? 3 : 1
     skuCapacity: 1 // skuCapacity set to 1 (not 3) due to multiple agents created per type during WAF deployment
     // WAF aligned configuration for Redundancy
-    zoneRedundant: false // zone redundancy requires minimum 2 instances, as we are keeping skuCapacity to 1, setting zoneRedundant to false 
+    zoneRedundant: false // zone redundancy requires a minimum of 2 instances; as we are keeping skuCapacity to 1, setting zoneRedundant to false
   }
 }
 
