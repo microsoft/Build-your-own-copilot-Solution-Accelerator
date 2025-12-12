@@ -9,6 +9,16 @@ on:
       - hb-psl-update-e2eworkflow
   schedule:
     - cron: "0 6 * * *" # Runs at 6:00 AM UTC daily
+  workflow_dispatch:
+    inputs:
+      DEPLOYMENT_TYPE:
+        description: 'Specify deployment type: WAF or Non-WAF'
+        required: false
+        type: choice
+        options:
+          - WAF
+          - Non-WAF
+        default: 'Non-WAF'
 
 env:
   GPT_MIN_CAPACITY: 200
@@ -24,6 +34,7 @@ jobs:
       DEPLOYMENT_SUCCESS: ${{ steps.deployment_status.outputs.SUCCESS }}
       AZURE_LOCATION: ${{ steps.set_region.outputs.AZURE_LOCATION }}
       ENV_NAME: ${{ steps.generate_env_name.outputs.ENV_NAME }}
+      DEPLOYMENT_TYPE: ${{ steps.determine_deployment_type.outputs.DEPLOYMENT_TYPE }}
 
     steps:
       - name: Checkout
@@ -155,6 +166,15 @@ jobs:
           # Remove leading zero
           DAY=$((10#$DAY))
           
+          # Check if deployment type is provided via workflow dispatch
+          if [ "${{ github.event.inputs.DEPLOYMENT_TYPE }}" != "" ]; then
+            DEPLOYMENT_TYPE="${{ github.event.inputs.DEPLOYMENT_TYPE }}"
+            echo "DEPLOYMENT_TYPE=$DEPLOYMENT_TYPE" >> $GITHUB_OUTPUT
+            echo "DEPLOYMENT_TYPE=$DEPLOYMENT_TYPE" >> $GITHUB_ENV
+            echo "Deployment type provided via workflow dispatch: $DEPLOYMENT_TYPE"
+            exit 0
+          fi
+
           # Alternate based on odd/even day
           if [ $((DAY % 2)) -eq 0 ]; then
             echo "DEPLOYMENT_TYPE=WAF" >> $GITHUB_OUTPUT
@@ -337,6 +357,7 @@ jobs:
       RESOURCE_GROUP_NAME: ${{ needs.deploy.outputs.RESOURCE_GROUP_NAME }}
       AZURE_LOCATION: ${{ needs.deploy.outputs.AZURE_LOCATION }}
       ENV_NAME: ${{ needs.deploy.outputs.ENV_NAME }}
+      DEPLOYMENT_TYPE: ${{ needs.deploy.outputs.DEPLOYMENT_TYPE }}
     steps:
       - name: Setup Azure CLI
         run: |
@@ -387,7 +408,7 @@ jobs:
           # Construct the email body
           EMAIL_BODY=$(cat <<EOF
           {
-            "body": "<p>Dear Team,</p><p>We would like to inform you that the Build-your-own-copilot-Solution-Accelerator(Client Advisior) Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
+            "body": "<p>Dear Team,</p><p>We would like to inform you that the Build-your-own-copilot-Solution-Accelerator(Client Advisior) - ${{ env.DEPLOYMENT_TYPE }} Automation process has encountered an issue and has failed to complete successfully.</p><p><strong>Build URL:</strong> ${RUN_URL}<br> ${OUTPUT}</p><p>Please investigate the matter at your earliest convenience.</p><p>Best regards,<br>Your Automation Team</p>"
           }
           EOF
           )
