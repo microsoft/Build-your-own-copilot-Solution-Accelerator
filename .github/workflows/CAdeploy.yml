@@ -597,7 +597,7 @@ jobs:
             azd env new ${{ env.ENV_NAME }} --no-prompt
             azd env set AZURE_RESOURCE_GROUP "${{ env.RESOURCE_GROUP_NAME }}"
             azd env set AZURE_SUBSCRIPTION_ID "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-            azd env set AZURE_ENV_AI_DEPLOYMENTS_LOCATION="${{ env.AZURE_LOCATION }}"
+            azd env set AZURE_ENV_AI_SERVICE_LOCATION="${{ env.AZURE_LOCATION }}"
           fi          
 
       - name: Delete deployment using azd
