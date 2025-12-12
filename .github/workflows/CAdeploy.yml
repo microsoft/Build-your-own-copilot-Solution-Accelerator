@@ -563,6 +563,9 @@ jobs:
       ENV_NAME: ${{ needs.deploy.outputs.ENV_NAME }}
       DEPLOYMENT_TYPE: ${{ needs.deploy.outputs.DEPLOYMENT_TYPE }}
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
       - name: Setup Azure CLI
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
