@@ -6,7 +6,6 @@ on:
       - main
       - dev
       - demo
-      - hb-psl-update-e2eworkflow
   schedule:
     - cron: "0 6 * * *" # Runs at 6:00 AM UTC daily
   workflow_dispatch:
@@ -177,9 +176,9 @@ jobs:
 
           # Alternate based on odd/even day
           if [ $((DAY % 2)) -eq 0 ]; then
-            echo "DEPLOYMENT_TYPE=Non-WAF" >> $GITHUB_OUTPUT
-            echo "DEPLOYMENT_TYPE=Non-WAF" >> $GITHUB_ENV
-            echo "Even day detected ($DAY). Setting deployment type to Non-WAF."
+            echo "DEPLOYMENT_TYPE=WAF" >> $GITHUB_OUTPUT
+            echo "DEPLOYMENT_TYPE=WAF" >> $GITHUB_ENV
+            echo "Even day detected ($DAY). Setting deployment type to WAF."
           else
             echo "DEPLOYMENT_TYPE=Non-WAF" >> $GITHUB_OUTPUT
             echo "DEPLOYMENT_TYPE=Non-WAF" >> $GITHUB_ENV
