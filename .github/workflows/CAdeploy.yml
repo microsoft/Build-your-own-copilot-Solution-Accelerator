@@ -186,8 +186,8 @@ jobs:
             echo "Odd day detected ($DAY). Setting deployment type to Non-WAF."
           fi
 
-      - name: Rename Parameters File Based on Deployment Type
-        id: rename_parameters_file
+      - name: Copy Parameters File Based on Deployment Type
+        id: copy_parameters_file
         run: |
           set -e
           if [ "${{ env.DEPLOYMENT_TYPE }}" == "WAF" ]; then
@@ -284,7 +284,133 @@ jobs:
 
           sleep 30
 
-      - name: Deploy Infra and Import Sample Data
+      - name: Enable Public Network Access (WAF Only)
+        if: env.DEPLOYMENT_TYPE == 'WAF'
+        run: |
+          set -e
+          echo "=== Temporarily enabling public network access for WAF deployment ==="
+          
+          # Enable public access for Storage Account
+          echo "Enabling public access for Storage Account: ${{ env.STORAGE_ACCOUNT }}"
+          ORIGINAL_STORAGE_PUBLIC_ACCESS=$(az storage account show \
+            --name "${{ env.STORAGE_ACCOUNT }}" \
+            --resource-group "${{ env.RG_NAME }}" \
+            --query "publicNetworkAccess" \
+            -o tsv)
+          echo "ORIGINAL_STORAGE_PUBLIC_ACCESS=$ORIGINAL_STORAGE_PUBLIC_ACCESS" >> $GITHUB_ENV
+          
+          ORIGINAL_STORAGE_DEFAULT_ACTION=$(az storage account show \
+            --name "${{ env.STORAGE_ACCOUNT }}" \
+            --resource-group "${{ env.RG_NAME }}" \
+            --query "networkRuleSet.defaultAction" \
+            -o tsv)
+          echo "ORIGINAL_STORAGE_DEFAULT_ACTION=$ORIGINAL_STORAGE_DEFAULT_ACTION" >> $GITHUB_ENV
+          
+          if [ "$ORIGINAL_STORAGE_PUBLIC_ACCESS" != "Enabled" ]; then
+            az storage account update \
+              --name "${{ env.STORAGE_ACCOUNT }}" \
+              --resource-group "${{ env.RG_NAME }}" \
+              --public-network-access Enabled \
+              --output none
+            echo "✓ Storage Account public access enabled"
+          fi
+          
+          if [ "$ORIGINAL_STORAGE_DEFAULT_ACTION" != "Allow" ]; then
+            az storage account update \
+              --name "${{ env.STORAGE_ACCOUNT }}" \
+              --resource-group "${{ env.RG_NAME }}" \
+              --default-action Allow \
+              --output none
+            echo "✓ Storage Account network default action set to Allow"
+          fi
+
+          # Enable public access for AI Foundry
+          AIF_ACCOUNT_RESOURCE_ID=$(echo "${{ env.AI_FOUNDRY_RESOURCE_ID }}" | sed 's|/projects/.*||')
+          AIF_RESOURCE_NAME=$(basename "$AIF_ACCOUNT_RESOURCE_ID")
+          AIF_RESOURCE_GROUP=$(echo "$AIF_ACCOUNT_RESOURCE_ID" | sed -n 's|.*/resourceGroups/\([^/]*\)/.*|\1|p')
+          AIF_SUBSCRIPTION_ID=$(echo "$AIF_ACCOUNT_RESOURCE_ID" | sed -n 's|.*/subscriptions/\([^/]*\)/.*|\1|p')
+          
+          echo "AIF_ACCOUNT_RESOURCE_ID=$AIF_ACCOUNT_RESOURCE_ID" >> $GITHUB_ENV
+          
+          ORIGINAL_FOUNDRY_PUBLIC_ACCESS=$(az cognitiveservices account show \
+            --name "$AIF_RESOURCE_NAME" \
+            --resource-group "$AIF_RESOURCE_GROUP" \
+            --subscription "$AIF_SUBSCRIPTION_ID" \
+            --query "properties.publicNetworkAccess" \
+            --output tsv || echo "")
+          echo "ORIGINAL_FOUNDRY_PUBLIC_ACCESS=$ORIGINAL_FOUNDRY_PUBLIC_ACCESS" >> $GITHUB_ENV
+          
+          if [ -n "$ORIGINAL_FOUNDRY_PUBLIC_ACCESS" ] && [ "$ORIGINAL_FOUNDRY_PUBLIC_ACCESS" != "Enabled" ]; then
+            az resource update \
+              --ids "$AIF_ACCOUNT_RESOURCE_ID" \
+              --api-version 2024-10-01 \
+              --set properties.publicNetworkAccess=Enabled properties.apiProperties="{}" \
+              --output none || echo "⚠ Warning: Failed to enable AI Foundry public access"
+            echo "✓ AI Foundry public access enabled"
+          fi
+
+          # Enable public access for Key Vault
+          echo "Enabling public access for Key Vault: ${{ env.KEYVAULT_NAME }}"
+          ORIGINAL_KEYVAULT_PUBLIC_ACCESS=$(az keyvault show \
+            --name "${{ env.KEYVAULT_NAME }}" \
+            --resource-group "${{ env.RG_NAME }}" \
+            --query "properties.publicNetworkAccess" \
+            -o tsv)
+          echo "ORIGINAL_KEYVAULT_PUBLIC_ACCESS=$ORIGINAL_KEYVAULT_PUBLIC_ACCESS" >> $GITHUB_ENV
+          
+          if [ "$ORIGINAL_KEYVAULT_PUBLIC_ACCESS" != "Enabled" ]; then
+            az keyvault update \
+              --name "${{ env.KEYVAULT_NAME }}" \
+              --resource-group "${{ env.RG_NAME }}" \
+              --public-network-access Enabled \
+              --output none
+            echo "✓ Key Vault public access enabled"
+          fi
+
+          # Enable public access for SQL Server
+          echo "Enabling public access for SQL Server: ${{ env.SQL_SERVER_NAME }}"
+          ORIGINAL_SQL_PUBLIC_ACCESS=$(az sql server show \
+            --name "${{ env.SQL_SERVER_NAME }}" \
+            --resource-group "${{ env.RG_NAME }}" \
+            --query "publicNetworkAccess" \
+            -o tsv)
+          echo "ORIGINAL_SQL_PUBLIC_ACCESS=$ORIGINAL_SQL_PUBLIC_ACCESS" >> $GITHUB_ENV
+          
+          if [ "$ORIGINAL_SQL_PUBLIC_ACCESS" != "Enabled" ]; then
+            az sql server update \
+              --name "${{ env.SQL_SERVER_NAME }}" \
+              --resource-group "${{ env.RG_NAME }}" \
+              --enable-public-network true \
+              --output none
+            echo "✓ SQL Server public access enabled"
+          fi
+
+          # Add temporary firewall rule allowing all IPs
+          EXISTING_ALLOW_ALL_RULE=$(az sql server firewall-rule list \
+            --server "${{ env.SQL_SERVER_NAME }}" \
+            --resource-group "${{ env.RG_NAME }}" \
+            --query "[?name=='temp-allow-all-ip'] | [0].name" \
+            -o tsv 2>/dev/null || echo "")
+          
+          if [ -z "$EXISTING_ALLOW_ALL_RULE" ]; then
+            az sql server firewall-rule create \
+              --resource-group "${{ env.RG_NAME }}" \
+              --server "${{ env.SQL_SERVER_NAME }}" \
+              --name "temp-allow-all-ip" \
+              --start-ip-address 0.0.0.0 \
+              --end-ip-address 255.255.255.255 \
+              --output none || echo "⚠ Warning: Failed to create allow-all firewall rule"
+            echo "CREATED_SQL_FIREWALL_RULE=true" >> $GITHUB_ENV
+            echo "✓ Temporary allow-all firewall rule created"
+          else
+            echo "CREATED_SQL_FIREWALL_RULE=false" >> $GITHUB_ENV
+          fi
+          
+          echo "Waiting for network access changes to propagate..."
+          sleep 10
+          echo "=== Public network access enabled successfully ==="
+
+      - name: Import Sample Data (Post-Deployment Scripts)
         run: |
           set -e
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
@@ -324,6 +450,84 @@ jobs:
             "${{ secrets.AZURE_CLIENT_ID }}"
 
           echo "=== Post-Deployment Script Completed Successfully ==="
+
+      - name: Restore Network Access (WAF Only)
+        if: always() && env.DEPLOYMENT_TYPE == 'WAF'
+        run: |
+          set -e
+          echo "=== Restoring original network access settings ==="
+          
+          # Restore Storage Account access
+          if [ -n "${{ env.ORIGINAL_STORAGE_PUBLIC_ACCESS }}" ] && [ "${{ env.ORIGINAL_STORAGE_PUBLIC_ACCESS }}" != "Enabled" ]; then
+            echo "Restoring Storage Account public access to: ${{ env.ORIGINAL_STORAGE_PUBLIC_ACCESS }}"
+            RESTORE_VALUE="${{ env.ORIGINAL_STORAGE_PUBLIC_ACCESS }}"
+            az storage account update \
+              --name "${{ env.STORAGE_ACCOUNT }}" \
+              --resource-group "${{ env.RG_NAME }}" \
+              --public-network-access "$RESTORE_VALUE" \
+              --output none || echo "✗ Failed to restore Storage Account access"
+            echo "✓ Storage Account access restored"
+          fi
+          
+          # Restore Storage Account network default action
+          if [ -n "${{ env.ORIGINAL_STORAGE_DEFAULT_ACTION }}" ] && [ "${{ env.ORIGINAL_STORAGE_DEFAULT_ACTION }}" != "Allow" ]; then
+            echo "Restoring Storage Account network default action to: ${{ env.ORIGINAL_STORAGE_DEFAULT_ACTION }}"
+            az storage account update \
+              --name "${{ env.STORAGE_ACCOUNT }}" \
+              --resource-group "${{ env.RG_NAME }}" \
+              --default-action "${{ env.ORIGINAL_STORAGE_DEFAULT_ACTION }}" \
+              --output none || echo "✗ Failed to restore Storage Account network default action"
+            echo "✓ Storage Account network default action restored"
+          fi
+          
+          # Restore AI Foundry access
+          if [ -n "${{ env.ORIGINAL_FOUNDRY_PUBLIC_ACCESS }}" ] && [ "${{ env.ORIGINAL_FOUNDRY_PUBLIC_ACCESS }}" != "Enabled" ]; then
+            echo "Restoring AI Foundry public access to: ${{ env.ORIGINAL_FOUNDRY_PUBLIC_ACCESS }}"
+            az resource update \
+              --ids "${{ env.AIF_ACCOUNT_RESOURCE_ID }}" \
+              --api-version 2024-10-01 \
+              --set properties.publicNetworkAccess="${{ env.ORIGINAL_FOUNDRY_PUBLIC_ACCESS }}" \
+              --set properties.apiProperties.qnaAzureSearchEndpointKey="" \
+              --set properties.networkAcls.bypass="AzureServices" \
+              --output none 2>/dev/null || echo "⚠ Warning: Failed to restore AI Foundry access automatically"
+            echo "✓ AI Foundry access restored"
+          fi
+          
+          # Restore Key Vault access
+          if [ -n "${{ env.ORIGINAL_KEYVAULT_PUBLIC_ACCESS }}" ] && [ "${{ env.ORIGINAL_KEYVAULT_PUBLIC_ACCESS }}" != "Enabled" ]; then
+            echo "Restoring Key Vault public access to: ${{ env.ORIGINAL_KEYVAULT_PUBLIC_ACCESS }}"
+            RESTORE_VALUE="${{ env.ORIGINAL_KEYVAULT_PUBLIC_ACCESS }}"
+            az keyvault update \
+              --name "${{ env.KEYVAULT_NAME }}" \
+              --resource-group "${{ env.RG_NAME }}" \
+              --public-network-access "$RESTORE_VALUE" \
+              --output none || echo "✗ Failed to restore Key Vault access"
+            echo "✓ Key Vault access restored"
+          fi
+
+          # Restore SQL Server public access
+          if [ -n "${{ env.ORIGINAL_SQL_PUBLIC_ACCESS }}" ] && [ "${{ env.ORIGINAL_SQL_PUBLIC_ACCESS }}" != "Enabled" ]; then
+            echo "Restoring SQL Server public access to: ${{ env.ORIGINAL_SQL_PUBLIC_ACCESS }}"
+            az sql server update \
+              --name "${{ env.SQL_SERVER_NAME }}" \
+              --resource-group "${{ env.RG_NAME }}" \
+              --enable-public-network false \
+              --output none || echo "✗ Failed to restore SQL Server access"
+            echo "✓ SQL Server access restored"
+          fi
+
+          # Remove temporary firewall rule if we created it
+          if [ "${{ env.CREATED_SQL_FIREWALL_RULE }}" == "true" ]; then
+            echo "Removing temporary allow-all firewall rule..."
+            az sql server firewall-rule delete \
+              --resource-group "${{ env.RG_NAME }}" \
+              --server "${{ env.SQL_SERVER_NAME }}" \
+              --name "temp-allow-all-ip" \
+              --output none || echo "⚠ Warning: Failed to remove temporary firewall rule"
+            echo "✓ Temporary firewall rule removed"
+          fi
+          
+          echo "=== Network access restoration completed ==="
 
       - name: Set Deployment Status
         id: deployment_status
