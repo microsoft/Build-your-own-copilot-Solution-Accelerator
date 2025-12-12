@@ -177,9 +177,9 @@ jobs:
 
           # Alternate based on odd/even day
           if [ $((DAY % 2)) -eq 0 ]; then
-            echo "DEPLOYMENT_TYPE=WAF" >> $GITHUB_OUTPUT
-            echo "DEPLOYMENT_TYPE=WAF" >> $GITHUB_ENV
-            echo "Even day detected ($DAY). Setting deployment type to WAF."
+            echo "DEPLOYMENT_TYPE=Non-WAF" >> $GITHUB_OUTPUT
+            echo "DEPLOYMENT_TYPE=Non-WAF" >> $GITHUB_ENV
+            echo "Even day detected ($DAY). Setting deployment type to Non-WAF."
           else
             echo "DEPLOYMENT_TYPE=Non-WAF" >> $GITHUB_OUTPUT
             echo "DEPLOYMENT_TYPE=Non-WAF" >> $GITHUB_ENV
@@ -407,7 +407,7 @@ jobs:
           fi
           
           echo "Waiting for network access changes to propagate..."
-          sleep 10
+          sleep 30
           echo "=== Public network access enabled successfully ==="
 
       - name: Import Sample Data (Post-Deployment Scripts)
@@ -565,7 +565,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        
+
       - name: Setup Azure CLI
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
