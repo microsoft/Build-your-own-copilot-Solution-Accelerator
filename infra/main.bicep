@@ -89,7 +89,6 @@ param azureAiServiceLocation string
   'northeurope'
   'southeastasia'
   'uksouth'
-  'swedencentral'
 ])
 @metadata({ azd: { type: 'location' } })
 @description('Required. Azure region for all services. Regions are restricted to guarantee compatibility with paired regions and replica locations for data redundancy and failover scenarios based on articles [Azure regions list](https://learn.microsoft.com/azure/reliability/regions-list) and [Azure Database for MySQL Flexible Server - Azure Regions](https://learn.microsoft.com/azure/mysql/flexible-server/overview#azure-regions).')
