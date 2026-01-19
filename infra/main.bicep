@@ -229,6 +229,7 @@ var replicaRegionPairs = {
   southeastasia: 'eastasia'
   uksouth: 'westeurope'
   westeurope: 'northeurope'
+  swedencentral: 'swedensouth'
 }
 var replicaLocation = replicaRegionPairs[resourceGroup().location]
 
