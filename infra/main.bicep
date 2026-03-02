@@ -149,6 +149,7 @@ resource resourceGroupTags 'Microsoft.Resources/tags@2021-04-01' = {
       ...tags
       TemplateName: 'Research Assistant'
       CreatedBy: createdBy
+      Type: enablePrivateNetworking ? 'WAF' : 'Non-WAF'
     }
   }
 }
