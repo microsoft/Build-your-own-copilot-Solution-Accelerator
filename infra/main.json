@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.37.4.10188",
-      "templateHash": "10419838746251975414"
+      "version": "0.41.2.15936",
+      "templateHash": "1028545418078468142"
     }
   },
   "parameters": {
@@ -310,7 +310,7 @@
       "apiVersion": "2021-04-01",
       "name": "default",
       "properties": {
-        "tags": "[shallowMerge(createArray(resourceGroup().tags, parameters('tags'), createObject('TemplateName', 'Research Assistant', 'CreatedBy', parameters('createdBy'))))]"
+        "tags": "[shallowMerge(createArray(resourceGroup().tags, parameters('tags'), createObject('TemplateName', 'Research Assistant', 'CreatedBy', parameters('createdBy'), 'Type', if(parameters('enablePrivateNetworking'), 'WAF', 'Non-WAF'))))]"
       }
     },
     "cogEndpointSecret": {
@@ -357,7 +357,7 @@
     },
     "userAssignedIdentity": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.managed-identity.user-assigned-identity.{0}', variables('userAssignedIdentityResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -836,7 +836,7 @@
     },
     "roleAssignment": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take('avm.res.authorization.role-assignment.deployRoleAssignment', 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -1025,7 +1025,7 @@
     "virtualNetwork": {
       "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('module.virtualNetwork.{0}', variables('solutionSuffix')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -1062,8 +1062,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.37.4.10188",
-              "templateHash": "150702682969982307"
+              "version": "0.41.2.15936",
+              "templateHash": "9261939637226789375"
             }
           },
           "definitions": {
@@ -1470,7 +1470,7 @@
               },
               "condition": "[not(empty(tryGet(parameters('subnets')[copyIndex()], 'networkSecurityGroup')))]",
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2025-04-01",
               "name": "[take(format('avm.res.network.network-security-group.{0}.{1}', tryGet(parameters('subnets')[copyIndex()], 'networkSecurityGroup', 'name'), parameters('resourceSuffix')), 64)]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -2122,7 +2122,7 @@
             },
             "virtualNetwork": {
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2025-04-01",
               "name": "[take(format('avm.res.network.virtual-network.{0}', parameters('name')), 64)]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -3853,7 +3853,7 @@
     "bastionHost": {
       "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.network.bastion-host.{0}', variables('bastionHostName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -5172,7 +5172,7 @@
     "jumpboxVM": {
       "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.compute.virtual-machine.{0}', variables('jumpboxVmName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -13518,7 +13518,7 @@
       },
       "condition": "[parameters('enablePrivateNetworking')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[format('dns-zone-{0}', copyIndex())]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -16685,7 +16685,7 @@
     },
     "storageAccountModule": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.storage.storage-account.{0}', variables('storageAccountName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -22463,8 +22463,8 @@
       },
       "dependsOn": [
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageFile)]",
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageQueue)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageBlob)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').storageDfs)]",
         "userAssignedIdentity",
         "virtualNetwork"
@@ -22472,7 +22472,7 @@
     },
     "azSearchService": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.search.search-service.{0}', variables('aiSearchName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -24834,7 +24834,7 @@
     },
     "uploadFiles": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take('avm.res.resources.deployment-script.uploadFiles', 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -25420,7 +25420,7 @@
     },
     "keyvault": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.key-vault.vault.{0}', variables('keyVaultName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -25499,7 +25499,7 @@
               },
               {
                 "name": "AZURE-SEARCH-KEY",
-                "value": "[listOutputsWithSecureValues('azSearchService', '2022-09-01').primaryKey]"
+                "value": "[listOutputsWithSecureValues('azSearchService', '2025-04-01').primaryKey]"
               },
               {
                 "name": "AZURE-SEARCH-ENDPOINT",
@@ -28666,7 +28666,7 @@
     },
     "azOpenAI": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.cognitiveservices.account.{0}', variables('openAiResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -30993,7 +30993,7 @@
     },
     "azAIMultiServiceAccount": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.cognitiveservices.account.{0}', variables('cognitiveServicesResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -33288,7 +33288,7 @@
     },
     "createIndex": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take('avm.res.resources.deployment-script.createIndex', 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -33876,7 +33876,7 @@
     },
     "aihubworkspace": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.devcenter.hub.{0}', variables('aihubworkspaceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -33929,7 +33929,7 @@
                 "connectionProperties": {
                   "authType": "ApiKey",
                   "credentials": {
-                    "key": "[listOutputsWithSecureValues('azSearchService', '2022-09-01').primaryKey]"
+                    "key": "[listOutputsWithSecureValues('azSearchService', '2025-04-01').primaryKey]"
                   },
                   "metadata": {
                     "ApiType": "Azure",
@@ -38336,8 +38336,8 @@
         }
       },
       "dependsOn": [
-        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').notebook)]",
         "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').machineLearningServices)]",
+        "[format('avmPrivateDnsZones[{0}]', variables('dnsZoneIndex').notebook)]",
         "azOpenAI",
         "azSearchService",
         "existingOpenAI",
@@ -38349,7 +38349,7 @@
     },
     "aiProjectWorkspace": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.devcenter.hub.{0}', variables('aiProjectworkspaceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -42762,7 +42762,7 @@
     },
     "webServerFarm": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.web.serverfarm.{0}', variables('webServerFarmResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -43328,7 +43328,7 @@
     "logAnalyticsWorkspace": {
       "condition": "[and(parameters('enableMonitoring'), not(variables('useExistingLogAnalytics')))]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.operational-insights.workspace.{0}', variables('logAnalyticsWorkspaceResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -46434,7 +46434,7 @@
     "applicationInsights": {
       "condition": "[parameters('enableMonitoring')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('avm.res.insights.component.{0}', variables('ApplicationInsightsName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -47157,7 +47157,7 @@
     },
     "webSite": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take(format('module.web-sites.{0}', variables('webSiteResourceName')), 64)]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -47207,7 +47207,7 @@
                   "WEB_APP_ENABLE_CHAT_HISTORY": "False",
                   "AZURE_SEARCH_ENABLE_IN_DOMAIN": "False",
                   "AZURE_SEARCH_INDEX_DRAFTS": "draftsindex",
-                  "AZURE_SEARCH_KEY": "[listOutputsWithSecureValues('azSearchService', '2022-09-01').primaryKey]",
+                  "AZURE_SEARCH_KEY": "[listOutputsWithSecureValues('azSearchService', '2025-04-01').primaryKey]",
                   "AZURE_SEARCH_USE_SEMANTIC_SEARCH": "True",
                   "AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG": "my-semantic-config",
                   "AZURE_SEARCH_INDEX_IS_PRECHUNKED": "False",
@@ -47267,8 +47267,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.37.4.10188",
-              "templateHash": "4298119334635398540"
+              "version": "0.41.2.15936",
+              "templateHash": "14525082674956141939"
             }
           },
           "definitions": {
@@ -48205,7 +48205,7 @@
               },
               "type": "Microsoft.Insights/diagnosticSettings",
               "apiVersion": "2021-05-01-preview",
-              "scope": "[format('Microsoft.Web/sites/{0}', parameters('name'))]",
+              "scope": "[resourceId('Microsoft.Web/sites', parameters('name'))]",
               "name": "[coalesce(tryGet(coalesce(parameters('diagnosticSettings'), createArray())[copyIndex()], 'name'), format('{0}-diagnosticSettings', parameters('name')))]",
               "properties": {
                 "copy": [
@@ -48245,7 +48245,7 @@
                 "count": "[length(coalesce(parameters('configs'), createArray()))]"
               },
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2025-04-01",
               "name": "[format('{0}-Site-Config-{1}', uniqueString(deployment().name, parameters('location')), copyIndex())]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -48280,8 +48280,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.37.4.10188",
-                      "templateHash": "4653685834544796273"
+                      "version": "0.41.2.15936",
+                      "templateHash": "1185169597469996118"
                     },
                     "name": "Site App Settings",
                     "description": "This module deploys a Site App Setting."
@@ -48426,7 +48426,7 @@
                 "count": "[length(coalesce(parameters('privateEndpoints'), createArray()))]"
               },
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2025-04-01",
               "name": "[format('{0}-app-PrivateEndpoint-{1}', uniqueString(deployment().name, parameters('location')), copyIndex())]",
               "subscriptionId": "[split(coalesce(tryGet(coalesce(parameters('privateEndpoints'), createArray())[copyIndex()], 'resourceGroupResourceId'), resourceGroup().id), '/')[2]]",
               "resourceGroup": "[split(coalesce(tryGet(coalesce(parameters('privateEndpoints'), createArray())[copyIndex()], 'resourceGroupResourceId'), resourceGroup().id), '/')[4]]",
@@ -49252,7 +49252,7 @@
     },
     "keyVaultSecretsUserAssignment": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[take('avm.res.authorization.role-assignment.keyVaultSecretsUserAssignment', 64)]",
       "properties": {
         "expressionEvaluationOptions": {
