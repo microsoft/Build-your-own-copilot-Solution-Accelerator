@@ -58,6 +58,7 @@ updates:
           - "*"
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "dependabotchanges"
     groups:
       github-actions:
         patterns: ["*"]
