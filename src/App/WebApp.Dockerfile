@@ -3,7 +3,7 @@ FROM node:20-alpine AS frontend
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
 WORKDIR /home/node/app 
-COPY ./App/frontend/package*.json ./  
+COPY ./App/frontend/package*.json ./App/frontend/.npmrc ./
 USER node
 RUN npm ci
 COPY --chown=node:node ./App/frontend/ ./frontend  
@@ -13,6 +13,7 @@ RUN npm install --save-dev @types/jest && npm run build
 
 # Backend stage
 FROM python:3.11-alpine 
+ENV PIP_INDEX_URL=https://packagefeedproxy.microsoft.io/pypi/simple/
 RUN apk add --no-cache --virtual .build-deps \  
     build-base \  
     libffi-dev \  

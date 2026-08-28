@@ -27,6 +27,10 @@
         5000
     ],
     "remoteUser": "vscode",
+    "containerEnv": {
+        "NPM_CONFIG_REGISTRY": "https://packagefeedproxy.microsoft.io/npm/",
+        "PIP_INDEX_URL": "https://packagefeedproxy.microsoft.io/pypi/simple/"
+    },
     "hostRequirements": {
         "memory": "8gb"
     }

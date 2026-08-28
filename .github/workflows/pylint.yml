@@ -5,6 +5,8 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple/
     strategy:
       matrix:
         python-version: ["3.11"]

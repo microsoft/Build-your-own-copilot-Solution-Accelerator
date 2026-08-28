@@ -15,6 +15,7 @@ on:
 env:
     url: ${{ inputs.CA_WEB_URL }}
     accelerator_name: "Client Advisor"
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple/
 
 jobs:
   test:

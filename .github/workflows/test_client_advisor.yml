@@ -17,6 +17,9 @@ jobs:
     
     name: Client Advisor Tests
     runs-on: ubuntu-latest
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
+      PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple/
     # The if condition ensures that this job only runs if changes are in the ClientAdvisor folder
     
     steps:

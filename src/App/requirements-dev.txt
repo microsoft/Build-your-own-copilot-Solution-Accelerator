@@ -1,3 +1,5 @@
+--index-url https://packagefeedproxy.microsoft.io/pypi/simple/
+
 -r requirements.txt
 azure-identity==1.25.0
 azure-ai-projects==1.0.0
